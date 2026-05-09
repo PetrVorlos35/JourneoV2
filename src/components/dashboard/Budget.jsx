@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import { Plus, Trash2, DollarSign, TrendingUp } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useDialog } from '../ui/DialogModal';
+import { useCurrency } from '../../contexts/CurrencyContext';
+
+const formatCurrency = (amount, currency) => {
+  const symbols = { CZK: 'Kč', EUR: '€', USD: '$', GBP: '£' };
+  const symbol = symbols[currency] || 'Kč';
+  return `${amount.toLocaleString('cs-CZ')} ${symbol}`;
+};
 
 // ── Kategorie výdajů ──────────────────────────────────────────────
 const CATEGORIES = [
@@ -14,7 +22,7 @@ const CATEGORIES = [
 const catInfo = (id) => CATEGORIES.find(c => c.id === id) || CATEGORIES[4];
 
 // ── Přidání výdaje ────────────────────────────────────────────────
-const AddExpenseForm = ({ onAdd }) => {
+const AddExpenseForm = ({ onAdd, currency }) => {
   const [form, setForm] = useState({ description: '', amount: '', category: 'transport', date: new Date().toISOString().split('T')[0] });
   const [open, setOpen] = useState(false);
 
@@ -54,7 +62,7 @@ const AddExpenseForm = ({ onAdd }) => {
           />
         </div>
         <div>
-          <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Částka (Kč)</label>
+          <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Částka ({currency})</label>
           <input
             type="number"
             required
@@ -99,7 +107,7 @@ const AddExpenseForm = ({ onAdd }) => {
 };
 
 // ── Pruh kategorií ────────────────────────────────────────────────
-const CategoryBar = ({ expenses }) => {
+const CategoryBar = ({ expenses, currency }) => {
   const total = expenses.reduce((s, e) => s + e.amount, 0);
   if (total === 0) return null;
 
@@ -124,7 +132,7 @@ const CategoryBar = ({ expenses }) => {
           <div key={c.id} className="flex items-center gap-1.5 text-sm">
             <div className={`w-2.5 h-2.5 rounded-full ${c.color}`} />
             <span className="text-gray-500 dark:text-gray-400">{c.label}</span>
-            <span className="font-semibold text-gray-900 dark:text-white">{c.amount.toLocaleString('cs-CZ')} Kč</span>
+            <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(c.amount, currency)}</span>
           </div>
         ))}
       </div>
@@ -138,36 +146,49 @@ const Budget = ({ trips, onUpdateTrip }) => {
   const trip = trips.find(t => t.id === selectedTripId);
   const expenses = trip?.expenses || [];
   const total = expenses.reduce((s, e) => s + e.amount, 0);
+  const { confirmDialog, ModalPortal } = useDialog();
+  const { currency } = useCurrency();
 
   const handleAddExpense = (expense) => {
     onUpdateTrip({ ...trip, expenses: [...expenses, expense] });
   };
 
-  const handleDeleteExpense = (id) => {
-    if (!window.confirm('Smazat tento výdaj?')) return;
+  const handleDeleteExpense = async (id) => {
+    const ok = await confirmDialog({
+      title: 'Smazat výdaj?',
+      message: 'Opravdu chcete smazat tento výdaj? Tato akce nelze vrátit zpět.',
+      variant: 'danger',
+      confirmLabel: 'Smazat'
+    });
+    if (!ok) return;
+    
     onUpdateTrip({ ...trip, expenses: expenses.filter(e => e.id !== id) });
     toast.success('Výdaj smazán');
   };
 
   return (
     <div className="space-y-6 w-full">
+      {ModalPortal}
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col gap-6 border-b border-gray-200 dark:border-white/10 pb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Sledování výdajů</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Přehled nákladů na jednotlivé výlety.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">Výdaje a rozpočet</h1>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">Vyberte konkrétní výlet a spravujte jeho útraty.</p>
+          
+          {/* Prominent Trip selector */}
+          {trips.length > 0 && (
+            <div className="inline-flex items-center gap-3 bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 p-2 pl-4 rounded-2xl shadow-sm w-full sm:w-auto">
+              <span className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Zvolený výlet:</span>
+              <select
+                value={selectedTripId || ''}
+                onChange={e => setSelectedTripId(e.target.value)}
+                className="bg-transparent text-lg font-bold text-blue-600 dark:text-blue-400 focus:outline-none cursor-pointer max-w-[200px] sm:max-w-xs truncate pr-4"
+              >
+                {trips.map(t => <option key={t.id} value={t.id} className="text-black dark:text-white">{t.title}</option>)}
+              </select>
+            </div>
+          )}
         </div>
-
-        {/* Trip selector */}
-        {trips.length > 0 && (
-          <select
-            value={selectedTripId || ''}
-            onChange={e => setSelectedTripId(e.target.value)}
-            className="bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium"
-          >
-            {trips.map(t => <option key={t.id} value={t.id}>{t.title}</option>)}
-          </select>
-        )}
       </div>
 
       {trips.length === 0 ? (
@@ -181,7 +202,7 @@ const Budget = ({ trips, onUpdateTrip }) => {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             <div className="col-span-2 sm:col-span-1 bg-blue-600 text-white rounded-2xl p-5">
               <p className="text-sm font-medium text-blue-100 mb-1">Celkové výdaje</p>
-              <p className="text-3xl font-bold">{total.toLocaleString('cs-CZ')} Kč</p>
+              <p className="text-3xl font-bold">{formatCurrency(total, currency)}</p>
             </div>
             <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-5">
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Počet položek</p>
@@ -190,7 +211,7 @@ const Budget = ({ trips, onUpdateTrip }) => {
             <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-5">
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Průměr / položka</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                {expenses.length > 0 ? Math.round(total / expenses.length).toLocaleString('cs-CZ') : 0} Kč
+                {expenses.length > 0 ? formatCurrency(Math.round(total / expenses.length), currency) : formatCurrency(0, currency)}
               </p>
             </div>
           </div>
@@ -201,13 +222,13 @@ const Budget = ({ trips, onUpdateTrip }) => {
               <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <TrendingUp size={18} /> Rozložení výdajů
               </h3>
-              <CategoryBar expenses={expenses} />
+              <CategoryBar expenses={expenses} currency={currency} />
             </div>
           )}
 
           {/* Formulář + seznam */}
           <div className="space-y-4">
-            <AddExpenseForm onAdd={handleAddExpense} />
+            <AddExpenseForm onAdd={handleAddExpense} currency={currency} />
 
             {expenses.length > 0 ? (
               <div className="space-y-2">
@@ -225,7 +246,7 @@ const Budget = ({ trips, onUpdateTrip }) => {
                         )}
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
-                        <span className="font-bold text-gray-900 dark:text-white">{expense.amount.toLocaleString('cs-CZ')} Kč</span>
+                        <span className="font-bold text-gray-900 dark:text-white">{formatCurrency(expense.amount, currency)}</span>
                         <button
                           onClick={() => handleDeleteExpense(expense.id)}
                           className="text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
