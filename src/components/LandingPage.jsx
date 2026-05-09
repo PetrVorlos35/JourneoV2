@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
-import confetti from 'canvas-confetti';
 import { MapPin, BarChart2, Calendar, Users } from 'lucide-react';
 import JourneoLogo from '../assets/Journeo_whitelogo.png';
 
@@ -61,9 +60,6 @@ const LandingNavbar = () => {
 
 // ── Hero ────────────────────────────────────────────────────────
 const Hero = () => {
-  const fireConfetti = () => {
-    confetti({ particleCount: 200, spread: 360, origin: { y: 0.6 } });
-  };
 
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
@@ -108,12 +104,6 @@ const Hero = () => {
           <Link to="/dashboard" className="w-full sm:w-auto px-8 py-4 bg-white text-black rounded-xl font-bold text-lg hover:scale-105 transition-transform inline-block text-center">
             Začít objevovat
           </Link>
-          <button
-            onClick={fireConfetti}
-            className="w-full sm:w-auto px-8 py-4 bg-white/10 text-white border border-white/20 rounded-xl font-bold text-lg hover:bg-white/20 transition-colors"
-          >
-            🎉 Slavnostní konfety
-          </button>
         </motion.div>
       </div>
     </section>
@@ -227,9 +217,6 @@ const Features = () => (
 
 // ── CTA ────────────────────────────────────────────────────────
 const CTA = () => {
-  const fireConfetti = () => {
-    confetti({ particleCount: 200, spread: 360, origin: { y: 0.6 } });
-  };
 
   return (
     <section id="cta" className="py-24 bg-gradient-to-b from-gray-800 to-gray-950 dark:from-gray-900 dark:to-black text-center">
@@ -260,12 +247,6 @@ const CTA = () => {
           <Link to="/dashboard" className="w-full sm:w-auto px-10 py-4 bg-white text-black rounded-xl font-bold text-lg hover:scale-105 transition-transform inline-block text-center">
             Přejít do aplikace
           </Link>
-          <button
-            onClick={fireConfetti}
-            className="w-full sm:w-auto px-10 py-4 bg-pink-600/80 text-white border border-pink-500/40 rounded-xl font-bold text-lg hover:bg-pink-600 transition-colors"
-          >
-            🎉 Slavme to spolu!
-          </button>
         </div>
       </div>
     </section>
