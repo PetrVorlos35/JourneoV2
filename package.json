@@ -12,6 +12,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.8",
     "canvas-confetti": "^1.9.4",
+    "cobe": "^2.0.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.16.0",
     "gsap": "^3.13.0",
