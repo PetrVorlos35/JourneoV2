@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
  */
 
 // ── Internal modal UI ──────────────────────────────────────────────
-const DialogModal = ({ isOpen, config, onConfirm, onCancel }) => {
+const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
   const inputRef = useRef(null);
   const [inputValue, setInputValue] = useState('');
 
@@ -24,10 +24,10 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel }) => {
 
   // Close on Escape
   useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape' && isOpen) onCancel(); };
+    const handler = (e) => { if (e.key === 'Escape' && isOpen) onClose(); };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [isOpen, onCancel]);
+  }, [isOpen, onClose]);
 
   const handleConfirm = () => {
     if (config?.type === 'prompt') {
@@ -53,7 +53,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel }) => {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
           className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-          onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}
+          onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
         >
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
@@ -68,7 +68,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel }) => {
           >
             {/* Close btn */}
             <button
-              onClick={onCancel}
+              onClick={onClose}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors"
             >
               <X size={20} />
@@ -121,7 +121,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel }) => {
             {/* Actions */}
             <div className="flex gap-3 justify-end">
               <button
-                onClick={onCancel}
+                onClick={() => onCancel(false)}
                 className="px-5 py-2.5 rounded-xl font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-colors text-sm"
               >
                 {config?.cancelLabel || 'Zrušit'}
@@ -166,7 +166,12 @@ export const useDialog = () => {
     resolverRef.current?.(value);
   };
 
-  const handleCancel = () => {
+  const handleCancel = (value = false) => {
+    setState({ isOpen: false, config: null });
+    resolverRef.current?.(value);
+  };
+
+  const handleClose = () => {
     setState({ isOpen: false, config: null });
     resolverRef.current?.(null);
   };
@@ -180,6 +185,7 @@ export const useDialog = () => {
       config={state.config}
       onConfirm={handleConfirm}
       onCancel={handleCancel}
+      onClose={handleClose}
     />
   );
 

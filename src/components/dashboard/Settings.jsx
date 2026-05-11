@@ -42,20 +42,25 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
   const handleCurrencyChange = async (newCurr) => {
     if (newCurr === currency) return;
     const oldCurr = currency;
-    setCurrency(newCurr);
     
-    const ok = await confirmDialog({
-      title: 'Přepočítat výdaje?',
-      message: `Chcete přepočítat i všechny dosud zadané výdaje do nové měny (${newCurr}) pomocí přibližného kurzu? (Pokud zvolíte Ne, změní se pouze symbol měny)`,
+    const result = await confirmDialog({
+      title: 'Změnit měnu?',
+      message: `Přejete si přepočítat stávající výdaje do nové měny (${newCurr}) pomocí kurzu, nebo jen změnit symbol měny a nechat částky beze změny?`,
       confirmLabel: 'Ano, přepočítat',
-      cancelLabel: 'Ne, nechat částky',
+      cancelLabel: 'Ne, jen symbol',
     });
     
-    if (ok) {
+    // result: true (Ano), false (Ne, jen symbol), null (Zavření křížkem/Esc/Kliknutí vedle)
+    if (result === null) return;
+
+    // Nastavíme novou měnu (pro obě potvrzovací možnosti)
+    setCurrency(newCurr);
+    
+    if (result === true) {
       onConvertCurrency(oldCurr, newCurr);
       toast.success(`Částky byly přepočítány do ${newCurr}`);
     } else {
-      toast.success(`Měna změněna na ${newCurr}`);
+      toast.success(`Symbol měny změněn na ${newCurr}`);
     }
   };
 

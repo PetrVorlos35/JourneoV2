@@ -25,7 +25,7 @@ export const Globe = memo(function Globe({
   speed = 0.003,
   theta = 0.3,
   diffuse = 1.2,
-  mapSamples = 12000,
+  mapSamples = 10000,
 }) {
   const canvasRef = useRef(null);
   const phiRef = useRef(0);
