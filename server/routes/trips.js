@@ -6,9 +6,12 @@ const router = Router();
 // Pomocná funkce pro formátování data pro MariaDB (YYYY-MM-DD)
 const formatDateForDb = (date) => {
   if (!date) return null;
-  if (typeof date === 'string' && date.includes('T')) {
-    return date.split('T')[0];
-  }
+  // Pokud je to už ve formátu YYYY-MM-DD, nešahej na to
+  if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
+  // Pokud je to string s T (ISO), nebo cokoliv jiného, usekni to
+  if (typeof date === 'string') return date.split('T')[0].split(' ')[0];
+  // Pokud je to Date objekt
+  if (date instanceof Date) return date.toISOString().split('T')[0];
   return date;
 };
 
