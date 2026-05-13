@@ -94,7 +94,7 @@ const Navbar = () => {
         </div>
 
         <Link 
-          to="/dashboard" 
+          to="/auth" 
           className="relative group px-4 sm:px-6 py-2 rounded-full bg-white text-black text-xs sm:text-sm font-bold overflow-hidden transition-all hover:scale-105 active:scale-95"
         >
           <span className="relative z-10">Vstoupit</span>
@@ -208,7 +208,7 @@ const LandingPage = () => {
             className="flex flex-col sm:flex-row items-center justify-center gap-4 px-6"
           >
             <Link 
-              to="/dashboard" 
+              to="/auth" 
               className="w-full sm:w-auto group flex items-center justify-center gap-3 px-8 py-4 bg-white text-black rounded-2xl font-bold text-lg hover:bg-blue-50 transition-all active:scale-95 shadow-xl shadow-white/5"
             >
               Začít objevovat
@@ -289,7 +289,7 @@ const LandingPage = () => {
             </p>
             <div className="pt-8">
               <Link 
-                to="/dashboard" 
+                to="/auth" 
                 className="w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 bg-white text-black rounded-2xl font-bold text-lg sm:text-xl hover:scale-105 transition-all active:scale-95 inline-block"
               >
                 Vstoupit do Journeo

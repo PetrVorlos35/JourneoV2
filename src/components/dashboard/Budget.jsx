@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { Plus, Trash2, DollarSign, TrendingUp } from 'lucide-react';
+import { Plus, Trash2, DollarSign, TrendingUp, Calendar } from 'lucide-react';
+import { format } from 'date-fns';
+import { cs } from 'date-fns/locale';
+import { DayPicker } from 'react-day-picker';
+import 'react-day-picker/dist/style.css';
 import toast from 'react-hot-toast';
 import { useDialog } from '../ui/DialogModal';
 import { useCurrency } from '../../contexts/CurrencyContext';
@@ -22,9 +26,23 @@ const CATEGORIES = [
 const catInfo = (id) => CATEGORIES.find(c => c.id === id) || CATEGORIES[4];
 
 // ── Přidání výdaje ────────────────────────────────────────────────
-const AddExpenseForm = ({ onAdd, currency }) => {
-  const [form, setForm] = useState({ description: '', amount: '', category: 'transport', date: new Date().toISOString().split('T')[0] });
+const AddExpenseForm = ({ onAdd, currency, tripRange }) => {
+  const [form, setForm] = useState({ 
+    description: '', 
+    amount: '', 
+    category: 'transport', 
+    date: new Date().toISOString().split('T')[0] 
+  });
   const [open, setOpen] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+
+  const tripStart = tripRange?.start ? new Date(tripRange.start) : null;
+  const tripEnd = tripRange?.end ? new Date(tripRange.end) : null;
+
+  // Modifikátory pro zvýraznění výletu
+  const modifiers = {
+    trip: (date) => tripStart && tripEnd && date >= tripStart && date <= tripEnd
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -84,14 +102,43 @@ const AddExpenseForm = ({ onAdd, currency }) => {
             {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
           </select>
         </div>
-        <div>
+        <div className="relative">
           <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Datum</label>
-          <input
-            type="date"
-            value={form.date}
-            onChange={e => setForm({ ...form, date: e.target.value })}
-            className="w-full bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 rounded-xl px-3 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 [color-scheme:light] dark:[color-scheme:dark]"
-          />
+          <button
+            type="button"
+            onClick={() => setShowCalendar(!showCalendar)}
+            className="w-full flex items-center justify-between bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 rounded-xl px-3 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-left"
+          >
+            <span className="truncate">
+              {format(new Date(form.date), 'dd. MM. yyyy', { locale: cs })}
+            </span>
+            <Calendar className="text-gray-400 shrink-0" size={18} />
+          </button>
+          
+          {showCalendar && (
+            <div className="absolute top-full left-0 mt-2 z-50 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-3xl shadow-2xl p-2 animate-in fade-in zoom-in duration-200">
+              <DayPicker
+                mode="single"
+                selected={new Date(form.date)}
+                onSelect={(date) => {
+                  if (date) {
+                    setForm({ ...form, date: format(date, 'yyyy-MM-dd') });
+                    setShowCalendar(false);
+                  }
+                }}
+                locale={cs}
+                modifiers={modifiers}
+                modifiersClassNames={{
+                  trip: "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold"
+                }}
+                className="premium-calendar"
+              />
+              <div className="p-3 border-t border-gray-100 dark:border-white/5 flex items-center gap-2 text-[10px] uppercase tracking-wider font-bold text-blue-500/70">
+                <div className="w-3 h-3 bg-blue-100 dark:bg-blue-500/20 rounded-full" />
+                Doba trvání výletu
+              </div>
+            </div>
+          )}
         </div>
       </div>
       <div className="flex gap-3 pt-2">
@@ -228,7 +275,11 @@ const Budget = ({ trips, onUpdateTrip }) => {
 
           {/* Formulář + seznam */}
           <div className="space-y-4">
-            <AddExpenseForm onAdd={handleAddExpense} currency={currency} />
+            <AddExpenseForm 
+              onAdd={handleAddExpense} 
+              currency={currency} 
+              tripRange={{ start: trip.startDate, end: trip.endDate }} 
+            />
 
             {expenses.length > 0 ? (
               <div className="space-y-2">
@@ -242,7 +293,9 @@ const Budget = ({ trips, onUpdateTrip }) => {
                         </span>
                         <span className="text-gray-800 dark:text-gray-100 font-medium truncate">{expense.description}</span>
                         {expense.date && (
-                          <span className="hidden sm:block text-xs text-gray-400 dark:text-gray-500 shrink-0">{expense.date}</span>
+                          <span className="hidden sm:block text-xs text-gray-400 dark:text-gray-500 shrink-0">
+                            {format(new Date(expense.date), 'dd. MM. yyyy', { locale: cs })}
+                          </span>
                         )}
                       </div>
                       <div className="flex items-center gap-3 shrink-0">

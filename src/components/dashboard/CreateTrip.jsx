@@ -3,11 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, ArrowRight, ArrowLeft, Rocket } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { DayPicker } from 'react-day-picker';
+import { cs } from 'date-fns/locale';
+import { format } from 'date-fns';
+import 'react-day-picker/dist/style.css';
 
 const CreateTrip = ({ onAddTrip }) => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({ title: '', startDate: '', endDate: '' });
+  const [range, setRange] = useState({ from: undefined, to: undefined });
 
   const totalSteps = 3;
 
@@ -27,20 +32,20 @@ const CreateTrip = ({ onAddTrip }) => {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = () => {
-    const newTrip = {
-      id: Date.now().toString(),
-      title: formData.title,
-      startDate: formData.startDate,
-      endDate: formData.endDate,
-      activities: []
-    };
-
-    onAddTrip(newTrip);
-    toast.success('Výlet byl úspěšně vytvořen!');
-    setTimeout(() => {
-      navigate(`/dashboard/trip/${newTrip.id}`);
-    }, 1500);
+  const handleSubmit = async () => {
+    try {
+      const createdTrip = await onAddTrip({
+        title: formData.title,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+      });
+      toast.success('Výlet byl úspěšně vytvořen!');
+      setTimeout(() => {
+        navigate(`/dashboard/trip/${createdTrip.id}`);
+      }, 1500);
+    } catch (err) {
+      // Error toast is handled in DashboardHome
+    }
   };
 
   const variants = {
@@ -129,35 +134,41 @@ const CreateTrip = ({ onAddTrip }) => {
                 <p className="text-gray-500 dark:text-gray-400">Vyberte termín vaší cesty.</p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
-                <div className="space-y-3">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-gray-400 ml-1">Datum od</label>
-                  <div className="relative">
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                    <input
-                      type="date"
-                      required
-                      value={formData.startDate}
-                      onChange={e => setFormData({ ...formData, startDate: e.target.value })}
-                      className="w-full bg-gray-50 dark:bg-white/5 border-2 border-transparent focus:border-blue-500/50 rounded-2xl pl-12 pr-6 py-4 text-lg font-medium text-gray-900 dark:text-white outline-none transition-all [color-scheme:light] dark:[color-scheme:dark]"
-                    />
-                  </div>
+              <div className="space-y-4">
+                <div className="flex flex-col items-center bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 p-4 rounded-3xl shadow-sm w-fit mx-auto md:mx-0">
+                  <DayPicker
+                    mode="range"
+                    selected={range}
+                    onSelect={(newRange) => {
+                      setRange(newRange);
+                      if (newRange?.from) {
+                        setFormData(prev => ({ ...prev, startDate: format(newRange.from, 'yyyy-MM-dd') }));
+                      }
+                      if (newRange?.to) {
+                        setFormData(prev => ({ ...prev, endDate: format(newRange.to, 'yyyy-MM-dd') }));
+                      }
+                    }}
+                    locale={cs}
+                    numberOfMonths={window.innerWidth > 768 ? 2 : 1}
+                    className="premium-calendar"
+                  />
                 </div>
-
-                <div className="space-y-3">
-                  <label className="text-sm font-semibold uppercase tracking-wider text-gray-400 ml-1">Datum do</label>
-                  <div className="relative">
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                    <input
-                      type="date"
-                      required
-                      min={formData.startDate}
-                      value={formData.endDate}
-                      onChange={e => setFormData({ ...formData, endDate: e.target.value })}
-                      className="w-full bg-gray-50 dark:bg-white/5 border-2 border-transparent focus:border-blue-500/50 rounded-2xl pl-12 pr-6 py-4 text-lg font-medium text-gray-900 dark:text-white outline-none transition-all [color-scheme:light] dark:[color-scheme:dark]"
-                    />
+                
+                {range?.from && (
+                  <div className="flex items-center gap-4 text-sm font-medium p-4 bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-2xl w-fit">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] uppercase text-blue-500/60 tracking-wider">Odjezd</span>
+                      <span className="text-gray-900 dark:text-white">{format(range.from, 'd. MMMM yyyy', { locale: cs })}</span>
+                    </div>
+                    <ArrowRight size={16} className="text-blue-500" />
+                    <div className="flex flex-col">
+                      <span className="text-[10px] uppercase text-blue-500/60 tracking-wider">Návrat</span>
+                      <span className="text-gray-900 dark:text-white">
+                        {range.to ? format(range.to, 'd. MMMM yyyy', { locale: cs }) : 'Vyberte datum...'}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               <div className="pt-4 flex gap-4">

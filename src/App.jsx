@@ -1,7 +1,8 @@
 import React, { Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
+import AuthFlow from './components/auth/AuthFlow';
+import { useAuth } from './contexts/AuthContext';
 
 // Lazy load the dashboard to speed up initial landing page load
 const DashboardHome = lazy(() => import('./components/dashboard/DashboardHome'));
@@ -12,20 +13,39 @@ const LoadingFallback = () => (
   </div>
 );
 
+// Protected Route component
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingFallback />;
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  return children;
+};
+
 function App() {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className="bg-[#020617] min-h-screen">
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/dashboard/*" element={<DashboardHome />} />
+          <Route path="/auth" element={<AuthFlow />} />
+          <Route
+            path="/dashboard/*"
+            element={
+              <ProtectedRoute>
+                <DashboardHome />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Suspense>
-    </motion.div>
+    </div>
   );
 }
 

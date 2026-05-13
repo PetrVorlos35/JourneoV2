@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, PlusSquare, Settings, LogOut, BarChart2, Menu, X, Wallet } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 import JourneoLogo from '../../assets/Journeo_whitelogo.png';
 
 const navItems = [
@@ -28,7 +29,14 @@ const SidebarItem = ({ icon: Icon, label, path, active, onClick }) => (
 
 const DashboardLayout = ({ children }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   const closeMobile = () => setMobileOpen(false);
 
@@ -67,13 +75,13 @@ const DashboardLayout = ({ children }) => {
             path="/dashboard/settings"
             active={location.pathname === '/dashboard/settings'}
           />
-          <Link
-            to="/"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors"
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors"
           >
             <LogOut size={20} />
-            <span className="font-medium">Zpět domů</span>
-          </Link>
+            <span className="font-medium">Odhlásit se</span>
+          </button>
         </div>
       </aside>
 
@@ -113,14 +121,13 @@ const DashboardLayout = ({ children }) => {
                 active={location.pathname === '/dashboard/settings'}
                 onClick={closeMobile}
               />
-              <Link
-                to="/"
-                onClick={closeMobile}
-                className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors"
+              <button
+                onClick={() => { closeMobile(); handleLogout(); }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors"
               >
                 <LogOut size={20} />
-                <span className="font-medium">Zpět domů</span>
-              </Link>
+                <span className="font-medium">Odhlásit se</span>
+              </button>
             </div>
           </aside>
         </div>

@@ -1,2 +1,116 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Premium Calendar Styling */
+.premium-calendar {
+  --rdp-cell-size: 44px;
+  --rdp-accent-color: #2563eb;
+  --rdp-background-color: #eff6ff;
+  margin: 0;
+  border: none;
+}
+
+.dark .premium-calendar {
+  --rdp-accent-color: #60a5fa;
+  --rdp-background-color: rgba(37, 99, 235, 0.2);
+}
+
+.premium-calendar .rdp-month_caption {
+  padding-bottom: 1.5rem;
+}
+
+.premium-calendar .rdp-caption_label {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #111827; /* Gray 900 */
+}
+
+.dark .premium-calendar .rdp-caption_label {
+  color: #f9fafb; /* Gray 50 */
+}
+
+.premium-calendar .rdp-head_cell {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #6b7280; /* Gray 500 */
+  padding-bottom: 0.5rem;
+}
+
+.dark .premium-calendar .rdp-head_cell {
+  color: #9ca3af; /* Gray 400 */
+}
+
+.premium-calendar .rdp-day {
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  color: #374151; /* Gray 700 */
+}
+
+.dark .premium-calendar .rdp-day {
+  color: #d1d5db; /* Gray 300 */
+}
+
+.premium-calendar .rdp-day:hover:not(.rdp-day_selected) {
+  background-color: #f3f4f6; /* Gray 100 */
+}
+
+.dark .premium-calendar .rdp-day:hover:not(.rdp-day_selected) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Výběr a rozmezí pro react-day-picker v10 */
+.premium-calendar .rdp-selected {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  font-weight: 800;
+  border-radius: 10px;
+}
+
+/* Rozmezí (prostředek) - jen pro mode="range" */
+.premium-calendar .rdp-range_middle,
+.premium-calendar [data-selected].rdp-range_middle {
+  background-color: #eff6ff !important;
+  color: #2563eb !important;
+  opacity: 1 !important;
+  border-radius: 0 !important;
+}
+
+.dark .premium-calendar .rdp-range_middle,
+.dark .premium-calendar [data-selected].rdp-range_middle {
+  background-color: rgba(37, 99, 235, 0.2) !important;
+  color: #60a5fa !important;
+}
+
+/* Začátek a konec */
+.premium-calendar .rdp-range_start {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border-radius: 10px 0 0 10px !important;
+}
+
+.premium-calendar .rdp-range_end {
+  background-color: #2563eb !important;
+  color: #ffffff !important;
+  border-radius: 0 10px 10px 0 !important;
+}
+
+/* Dnešní den */
+.premium-calendar .rdp-today {
+  color: #2563eb !important;
+  font-weight: 900 !important;
+  position: relative;
+}
+
+.premium-calendar .rdp-today::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background-color: #2563eb;
+  border-radius: 50%;
+}

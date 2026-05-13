@@ -1,8 +1,9 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useState, useEffect, useCallback } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import DashboardLayout from './DashboardLayout';
 import DashboardSplash from './DashboardSplash';
-import useLocalStorage from '../../hooks/useLocalStorage';
+import api from '../../services/api';
+import toast from 'react-hot-toast';
 
 // Lazy load dashboard sub-components
 const TripsOverview = lazy(() => import('./TripsOverview'));
@@ -26,28 +27,75 @@ const DashboardLoading = () => (
 );
 
 const DashboardHome = () => {
-  const [trips, setTrips] = useLocalStorage('journeo_trips', []);
+  const [trips, setTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleAddTrip = (newTrip) => {
-    setTrips([...trips, newTrip]);
+  // Load trips from API on mount
+  const fetchTrips = useCallback(async () => {
+    try {
+      const data = await api.trips.getAll();
+      setTrips(data.trips);
+    } catch (err) {
+      console.error('Failed to fetch trips:', err);
+      toast.error('Nepodařilo se načíst výlety.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTrips();
+  }, [fetchTrips]);
+
+  const handleAddTrip = async (newTrip) => {
+    try {
+      const data = await api.trips.create({
+        title: newTrip.title,
+        startDate: newTrip.startDate,
+        endDate: newTrip.endDate,
+      });
+      setTrips(prev => [...prev, data.trip]);
+      return data.trip;
+    } catch (err) {
+      toast.error(err.message || 'Nepodařilo se vytvořit výlet.');
+      throw err;
+    }
   };
 
-  const handleDeleteTrip = (id) => {
-    setTrips(trips.filter(trip => trip.id !== id));
+  const handleDeleteTrip = async (id) => {
+    try {
+      await api.trips.delete(id);
+      setTrips(prev => prev.filter(trip => trip.id !== id));
+    } catch (err) {
+      toast.error(err.message || 'Nepodařilo se smazat výlet.');
+    }
   };
 
-  const handleUpdateTrip = (updatedTrip) => {
-    setTrips(trips.map(trip => trip.id === updatedTrip.id ? updatedTrip : trip));
+  const handleUpdateTrip = async (updatedTrip) => {
+    try {
+      const data = await api.trips.update(updatedTrip.id, updatedTrip);
+      setTrips(prev => prev.map(trip => trip.id === data.trip.id ? data.trip : trip));
+      return data.trip;
+    } catch (err) {
+      toast.error(err.message || 'Nepodařilo se aktualizovat výlet.');
+      throw err;
+    }
   };
 
-  const handleClearData = () => {
-    setTrips([]);
+  const handleClearData = async () => {
+    try {
+      // Delete all trips one by one
+      await Promise.all(trips.map(trip => api.trips.delete(trip.id)));
+      setTrips([]);
+    } catch (err) {
+      toast.error('Nepodařilo se smazat data.');
+    }
   };
 
-  const handleConvertCurrency = (oldCurr, newCurr) => {
+  const handleConvertCurrency = async (oldCurr, newCurr) => {
     const rate = EXCHANGE_RATES[oldCurr]?.[newCurr] || 1;
-    const newTrips = trips.map(trip => {
-      if (!trip.expenses) return trip;
+    const convertedTrips = trips.map(trip => {
+      if (!trip.expenses || trip.expenses.length === 0) return trip;
       return {
         ...trip,
         expenses: trip.expenses.map(exp => ({
@@ -56,8 +104,29 @@ const DashboardHome = () => {
         }))
       };
     });
-    setTrips(newTrips);
+
+    // Update each trip with converted expenses on the server
+    try {
+      await Promise.all(
+        convertedTrips
+          .filter(trip => trip.expenses && trip.expenses.length > 0)
+          .map(trip => api.trips.update(trip.id, trip))
+      );
+      setTrips(convertedTrips);
+    } catch (err) {
+      toast.error('Chyba při přepočtu měny.');
+    }
   };
+
+  if (loading) {
+    return (
+      <DashboardSplash>
+        <DashboardLayout>
+          <DashboardLoading />
+        </DashboardLayout>
+      </DashboardSplash>
+    );
+  }
 
   return (
     <DashboardSplash>
