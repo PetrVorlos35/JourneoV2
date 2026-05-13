@@ -61,6 +61,18 @@ const AuthFlow = () => {
   return (
     <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 relative overflow-hidden">
       <StarBackground />
+
+      <motion.button
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        onClick={() => navigate('/')}
+        className="absolute top-8 left-8 z-20 flex items-center gap-3 text-slate-400 hover:text-white transition-all group"
+      >
+        <div className="w-11 h-11 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 group-hover:border-white/20 group-hover:scale-105 transition-all">
+          <ChevronLeft size={22} />
+        </div>
+        <span className="text-sm font-bold tracking-wide hidden sm:block uppercase">Zpět na úvod</span>
+      </motion.button>
       
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
