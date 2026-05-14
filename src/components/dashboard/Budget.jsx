@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2, DollarSign, TrendingUp, Calendar } from 'lucide-react';
+import { Plus, Trash2, DollarSign, TrendingUp, Calendar, Car, Home, Utensils, Palmtree, MoreHorizontal, ChevronRight, Wallet } from 'lucide-react';
 import { format } from 'date-fns';
 import { cs } from 'date-fns/locale';
 import { DayPicker } from 'react-day-picker';
@@ -16,11 +16,11 @@ const formatCurrency = (amount, currency) => {
 
 // ── Kategorie výdajů ──────────────────────────────────────────────
 const CATEGORIES = [
-  { id: 'transport', label: 'Doprava', color: 'bg-blue-500', light: 'bg-blue-100 text-blue-700' },
-  { id: 'accommodation', label: 'Ubytování', color: 'bg-purple-500', light: 'bg-purple-100 text-purple-700' },
-  { id: 'food', label: 'Jídlo & Pití', color: 'bg-green-500', light: 'bg-green-100 text-green-700' },
-  { id: 'activities', label: 'Aktivity', color: 'bg-orange-500', light: 'bg-orange-100 text-orange-700' },
-  { id: 'other', label: 'Ostatní', color: 'bg-gray-400', light: 'bg-gray-100 text-gray-700' },
+  { id: 'transport', label: 'Doprava', color: 'bg-blue-500', light: 'bg-blue-50 dark:bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', icon: Car },
+  { id: 'accommodation', label: 'Ubytování', color: 'bg-purple-500', light: 'bg-purple-50 dark:bg-purple-500/10', text: 'text-purple-600 dark:text-purple-400', icon: Home },
+  { id: 'food', label: 'Jídlo & Pití', color: 'bg-green-500', light: 'bg-green-50 dark:bg-green-500/10', text: 'text-green-600 dark:text-green-400', icon: Utensils },
+  { id: 'activities', label: 'Aktivity', color: 'bg-orange-500', light: 'bg-orange-50 dark:bg-orange-500/10', text: 'text-orange-600 dark:text-orange-400', icon: Palmtree },
+  { id: 'other', label: 'Ostatní', color: 'bg-gray-400', light: 'bg-gray-50 dark:bg-gray-500/10', text: 'text-gray-600 dark:text-gray-400', icon: MoreHorizontal },
 ];
 
 const catInfo = (id) => CATEGORIES.find(c => c.id === id) || CATEGORIES[4];
@@ -58,15 +58,23 @@ const AddExpenseForm = ({ onAdd, currency, tripRange }) => {
 
   if (!open) {
     return (
-      <button onClick={() => setOpen(true)} className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-500 transition-colors">
-        <Plus size={18} /> Přidat výdaj
+      <button 
+        onClick={() => setOpen(true)} 
+        className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/25 active:scale-95"
+      >
+        <Plus size={20} /> Přidat nový výdaj
       </button>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 space-y-4">
-      <h3 className="font-bold text-gray-900 dark:text-white mb-2">Nový výdaj</h3>
+    <form onSubmit={handleSubmit} className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-3xl p-6 shadow-xl shadow-black/5 animate-in zoom-in-95 duration-200">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="font-black text-xl text-gray-900 dark:text-white">Nový výdaj</h3>
+        <button type="button" onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors">
+          Zrušit
+        </button>
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1 block">Popis</label>
@@ -141,12 +149,9 @@ const AddExpenseForm = ({ onAdd, currency, tripRange }) => {
           )}
         </div>
       </div>
-      <div className="flex gap-3 pt-2">
-        <button type="submit" className="px-5 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-500 transition-colors">
-          Přidat
-        </button>
-        <button type="button" onClick={() => setOpen(false)} className="px-5 py-2.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-          Zrušit
+      <div className="flex gap-4 pt-4 border-t border-gray-50 dark:border-white/5">
+        <button type="submit" className="flex-1 px-6 py-3.5 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20 active:scale-95">
+          Uložit výdaj
         </button>
       </div>
     </form>
@@ -217,25 +222,30 @@ const Budget = ({ trips, onUpdateTrip }) => {
     <div className="space-y-6 w-full">
       {ModalPortal}
       {/* Header */}
-      <div className="flex flex-col gap-6 border-b border-gray-200 dark:border-white/10 pb-6">
+      <div className="space-y-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">Výdaje a rozpočet</h1>
-          <p className="text-gray-500 dark:text-gray-400 mb-4">Vyberte konkrétní výlet a spravujte jeho útraty.</p>
-          
-          {/* Prominent Trip selector */}
-          {trips.length > 0 && (
-            <div className="inline-flex items-center gap-3 bg-white dark:bg-black/40 border border-gray-300 dark:border-white/10 p-2 pl-4 rounded-2xl shadow-sm w-full sm:w-auto">
-              <span className="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Zvolený výlet:</span>
-              <select
-                value={selectedTripId || ''}
-                onChange={e => setSelectedTripId(e.target.value)}
-                className="bg-transparent text-lg font-bold text-blue-600 dark:text-blue-400 focus:outline-none cursor-pointer max-w-[200px] sm:max-w-xs truncate pr-4"
-              >
-                {trips.map(t => <option key={t.id} value={t.id} className="text-black dark:text-white">{t.title}</option>)}
-              </select>
-            </div>
-          )}
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white leading-tight">Výdaje a rozpočet</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Spravujte své útraty a hlídejte si budget.</p>
         </div>
+
+        {/* Trip selector */}
+        {trips.length > 0 && (
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-blue-600 dark:text-blue-400">
+              <Wallet size={18} />
+            </div>
+            <select
+              value={selectedTripId || ''}
+              onChange={e => setSelectedTripId(e.target.value)}
+              className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 p-4 pl-12 rounded-2xl shadow-sm text-lg font-black text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer"
+            >
+              {trips.map(t => <option key={t.id} value={t.id} className="text-black dark:text-white">{t.title}</option>)}
+            </select>
+            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
+               <ChevronRight size={18} className="rotate-90" />
+            </div>
+          </div>
+        )}
       </div>
 
       {trips.length === 0 ? (
@@ -246,28 +256,30 @@ const Budget = ({ trips, onUpdateTrip }) => {
       ) : trip ? (
         <>
           {/* Souhrn */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <div className="col-span-2 sm:col-span-1 bg-blue-600 text-white rounded-2xl p-5">
-              <p className="text-sm font-medium text-blue-100 mb-1">Celkové výdaje</p>
-              <p className="text-3xl font-bold">{formatCurrency(total, currency)}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-3xl p-6 shadow-xl shadow-blue-500/20">
+              <p className="text-xs font-bold text-blue-100/70 uppercase tracking-widest mb-1">Celkové výdaje</p>
+              <p className="text-4xl font-black">{formatCurrency(total, currency)}</p>
             </div>
-            <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-5">
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Počet položek</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">{expenses.length}</p>
-            </div>
-            <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-5">
-              <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Průměr / položka</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                {expenses.length > 0 ? formatCurrency(Math.round(total / expenses.length), currency) : formatCurrency(0, currency)}
-              </p>
+            <div className="grid grid-cols-2 sm:contents gap-4">
+              <div className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-3xl p-6 shadow-sm">
+                <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Položek</p>
+                <p className="text-2xl font-black text-gray-900 dark:text-white">{expenses.length}</p>
+              </div>
+              <div className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-3xl p-6 shadow-sm">
+                <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Průměr</p>
+                <p className="text-2xl font-black text-gray-900 dark:text-white">
+                  {expenses.length > 0 ? formatCurrency(Math.round(total / expenses.length), currency) : formatCurrency(0, currency)}
+                </p>
+              </div>
             </div>
           </div>
 
           {/* Kategoriový pruh */}
           {expenses.length > 0 && (
-            <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-5">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <TrendingUp size={18} /> Rozložení výdajů
+            <div className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-3xl p-6 shadow-sm">
+              <h3 className="font-bold text-gray-900 dark:text-white text-xs uppercase tracking-widest mb-6 flex items-center gap-2">
+                <TrendingUp size={16} className="text-blue-500" /> Rozložení výdajů
               </h3>
               <CategoryBar expenses={expenses} currency={currency} />
             </div>
@@ -282,30 +294,36 @@ const Budget = ({ trips, onUpdateTrip }) => {
             />
 
             {expenses.length > 0 ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {[...expenses].reverse().map(expense => {
                   const cat = catInfo(expense.category);
+                  const Icon = cat.icon;
                   return (
-                    <div key={expense.id} className="flex items-center justify-between gap-3 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl px-4 py-3 group">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <span className={`shrink-0 text-xs font-semibold px-2.5 py-1 rounded-lg ${cat.light} dark:bg-white/10 dark:text-white`}>
-                          {cat.label}
-                        </span>
-                        <span className="text-gray-800 dark:text-gray-100 font-medium truncate">{expense.description}</span>
-                        {expense.date && (
-                          <span className="hidden sm:block text-xs text-gray-400 dark:text-gray-500 shrink-0">
-                            {format(new Date(expense.date), 'dd. MM. yyyy', { locale: cs })}
-                          </span>
-                        )}
+                    <div key={expense.id} className="flex items-center justify-between gap-4 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-3xl p-4 group transition-all hover:border-blue-500/30">
+                      <div className="flex items-center gap-4 min-w-0">
+                        <div className={`shrink-0 w-12 h-12 rounded-2xl flex items-center justify-center ${cat.light} ${cat.text} transition-transform group-hover:scale-110`}>
+                          <Icon size={24} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-0.5">{cat.label}</p>
+                          <p className="text-gray-900 dark:text-white font-black truncate leading-tight">{expense.description}</p>
+                          {expense.date && (
+                            <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+                              {format(new Date(expense.date), 'd. M. yyyy')}
+                            </p>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span className="font-bold text-gray-900 dark:text-white">{formatCurrency(expense.amount, currency)}</span>
-                        <button
-                          onClick={() => handleDeleteExpense(expense.id)}
-                          className="text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                      <div className="flex items-center gap-4 shrink-0 text-right">
+                        <div className="flex flex-col items-end">
+                           <span className="font-black text-gray-900 dark:text-white text-lg">{formatCurrency(expense.amount, currency)}</span>
+                           <button
+                            onClick={() => handleDeleteExpense(expense.id)}
+                            className="text-[10px] font-bold text-red-500 uppercase tracking-wider mt-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            Smazat
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
