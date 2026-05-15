@@ -48,7 +48,7 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({
       token,
-      user: { id: userId, email }
+      user: { id: userId, email, first_name: null, last_name: null, avatar_url: null, bio: null }
     });
   } catch (err) {
     console.error('Register error:', err);
@@ -66,7 +66,10 @@ router.post('/login', async (req, res) => {
     }
 
     // Find user
-    const [users] = await pool.query('SELECT id, email, password_hash FROM users WHERE email = ?', [email]);
+    const [users] = await pool.query(
+      'SELECT id, email, password_hash, first_name, last_name FROM users WHERE email = ?', 
+      [email]
+    );
     if (users.length === 0) {
       return res.status(401).json({ error: 'Nesprávný e-mail nebo heslo.' });
     }
@@ -84,7 +87,14 @@ router.post('/login', async (req, res) => {
 
     res.json({
       token,
-      user: { id: user.id, email: user.email }
+      user: { 
+        id: user.id, 
+        email: user.email,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        avatar_url: user.avatar_url,
+        bio: user.bio
+      }
     });
   } catch (err) {
     console.error('Login error:', err);
@@ -95,7 +105,10 @@ router.post('/login', async (req, res) => {
 // ── GET /api/auth/me ────────────────────────────────────────
 router.get('/me', auth, async (req, res) => {
   try {
-    const [users] = await pool.query('SELECT id, email, created_at FROM users WHERE id = ?', [req.userId]);
+    const [users] = await pool.query(
+      'SELECT id, email, first_name, last_name, avatar_url, bio, created_at FROM users WHERE id = ?', 
+      [req.userId]
+    );
     if (users.length === 0) {
       return res.status(404).json({ error: 'Uživatel nenalezen.' });
     }
@@ -104,6 +117,28 @@ router.get('/me', auth, async (req, res) => {
   } catch (err) {
     console.error('Me error:', err);
     res.status(500).json({ error: 'Chyba serveru.' });
+  }
+});
+
+// ── PUT /api/auth/profile ────────────────────────────────────
+router.put('/profile', auth, async (req, res) => {
+  try {
+    const { first_name, last_name, avatar_url, bio } = req.body;
+
+    await pool.query(
+      'UPDATE users SET first_name = ?, last_name = ?, avatar_url = ?, bio = ? WHERE id = ?',
+      [first_name, last_name, avatar_url, bio, req.userId]
+    );
+
+    const [users] = await pool.query(
+      'SELECT id, email, first_name, last_name, avatar_url, bio, created_at FROM users WHERE id = ?',
+      [req.userId]
+    );
+
+    res.json({ user: users[0] });
+  } catch (err) {
+    console.error('Update profile error:', err);
+    res.status(500).json({ error: 'Chyba serveru při aktualizaci profilu.' });
   }
 });
 

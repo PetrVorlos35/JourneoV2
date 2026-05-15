@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, PlusSquare, Settings, LogOut, BarChart2, Menu, X, Wallet } from 'lucide-react';
+import { Home, PlusSquare, Settings, LogOut, BarChart2, Menu, X, Wallet, Camera, Mountain, Palmtree, Compass, Map, Plane } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import JourneoLogo from '../../assets/Journeo_whitelogo.png';
@@ -27,10 +27,53 @@ const SidebarItem = ({ icon: Icon, label, path, active, onClick }) => (
   </Link>
 );
 
+const UserAvatar = ({ user, size = "md" }) => {
+  const getInitials = () => {
+    if (user?.first_name && user?.last_name) {
+      return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
+    }
+    if (user?.first_name) return user.first_name[0].toUpperCase();
+    if (user?.email) return user.email.substring(0, 2).toUpperCase();
+    return '??';
+  };
+
+  const avatarPresets = {
+    mountain: { Icon: Mountain, color: 'bg-blue-500' },
+    beach: { Icon: Palmtree, color: 'bg-orange-400' },
+    city: { Icon: Compass, color: 'bg-purple-500' },
+    forest: { Icon: Map, color: 'bg-green-500' },
+    travel: { Icon: Plane, color: 'bg-indigo-500' },
+    photography: { Icon: Camera, color: 'bg-pink-500' },
+  };
+
+  const preset = user?.avatar_url ? avatarPresets[user.avatar_url] : null;
+
+  const sizeClasses = {
+    sm: "w-8 h-8 text-[10px]",
+    md: "w-10 h-10 text-xs",
+    lg: "w-12 h-12 text-base",
+    xl: "w-16 h-16 text-xl"
+  };
+
+  if (preset) {
+    return (
+      <div className={`${sizeClasses[size]} rounded-full ${preset.color} flex items-center justify-center text-white shadow-lg shadow-black/20 shrink-0`}>
+        <preset.Icon size={size === 'sm' ? 16 : size === 'xl' ? 32 : 20} />
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${sizeClasses[size]} rounded-full bg-blue-600 flex items-center justify-center text-white font-black shrink-0`}>
+      {getInitials()}
+    </div>
+  );
+};
+
 const DashboardLayout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = () => {
@@ -41,7 +84,7 @@ const DashboardLayout = ({ children }) => {
   const closeMobile = () => setMobileOpen(false);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-white flex">
+    <div className="h-screen overflow-hidden bg-white dark:bg-black text-gray-900 dark:text-white flex">
       <Toaster
         position="top-right"
         toastOptions={{
@@ -75,6 +118,15 @@ const DashboardLayout = ({ children }) => {
             path="/dashboard/settings"
             active={location.pathname === '/dashboard/settings'}
           />
+          <div className="px-4 py-3 flex items-center gap-3 border-t border-gray-100 dark:border-white/5 mt-2">
+            <UserAvatar user={user} size="sm" />
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold text-gray-900 dark:text-white truncate">
+                {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.email}
+              </p>
+              <p className="text-[10px] text-gray-400 truncate">{user?.bio || 'Cestovatel'}</p>
+            </div>
+          </div>
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors"
@@ -103,7 +155,7 @@ const DashboardLayout = ({ children }) => {
           onClick={() => setMobileOpen(true)}
           className="flex flex-col items-center gap-1 flex-1 text-gray-400"
         >
-          <Menu size={20} />
+          <UserAvatar user={user} size="sm" />
           <span className="text-[10px] font-bold uppercase tracking-wider">Více</span>
         </button>
       </nav>
@@ -124,6 +176,21 @@ const DashboardLayout = ({ children }) => {
             </div>
 
             <div className="flex-1 px-4 py-2 space-y-6">
+              <div className="px-4 py-6 bg-white/5 rounded-2xl mx-2">
+                <div className="flex items-center gap-4 mb-4">
+                  <UserAvatar user={user} size="lg" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-lg font-black text-white truncate">
+                      {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : 'Můj Profil'}
+                    </p>
+                    <p className="text-sm text-gray-400 truncate">{user?.email}</p>
+                  </div>
+                </div>
+                {user?.bio && (
+                  <p className="text-xs text-gray-400 line-clamp-2 px-1">{user.bio}</p>
+                )}
+              </div>
+
               <div className="space-y-1">
                 <p className="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Možnosti</p>
                 <SidebarItem
@@ -150,22 +217,21 @@ const DashboardLayout = ({ children }) => {
       )}
 
       {/* ── Main content ── */}
-      <main className="flex-1 overflow-y-auto min-w-0 pb-20 md:pb-0">
+      <main className="flex-1 min-w-0 pb-20 md:pb-0 h-full flex flex-col overflow-hidden">
         {/* Mobile top bar */}
-        <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-200 dark:border-white/10 bg-white/80 dark:bg-black/80 backdrop-blur-lg sticky top-0 z-30">
+        <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-200 dark:border-white/10 bg-white/80 dark:bg-black/80 backdrop-blur-lg sticky top-0 z-30 shrink-0">
           <Link to="/" className="flex items-center gap-2">
             <img src={JourneoLogo} alt="Journeo" className="w-6 h-6 object-contain" />
             <span className="font-bold text-gray-900 dark:text-white tracking-tight">Journeo</span>
           </Link>
           <div className="flex items-center gap-4">
-             {/* Small status indicator or user icon could go here */}
-             <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 text-xs font-bold uppercase">
-               JD
-             </div>
+             <Link to="/dashboard/settings">
+               <UserAvatar user={user} size="sm" />
+             </Link>
           </div>
         </div>
 
-        <div className="p-4 sm:p-6 md:p-10 max-w-7xl mx-auto">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10 max-w-7xl mx-auto w-full flex flex-col min-h-0">
           {children}
         </div>
       </main>

@@ -163,7 +163,7 @@ const TripsOverview = ({ trips, onDeleteTrip }) => {
                 </div>
                 <button
                   onClick={(e) => handleDelete(trip.id, e)}
-                  className="p-2 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="p-2 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                   title="Smazat výlet"
                 >
                   <Trash2 size={20} />

@@ -191,7 +191,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   );
 
   const DayPicker = () => (
-    <div className="flex gap-2 overflow-x-auto pb-4 mb-6 no-scrollbar -mx-4 px-4 md:hidden">
+    <div className="flex gap-2 overflow-x-auto pb-4 mb-6 no-scrollbar -mx-4 sm:-mx-6 px-6 md:hidden">
       {dailyPlans.map((day, index) => (
         <button
           key={index}
@@ -213,12 +213,12 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   );
 
   return (
-    <div className="max-w-5xl mx-auto pb-24 md:pb-0">
+    <div className="w-full h-full flex flex-col overflow-hidden">
       {ModalPortal}
       <MobileBottomNav />
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 -mx-4 sm:-mx-6 px-6 md:mx-0 md:px-0">
         <div>
           <button onClick={handleBack} className="inline-flex items-center text-blue-600 dark:text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 mb-4 font-medium transition-colors md:mb-6">
             <ArrowLeft size={16} className="mr-2" /> <span className="hidden md:inline">Zpět na přehled</span><span className="md:hidden">Zpět</span>
@@ -260,15 +260,19 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
 
         <button
           onClick={handleSave}
-          className="hidden md:flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-500 transition-all hover:shadow-lg hover:shadow-blue-500/25 shrink-0"
+          className={`hidden md:flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all shrink-0 ${
+            hasUnsavedChanges 
+              ? 'bg-orange-500 text-white animate-pulse shadow-lg shadow-orange-500/20 hover:bg-orange-400' 
+              : 'bg-blue-600 text-white hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/25'
+          }`}
         >
-          <Save size={18} /> Uložit plán
+          <Save size={18} /> {hasUnsavedChanges ? 'Uložit změny' : 'Uložit plán'}
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 flex-1 min-h-0 pb-10">
         {/* Desktop sidebar */}
-        <div className="hidden lg:block lg:col-span-1 space-y-4">
+        <div className="hidden lg:flex lg:col-span-1 flex-col space-y-4 h-full min-h-0">
           
           <div className="space-y-2">
             <h3 className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-sm mb-3 px-2">Nástroje</h3>
@@ -306,86 +310,107 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
             </button>
           </div>
 
-          <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-white/10">
+          <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-white/10 flex-1 flex flex-col min-h-0">
             <h3 className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-sm mb-3 px-2">Itinerář</h3>
-            {dailyPlans.map((day, index) => (
-              <button
-                key={index}
-                onClick={() => setActiveView(index)}
-                className={`w-full text-left px-4 py-3 rounded-xl transition-all ${
-                  activeView === index
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10'
-                }`}
-              >
-                <div className="font-bold">{day.title}</div>
-                <div className="text-xs opacity-70 mt-1 capitalize">
-                  {format(new Date(day.date), 'EEEE, dd.MM.yyyy', { locale: cs })}
-                </div>
-              </button>
-            ))}
+            <div className="space-y-2 overflow-y-auto pr-2 custom-scrollbar flex-1">
+              {dailyPlans.map((day, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveView(index)}
+                  className={`w-full text-left px-4 py-3 rounded-xl transition-all ${
+                    activeView === index
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10'
+                  }`}
+                >
+                  <div className="font-bold">{day.title}</div>
+                  <div className="text-xs opacity-70 mt-1 capitalize">
+                    {format(new Date(day.date), 'EEEE, dd.MM.yyyy', { locale: cs })}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Editor / Main Content */}
-        <div className="lg:col-span-3 print:col-span-1 print:block">
+        <div className="lg:col-span-3 print:col-span-1 print:block h-full overflow-y-auto md:pr-2 custom-scrollbar">
           
           {/* Mobile Info View */}
           <div className={`${mobileTab === 'info' ? 'block' : 'hidden'} md:hidden space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300`}>
-            <div className="bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 shadow-sm">
-              <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+            <div className="bg-white dark:bg-white/5 border-y border-gray-100 dark:border-white/10 -mx-4 sm:-mx-6 px-6 py-6 shadow-sm">
+              <h2 className="text-lg font-black mb-6 flex items-center gap-2">
                 <Info size={18} className="text-blue-500" /> Přehled výletu
-              </h3>
+              </h2>
               <div className="space-y-4">
                 <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-white/5">
-                  <span className="text-gray-500 text-sm">Datum</span>
-                  <span className="font-medium text-sm">
+                  <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Datum</span>
+                  <span className="font-black text-sm text-right">
                     {format(new Date(trip.startDate), 'd. M. yyyy')} - {format(new Date(trip.endDate), 'd. M. yyyy')}
                   </span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-white/5">
-                  <span className="text-gray-500 text-sm">Počet dní</span>
-                  <span className="font-medium text-sm">{dailyPlans.length} dní</span>
+                  <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Počet dní</span>
+                  <span className="font-black text-sm">{dailyPlans.length} dní</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
-                  <span className="text-gray-500 text-sm">Status</span>
-                  <span className="px-2 py-0.5 bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 text-[10px] font-bold uppercase rounded-full">Naplánováno</span>
+                  <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Status</span>
+                  <span className="px-3 py-1 bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 text-[10px] font-black uppercase rounded-full">Naplánováno</span>
                 </div>
               </div>
             </div>
             
-            <button 
-              onClick={() => setActiveView('diary')}
-              className="w-full bg-blue-600 text-white p-4 rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25"
-            >
-              <ImageIcon size={20} /> Otevřít deník
-            </button>
+            <div className="-mx-4 sm:-mx-6 px-6">
+              <button 
+                onClick={() => setActiveView('diary')}
+                className="w-full bg-blue-600 text-white p-4 rounded-2xl font-black flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 active:scale-95 transition-transform"
+              >
+                <ImageIcon size={20} /> Otevřít deník
+              </button>
+            </div>
           </div>
 
           {/* Mobile Tools View Selection */}
           <div className={`${mobileTab === 'tools' ? 'block' : 'hidden'} md:hidden animate-in fade-in slide-in-from-bottom-4 duration-300`}>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-4">
               <button
                 onClick={() => setActiveView('packing')}
-                className={`p-6 rounded-2xl border transition-all flex flex-col items-center gap-3 ${
+                className={`w-full flex items-center gap-4 -mx-4 sm:-mx-6 px-6 py-6 border-y transition-all active:scale-[0.98] ${
                   activeView === 'packing' 
-                    ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/25' 
-                    : 'bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300'
+                    ? 'bg-blue-600 border-blue-500 text-white shadow-xl shadow-blue-500/20' 
+                    : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-900 dark:text-white'
                 }`}
               >
-                <PackageOpen size={32} />
-                <span className="font-bold text-sm text-center">Balící seznam</span>
+                <div className={`p-3 rounded-xl ${activeView === 'packing' ? 'bg-white/20' : 'bg-blue-50 dark:bg-blue-500/10 text-blue-500'}`}>
+                  <PackageOpen size={24} />
+                </div>
+                <div className="flex-1 text-left">
+                  <span className="font-black text-base block">Balící seznam</span>
+                  <span className={`text-[10px] font-bold uppercase tracking-wider opacity-60 ${activeView === 'packing' ? 'text-white' : 'text-gray-500'}`}>
+                    {packingList.length} položek
+                  </span>
+                </div>
+                <ArrowLeft size={18} className="rotate-180 opacity-40" />
               </button>
+
               <button
                 onClick={() => setActiveView('documents')}
-                className={`p-6 rounded-2xl border transition-all flex flex-col items-center gap-3 ${
+                className={`w-full flex items-center gap-4 -mx-4 sm:-mx-6 px-6 py-6 border-y transition-all active:scale-[0.98] ${
                   activeView === 'documents' 
-                    ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/25' 
-                    : 'bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-700 dark:text-gray-300'
+                    ? 'bg-blue-600 border-blue-500 text-white shadow-xl shadow-blue-500/20' 
+                    : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-900 dark:text-white'
                 }`}
               >
-                <LinkIcon size={32} />
-                <span className="font-bold text-sm text-center">Odkazy</span>
+                <div className={`p-3 rounded-xl ${activeView === 'documents' ? 'bg-white/20' : 'bg-purple-50 dark:bg-purple-500/10 text-purple-500'}`}>
+                  <LinkIcon size={24} />
+                </div>
+                <div className="flex-1 text-left">
+                  <span className="font-black text-base block">Odkazy a poznámky</span>
+                  <span className={`text-[10px] font-bold uppercase tracking-wider opacity-60 ${activeView === 'documents' ? 'text-white' : 'text-gray-500'}`}>
+                    {documents.length} záznamů
+                  </span>
+                </div>
+                <ArrowLeft size={18} className="rotate-180 opacity-40" />
               </button>
             </div>
 
@@ -393,13 +418,13 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
             <div className="mt-8">
               {activeView === 'packing' && (
                 <div className="animate-in zoom-in-95 duration-200">
-                  <h3 className="text-xl font-bold mb-4 px-2">Položky k zabalení</h3>
+                  <h3 className="text-xl font-bold mb-4 -mx-4 sm:-mx-6 px-6">Položky k zabalení</h3>
                   {/* The actual packing content is below in the editor section */}
                 </div>
               )}
               {activeView === 'documents' && (
                 <div className="animate-in zoom-in-95 duration-200">
-                  <h3 className="text-xl font-bold mb-4 px-2">Odkazy a poznámky</h3>
+                  <h3 className="text-xl font-bold mb-4 -mx-4 sm:-mx-6 px-6">Odkazy a poznámky</h3>
                 </div>
               )}
             </div>
@@ -412,8 +437,8 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
 
           {/* Actual content containers (shared) */}
           <div className={`${activeView === 'packing' ? 'block' : 'hidden'} ${mobileTab === 'tools' ? '' : 'max-md:hidden'} mb-8 print:mb-12`}>
-            <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 print:bg-white print:border-none p-6 md:p-8 rounded-2xl print:p-0">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white print:text-black mb-6 border-b border-gray-200 dark:border-white/10 print:border-black pb-4 flex items-center gap-3">
+            <div className="bg-white dark:bg-white/5 border-y border-gray-100 dark:border-white/10 print:bg-white print:border-none -mx-4 sm:-mx-6 px-6 py-6 md:p-8 md:rounded-3xl print:p-0">
+              <h2 className="text-2xl font-black text-gray-900 dark:text-white print:text-black mb-6 border-b border-gray-100 dark:border-white/10 print:border-black pb-4 flex items-center gap-3">
                 <PackageOpen className="text-blue-500 print:text-black" /> Balící seznam
               </h2>
               
@@ -447,7 +472,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                         </span>
                         <button
                           onClick={() => deletePackingItem(item.id)}
-                          className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all p-1 print:hidden"
+                          className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all p-1 print:hidden"
                         >
                           <Trash2 size={18} />
                         </button>
@@ -460,8 +485,8 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           </div>
 
           <div className={`${activeView === 'documents' ? 'block' : 'hidden'} ${mobileTab === 'tools' ? '' : 'max-md:hidden'} mb-8 print:mb-12`}>
-            <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 print:bg-white print:border-none p-6 md:p-8 rounded-2xl print:p-0">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white print:text-black mb-6 border-b border-gray-200 dark:border-white/10 print:border-black pb-4 flex items-center gap-3">
+            <div className="bg-white dark:bg-white/5 border-y border-gray-100 dark:border-white/10 print:bg-white print:border-none -mx-4 sm:-mx-6 px-6 py-6 md:p-8 md:rounded-3xl print:p-0">
+              <h2 className="text-2xl font-black text-gray-900 dark:text-white print:text-black mb-6 border-b border-gray-100 dark:border-white/10 print:border-black pb-4 flex items-center gap-3">
                 <LinkIcon className="text-blue-500 print:text-black" /> Odkazy a poznámky
               </h2>
               
@@ -501,7 +526,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                       <div key={doc.id} className="bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 print:border-none p-5 rounded-xl group relative pr-12 print:p-2 print:pr-0 print:bg-transparent">
                         <button
                           onClick={() => deleteDocument(doc.id)}
-                          className="absolute top-4 right-4 text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity print:hidden"
+                          className="absolute top-4 right-4 text-gray-400 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity print:hidden"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -522,7 +547,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           </div>
 
           <div className={`${activeView === 'diary' ? 'block' : 'hidden'} ${mobileTab === 'info' ? '' : 'max-md:hidden'} print:hidden`}>
-            <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-6 md:p-8 rounded-2xl flex flex-col items-center justify-center min-h-[400px] text-center">
+            <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 -mx-4 sm:-mx-6 px-6 py-12 md:p-8 md:rounded-2xl flex flex-col items-center justify-center min-h-[400px] text-center">
               <div className="w-16 h-16 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-4">
                 <ImageIcon size={32} />
               </div>
@@ -544,11 +569,11 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
               if (typeof activeView === 'number' && activeView !== idx) return null; // In screen mode, show only active. In print mode, wait, map will show all if we override css.
               return (
                 <div key={idx} className={`${typeof activeView === 'number' && activeView !== idx ? 'hidden print:block' : 'block'} mb-8 print:mb-10 print:break-inside-avoid`}>
-                  <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 print:bg-white print:border-none p-6 md:p-8 rounded-2xl print:p-0">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white print:text-black mb-6 border-b border-gray-200 dark:border-white/10 print:border-black pb-4 flex items-baseline gap-3">
+                  <div className="bg-white dark:bg-white/5 border-y border-gray-100 dark:border-white/10 print:bg-white print:border-none -mx-4 sm:-mx-6 px-6 py-6 md:p-8 md:rounded-3xl print:p-0">
+                    <h2 className="text-2xl font-black text-gray-900 dark:text-white print:text-black mb-6 border-b border-gray-100 dark:border-white/10 print:border-black pb-4 flex items-baseline gap-3">
                       <span>Plán pro {day.title}</span>
-                      <span className="text-sm font-normal text-gray-400 dark:text-gray-500 print:text-gray-600 capitalize">
-                        ({format(new Date(day.date), 'EEEE, dd.MM.yyyy', { locale: cs })})
+                      <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 print:text-gray-600 uppercase tracking-widest">
+                        ({format(new Date(day.date), 'EEEE, d. M.', { locale: cs })})
                       </span>
                     </h2>
 

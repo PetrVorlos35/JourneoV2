@@ -50,6 +50,11 @@ export const api = {
       }),
 
     me: () => request('/auth/me'),
+    updateProfile: (profileData) =>
+      request('/auth/profile', {
+        method: 'PUT',
+        body: JSON.stringify(profileData),
+      }),
   },
 
   // ── Trips ───────────────────────────────────────────────────
