@@ -67,7 +67,7 @@ router.post('/login', async (req, res) => {
 
     // Find user
     const [users] = await pool.query(
-      'SELECT id, email, password_hash, first_name, last_name FROM users WHERE email = ?', 
+      'SELECT id, email, password_hash, first_name, last_name, avatar_url, bio FROM users WHERE email = ?', 
       [email]
     );
     if (users.length === 0) {
