@@ -1,318 +1,225 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, BarChart2, Calendar, Users, ArrowRight, Plane, Sparkles } from 'lucide-react';
-import { Globe } from './ui/Globe';
+import { ArrowRight, MapPin, BookOpen, Compass } from 'lucide-react';
 import JourneoLogo from '../assets/Journeo_whitelogo.png';
-
-// --- Static Data ---
-const globeMarkers = [
-  { location: [50.0755, 14.4378], id: 'prague' },
-  { location: [41.9028, 12.4964], id: 'rome' },
-  { location: [48.8566, 2.3522], id: 'paris' },
-  { location: [35.6762, 139.6503], id: 'tokyo' },
-  { location: [40.7128, -74.0060], id: 'nyc' },
-  { location: [-33.8688, 151.2093], id: 'sydney' },
-];
-
-const GLOBE_CONFIG = {
-  baseColor: [0.05, 0.1, 0.3],
-  markerColor: [0.4, 0.6, 1],
-  glowColor: [0.1, 0.2, 0.4]
-};
-
-// --- Background Components ---
-
-const GridBackground = () => (
-  <div className="absolute inset-0 pointer-events-none overflow-hidden">
-    <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
-    <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent" />
-  </div>
-);
-
-// --- Animation Components ---
-
-const AnimatedText = ({ text, className, delay = 0 }) => {
-  const words = text.split(' ');
-  
-  return (
-    <div className="flex flex-wrap justify-center overflow-visible px-4">
-      {words.map((word, i) => (
-        <motion.span
-          key={i}
-          initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
-          animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-          transition={{
-            duration: 0.8,
-            delay: delay + (i * 0.1),
-            ease: [0.21, 0.47, 0.32, 0.98]
-          }}
-          className={`inline-block whitespace-nowrap ${className} ${i !== words.length - 1 ? 'mr-[0.25em]' : ''}`}
-        >
-          {word}
-        </motion.span>
-      ))}
-    </div>
-  );
-};
-
-// --- Sections ---
-
-const Navbar = () => {
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  return (
-    <motion.nav
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 px-4 sm:px-6 py-4 ${
-        scrolled ? 'sm:py-3' : 'sm:py-6'
-      }`}
-    >
-      <div className={`max-w-7xl mx-auto flex items-center justify-between rounded-full px-4 sm:px-6 py-2.5 sm:py-3 transition-all duration-500 ${
-        scrolled 
-          ? 'bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl' 
-          : 'bg-transparent border border-transparent'
-      }`}>
-        <div className="flex items-center gap-2 sm:gap-3">
-          <img src={JourneoLogo} alt="Journeo" className="w-7 h-7 sm:w-8 sm:h-8 object-contain" />
-          <span className="text-lg sm:text-xl font-bold tracking-tight text-white">Journeo</span>
-        </div>
-
-        <div className="hidden md:flex items-center gap-10 text-sm font-medium">
-          {['Vlastnosti', 'O aplikaci', 'Komunita'].map((item) => (
-            <a key={item} href={`#${item}`} className="text-gray-400 hover:text-white transition-colors">
-              {item}
-            </a>
-          ))}
-        </div>
-
-        <Link 
-          to="/auth" 
-          className="relative group px-4 sm:px-6 py-2 rounded-full bg-white text-black text-xs sm:text-sm font-bold overflow-hidden transition-all hover:scale-105 active:scale-95"
-        >
-          <span className="relative z-10">Vstoupit</span>
-          <div className="absolute inset-0 bg-blue-500 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-        </Link>
-      </div>
-    </motion.nav>
-  );
-};
-
-const FeatureCard = ({ icon: Icon, title, description, delay }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 30 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    transition={{ duration: 0.8, delay }}
-    className="group p-6 sm:p-8 rounded-3xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-white/20 transition-all duration-500"
-  >
-    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 mb-6 group-hover:scale-110 group-hover:rotate-3 transition-transform">
-      <Icon size={20} className="sm:w-6 sm:h-6" />
-    </div>
-    <h3 className="text-lg sm:text-xl font-bold text-white mb-3 tracking-tight">{title}</h3>
-    <p className="text-gray-500 leading-relaxed text-sm">{description}</p>
-  </motion.div>
-);
+import heroImage from '../assets/hero_travel.png';
 
 const LandingPage = () => {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const handleMouseMove = (e) => setMousePos({ x: e.clientX, y: e.clientY });
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-100 font-sans selection:bg-blue-500/30 overflow-x-hidden">
-      <Navbar />
-      
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center pt-20 overflow-hidden">
-        <GridBackground />
-        
-        {/* Glow effect follows mouse */}
-        <div 
-          className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-1000 opacity-50"
-          style={{
-            background: `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(37, 99, 235, 0.08), transparent 80%)`
-          }}
-        />
+    <div className="min-h-screen selection:bg-journeo-accent/30 overflow-x-hidden">
 
-        {/* Globe Background - Absolute positioned behind content */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] sm:w-[100%] max-w-[800px] aspect-square pointer-events-none opacity-40 sm:opacity-60 blur-[2px] sm:blur-none">
-          <Globe 
-            className="w-full h-full"
-            markers={globeMarkers}
-            baseColor={GLOBE_CONFIG.baseColor}
-            markerColor={GLOBE_CONFIG.markerColor}
-            glowColor={GLOBE_CONFIG.glowColor}
-          />
-        </div>
+      {/* ===== Navbar ===== */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-journeo-dark/90 backdrop-blur-md border-b border-journeo-border">
+        <div className="max-w-[1400px] mx-auto flex items-center justify-between px-8 md:px-16 h-20">
+          <Link to="/" className="flex items-center gap-3 group">
+            <img src={JourneoLogo} alt="Journeo" className="w-6 h-6 object-contain opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
+            <span className="font-serif text-2xl tracking-tight mt-1">Journeo</span>
+          </Link>
 
-        <div className="relative z-10 max-w-5xl mx-auto px-6 w-full text-center space-y-8 sm:space-y-12">
-          <div className="space-y-6 sm:space-y-8">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5 }}
-              className="flex justify-center"
+          <div className="flex items-center gap-10">
+            <div className="hidden md:flex items-center gap-8 text-[14px] text-journeo-text-muted">
+              <a href="#features" className="hover:text-journeo-text transition-colors duration-300">Funkce</a>
+              <a href="#about" className="hover:text-journeo-text transition-colors duration-300">Příběh</a>
+            </div>
+            <Link
+              to="/auth"
+              className="text-[14px] font-medium text-journeo-accent hover:text-journeo-accent-hover transition-colors duration-300"
             >
-            </motion.div>
+              Přihlásit se
+            </Link>
+          </div>
+        </div>
+      </nav>
 
-            <div className="space-y-4 sm:space-y-6">
-              <div className="relative inline-block">
-                <AnimatedText 
-                  text="Journeo"
-                  className="text-7xl sm:text-9xl md:text-[10rem] font-bold tracking-tight text-white select-none"
-                />
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1, duration: 1 }}
-                  className="absolute -top-6 -right-6 hidden sm:block"
-                >
-                  <span className="px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-bold text-blue-400 uppercase tracking-widest backdrop-blur-md">
-                    Beta
-                  </span>
-                </motion.div>
+      {/* ===== Hero ===== */}
+      <section className="relative pt-20">
+        <div className="max-w-[1400px] mx-auto px-6 md:px-16">
+          <div className="grid lg:grid-cols-12 gap-10 lg:gap-20 items-center min-h-[calc(100vh-80px)] py-10 lg:py-0">
+
+            {/* Left — text (7 cols) */}
+            <div className="lg:col-span-7 space-y-8 lg:space-y-10 lg:pr-8">
+              <div className="space-y-6 lg:space-y-8">
+                <p className="text-[11px] sm:text-[13px] text-journeo-text-subtle tracking-[0.2em] uppercase font-medium">
+                  Cestovatelský deník
+                </p>
+
+                <h1 className="font-serif text-[2.75rem] sm:text-[4rem] lg:text-[6.5rem] leading-[1.05] tracking-tight">
+                  Zaznamenávejte<br className="hidden sm:block" />
+                  <span className="sm:hidden"> </span>svá <em className="text-journeo-accent not-italic">dobrodružství</em>
+                </h1>
+
+                <p className="text-base sm:text-xl text-journeo-text-muted leading-relaxed max-w-xl font-light">
+                  Každý krok, každý objev, každá vzpomínka. Váš osobní cestovatelský deník, který má duši. Navrženo pro ty, kteří cestují s účelem.
+                </p>
               </div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.8 }}
-                className="space-y-6"
-              >
-                <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
-                  Zaznamenávejte svá <span className="text-blue-500 italic">dobrodružství</span>
-                </h2>
-                <p className="text-base sm:text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed font-light px-4">
-                  Jednoduchá a elegantní aplikace pro plánování, sdílení a uchovávání vzpomínek na všechny vaše cesty.
-                </p>
-              </motion.div>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-start gap-4 sm:gap-6 pt-2 sm:pt-4">
+                <Link
+                  to="/auth"
+                  className="group inline-flex justify-center items-center gap-3 px-8 py-4 bg-journeo-accent text-journeo-dark text-[15px] font-medium rounded-sm hover:bg-journeo-accent-hover transition-colors duration-300"
+                >
+                  Začít psát
+                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
+                </Link>
+                <a
+                  href="#features"
+                  className="inline-flex justify-center items-center gap-2 px-8 py-4 text-[15px] font-medium text-journeo-text-muted hover:text-journeo-text bg-journeo-surface sm:bg-transparent rounded-sm transition-colors duration-300"
+                >
+                  Zjistit více
+                </a>
+              </div>
+
+              {/* Minimal stats */}
+              <div className="flex flex-wrap items-center gap-6 sm:gap-12 pt-8 sm:pt-12 mt-8 sm:mt-12 border-t border-journeo-border">
+                <div className="space-y-1">
+                  <span className="font-serif text-2xl sm:text-3xl text-journeo-text">200+</span>
+                  <p className="text-[10px] sm:text-[11px] text-journeo-text-subtle uppercase tracking-widest font-medium">cestovatelů</p>
+                </div>
+                <div className="hidden sm:block w-px h-10 bg-journeo-border" />
+                <div className="space-y-1">
+                  <span className="font-serif text-2xl sm:text-3xl text-journeo-text">1.2k</span>
+                  <p className="text-[10px] sm:text-[11px] text-journeo-text-subtle uppercase tracking-widest font-medium">výletů</p>
+                </div>
+                <div className="hidden sm:block w-px h-10 bg-journeo-border" />
+                <div className="space-y-1">
+                  <span className="font-serif text-2xl sm:text-3xl text-journeo-text">48</span>
+                  <p className="text-[10px] sm:text-[11px] text-journeo-text-subtle uppercase tracking-widest font-medium">zemí</p>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 px-6"
-          >
-            <Link 
-              to="/auth" 
-              className="w-full sm:w-auto group flex items-center justify-center gap-3 px-8 py-4 bg-white text-black rounded-2xl font-bold text-lg hover:bg-blue-50 transition-all active:scale-95 shadow-xl shadow-white/5"
-            >
-              Začít objevovat
-              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <button className="w-full sm:w-auto px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl font-bold text-lg transition-all">
-              Více o nás
-            </button>
-          </motion.div>
-        </div>
-
-        {/* Scroll indicator */}
-        <motion.div 
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30"
-        >
-          <span className="text-[10px] uppercase tracking-[0.3em] font-bold">Sjeďte dolů</span>
-          <div className="w-px h-8 sm:h-12 bg-gradient-to-b from-white to-transparent" />
-        </motion.div>
-      </section>
-
-      {/* Features Section */}
-      <section id="Vlastnosti" className="py-20 sm:py-32 relative">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-20 space-y-4">
-            <h2 className="text-[10px] sm:text-xs font-bold text-blue-500 uppercase tracking-[0.3em]">Funkce</h2>
-            <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
-              Vše co potřebujete pro dokonalý přehled
-            </h3>
-            <p className="text-slate-500 text-base sm:text-lg font-light">
-              Aplikace navržená s ohledem na jednoduchost a krásný design. Zaznamenat výlet nebylo nikdy jednodušší.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <FeatureCard 
-              icon={Calendar} 
-              title="Denní plánování" 
-              description="Sestavte si itinerář den po dni. Zadejte lokace, aktivity a poznámky ke každému dni výletu."
-              delay={0.1}
-            />
-            <FeatureCard 
-              icon={BarChart2} 
-              title="Statistiky cest" 
-              description="Přehled všech vašich cest – počet výletů, strávené dny na cestách a naplánované aktivity."
-              delay={0.2}
-            />
-            <FeatureCard 
-              icon={MapPin} 
-              title="Sledování lokací" 
-              description="Ke každému výletnímu dni přiřaďte město nebo konkrétní místo, které plánujete navštívit."
-              delay={0.3}
-            />
-            <FeatureCard 
-              icon={Users} 
-              title="Sdílení a komunita" 
-              description="Brzy přijdou funkce pro sdílení výletů s přáteli a plánování společných dobrodružství."
-              delay={0.4}
-            />
+            {/* Right — image (5 cols) */}
+            <div className="lg:col-span-5 relative w-full h-[350px] sm:h-[500px] lg:h-[750px] mt-8 lg:mt-0">
+              <div className="absolute inset-0 overflow-hidden rounded-sm bg-journeo-surface">
+                <img
+                  src={heroImage}
+                  alt="Horská silnice při západu slunce"
+                  className="w-full h-full object-cover opacity-90 mix-blend-lighten"
+                />
+              </div>
+              {/* Overlay minimal card */}
+              <div className="absolute -bottom-8 -left-8 bg-journeo-surface border border-journeo-border-strong p-8 rounded-sm shadow-2xl z-10 w-72 hidden md:block">
+                <p className="text-[11px] text-journeo-text-subtle uppercase tracking-widest font-medium mb-3">Poslední výlet</p>
+                <p className="font-serif text-2xl text-journeo-text">Transfăgărășan</p>
+                <p className="text-[14px] text-journeo-text-muted mt-2">Rumunsko, 4 dny</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 sm:py-32 relative overflow-hidden px-4">
-        <div className="absolute inset-0 bg-blue-600/5 z-0" />
-        <div className="max-w-5xl mx-auto relative z-10">
-          <div className="bg-gradient-to-b from-white/[0.05] to-transparent border border-white/10 rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-20 text-center space-y-8">
-            <div className="inline-flex p-4 rounded-3xl bg-blue-500/10 text-blue-400 mb-4">
-              <Plane size={32} />
-            </div>
-            <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white tracking-tight">
-              Začněte své <span className="text-blue-500 italic">dobrodružství</span> dnes
+      {/* ===== Features ===== */}
+      <section id="features" className="py-20 md:py-32 bg-journeo-surface border-y border-journeo-border">
+        <div className="max-w-[1400px] mx-auto px-6 md:px-16">
+          {/* Section header */}
+          <div className="max-w-2xl mb-16 md:mb-24 space-y-4 md:space-y-6">
+            <p className="text-[11px] sm:text-[13px] text-journeo-text-subtle tracking-[0.2em] uppercase font-medium">Více než jen deník</p>
+            <h2 className="font-serif text-3xl sm:text-4xl lg:text-6xl text-journeo-text tracking-tight leading-[1.1]">
+              Vše pro vaše cesty,<br className="hidden sm:block" />na jednom místě.
             </h2>
-            <p className="text-slate-400 text-base sm:text-lg md:text-xl max-w-2xl mx-auto font-light">
-              Žádná registrace, žádná databáze. Otevřete aplikaci a začněte plánovat hned teď.
-            </p>
-            <div className="pt-8">
-              <Link 
-                to="/auth" 
-                className="w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-5 bg-white text-black rounded-2xl font-bold text-lg sm:text-xl hover:scale-105 transition-all active:scale-95 inline-block"
+          </div>
+
+          {/* Asymmetric feature grid using modern CSS grid */}
+          <div className="grid md:grid-cols-12 gap-px bg-journeo-border rounded-sm overflow-hidden border border-journeo-border">
+            
+            <div className="md:col-span-8 bg-journeo-surface p-8 sm:p-12 md:p-16 hover:bg-journeo-surface-hover transition-colors duration-500 flex flex-col justify-end min-h-[300px] md:min-h-[360px]">
+              <div className="w-10 h-10 md:w-12 md:h-12 mb-6 md:mb-8 text-journeo-accent">
+                <BookOpen size={28} strokeWidth={1.2} className="md:w-8 md:h-8" />
+              </div>
+              <h3 className="font-serif text-2xl md:text-3xl mb-3 md:mb-4 text-journeo-text">Denní itinerář</h3>
+              <p className="text-journeo-text-muted text-base md:text-lg leading-relaxed max-w-xl font-light">
+                Sestavte si plán den po dni. Lokace, aktivity, poznámky — vše přehledně na jednom místě.
+                Žádné zbytečné komplikace, jen čisté plánování a radost z cesty.
+              </p>
+            </div>
+
+            <div className="md:col-span-4 bg-journeo-surface p-8 sm:p-12 md:p-16 hover:bg-journeo-surface-hover transition-colors duration-500 flex flex-col justify-end min-h-[300px] md:min-h-[360px]">
+              <div className="w-10 h-10 md:w-12 md:h-12 mb-6 md:mb-8 text-journeo-accent">
+                <MapPin size={28} strokeWidth={1.2} className="md:w-8 md:h-8" />
+              </div>
+              <h3 className="font-serif text-xl md:text-2xl mb-3 md:mb-4 text-journeo-text">Mapa vzpomínek</h3>
+              <p className="text-journeo-text-muted text-[15px] md:text-[16px] leading-relaxed font-light">
+                Sledujte, kde všude jste byli. Vaše osobní mapa se plní s každým výletem.
+              </p>
+            </div>
+
+            <div className="md:col-span-4 bg-journeo-surface p-8 sm:p-12 md:p-16 hover:bg-journeo-surface-hover transition-colors duration-500 flex flex-col justify-end min-h-[300px] md:min-h-[360px]">
+              <div className="w-10 h-10 md:w-12 md:h-12 mb-6 md:mb-8 text-journeo-accent">
+                <Compass size={28} strokeWidth={1.2} className="md:w-8 md:h-8" />
+              </div>
+              <h3 className="font-serif text-xl md:text-2xl mb-3 md:mb-4 text-journeo-text">Statistiky</h3>
+              <p className="text-journeo-text-muted text-[15px] md:text-[16px] leading-relaxed font-light">
+                Počet zemí, strávené dny, ujeté kilometry. Čísla, která vypráví váš příběh.
+              </p>
+            </div>
+
+            <div className="md:col-span-8 bg-journeo-surface p-8 sm:p-12 md:p-16 hover:bg-journeo-surface-hover transition-colors duration-500 flex flex-col justify-end min-h-[300px] md:min-h-[360px] relative overflow-hidden">
+              <div className="absolute top-8 right-8 md:top-12 md:right-12 px-3 py-1 md:px-4 md:py-1.5 border border-journeo-accent/30 text-journeo-accent text-[10px] md:text-[11px] tracking-widest uppercase font-medium rounded-sm">
+                Již brzy
+              </div>
+              <h3 className="font-serif text-2xl md:text-3xl mb-3 md:mb-4 text-journeo-text">Sdílení s přáteli</h3>
+              <p className="text-journeo-text-muted text-base md:text-lg leading-relaxed max-w-xl font-light">
+                Sdílejte výlety, plánujte společně, inspirujte se navzájem.
+                Komunita cestovatelů, kteří to myslí vážně.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ===== Pullquote / Editorial break ===== */}
+      <section id="about" className="py-24 md:py-40">
+        <div className="max-w-[1000px] mx-auto px-6 text-center space-y-10 md:space-y-12">
+          <p className="font-serif text-[2rem] md:text-[3.5rem] text-journeo-text leading-[1.3] md:leading-[1.2] italic text-balance">
+            „Cestování je jediná věc, za kterou zaplatíte a&nbsp;přitom vás udělá bohatšími."
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+            <div className="w-12 sm:w-16 h-px bg-journeo-border-strong" />
+            <p className="text-[11px] sm:text-[13px] text-journeo-text-subtle uppercase tracking-[0.15em] font-medium">Journeo — pro ty, kteří cestují s příběhem</p>
+            <div className="w-12 sm:w-16 h-px bg-journeo-border-strong" />
+          </div>
+        </div>
+      </section>
+
+      {/* ===== CTA ===== */}
+      <section className="py-24 md:py-40 bg-journeo-surface border-t border-journeo-border">
+        <div className="max-w-[1400px] mx-auto px-6 md:px-16">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10 lg:gap-24">
+            <div className="space-y-4 md:space-y-6 max-w-2xl flex-1">
+              <h2 className="font-serif text-4xl md:text-6xl text-journeo-text tracking-tight leading-tight">
+                Začněte svůj<br />příběh dnes.
+              </h2>
+              <p className="text-journeo-text-muted text-base md:text-lg leading-relaxed font-light">
+                Vytvořte si účet zdarma a zaznamenejte svůj další výlet. Žádné závazky, žádné zbytečnosti. Prostor jen pro vaše vzpomínky.
+              </p>
+            </div>
+            <div className="shrink-0">
+              <Link
+                to="/auth"
+                className="group flex items-center justify-center gap-4 px-10 py-5 bg-journeo-accent text-journeo-dark text-lg font-medium rounded-sm hover:bg-journeo-accent-hover transition-colors duration-300 w-full sm:w-auto"
               >
                 Vstoupit do Journeo
+                <ArrowRight size={20} className="group-hover:translate-x-1.5 transition-transform duration-300" />
               </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 border-t border-white/5 bg-[#01040f]">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+      {/* ===== Footer ===== */}
+      <footer className="py-12 border-t border-journeo-border bg-journeo-dark">
+        <div className="max-w-[1400px] mx-auto px-8 md:px-16 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-3">
-            <img src={JourneoLogo} alt="Journeo" className="w-6 h-6 object-contain opacity-50" />
-            <span className="text-slate-500 font-bold tracking-tight">Journeo</span>
+            <img src={JourneoLogo} alt="Journeo" className="w-5 h-5 object-contain opacity-50" />
+            <span className="font-serif text-xl text-journeo-text-subtle mt-0.5">Journeo</span>
           </div>
-          <div className="text-slate-600 text-xs sm:text-sm text-center md:text-left">
-            &copy; {new Date().getFullYear()} Journeo — Petr Vorlíček. Vyrobeno pro cestovatele.
-          </div>
-          <div className="flex gap-6 text-slate-500 text-sm">
-            <a href="#" className="hover:text-white transition-colors">Instagram</a>
-            <a href="#" className="hover:text-white transition-colors">GitHub</a>
-            <a href="#" className="hover:text-white transition-colors">LinkedIn</a>
+          <p className="text-journeo-text-subtle text-[13px] font-medium tracking-wide">
+            &copy; {new Date().getFullYear()} Petr Vorlíček. Všechna práva vyhrazena.
+          </p>
+          <div className="flex gap-8 text-journeo-text-subtle text-[13px] font-medium tracking-wide">
+            <a href="#" className="hover:text-journeo-text transition-colors duration-300">Instagram</a>
+            <a href="#" className="hover:text-journeo-text transition-colors duration-300">GitHub</a>
           </div>
         </div>
       </footer>

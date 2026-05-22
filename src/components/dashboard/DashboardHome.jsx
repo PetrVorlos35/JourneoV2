@@ -22,7 +22,7 @@ const EXCHANGE_RATES = {
 
 const DashboardLoading = () => (
   <div className="w-full h-[60vh] flex items-center justify-center">
-    <div className="w-6 h-6 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+    <div className="w-6 h-6 border-2 border-journeo-accent/20 border-t-journeo-accent rounded-full animate-spin" />
   </div>
 );
 

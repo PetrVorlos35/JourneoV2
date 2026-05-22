@@ -26,14 +26,13 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
     if (trip) setTripTitle(trip.title);
   }, [trip?.id]);
 
-  // Handle mobile tab switching logic
   useEffect(() => {
     if (window.innerWidth < 768) {
       if (mobileTab === 'itinerary' && typeof activeView !== 'number') {
         setActiveView(0);
       }
     }
-  }, [mobileTab]);
+  }, [mobileTab, activeView]);
 
   useEffect(() => {
     if (trip) {
@@ -57,10 +56,10 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
 
   if (!trip) {
     return (
-      <div className="text-center py-20 text-gray-500 dark:text-gray-400">
+      <div className="text-center py-20 text-journeo-text-subtle font-serif text-xl">
         Výlet nebyl nalezen.
         <br />
-        <Link to="/dashboard" className="text-blue-600 dark:text-blue-500 hover:underline mt-4 inline-block">Zpět na přehled</Link>
+        <Link to="/dashboard" className="text-journeo-accent hover:text-journeo-accent-hover transition-colors mt-4 inline-block font-sans text-sm uppercase tracking-widest font-medium">Zpět na přehled</Link>
       </div>
     );
   }
@@ -158,55 +157,55 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
 
   // Mobile Components
   const MobileBottomNav = () => (
-    <div className="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-black/80 backdrop-blur-lg border-t border-gray-200 dark:border-white/10 flex justify-around items-center px-2 py-3 z-50 md:hidden">
+    <div className="fixed bottom-0 left-0 right-0 bg-journeo-dark/90 backdrop-blur-md border-t border-journeo-border flex justify-around items-center px-2 py-3 z-50 md:hidden">
       <button 
         onClick={() => setMobileTab('itinerary')}
-        className={`flex flex-col items-center gap-1 flex-1 transition-colors ${mobileTab === 'itinerary' ? 'text-blue-600 dark:text-blue-500' : 'text-gray-400'}`}
+        className={`flex flex-col items-center gap-1.5 flex-1 transition-colors duration-300 ${mobileTab === 'itinerary' ? 'text-journeo-accent' : 'text-journeo-text-subtle'}`}
       >
-        <Layout size={20} />
-        <span className="text-[10px] font-bold uppercase tracking-wider">Itinerář</span>
+        <Layout size={20} strokeWidth={mobileTab === 'itinerary' ? 2 : 1.5} />
+        <span className="text-[9px] font-medium uppercase tracking-widest">Itinerář</span>
       </button>
       <button 
         onClick={() => setMobileTab('tools')}
-        className={`flex flex-col items-center gap-1 flex-1 transition-colors ${mobileTab === 'tools' ? 'text-blue-600 dark:text-blue-500' : 'text-gray-400'}`}
+        className={`flex flex-col items-center gap-1.5 flex-1 transition-colors duration-300 ${mobileTab === 'tools' ? 'text-journeo-accent' : 'text-journeo-text-subtle'}`}
       >
-        <Briefcase size={20} />
-        <span className="text-[10px] font-bold uppercase tracking-wider">Nástroje</span>
+        <Briefcase size={20} strokeWidth={mobileTab === 'tools' ? 2 : 1.5} />
+        <span className="text-[9px] font-medium uppercase tracking-widest">Nástroje</span>
       </button>
       <button 
         onClick={() => setMobileTab('info')}
-        className={`flex flex-col items-center gap-1 flex-1 transition-colors ${mobileTab === 'info' ? 'text-blue-600 dark:text-blue-500' : 'text-gray-400'}`}
+        className={`flex flex-col items-center gap-1.5 flex-1 transition-colors duration-300 ${mobileTab === 'info' ? 'text-journeo-accent' : 'text-journeo-text-subtle'}`}
       >
-        <Info size={20} />
-        <span className="text-[10px] font-bold uppercase tracking-wider">Detaily</span>
+        <Info size={20} strokeWidth={mobileTab === 'info' ? 2 : 1.5} />
+        <span className="text-[9px] font-medium uppercase tracking-widest">Detaily</span>
       </button>
       <button 
         onClick={handleSave}
-        className={`flex flex-col items-center gap-1 flex-1 transition-colors ${hasUnsavedChanges ? 'text-orange-500 animate-pulse' : 'text-gray-400'}`}
+        className={`flex flex-col items-center gap-1.5 flex-1 transition-colors duration-300 ${hasUnsavedChanges ? 'text-amber-500' : 'text-journeo-text-subtle'}`}
       >
-        <Save size={20} />
-        <span className="text-[10px] font-bold uppercase tracking-wider">Uložit</span>
+        <Save size={20} strokeWidth={1.5} />
+        <span className="text-[9px] font-medium uppercase tracking-widest">Uložit</span>
       </button>
     </div>
   );
 
   const DayPicker = () => (
-    <div className="flex gap-2 overflow-x-auto pb-4 mb-6 no-scrollbar -mx-4 sm:-mx-6 px-6 md:hidden">
+    <div className="flex gap-4 overflow-x-auto pb-4 mb-8 no-scrollbar -mx-4 sm:-mx-6 px-6 md:hidden">
       {dailyPlans.map((day, index) => (
         <button
           key={index}
           onClick={() => setActiveView(index)}
-          className={`flex-shrink-0 min-w-[100px] p-3 rounded-2xl transition-all border ${
+          className={`flex-shrink-0 min-w-[110px] p-4 rounded-sm transition-all duration-300 border ${
             activeView === index
-              ? 'bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-500/25'
-              : 'bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400'
+              ? 'bg-journeo-surface border-journeo-accent text-journeo-text'
+              : 'bg-transparent border-journeo-border text-journeo-text-subtle'
           }`}
         >
-          <div className="text-[10px] font-bold uppercase opacity-70 mb-1">
+          <div className={`text-[10px] font-medium uppercase tracking-widest mb-2 ${activeView === index ? 'text-journeo-accent' : ''}`}>
             {format(new Date(day.date), 'EEE', { locale: cs })}
           </div>
-          <div className="text-lg font-black leading-none">{format(new Date(day.date), 'd.')}</div>
-          <div className="text-[10px] mt-1 truncate max-w-[80px]">{day.location || 'Bez místa'}</div>
+          <div className="text-3xl font-serif leading-none mb-2">{format(new Date(day.date), 'd.')}</div>
+          <div className="text-[11px] truncate opacity-70 italic">{day.location || 'Bez lokace'}</div>
         </button>
       ))}
     </div>
@@ -218,15 +217,15 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
       <MobileBottomNav />
       
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 -mx-4 sm:-mx-6 px-6 md:mx-0 md:px-0">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 -mx-4 sm:-mx-6 px-6 md:mx-0 md:px-0">
         <div>
-          <button onClick={handleBack} className="inline-flex items-center text-blue-600 dark:text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 mb-4 font-medium transition-colors md:mb-6">
-            <ArrowLeft size={16} className="mr-2" /> <span className="hidden md:inline">Zpět na přehled</span><span className="md:hidden">Zpět</span>
+          <button onClick={handleBack} className="inline-flex items-center text-[12px] uppercase tracking-widest font-medium text-journeo-text-subtle hover:text-journeo-text mb-6 transition-colors duration-300">
+            <ArrowLeft size={16} className="mr-2" strokeWidth={1.5} /> <span className="hidden md:inline">Zpět na přehled</span><span className="md:hidden">Zpět</span>
           </button>
 
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-4 mb-3">
             {editingTitle ? (
-              <div className="flex items-center gap-2 w-full max-w-md">
+              <div className="flex items-center gap-3 w-full max-w-md">
                 <input
                   ref={titleInputRef}
                   value={tripTitle}
@@ -235,97 +234,97 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                     setHasUnsavedChanges(true);
                   }}
                   onKeyDown={e => { if (e.key === 'Enter') setEditingTitle(false); }}
-                  className="text-2xl md:text-4xl font-bold bg-transparent border-b-2 border-blue-500 text-gray-900 dark:text-white focus:outline-none w-full"
+                  className="text-4xl md:text-5xl font-serif bg-transparent border-b border-journeo-accent text-journeo-text focus:outline-none w-full pb-1"
                   autoFocus
                 />
-                <button onClick={() => setEditingTitle(false)} className="text-green-600 dark:text-green-400 p-2">
-                  <Check size={24} />
+                <button onClick={() => setEditingTitle(false)} className="text-journeo-text-subtle hover:text-journeo-accent transition-colors p-2">
+                  <Check size={24} strokeWidth={1.5} />
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-3 group">
-                <h1 className="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white leading-tight">{tripTitle}</h1>
-                <button onClick={() => setEditingTitle(true)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" title="Přejmenovat">
-                  <Pencil size={18} />
+              <div className="flex items-center gap-4 group">
+                <h1 className="text-4xl md:text-5xl font-serif text-journeo-text leading-tight tracking-tight">{tripTitle}</h1>
+                <button onClick={() => setEditingTitle(true)} className="text-journeo-text-subtle opacity-0 group-hover:opacity-100 transition-opacity" title="Přejmenovat">
+                  <Pencil size={18} strokeWidth={1.5} />
                 </button>
               </div>
             )}
           </div>
 
-          <p className="text-gray-500 dark:text-gray-400 flex items-center gap-2 text-sm md:text-base">
-            <Calendar size={16} />
-            {format(new Date(trip.startDate), 'dd.MM.yyyy')} - {format(new Date(trip.endDate), 'dd.MM.yyyy')}
+          <p className="text-journeo-text-muted flex items-center gap-2 text-[13px] font-medium tracking-wide">
+            <Calendar size={16} strokeWidth={1.5} />
+            {format(new Date(trip.startDate), 'dd.MM.yyyy')} — {format(new Date(trip.endDate), 'dd.MM.yyyy')}
           </p>
         </div>
 
         <button
           onClick={handleSave}
-          className={`hidden md:flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all shrink-0 ${
+          className={`hidden md:flex items-center justify-center gap-2 px-8 py-3.5 rounded-sm font-medium transition-colors duration-300 shrink-0 ${
             hasUnsavedChanges 
-              ? 'bg-orange-500 text-white animate-pulse shadow-lg shadow-orange-500/20 hover:bg-orange-400' 
-              : 'bg-blue-600 text-white hover:bg-blue-500 hover:shadow-lg hover:shadow-blue-500/25'
+              ? 'bg-amber-600/10 text-amber-500 border border-amber-500/20 hover:bg-amber-600/20' 
+              : 'bg-journeo-accent text-journeo-dark hover:bg-journeo-accent-hover'
           }`}
         >
-          <Save size={18} /> {hasUnsavedChanges ? 'Uložit změny' : 'Uložit plán'}
+          <Save size={18} strokeWidth={1.5} /> {hasUnsavedChanges ? 'Uložit změny' : 'Uložit plán'}
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 flex-1 min-h-0 pb-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 flex-1 min-h-0 pb-10">
         {/* Desktop sidebar */}
-        <div className="hidden lg:flex lg:col-span-1 flex-col space-y-4 h-full min-h-0">
+        <div className="hidden lg:flex lg:col-span-3 flex-col space-y-12 h-full min-h-0 border-r border-journeo-border pr-8">
           
-          <div className="space-y-2">
-            <h3 className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-sm mb-3 px-2">Nástroje</h3>
+          <div className="space-y-4">
+            <h3 className="font-medium text-journeo-text-subtle uppercase tracking-widest text-[11px] mb-4">Nástroje</h3>
             
             <button
               onClick={() => setActiveView('packing')}
-              className={`w-full flex items-center gap-3 text-left px-4 py-3 rounded-xl transition-all font-medium ${
+              className={`w-full flex items-center gap-3 text-left px-4 py-3 rounded-sm transition-all duration-300 font-medium ${
                 activeView === 'packing'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10'
+                  ? 'bg-journeo-surface border-l-2 border-journeo-accent text-journeo-accent'
+                  : 'text-journeo-text hover:bg-journeo-surface-hover border-l-2 border-transparent'
               }`}
             >
-              <PackageOpen size={18} /> Balící seznam
+              <PackageOpen size={18} strokeWidth={1.5} /> Balící seznam
             </button>
             
             <button
               onClick={() => setActiveView('documents')}
-              className={`w-full flex items-center gap-3 text-left px-4 py-3 rounded-xl transition-all font-medium ${
+              className={`w-full flex items-center gap-3 text-left px-4 py-3 rounded-sm transition-all duration-300 font-medium ${
                 activeView === 'documents'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10'
+                  ? 'bg-journeo-surface border-l-2 border-journeo-accent text-journeo-accent'
+                  : 'text-journeo-text hover:bg-journeo-surface-hover border-l-2 border-transparent'
               }`}
             >
-              <LinkIcon size={18} /> Odkazy a poznámky
+              <LinkIcon size={18} strokeWidth={1.5} /> Odkazy a poznámky
             </button>
             <button
               onClick={() => setActiveView('diary')}
-              className={`w-full flex items-center gap-3 text-left px-4 py-3 rounded-xl transition-all font-medium ${
+              className={`w-full flex items-center gap-3 text-left px-4 py-3 rounded-sm transition-all duration-300 font-medium ${
                 activeView === 'diary'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10'
+                  ? 'bg-journeo-surface border-l-2 border-journeo-accent text-journeo-accent'
+                  : 'text-journeo-text hover:bg-journeo-surface-hover border-l-2 border-transparent'
               }`}
             >
-              <ImageIcon size={18} /> Deník a Galerie
+              <ImageIcon size={18} strokeWidth={1.5} /> Deník a Galerie
             </button>
           </div>
 
-          <div className="space-y-2 pt-2 border-t border-gray-200 dark:border-white/10 flex-1 flex flex-col min-h-0">
-            <h3 className="font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-sm mb-3 px-2">Itinerář</h3>
-            <div className="space-y-2 overflow-y-auto pr-2 custom-scrollbar flex-1">
+          <div className="space-y-4 flex-1 flex flex-col min-h-0">
+            <h3 className="font-medium text-journeo-text-subtle uppercase tracking-widest text-[11px] mb-4">Itinerář</h3>
+            <div className="space-y-2 overflow-y-auto pr-2 no-scrollbar flex-1">
               {dailyPlans.map((day, index) => (
                 <button
                   key={index}
                   onClick={() => setActiveView(index)}
-                  className={`w-full text-left px-4 py-3 rounded-xl transition-all ${
+                  className={`w-full text-left px-4 py-4 rounded-sm transition-all duration-300 ${
                     activeView === index
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10'
+                      ? 'bg-journeo-surface border-l-2 border-journeo-accent text-journeo-accent'
+                      : 'text-journeo-text hover:bg-journeo-surface-hover border-l-2 border-transparent'
                   }`}
                 >
-                  <div className="font-bold">{day.title}</div>
-                  <div className="text-xs opacity-70 mt-1 capitalize">
-                    {format(new Date(day.date), 'EEEE, dd.MM.yyyy', { locale: cs })}
+                  <div className="font-serif text-lg">{day.title}</div>
+                  <div className="text-[11px] opacity-70 mt-1 uppercase tracking-widest">
+                    {format(new Date(day.date), 'EEE, dd.MM.yyyy', { locale: cs })}
                   </div>
                 </button>
               ))}
@@ -334,28 +333,28 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
         </div>
 
         {/* Editor / Main Content */}
-        <div className="lg:col-span-3 print:col-span-1 print:block h-full overflow-y-auto md:pr-2 custom-scrollbar">
+        <div className="lg:col-span-9 print:col-span-1 print:block h-full overflow-y-auto no-scrollbar lg:pl-4">
           
           {/* Mobile Info View */}
-          <div className={`${mobileTab === 'info' ? 'block' : 'hidden'} md:hidden space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300`}>
-            <div className="bg-white dark:bg-white/5 border-y border-gray-100 dark:border-white/10 -mx-4 sm:-mx-6 px-6 py-6 shadow-sm">
-              <h2 className="text-lg font-black mb-6 flex items-center gap-2">
-                <Info size={18} className="text-blue-500" /> Přehled výletu
+          <div className={`${mobileTab === 'info' ? 'block' : 'hidden'} md:hidden space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300`}>
+            <div className="bg-journeo-surface border border-journeo-border -mx-4 sm:-mx-6 px-6 py-8 rounded-sm">
+              <h2 className="font-serif text-2xl mb-8 flex items-center gap-3 text-journeo-text">
+                <Info size={20} className="text-journeo-accent" /> Přehled výletu
               </h2>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-white/5">
-                  <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Datum</span>
-                  <span className="font-black text-sm text-right">
-                    {format(new Date(trip.startDate), 'd. M. yyyy')} - {format(new Date(trip.endDate), 'd. M. yyyy')}
+              <div className="space-y-6">
+                <div className="flex justify-between items-center pb-4 border-b border-journeo-border-strong">
+                  <span className="text-journeo-text-subtle text-[11px] font-medium uppercase tracking-widest">Datum</span>
+                  <span className="font-serif text-lg">
+                    {format(new Date(trip.startDate), 'd. M. yyyy')} — {format(new Date(trip.endDate), 'd. M. yyyy')}
                   </span>
                 </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-100 dark:border-white/5">
-                  <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Počet dní</span>
-                  <span className="font-black text-sm">{dailyPlans.length} dní</span>
+                <div className="flex justify-between items-center pb-4 border-b border-journeo-border-strong">
+                  <span className="text-journeo-text-subtle text-[11px] font-medium uppercase tracking-widest">Počet dní</span>
+                  <span className="font-serif text-lg">{dailyPlans.length} dní</span>
                 </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">Status</span>
-                  <span className="px-3 py-1 bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 text-[10px] font-black uppercase rounded-full">Naplánováno</span>
+                <div className="flex justify-between items-center pt-2">
+                  <span className="text-journeo-text-subtle text-[11px] font-medium uppercase tracking-widest">Status</span>
+                  <span className="px-3 py-1 bg-journeo-accent/10 text-journeo-accent border border-journeo-accent/20 text-[10px] font-medium uppercase tracking-widest rounded-sm">Naplánováno</span>
                 </div>
               </div>
             </div>
@@ -363,9 +362,9 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
             <div className="-mx-4 sm:-mx-6 px-6">
               <button 
                 onClick={() => setActiveView('diary')}
-                className="w-full bg-blue-600 text-white p-4 rounded-2xl font-black flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 active:scale-95 transition-transform"
+                className="w-full bg-transparent border border-journeo-border text-journeo-text p-4 rounded-sm font-medium flex items-center justify-center gap-3 hover:bg-journeo-surface transition-colors duration-300"
               >
-                <ImageIcon size={20} /> Otevřít deník
+                <ImageIcon size={20} strokeWidth={1.5} /> Otevřít deník
               </button>
             </div>
           </div>
@@ -375,56 +374,54 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
             <div className="space-y-4">
               <button
                 onClick={() => setActiveView('packing')}
-                className={`w-full flex items-center gap-4 -mx-4 sm:-mx-6 px-6 py-6 border-y transition-all active:scale-[0.98] ${
+                className={`w-full flex items-center gap-4 -mx-4 sm:-mx-6 px-6 py-6 border-y border-journeo-border transition-colors duration-300 ${
                   activeView === 'packing' 
-                    ? 'bg-blue-600 border-blue-500 text-white shadow-xl shadow-blue-500/20' 
-                    : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-900 dark:text-white'
+                    ? 'bg-journeo-surface border-l-2 border-l-journeo-accent' 
+                    : 'bg-transparent text-journeo-text'
                 }`}
               >
-                <div className={`p-3 rounded-xl ${activeView === 'packing' ? 'bg-white/20' : 'bg-blue-50 dark:bg-blue-500/10 text-blue-500'}`}>
-                  <PackageOpen size={24} />
+                <div className={`text-journeo-accent opacity-80`}>
+                  <PackageOpen size={24} strokeWidth={1.5} />
                 </div>
                 <div className="flex-1 text-left">
-                  <span className="font-black text-base block">Balící seznam</span>
-                  <span className={`text-[10px] font-bold uppercase tracking-wider opacity-60 ${activeView === 'packing' ? 'text-white' : 'text-gray-500'}`}>
+                  <span className="font-serif text-xl block mb-1">Balící seznam</span>
+                  <span className="text-[10px] font-medium uppercase tracking-widest text-journeo-text-subtle">
                     {packingList.length} položek
                   </span>
                 </div>
-                <ArrowLeft size={18} className="rotate-180 opacity-40" />
               </button>
 
               <button
                 onClick={() => setActiveView('documents')}
-                className={`w-full flex items-center gap-4 -mx-4 sm:-mx-6 px-6 py-6 border-y transition-all active:scale-[0.98] ${
+                className={`w-full flex items-center gap-4 -mx-4 sm:-mx-6 px-6 py-6 border-b border-journeo-border transition-colors duration-300 ${
                   activeView === 'documents' 
-                    ? 'bg-blue-600 border-blue-500 text-white shadow-xl shadow-blue-500/20' 
-                    : 'bg-white dark:bg-white/5 border-gray-100 dark:border-white/10 text-gray-900 dark:text-white'
+                    ? 'bg-journeo-surface border-l-2 border-l-journeo-accent' 
+                    : 'bg-transparent text-journeo-text'
                 }`}
               >
-                <div className={`p-3 rounded-xl ${activeView === 'documents' ? 'bg-white/20' : 'bg-purple-50 dark:bg-purple-500/10 text-purple-500'}`}>
-                  <LinkIcon size={24} />
+                <div className={`text-journeo-accent opacity-80`}>
+                  <LinkIcon size={24} strokeWidth={1.5} />
                 </div>
                 <div className="flex-1 text-left">
-                  <span className="font-black text-base block">Odkazy a poznámky</span>
-                  <span className={`text-[10px] font-bold uppercase tracking-wider opacity-60 ${activeView === 'documents' ? 'text-white' : 'text-gray-500'}`}>
+                  <span className="font-serif text-xl block mb-1">Odkazy a poznámky</span>
+                  <span className="text-[10px] font-medium uppercase tracking-widest text-journeo-text-subtle">
                     {documents.length} záznamů
                   </span>
                 </div>
-                <ArrowLeft size={18} className="rotate-180 opacity-40" />
               </button>
             </div>
 
             {/* Render actual tool content below if selected on mobile */}
             <div className="mt-8">
               {activeView === 'packing' && (
-                <div className="animate-in zoom-in-95 duration-200">
-                  <h3 className="text-xl font-bold mb-4 -mx-4 sm:-mx-6 px-6">Položky k zabalení</h3>
+                <div className="animate-in fade-in duration-300">
+                  <h3 className="font-serif text-2xl mb-6 -mx-4 sm:-mx-6 px-6">Položky k zabalení</h3>
                   {/* The actual packing content is below in the editor section */}
                 </div>
               )}
               {activeView === 'documents' && (
-                <div className="animate-in zoom-in-95 duration-200">
-                  <h3 className="text-xl font-bold mb-4 -mx-4 sm:-mx-6 px-6">Odkazy a poznámky</h3>
+                <div className="animate-in fade-in duration-300">
+                  <h3 className="font-serif text-2xl mb-6 -mx-4 sm:-mx-6 px-6">Odkazy a poznámky</h3>
                 </div>
               )}
             </div>
@@ -437,44 +434,44 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
 
           {/* Actual content containers (shared) */}
           <div className={`${activeView === 'packing' ? 'block' : 'hidden'} ${mobileTab === 'tools' ? '' : 'max-md:hidden'} mb-8 print:mb-12`}>
-            <div className="bg-white dark:bg-white/5 border-y border-gray-100 dark:border-white/10 print:bg-white print:border-none -mx-4 sm:-mx-6 px-6 py-6 md:p-8 md:rounded-3xl print:p-0">
-              <h2 className="text-2xl font-black text-gray-900 dark:text-white print:text-black mb-6 border-b border-gray-100 dark:border-white/10 print:border-black pb-4 flex items-center gap-3">
-                <PackageOpen className="text-blue-500 print:text-black" /> Balící seznam
+            <div className="bg-transparent border border-journeo-border print:border-none -mx-4 sm:-mx-6 px-6 py-8 md:p-10 md:rounded-sm print:p-0">
+              <h2 className="font-serif text-3xl text-journeo-text print:text-black mb-8 border-b border-journeo-border print:border-black pb-6 flex items-center gap-4">
+                <PackageOpen className="text-journeo-accent print:text-black" size={28} strokeWidth={1.5} /> Balící seznam
               </h2>
               
-              <div className="space-y-4">
+              <div className="space-y-8">
                 <div className="relative print:hidden">
-                  <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                    <Plus size={18} className="text-gray-400" />
+                  <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
+                    <Plus size={20} className="text-journeo-text-subtle" strokeWidth={1.5} />
                   </div>
                   <input
                     type="text"
                     onKeyDown={addPackingItem}
                     placeholder="Přidat položku (stiskněte Enter)"
-                    className="w-full bg-white dark:bg-black/50 border border-gray-300 dark:border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all font-medium"
+                    className="w-full bg-transparent border-b border-journeo-border-strong pl-10 pr-4 py-4 text-journeo-text placeholder-journeo-text-subtle/40 focus:outline-none focus:border-journeo-accent transition-colors duration-300 font-serif text-xl"
                   />
                 </div>
 
-                <div className="space-y-2 mt-6 print:mt-0 print:grid print:grid-cols-2 print:gap-x-8">
+                <div className="space-y-4 mt-8 print:mt-0 print:grid print:grid-cols-2 print:gap-x-8">
                   {packingList.length === 0 ? (
-                    <p className="text-center text-gray-500 py-8 print:hidden">Zatím tu nic není. Přidejte první věc do batohu!</p>
+                    <p className="text-journeo-text-subtle italic py-8 print:hidden">Zatím tu nic není. Přidejte první věc do batohu!</p>
                   ) : (
                     packingList.map(item => (
-                      <div key={item.id} className="group flex items-center gap-3 bg-white dark:bg-black/20 border border-gray-200 dark:border-white/5 px-4 py-3 rounded-xl transition-all hover:border-gray-300 dark:hover:border-white/10 print:border-none print:p-1 print:bg-transparent">
+                      <div key={item.id} className="group flex items-center gap-4 py-3 border-b border-journeo-border/50 print:border-none print:p-1">
                         <input
                           type="checkbox"
                           checked={item.checked}
                           onChange={() => togglePackingItem(item.id)}
-                          className="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer print:text-black print:border-black"
+                          className="w-5 h-5 rounded-sm border-journeo-border-strong text-journeo-accent bg-transparent focus:ring-journeo-accent focus:ring-offset-journeo-dark cursor-pointer print:text-black print:border-black"
                         />
-                        <span className={`flex-1 font-medium transition-all print:text-black ${item.checked ? 'text-gray-400 line-through print:line-through' : 'text-gray-800 dark:text-gray-200'}`}>
+                        <span className={`flex-1 text-lg font-serif transition-colors print:text-black ${item.checked ? 'text-journeo-text-subtle line-through print:line-through' : 'text-journeo-text'}`}>
                           {item.text}
                         </span>
                         <button
                           onClick={() => deletePackingItem(item.id)}
-                          className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all p-1 print:hidden"
+                          className="opacity-100 md:opacity-0 md:group-hover:opacity-100 text-journeo-text-subtle hover:text-red-400 transition-colors p-2 print:hidden"
                         >
-                          <Trash2 size={18} />
+                          <Trash2 size={18} strokeWidth={1.5} />
                         </button>
                       </div>
                     ))
@@ -485,19 +482,19 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           </div>
 
           <div className={`${activeView === 'documents' ? 'block' : 'hidden'} ${mobileTab === 'tools' ? '' : 'max-md:hidden'} mb-8 print:mb-12`}>
-            <div className="bg-white dark:bg-white/5 border-y border-gray-100 dark:border-white/10 print:bg-white print:border-none -mx-4 sm:-mx-6 px-6 py-6 md:p-8 md:rounded-3xl print:p-0">
-              <h2 className="text-2xl font-black text-gray-900 dark:text-white print:text-black mb-6 border-b border-gray-100 dark:border-white/10 print:border-black pb-4 flex items-center gap-3">
-                <LinkIcon className="text-blue-500 print:text-black" /> Odkazy a poznámky
+            <div className="bg-transparent border border-journeo-border print:border-none -mx-4 sm:-mx-6 px-6 py-8 md:p-10 md:rounded-sm print:p-0">
+              <h2 className="font-serif text-3xl text-journeo-text print:text-black mb-8 border-b border-journeo-border print:border-black pb-6 flex items-center gap-4">
+                <LinkIcon className="text-journeo-accent print:text-black" size={28} strokeWidth={1.5} /> Odkazy a poznámky
               </h2>
               
-              <form onSubmit={addDocument} className="print:hidden bg-white dark:bg-black/20 border border-gray-200 dark:border-white/5 p-5 rounded-xl space-y-4 mb-8">
+              <form onSubmit={addDocument} className="print:hidden bg-journeo-surface border border-journeo-border p-8 rounded-sm space-y-6 mb-12">
                 <div>
                   <input
                     name="title"
                     type="text"
                     required
                     placeholder="Název (např. Letenky, Airbnb)"
-                    className="w-full bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all"
+                    className="w-full bg-transparent border-b border-journeo-border-strong px-0 py-3 text-journeo-text placeholder-journeo-text-subtle/40 focus:outline-none focus:border-journeo-accent transition-colors duration-300 font-serif text-xl"
                   />
                 </div>
                 <div>
@@ -506,37 +503,39 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                     required
                     placeholder="Vložte URL odkaz nebo libovolnou textovou poznámku..."
                     rows="2"
-                    className="w-full bg-gray-50 dark:bg-black/50 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-2.5 text-gray-900 dark:text-white focus:outline-none focus:border-blue-500 transition-all resize-y"
+                    className="w-full bg-transparent border-b border-journeo-border-strong px-0 py-3 text-journeo-text placeholder-journeo-text-subtle/40 focus:outline-none focus:border-journeo-accent transition-colors duration-300 resize-y"
                   ></textarea>
                 </div>
-                <button type="submit" className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-500 transition-colors">
-                  Uložit
-                </button>
+                <div className="pt-2">
+                  <button type="submit" className="px-8 py-3 bg-journeo-accent text-journeo-dark font-medium rounded-sm hover:bg-journeo-accent-hover transition-colors duration-300">
+                    Uložit odkaz
+                  </button>
+                </div>
               </form>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print:grid-cols-1 print:gap-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:grid-cols-1 print:gap-4">
                 {documents.length === 0 ? (
-                  <div className="col-span-full text-center text-gray-500 py-8 border-2 border-dashed border-gray-200 dark:border-white/10 rounded-xl print:hidden">
+                  <div className="col-span-full py-12 text-center text-journeo-text-subtle italic border border-journeo-border rounded-sm print:hidden">
                     Žádné uložené odkazy.
                   </div>
                 ) : (
                   documents.map(doc => {
                     const isUrl = doc.content.startsWith('http://') || doc.content.startsWith('https://');
                     return (
-                      <div key={doc.id} className="bg-white dark:bg-black/40 border border-gray-200 dark:border-white/10 print:border-none p-5 rounded-xl group relative pr-12 print:p-2 print:pr-0 print:bg-transparent">
+                      <div key={doc.id} className="bg-journeo-surface border border-journeo-border print:border-none p-6 rounded-sm group relative pr-12 print:p-2 print:pr-0 print:bg-transparent">
                         <button
                           onClick={() => deleteDocument(doc.id)}
-                          className="absolute top-4 right-4 text-gray-400 hover:text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity print:hidden"
+                          className="absolute top-6 right-6 text-journeo-text-subtle hover:text-red-400 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity print:hidden"
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={16} strokeWidth={1.5} />
                         </button>
-                        <h4 className="font-bold text-gray-900 dark:text-white print:text-black mb-2 pr-4 print:pr-0">{doc.title}</h4>
+                        <h4 className="font-serif text-xl text-journeo-text print:text-black mb-3 pr-4 print:pr-0">{doc.title}</h4>
                         {isUrl ? (
-                          <a href={doc.content} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:underline break-all print:text-black print:no-underline">
-                            <ExternalLink size={14} className="print:hidden" /> {doc.content}
+                          <a href={doc.content} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[13px] text-journeo-accent hover:text-journeo-accent-hover transition-colors break-all print:text-black print:no-underline">
+                            <ExternalLink size={14} className="print:hidden" strokeWidth={1.5} /> {doc.content}
                           </a>
                         ) : (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 print:text-black whitespace-pre-wrap">{doc.content}</p>
+                          <p className="text-[14px] text-journeo-text-muted print:text-black whitespace-pre-wrap font-light leading-relaxed">{doc.content}</p>
                         )}
                       </div>
                     );
@@ -547,40 +546,40 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           </div>
 
           <div className={`${activeView === 'diary' ? 'block' : 'hidden'} ${mobileTab === 'info' ? '' : 'max-md:hidden'} print:hidden`}>
-            <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 -mx-4 sm:-mx-6 px-6 py-12 md:p-8 md:rounded-2xl flex flex-col items-center justify-center min-h-[400px] text-center">
-              <div className="w-16 h-16 bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-4">
-                <ImageIcon size={32} />
+            <div className="bg-transparent border border-journeo-border -mx-4 sm:-mx-6 px-6 py-16 md:p-16 md:rounded-sm flex flex-col items-center justify-center min-h-[500px] text-center">
+              <div className="w-16 h-16 border border-journeo-accent/30 text-journeo-accent rounded-full flex items-center justify-center mb-6">
+                <ImageIcon size={28} strokeWidth={1.5} />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Deník a Fotogalerie</h2>
-              <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
+              <h2 className="text-3xl font-serif text-journeo-text mb-4">Deník a Fotogalerie</h2>
+              <p className="text-journeo-text-muted max-w-md mx-auto mb-8 font-light leading-relaxed">
                 Tato funkce se momentálně připravuje! Brzy si zde budete moci zapisovat vzpomínky z cest, hodnotit výlety a vytvářet krásné fotogalerie. 
               </p>
-              <span className="inline-flex px-3 py-1 bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400 font-medium rounded-full text-sm">
+              <span className="inline-flex px-4 py-1.5 bg-journeo-surface border border-journeo-border text-journeo-text-subtle font-medium rounded-sm text-[11px] uppercase tracking-widest">
                 Připravujeme (Coming soon)
               </span>
             </div>
           </div>
 
           <div className={`${typeof activeView === 'number' ? 'block' : 'hidden'} ${mobileTab === 'itinerary' ? '' : 'max-md:hidden'} print:break-before-page`}>
-            <h2 className="hidden print:flex text-2xl font-bold text-black mb-6 border-b border-black pb-4 items-center gap-3">
-              <Calendar className="text-black" /> Itinerář výletu
+            <h2 className="hidden print:flex text-3xl font-serif text-black mb-8 border-b border-black pb-6 items-center gap-4">
+              <Calendar className="text-black" size={28} /> Itinerář výletu
             </h2>
             {dailyPlans.map((day, idx) => {
-              if (typeof activeView === 'number' && activeView !== idx) return null; // In screen mode, show only active. In print mode, wait, map will show all if we override css.
+              if (typeof activeView === 'number' && activeView !== idx) return null; // In screen mode, show only active.
               return (
-                <div key={idx} className={`${typeof activeView === 'number' && activeView !== idx ? 'hidden print:block' : 'block'} mb-8 print:mb-10 print:break-inside-avoid`}>
-                  <div className="bg-white dark:bg-white/5 border-y border-gray-100 dark:border-white/10 print:bg-white print:border-none -mx-4 sm:-mx-6 px-6 py-6 md:p-8 md:rounded-3xl print:p-0">
-                    <h2 className="text-2xl font-black text-gray-900 dark:text-white print:text-black mb-6 border-b border-gray-100 dark:border-white/10 print:border-black pb-4 flex items-baseline gap-3">
-                      <span>Plán pro {day.title}</span>
-                      <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 print:text-gray-600 uppercase tracking-widest">
+                <div key={idx} className={`${typeof activeView === 'number' && activeView !== idx ? 'hidden print:block' : 'block'} mb-12 print:mb-16 print:break-inside-avoid`}>
+                  <div className="bg-transparent border-y border-journeo-border md:border-none print:bg-white print:border-none -mx-4 sm:-mx-6 px-6 py-8 md:p-0 print:p-0">
+                    <h2 className="font-serif text-3xl md:text-4xl text-journeo-text print:text-black mb-8 border-b border-journeo-border print:border-black pb-6 flex flex-col md:flex-row md:items-baseline gap-2 md:gap-4">
+                      <span>{day.title}</span>
+                      <span className="text-[12px] md:text-[14px] font-sans font-medium text-journeo-text-subtle print:text-gray-600 uppercase tracking-widest">
                         ({format(new Date(day.date), 'EEEE, d. M.', { locale: cs })})
                       </span>
                     </h2>
 
-                    <div className="space-y-6">
+                    <div className="space-y-12">
                       <div className={typeof activeView === 'number' ? 'block' : 'hidden print:block'}>
-                        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 print:text-black mb-2">
-                          <MapPin size={16} /> Lokace (Město, Místo)
+                        <label className="flex items-center gap-3 text-[11px] font-medium text-journeo-text-subtle print:text-black mb-4 uppercase tracking-widest">
+                          <MapPin size={16} strokeWidth={1.5} /> Lokace (Město, Místo)
                         </label>
                         <input
                           type="text"
@@ -592,12 +591,12 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                             setHasUnsavedChanges(true);
                           }}
                           placeholder="Např. Eiffelova věž, Paříž"
-                          className="w-full bg-white dark:bg-black/50 border border-gray-300 dark:border-white/10 print:border-none print:p-0 print:bg-transparent rounded-xl px-4 py-3 text-gray-900 dark:text-white print:text-black placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-all"
+                          className="w-full bg-transparent border-b border-journeo-border-strong print:border-none print:p-0 print:bg-transparent px-0 py-4 font-serif text-2xl text-journeo-text print:text-black placeholder-journeo-text-subtle/30 focus:outline-none focus:border-journeo-accent transition-colors duration-300"
                         />
                       </div>
 
                       <div className={typeof activeView === 'number' ? 'block' : 'hidden print:block'}>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 print:text-black mb-2">
+                        <label className="block text-[11px] font-medium text-journeo-text-subtle print:text-black mb-4 uppercase tracking-widest">
                           Co máte v plánu?
                         </label>
                         <textarea
@@ -609,8 +608,8 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                             setHasUnsavedChanges(true);
                           }}
                           placeholder="Napište si poznámky, aktivity, časy rezervací..."
-                          rows={8}
-                          className="w-full bg-white dark:bg-black/50 border border-gray-300 dark:border-white/10 print:border-none print:p-0 print:bg-transparent rounded-xl px-4 py-3 text-gray-900 dark:text-white print:text-black placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-all resize-y print:min-h-0"
+                          rows={12}
+                          className="w-full bg-transparent border border-journeo-border print:border-none print:p-0 print:bg-transparent rounded-sm p-6 text-journeo-text print:text-black placeholder-journeo-text-subtle/30 focus:outline-none focus:border-journeo-border-strong transition-colors duration-300 resize-y print:min-h-0 leading-relaxed font-light"
                         />
                       </div>
                     </div>

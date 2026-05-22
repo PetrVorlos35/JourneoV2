@@ -55,29 +55,29 @@ const CreateTrip = ({ onAddTrip }) => {
   };
 
   return (
-    <div className="w-full space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">Vytvořit nový výlet</h1>
-        <p className="text-gray-500 dark:text-gray-400">Naplánujte si své další dobrodružství krok za krokem.</p>
+    <div className="w-full space-y-12">
+      <div className="space-y-2">
+        <p className="text-[11px] text-journeo-text-subtle uppercase tracking-widest font-medium">Plánování</p>
+        <h1 className="font-serif text-4xl text-journeo-text tracking-tight">Vytvořit nový výlet</h1>
       </div>
 
       {/* Progress Bar */}
-      <div className="max-w-4xl">
+      <div className="max-w-3xl">
         <div className="flex justify-between items-center mb-4">
-          <span className="text-sm font-medium text-blue-600 dark:text-blue-400">Krok {step} z {totalSteps}</span>
-          <span className="text-sm font-medium text-gray-500">{Math.round((step / totalSteps) * 100)}% dokončeno</span>
+          <span className="text-[11px] font-medium text-journeo-accent uppercase tracking-widest">Krok {step} z {totalSteps}</span>
+          <span className="text-[11px] font-medium text-journeo-text-subtle uppercase tracking-widest">{Math.round((step / totalSteps) * 100)}% hotovo</span>
         </div>
-        <div className="h-2 w-full bg-gray-100 dark:bg-white/5 rounded-full overflow-hidden">
+        <div className="h-[2px] w-full bg-journeo-border-strong overflow-hidden">
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${(step / totalSteps) * 100}%` }}
-            className="h-full bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.5)]"
+            className="h-full bg-journeo-accent"
             transition={{ duration: 0.5, ease: "easeInOut" }}
           />
         </div>
       </div>
 
-      <div className="min-h-[400px] max-w-4xl flex flex-col">
+      <div className="min-h-[400px] max-w-3xl flex flex-col">
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div
@@ -86,16 +86,16 @@ const CreateTrip = ({ onAddTrip }) => {
               initial="initial"
               animate="animate"
               exit="exit"
-              className="space-y-8"
+              className="space-y-12"
             >
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Kam se chystáte?</h2>
-                <p className="text-gray-500 dark:text-gray-400">Pojmenujte svůj výlet nebo zadejte cílovou destinaci.</p>
+              <div className="space-y-4">
+                <h2 className="font-serif text-3xl text-journeo-text">Kam se chystáte?</h2>
+                <p className="text-journeo-text-muted text-lg font-light">Pojmenujte svůj výlet nebo zadejte cílovou destinaci.</p>
               </div>
 
               <div className="relative group max-w-2xl">
-                <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors">
-                  <MapPin size={24} />
+                <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none text-journeo-text-subtle group-focus-within:text-journeo-accent transition-colors">
+                  <MapPin size={24} strokeWidth={1.5} />
                 </div>
                 <input
                   type="text"
@@ -104,17 +104,17 @@ const CreateTrip = ({ onAddTrip }) => {
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   onKeyDown={(e) => e.key === 'Enter' && nextStep()}
-                  className="w-full bg-gray-50 dark:bg-white/5 border-2 border-transparent focus:border-blue-500/50 dark:focus:border-blue-500/50 rounded-2xl pl-14 pr-6 py-5 text-xl font-medium text-gray-900 dark:text-white placeholder-gray-300 dark:placeholder-gray-700 outline-none transition-all shadow-sm focus:shadow-blue-500/10"
+                  className="w-full bg-transparent border-b border-journeo-border-strong focus:border-journeo-accent pl-12 pr-6 py-4 text-2xl font-serif text-journeo-text placeholder-journeo-text-subtle/30 outline-none transition-all duration-300"
                 />
               </div>
               
-              <div className="pt-4">
+              <div className="pt-8">
                 <button
                   onClick={nextStep}
-                  className="group flex items-center gap-3 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-95 cursor-pointer"
+                  className="group inline-flex items-center gap-3 px-8 py-4 bg-journeo-accent hover:bg-journeo-accent-hover text-journeo-dark rounded-sm font-medium transition-colors duration-300"
                 >
                   Pokračovat
-                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
             </motion.div>
@@ -127,15 +127,16 @@ const CreateTrip = ({ onAddTrip }) => {
               initial="initial"
               animate="animate"
               exit="exit"
-              className="space-y-8"
+              className="space-y-12"
             >
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Kdy vyrážíte?</h2>
-                <p className="text-gray-500 dark:text-gray-400">Vyberte termín vaší cesty.</p>
+              <div className="space-y-4">
+                <h2 className="font-serif text-3xl text-journeo-text">Kdy vyrážíte?</h2>
+                <p className="text-journeo-text-muted text-lg font-light">Vyberte termín vaší cesty.</p>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex flex-col items-center bg-white dark:bg-black/20 border border-gray-200 dark:border-white/10 p-4 rounded-3xl shadow-sm w-fit mx-auto md:mx-0">
+              <div className="space-y-8">
+                <div className="inline-block bg-journeo-surface border border-journeo-border p-6 rounded-sm shadow-xl">
+                  {/* Custom CSS classes for DayPicker are in index.css */}
                   <DayPicker
                     mode="range"
                     selected={range}
@@ -155,36 +156,36 @@ const CreateTrip = ({ onAddTrip }) => {
                 </div>
                 
                 {range?.from && (
-                  <div className="flex items-center gap-4 text-sm font-medium p-4 bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-2xl w-fit">
+                  <div className="flex items-center gap-6 p-6 border-l-2 border-journeo-accent bg-journeo-surface max-w-fit">
                     <div className="flex flex-col">
-                      <span className="text-[10px] uppercase text-blue-500/60 tracking-wider">Odjezd</span>
-                      <span className="text-gray-900 dark:text-white">{format(range.from, 'd. MMMM yyyy', { locale: cs })}</span>
+                      <span className="text-[10px] uppercase text-journeo-text-subtle tracking-widest font-medium mb-1">Odjezd</span>
+                      <span className="text-lg font-serif text-journeo-text">{format(range.from, 'd. MMMM yyyy', { locale: cs })}</span>
                     </div>
-                    <ArrowRight size={16} className="text-blue-500" />
+                    <ArrowRight size={20} className="text-journeo-text-subtle mx-2" />
                     <div className="flex flex-col">
-                      <span className="text-[10px] uppercase text-blue-500/60 tracking-wider">Návrat</span>
-                      <span className="text-gray-900 dark:text-white">
-                        {range.to ? format(range.to, 'd. MMMM yyyy', { locale: cs }) : 'Vyberte datum...'}
+                      <span className="text-[10px] uppercase text-journeo-text-subtle tracking-widest font-medium mb-1">Návrat</span>
+                      <span className={`text-lg font-serif ${range.to ? 'text-journeo-text' : 'text-journeo-text-muted italic'}`}>
+                        {range.to ? format(range.to, 'd. MMMM yyyy', { locale: cs }) : 'Vyberte datum'}
                       </span>
                     </div>
                   </div>
                 )}
               </div>
 
-              <div className="pt-4 flex gap-4">
+              <div className="pt-4 flex items-center gap-6">
                 <button
                   onClick={prevStep}
-                  className="flex items-center gap-2 px-6 py-4 text-gray-500 dark:text-gray-400 font-bold hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
+                  className="flex items-center gap-2 px-6 py-4 text-[13px] text-journeo-text-subtle hover:text-journeo-text uppercase tracking-widest font-medium transition-colors"
                 >
-                  <ArrowLeft size={20} />
+                  <ArrowLeft size={16} />
                   Zpět
                 </button>
                 <button
                   onClick={nextStep}
-                  className="group flex items-center gap-3 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold transition-all shadow-lg shadow-blue-600/20 active:scale-95 cursor-pointer"
+                  className="group inline-flex items-center gap-3 px-8 py-4 bg-journeo-accent hover:bg-journeo-accent-hover text-journeo-dark rounded-sm font-medium transition-colors duration-300"
                 >
                   Další krok
-                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
             </motion.div>
@@ -197,50 +198,50 @@ const CreateTrip = ({ onAddTrip }) => {
               initial="initial"
               animate="animate"
               exit="exit"
-              className="space-y-8"
+              className="space-y-12"
             >
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Vše připraveno?</h2>
-                <p className="text-gray-500 dark:text-gray-400">Zkontrolujte si údaje a můžete vyrazit.</p>
+              <div className="space-y-4">
+                <h2 className="font-serif text-3xl text-journeo-text">Vše připraveno?</h2>
+                <p className="text-journeo-text-muted text-lg font-light">Zkontrolujte si údaje a můžete vyrazit.</p>
               </div>
 
-              <div className="bg-blue-50 dark:bg-blue-500/5 border border-blue-100 dark:border-blue-500/20 rounded-3xl p-8 space-y-6 max-w-2xl">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-blue-100 dark:bg-blue-500/20 rounded-xl text-blue-600 dark:text-blue-400">
-                    <MapPin size={24} />
+              <div className="border border-journeo-border bg-journeo-surface rounded-sm p-10 space-y-8 max-w-2xl">
+                <div className="flex items-start gap-6">
+                  <div className="text-journeo-accent mt-1">
+                    <MapPin size={28} strokeWidth={1.2} />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-blue-600/60 dark:text-blue-400/60 uppercase tracking-widest">Destinace</p>
-                    <p className="text-xl font-bold text-gray-900 dark:text-white">{formData.title}</p>
+                    <p className="text-[11px] text-journeo-text-subtle uppercase tracking-widest font-medium mb-2">Destinace</p>
+                    <p className="font-serif text-3xl text-journeo-text leading-tight">{formData.title}</p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-blue-100 dark:bg-blue-500/20 rounded-xl text-blue-600 dark:text-blue-400">
-                    <Calendar size={24} />
+                <div className="flex items-start gap-6">
+                  <div className="text-journeo-accent mt-1">
+                    <Calendar size={28} strokeWidth={1.2} />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-blue-600/60 dark:text-blue-400/60 uppercase tracking-widest">Termín</p>
-                    <p className="text-xl font-bold text-gray-900 dark:text-white">
+                    <p className="text-[11px] text-journeo-text-subtle uppercase tracking-widest font-medium mb-2">Termín</p>
+                    <p className="font-serif text-3xl text-journeo-text leading-tight">
                       {formData.startDate && new Date(formData.startDate).toLocaleDateString('cs-CZ')} — {formData.endDate && new Date(formData.endDate).toLocaleDateString('cs-CZ')}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4 flex gap-4">
+              <div className="pt-4 flex items-center gap-6">
                 <button
                   onClick={prevStep}
-                  className="flex items-center gap-2 px-6 py-4 text-gray-500 dark:text-gray-400 font-bold hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
+                  className="flex items-center gap-2 px-6 py-4 text-[13px] text-journeo-text-subtle hover:text-journeo-text uppercase tracking-widest font-medium transition-colors"
                 >
-                  <ArrowLeft size={20} />
+                  <ArrowLeft size={16} />
                   Upravit
                 </button>
                 <button
                   onClick={handleSubmit}
-                  className="group flex items-center gap-3 px-10 py-4 bg-green-600 hover:bg-green-500 text-white rounded-2xl font-bold text-lg transition-all shadow-lg shadow-green-600/20 active:scale-95 cursor-pointer"
+                  className="group inline-flex items-center gap-3 px-10 py-4 bg-journeo-accent hover:bg-journeo-accent-hover text-journeo-dark rounded-sm font-medium transition-colors duration-300"
                 >
-                  <Rocket size={22} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
+                  <Rocket size={18} className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />
                   Vytvořit výlet
                 </button>
               </div>

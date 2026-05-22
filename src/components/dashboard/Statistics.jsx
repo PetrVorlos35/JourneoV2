@@ -1,14 +1,14 @@
 import { Plane, CalendarDays, Map, CheckCircle } from 'lucide-react';
 import { eachDayOfInterval } from 'date-fns';
 
-const StatCard = ({ icon: Icon, label, value, colorClass, lightColorClass }) => (
-  <div className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 flex items-center gap-6">
-    <div className={`p-4 rounded-xl ${lightColorClass} dark:${colorClass}`}>
-      <Icon size={32} />
+const StatCard = ({ icon: Icon, label, value }) => (
+  <div className="bg-journeo-surface border border-journeo-border rounded-sm p-8 flex items-center gap-8">
+    <div className={`p-4 border border-journeo-border-strong text-journeo-accent rounded-full`}>
+      <Icon size={32} strokeWidth={1.5} />
     </div>
     <div>
-      <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">{label}</p>
-      <p className="text-3xl font-bold text-gray-900 dark:text-white">{value}</p>
+      <p className="text-journeo-text-subtle text-[11px] uppercase tracking-widest font-medium mb-3">{label}</p>
+      <p className="text-5xl font-serif text-journeo-text">{value}</p>
     </div>
   </div>
 );
@@ -41,10 +41,10 @@ const Statistics = ({ trips }) => {
   }, 0);
 
   return (
-    <div className="w-full">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">Statistiky cestování</h1>
-        <p className="text-gray-500 dark:text-gray-400">Přehled vašich cestovatelských úspěchů a dat.</p>
+    <div className="w-full space-y-12">
+      <div className="space-y-2">
+        <p className="text-[11px] text-journeo-text-subtle uppercase tracking-widest font-medium">Přehled</p>
+        <h1 className="font-serif text-4xl text-journeo-text tracking-tight">Statistiky cestování</h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -52,35 +52,27 @@ const Statistics = ({ trips }) => {
           icon={Plane}
           label="Celkem výletů"
           value={totalTrips}
-          colorClass="bg-blue-500/20 text-blue-400"
-          lightColorClass="bg-blue-100 text-blue-600"
         />
         <StatCard
           icon={CalendarDays}
           label="Celkem dní na cestách"
           value={totalDays}
-          colorClass="bg-purple-500/20 text-purple-400"
-          lightColorClass="bg-purple-100 text-purple-600"
         />
         <StatCard
           icon={CheckCircle}
           label="Dokončených výletů"
           value={pastTripsCount}
-          colorClass="bg-green-500/20 text-green-400"
-          lightColorClass="bg-green-100 text-green-600"
         />
         <StatCard
           icon={Map}
           label="Naplánovaných aktivit"
           value={totalActivities}
-          colorClass="bg-orange-500/20 text-orange-400"
-          lightColorClass="bg-orange-100 text-orange-600"
         />
       </div>
 
       {totalTrips === 0 && (
-        <div className="mt-8 text-center p-8 border-2 border-dashed border-gray-200 dark:border-white/10 rounded-2xl">
-          <p className="text-gray-500 dark:text-gray-400">Zatím nemáte žádné výlety. Zkuste si nějaký vytvořit!</p>
+        <div className="text-center p-16 border border-journeo-border rounded-sm bg-journeo-surface">
+          <p className="text-journeo-text-subtle font-serif text-2xl italic">Zatím nemáte žádné výlety. Zkuste si nějaký vytvořit!</p>
         </div>
       )}
     </div>

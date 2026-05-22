@@ -8,8 +8,8 @@ import { useAuth } from './contexts/AuthContext';
 const DashboardHome = lazy(() => import('./components/dashboard/DashboardHome'));
 
 const LoadingFallback = () => (
-  <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+  <div className="min-h-screen bg-[#0C0A09] flex items-center justify-center">
+    <div className="w-6 h-6 border-2 border-[#C2956B] border-t-transparent rounded-full animate-spin" />
   </div>
 );
 
@@ -30,7 +30,7 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   return (
-    <div className="bg-[#020617] min-h-screen">
+    <div className="bg-[#0C0A09] min-h-screen">
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />

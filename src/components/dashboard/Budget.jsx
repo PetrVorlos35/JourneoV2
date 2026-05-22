@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Plus, Trash2, DollarSign, TrendingUp, Calendar, Car, Home, Utensils, Palmtree, MoreHorizontal, ChevronRight, Wallet, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
@@ -17,11 +17,11 @@ const formatCurrency = (amount, currency) => {
 
 // ── Kategorie výdajů ──────────────────────────────────────────────
 const CATEGORIES = [
-  { id: 'transport', label: 'Doprava', color: 'bg-blue-500', light: 'bg-blue-50 dark:bg-blue-500/10', text: 'text-blue-600 dark:text-blue-400', icon: Car },
-  { id: 'accommodation', label: 'Ubytování', color: 'bg-purple-500', light: 'bg-purple-50 dark:bg-purple-500/10', text: 'text-purple-600 dark:text-purple-400', icon: Home },
-  { id: 'food', label: 'Jídlo & Pití', color: 'bg-green-500', light: 'bg-green-50 dark:bg-green-500/10', text: 'text-green-600 dark:text-green-400', icon: Utensils },
-  { id: 'activities', label: 'Aktivity', color: 'bg-orange-500', light: 'bg-orange-50 dark:bg-orange-500/10', text: 'text-orange-600 dark:text-orange-400', icon: Palmtree },
-  { id: 'other', label: 'Ostatní', color: 'bg-gray-400', light: 'bg-gray-50 dark:bg-gray-500/10', text: 'text-gray-600 dark:text-gray-400', icon: MoreHorizontal },
+  { id: 'transport', label: 'Doprava', icon: Car },
+  { id: 'accommodation', label: 'Ubytování', icon: Home },
+  { id: 'food', label: 'Jídlo & Pití', icon: Utensils },
+  { id: 'activities', label: 'Aktivity', icon: Palmtree },
+  { id: 'other', label: 'Ostatní', icon: MoreHorizontal },
 ];
 
 const catInfo = (id) => CATEGORIES.find(c => c.id === id) || CATEGORIES[4];
@@ -64,40 +64,40 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/80 backdrop-blur-md"
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative bg-white dark:bg-gray-900 border border-gray-100 dark:border-white/10 rounded-[2.5rem] p-8 shadow-2xl w-full max-w-lg overflow-hidden"
+            exit={{ opacity: 0, scale: 0.95, y: 12 }}
+            className="relative bg-journeo-surface border border-journeo-border-strong rounded-sm p-10 shadow-2xl w-full max-w-lg overflow-visible"
           >
-            <div className="flex justify-between items-center mb-8">
-              <h3 className="font-black text-2xl text-gray-900 dark:text-white">Nový výdaj</h3>
+            <div className="flex justify-between items-center mb-10 border-b border-journeo-border-strong pb-6">
+              <h3 className="font-serif text-3xl text-journeo-text">Nový výdaj</h3>
               <button 
                 onClick={onClose}
-                className="w-10 h-10 rounded-full bg-gray-100 dark:bg-white/5 flex items-center justify-center text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all"
+                className="text-journeo-text-subtle hover:text-journeo-text transition-colors"
               >
-                <X size={20} />
+                <X size={24} strokeWidth={1.5} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 gap-6">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="grid grid-cols-1 gap-8">
                 <div>
-                  <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 block">Popis výdaje</label>
+                  <label className="text-[11px] font-medium text-journeo-text-subtle uppercase tracking-widest mb-2 block">Popis výdaje</label>
                   <input
                     type="text"
                     required
                     placeholder="např. Letenka Praha → Londýn"
                     value={form.description}
                     onChange={e => setForm({ ...form, description: e.target.value })}
-                    className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                    className="w-full bg-transparent border-b border-journeo-border-strong focus:border-journeo-accent px-0 py-3 text-journeo-text placeholder-journeo-text-subtle/30 focus:outline-none transition-colors duration-300 font-serif text-xl"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 block">Částka ({currency})</label>
+                    <label className="text-[11px] font-medium text-journeo-text-subtle uppercase tracking-widest mb-2 block">Částka ({currency})</label>
                     <input
                       type="number"
                       required
@@ -106,35 +106,38 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
                       placeholder="0.00"
                       value={form.amount}
                       onChange={e => setForm({ ...form, amount: e.target.value })}
-                      className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all font-black"
+                      className="w-full bg-transparent border-b border-journeo-border-strong focus:border-journeo-accent px-0 py-3 text-journeo-text placeholder-journeo-text-subtle/30 focus:outline-none transition-colors duration-300 font-serif text-xl"
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 block">Kategorie</label>
-                    <select
-                      value={form.category}
-                      onChange={e => setForm({ ...form, category: e.target.value })}
-                      className="w-full bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer"
-                    >
-                      {CATEGORIES.map(c => <option key={c.id} value={c.id} className="text-black dark:text-white">{c.label}</option>)}
-                    </select>
+                    <label className="text-[11px] font-medium text-journeo-text-subtle uppercase tracking-widest mb-2 block">Kategorie</label>
+                    <div className="relative">
+                      <select
+                        value={form.category}
+                        onChange={e => setForm({ ...form, category: e.target.value })}
+                        className="w-full bg-transparent border-b border-journeo-border-strong focus:border-journeo-accent px-0 py-3 text-journeo-text focus:outline-none transition-colors duration-300 appearance-none cursor-pointer font-serif text-xl"
+                      >
+                        {CATEGORIES.map(c => <option key={c.id} value={c.id} className="bg-journeo-surface text-journeo-text">{c.label}</option>)}
+                      </select>
+                      <ChevronRight size={16} className="absolute right-0 top-1/2 -translate-y-1/2 rotate-90 text-journeo-text-subtle pointer-events-none" />
+                    </div>
                   </div>
                 </div>
                 <div className="relative">
-                  <label className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 block">Datum výdaje</label>
+                  <label className="text-[11px] font-medium text-journeo-text-subtle uppercase tracking-widest mb-2 block">Datum výdaje</label>
                   <button
                     type="button"
                     onClick={() => setShowCalendar(!showCalendar)}
-                    className="w-full flex items-center justify-between bg-gray-50 dark:bg-black/40 border border-gray-200 dark:border-white/10 rounded-2xl px-4 py-3.5 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all text-left"
+                    className="w-full flex items-center justify-between bg-transparent border-b border-journeo-border-strong hover:border-journeo-accent px-0 py-3 text-journeo-text focus:outline-none transition-colors duration-300 text-left font-serif text-xl"
                   >
-                    <span className="font-bold">
+                    <span>
                       {format(new Date(form.date), 'dd. MM. yyyy', { locale: cs })}
                     </span>
-                    <Calendar className="text-blue-500 shrink-0" size={20} />
+                    <Calendar className="text-journeo-accent shrink-0" size={20} strokeWidth={1.5} />
                   </button>
                   
                   {showCalendar && (
-                    <div className="absolute bottom-full left-0 mb-2 z-[200] bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-[2rem] shadow-2xl p-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                    <div className="absolute bottom-full left-0 mb-4 z-[200] bg-journeo-surface border border-journeo-border shadow-2xl p-6 animate-in fade-in slide-in-from-bottom-2 duration-200">
                       <DayPicker
                         mode="single"
                         selected={new Date(form.date)}
@@ -147,8 +150,9 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
                         locale={cs}
                         modifiers={modifiers}
                         modifiersClassNames={{
-                          trip: "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold"
+                          trip: "bg-journeo-accent/10 text-journeo-accent font-medium border border-journeo-accent/20"
                         }}
+                        className="premium-calendar"
                       />
                     </div>
                   )}
@@ -156,7 +160,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
               </div>
               <button 
                 type="submit" 
-                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-500 transition-all shadow-xl shadow-blue-500/25 active:scale-[0.98] mt-4"
+                className="w-full py-4 bg-journeo-accent text-journeo-dark rounded-sm font-medium hover:bg-journeo-accent-hover transition-colors duration-300 mt-8"
               >
                 Přidat výdaj
               </button>
@@ -178,23 +182,26 @@ const CategoryBar = ({ expenses, currency }) => {
     amount: expenses.filter(e => e.category === cat.id).reduce((s, e) => s + e.amount, 0),
   })).filter(c => c.amount > 0);
 
+  // We are using a monochrome/editorial palette now, so we compute opacity based on index
   return (
-    <div className="space-y-3">
-      <div className="flex h-3 rounded-full overflow-hidden gap-0.5">
-        {byCategory.map(c => (
+    <div className="space-y-6">
+      <div className="flex h-2 w-full gap-1">
+        {byCategory.map((c, i) => (
           <div
             key={c.id}
-            className={`${c.color} transition-all`}
-            style={{ width: `${(c.amount / total) * 100}%` }}
+            className="bg-journeo-accent transition-all"
+            style={{ width: `${(c.amount / total) * 100}%`, opacity: 1 - (i * 0.15) }}
           />
         ))}
       </div>
-      <div className="flex flex-wrap gap-x-4 gap-y-2">
-        {byCategory.map(c => (
-          <div key={c.id} className="flex items-center gap-1.5 text-sm">
-            <div className={`w-2.5 h-2.5 rounded-full ${c.color}`} />
-            <span className="text-gray-500 dark:text-gray-400">{c.label}</span>
-            <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(c.amount, currency)}</span>
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8">
+        {byCategory.map((c, i) => (
+          <div key={c.id} className="flex items-center justify-between border-b border-journeo-border-strong pb-2">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 bg-journeo-accent rounded-full" style={{ opacity: 1 - (i * 0.15) }} />
+              <span className="text-[12px] text-journeo-text-subtle uppercase tracking-widest font-medium">{c.label}</span>
+            </div>
+            <span className="font-serif text-lg text-journeo-text">{formatCurrency(c.amount, currency)}</span>
           </div>
         ))}
       </div>
@@ -230,46 +237,44 @@ const Budget = ({ trips, onUpdateTrip }) => {
   };
 
   return (
-    <div className="space-y-6 w-full">
+    <div className="space-y-12 w-full">
       {ModalPortal}
       {/* Header */}
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white leading-tight">Výdaje a rozpočet</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">Spravujte své útraty a hlídejte si budget.</p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
+        <div className="space-y-2">
+          <p className="text-[11px] text-journeo-text-subtle uppercase tracking-widest font-medium">Rozpočet</p>
+          <h1 className="font-serif text-4xl text-journeo-text tracking-tight">Výdaje a rozpočet</h1>
         </div>
 
-        {/* Trip selector */}
-        {trips.length > 0 && (
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-blue-600 dark:text-blue-400">
-              <Wallet size={18} />
+        {/* Action area */}
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          {/* Trip selector */}
+          {trips.length > 0 && (
+            <div className="relative group w-full sm:w-64">
+              <select
+                value={selectedTripId || ''}
+                onChange={e => setSelectedTripId(e.target.value)}
+                className="w-full bg-transparent border-b border-journeo-border-strong px-0 py-3 text-journeo-text focus:outline-none focus:border-journeo-accent transition-colors appearance-none cursor-pointer font-serif text-xl"
+              >
+                {trips.map(t => <option key={t.id} value={t.id} className="bg-journeo-surface text-journeo-text">{t.title}</option>)}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center pointer-events-none text-journeo-text-subtle">
+                 <ChevronRight size={18} className="rotate-90" />
+              </div>
             </div>
-            <select
-              value={selectedTripId || ''}
-              onChange={e => setSelectedTripId(e.target.value)}
-              className="w-full bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 p-4 pl-12 rounded-2xl shadow-sm text-lg font-black text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer"
-            >
-              {trips.map(t => <option key={t.id} value={t.id} className="text-black dark:text-white">{t.title}</option>)}
-            </select>
-            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400">
-               <ChevronRight size={18} className="rotate-90" />
-            </div>
-          </div>
-        )}
+          )}
 
-        {/* Add Button */}
-        {trip && (
-          <button 
-            onClick={() => setIsAddModalOpen(true)} 
-            className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-[2rem] font-black text-gray-900 dark:text-white hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 transition-all shadow-sm hover:shadow-xl hover:shadow-blue-500/20 active:scale-[0.98] group"
-          >
-            <div className="w-8 h-8 rounded-full bg-blue-500/10 group-hover:bg-white/20 flex items-center justify-center transition-colors">
-              <Plus size={20} className="text-blue-500 group-hover:text-white" />
-            </div>
-            Přidat nový výdaj
-          </button>
-        )}
+          {/* Add Button */}
+          {trip && (
+            <button 
+              onClick={() => setIsAddModalOpen(true)} 
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3.5 bg-journeo-accent text-journeo-dark rounded-sm font-medium hover:bg-journeo-accent-hover transition-colors duration-300 shrink-0"
+            >
+              <Plus size={18} strokeWidth={2} />
+              Nová útrata
+            </button>
+          )}
+        </div>
       </div>
 
       <AddExpenseModal 
@@ -281,26 +286,27 @@ const Budget = ({ trips, onUpdateTrip }) => {
       />
 
       {trips.length === 0 ? (
-        <div className="text-center py-16 border-2 border-dashed border-gray-200 dark:border-white/10 rounded-2xl">
-          <DollarSign size={40} className="mx-auto text-gray-300 dark:text-gray-600 mb-3" />
-          <p className="text-gray-500 dark:text-gray-400">Nejprve si vytvořte výlet a pak sem přidejte výdaje.</p>
+        <div className="text-center py-20 border border-journeo-border rounded-sm bg-journeo-surface flex flex-col items-center justify-center space-y-4">
+          <p className="font-serif text-2xl text-journeo-text">Žádný výlet</p>
+          <p className="text-[14px] text-journeo-text-muted max-w-md">Nejprve si vytvořte výlet v plánovači a pak sem můžete přidat první výdaje.</p>
         </div>
       ) : trip ? (
         <>
           {/* Souhrn */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-3xl p-6 shadow-xl shadow-blue-500/20">
-              <p className="text-xs font-bold text-blue-100/70 uppercase tracking-widest mb-1">Celkové výdaje</p>
-              <p className="text-4xl font-black">{formatCurrency(total, currency)}</p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="bg-transparent border border-journeo-border p-8 rounded-sm lg:col-span-1 flex flex-col justify-center">
+              <p className="text-[11px] font-medium text-journeo-text-subtle uppercase tracking-widest mb-4">Celkové výdaje</p>
+              <p className="text-5xl lg:text-6xl font-serif text-journeo-text">{formatCurrency(total, currency)}</p>
             </div>
-            <div className="grid grid-cols-2 sm:contents gap-4">
-              <div className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-3xl p-6 shadow-sm">
-                <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Položek</p>
-                <p className="text-2xl font-black text-gray-900 dark:text-white">{expenses.length}</p>
+            
+            <div className="grid grid-cols-2 lg:col-span-2 gap-6">
+              <div className="bg-journeo-surface border border-journeo-border p-8 rounded-sm">
+                <p className="text-[11px] font-medium text-journeo-text-subtle uppercase tracking-widest mb-4">Počet transakcí</p>
+                <p className="text-4xl font-serif text-journeo-text">{expenses.length}</p>
               </div>
-              <div className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-3xl p-6 shadow-sm">
-                <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Průměr</p>
-                <p className="text-2xl font-black text-gray-900 dark:text-white">
+              <div className="bg-journeo-surface border border-journeo-border p-8 rounded-sm">
+                <p className="text-[11px] font-medium text-journeo-text-subtle uppercase tracking-widest mb-4">Průměrný výdaj</p>
+                <p className="text-4xl font-serif text-journeo-text">
                   {expenses.length > 0 ? formatCurrency(Math.round(total / expenses.length), currency) : formatCurrency(0, currency)}
                 </p>
               </div>
@@ -309,23 +315,23 @@ const Budget = ({ trips, onUpdateTrip }) => {
 
           {/* Kategoriový pruh */}
           {expenses.length > 0 && (
-            <div className="bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-3xl p-6 shadow-sm">
-              <h3 className="font-bold text-gray-900 dark:text-white text-xs uppercase tracking-widest mb-6 flex items-center gap-2">
-                <TrendingUp size={16} className="text-blue-500" /> Rozložení výdajů
+            <div className="bg-journeo-surface border border-journeo-border p-8 rounded-sm pt-10">
+              <h3 className="font-medium text-journeo-text-subtle text-[11px] uppercase tracking-widest mb-8 flex items-center gap-3">
+                <TrendingUp size={16} className="text-journeo-accent" /> Rozložení podle kategorií
               </h3>
               <CategoryBar expenses={expenses} currency={currency} />
             </div>
           )}
 
           {/* Seznam výdajů */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between px-2">
-              <h3 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Historie výdajů</h3>
-              <span className="text-[10px] font-bold text-gray-400">{expenses.length} položek</span>
+          <div className="space-y-6 pt-6">
+            <div className="flex items-center justify-between border-b border-journeo-border pb-4">
+              <h3 className="text-[11px] font-medium text-journeo-text-subtle uppercase tracking-widest">Historie výdajů</h3>
+              <span className="text-[11px] font-medium text-journeo-text-subtle">{expenses.length} položek</span>
             </div>
 
             {expenses.length > 0 ? (
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 gap-4">
                 {[...expenses].reverse().map(expense => {
                   const cat = catInfo(expense.category);
                   const Icon = cat.icon;
@@ -334,18 +340,18 @@ const Budget = ({ trips, onUpdateTrip }) => {
                       key={expense.id} 
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="flex items-center justify-between gap-4 bg-white dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-[2rem] p-5 group transition-all hover:bg-gray-50 dark:hover:bg-white/[0.07] hover:border-blue-500/30"
+                      className="flex items-center justify-between p-6 bg-transparent border border-journeo-border hover:border-journeo-border-strong rounded-sm group transition-colors duration-300"
                     >
-                      <div className="flex items-center gap-5 min-w-0">
-                        <div className={`shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center ${cat.light} ${cat.text} transition-transform group-hover:scale-110 shadow-sm`}>
-                          <Icon size={28} />
+                      <div className="flex items-center gap-6 min-w-0">
+                        <div className={`shrink-0 text-journeo-accent opacity-80 group-hover:opacity-100 transition-opacity`}>
+                          <Icon size={24} strokeWidth={1.5} />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1 leading-none">{cat.label}</p>
-                          <p className="text-gray-900 dark:text-white font-black text-lg truncate leading-tight mb-1">{expense.description}</p>
+                          <p className="text-[10px] font-medium text-journeo-text-subtle uppercase tracking-widest mb-1 leading-none">{cat.label}</p>
+                          <p className="text-xl font-serif text-journeo-text truncate leading-tight mb-2">{expense.description}</p>
                           {expense.date && (
-                            <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-400 dark:text-gray-500">
-                              <Calendar size={12} />
+                            <div className="flex items-center gap-2 text-[11px] font-medium uppercase tracking-widest text-journeo-text-muted">
+                              <Calendar size={12} strokeWidth={1.5} />
                               {format(new Date(expense.date), 'd. MMMM yyyy', { locale: cs })}
                             </div>
                           )}
@@ -353,10 +359,10 @@ const Budget = ({ trips, onUpdateTrip }) => {
                       </div>
                       <div className="flex items-center gap-6 shrink-0 text-right">
                         <div className="flex flex-col items-end">
-                           <span className="font-black text-gray-900 dark:text-white text-xl tracking-tight">{formatCurrency(expense.amount, currency)}</span>
+                           <span className="font-serif text-2xl text-journeo-text mb-1">{formatCurrency(expense.amount, currency)}</span>
                            <button
                             onClick={() => handleDeleteExpense(expense.id)}
-                            className="text-[10px] font-black text-red-500 uppercase tracking-widest mt-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:scale-105 active:scale-95"
+                            className="text-[10px] font-medium text-journeo-text-subtle hover:text-red-400 uppercase tracking-widest opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all"
                           >
                             Smazat
                           </button>
@@ -367,11 +373,9 @@ const Budget = ({ trips, onUpdateTrip }) => {
                 })}
               </div>
             ) : (
-              <div className="text-center py-20 border-2 border-dashed border-gray-100 dark:border-white/5 rounded-[2.5rem]">
-                <div className="w-16 h-16 bg-gray-50 dark:bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Wallet className="text-gray-300 dark:text-gray-600" size={32} />
-                </div>
-                <p className="text-gray-400 dark:text-gray-500 font-medium">Zatím žádné výdaje. Přidejte první!</p>
+              <div className="text-center py-20 border border-journeo-border rounded-sm bg-journeo-surface">
+                <Wallet className="mx-auto text-journeo-text-subtle mb-4" size={32} strokeWidth={1} />
+                <p className="text-journeo-text-muted text-[14px]">Zatím žádné výdaje. Přidejte první!</p>
               </div>
             )}
           </div>

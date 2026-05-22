@@ -56,49 +56,49 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
           onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
         >
           {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" />
 
           {/* Dialog */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.93, y: 12 }}
+            initial={{ opacity: 0, scale: 0.95, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 8 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="relative z-10 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 rounded-2xl shadow-2xl w-full max-w-md p-6"
+            className="relative z-10 bg-journeo-surface border border-journeo-border-strong rounded-sm shadow-2xl w-full max-w-md p-8"
           >
             {/* Close btn */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 dark:hover:text-white transition-colors"
+              className="absolute top-4 right-4 text-journeo-text-subtle hover:text-journeo-text transition-colors"
             >
-              <X size={20} />
+              <X size={20} strokeWidth={1.5} />
             </button>
 
             {/* Icon */}
-            <div className={`inline-flex p-3 rounded-xl mb-4 ${
+            <div className={`inline-flex p-3 rounded-full mb-6 border ${
               config?.variant === 'danger'
-                ? 'bg-red-100 dark:bg-red-500/15 text-red-600 dark:text-red-400'
-                : 'bg-amber-100 dark:bg-amber-500/15 text-amber-600 dark:text-amber-400'
+                ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                : 'bg-journeo-accent/10 text-journeo-accent border-journeo-accent/20'
             }`}>
-              <AlertTriangle size={22} />
+              <AlertTriangle size={22} strokeWidth={1.5} />
             </div>
 
             {/* Title */}
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+            <h2 className="font-serif text-2xl text-journeo-text mb-3">
               {config?.title || 'Potvrdit akci'}
             </h2>
 
             {/* Message */}
             {config?.message && (
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-5 leading-relaxed">
+              <p className="text-[14px] text-journeo-text-muted mb-8 leading-relaxed font-light">
                 {config.message}
               </p>
             )}
 
             {/* Prompt input */}
             {config?.type === 'prompt' && (
-              <div className="mb-5">
-                <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">
+              <div className="mb-8">
+                <label className="block text-[11px] font-medium text-journeo-text-subtle mb-2 uppercase tracking-widest">
                   {config.inputLabel || 'Zadejte text pro potvrzení'}
                 </label>
                 <input
@@ -108,21 +108,21 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
                   onChange={e => setInputValue(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder={config.placeholder || ''}
-                  className="w-full bg-gray-50 dark:bg-black/40 border border-gray-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+                  className="w-full bg-transparent border-b border-journeo-border-strong px-0 py-3 text-journeo-text placeholder-journeo-text-subtle/30 focus:outline-none focus:border-journeo-accent font-serif text-lg transition-colors duration-300"
                 />
                 {config.requiredPhrase && inputValue && inputValue !== config.requiredPhrase && (
-                  <p className="text-xs text-red-500 dark:text-red-400 mt-1.5">
-                    Napište přesně: <span className="font-mono font-bold">{config.requiredPhrase}</span>
+                  <p className="text-[11px] text-red-400 mt-2 uppercase tracking-wide">
+                    Napište přesně: <span className="font-serif italic capitalize">{config.requiredPhrase}</span>
                   </p>
                 )}
               </div>
             )}
 
             {/* Actions */}
-            <div className="flex gap-3 justify-end">
+            <div className="flex gap-4 justify-end pt-4 border-t border-journeo-border-strong">
               <button
                 onClick={() => onCancel(false)}
-                className="px-5 py-2.5 rounded-xl font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-colors text-sm"
+                className="px-6 py-3 rounded-sm text-[13px] uppercase tracking-widest font-medium text-journeo-text-subtle hover:text-journeo-text transition-colors"
               >
                 {config?.cancelLabel || 'Zrušit'}
               </button>
@@ -133,10 +133,10 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
                   config?.requiredPhrase &&
                   inputValue !== config.requiredPhrase
                 }
-                className={`px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
+                className={`px-8 py-3 rounded-sm font-medium transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed ${
                   config?.variant === 'danger'
-                    ? 'bg-red-600 text-white hover:bg-red-500'
-                    : 'bg-blue-600 text-white hover:bg-blue-500'
+                    ? 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20'
+                    : 'bg-journeo-accent text-journeo-dark hover:bg-journeo-accent-hover'
                 }`}
               >
                 {config?.confirmLabel || 'Potvrdit'}

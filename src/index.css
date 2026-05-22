@@ -1,18 +1,47 @@
 @import "tailwindcss";
-@custom-variant dark (&:where(.dark, .dark *));
 
-/* Premium Calendar Styling */
-.premium-calendar {
-  --rdp-cell-size: 44px;
-  --rdp-accent-color: #2563eb;
-  --rdp-background-color: #eff6ff;
-  margin: 0;
-  border: none;
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-serif: 'DM Serif Display', 'Georgia', serif;
+  
+  /* Custom Color Palette */
+  --color-journeo-dark: #0C0A09;
+  --color-journeo-surface: #12100E;
+  --color-journeo-surface-hover: #181513;
+  --color-journeo-border: rgba(255, 255, 255, 0.06);
+  --color-journeo-border-strong: rgba(255, 255, 255, 0.12);
+  --color-journeo-accent: #C2956B;
+  --color-journeo-accent-hover: #D4A574;
+  --color-journeo-text: #FAFAF9;
+  --color-journeo-text-muted: #A8A29E;
+  --color-journeo-text-subtle: #57534E;
 }
 
-.dark .premium-calendar {
-  --rdp-accent-color: #60a5fa;
-  --rdp-background-color: rgba(37, 99, 235, 0.2);
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ===== BASE ===== */
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    @apply bg-journeo-dark text-journeo-text font-sans;
+  }
+}
+
+/* ===== Premium Calendar Styling (Editorial) ===== */
+.premium-calendar {
+  --rdp-cell-size: 44px;
+  --rdp-accent-color: var(--color-journeo-accent);
+  --rdp-background-color: var(--color-journeo-surface);
+  margin: 0;
+  border: none;
 }
 
 .premium-calendar .rdp-month_caption {
@@ -20,86 +49,69 @@
 }
 
 .premium-calendar .rdp-caption_label {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #111827; /* Gray 900 */
-}
-
-.dark .premium-calendar .rdp-caption_label {
-  color: #f9fafb; /* Gray 50 */
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 400;
+  color: var(--color-journeo-text);
 }
 
 .premium-calendar .rdp-head_cell {
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.65rem;
+  font-weight: 500;
   text-transform: uppercase;
-  color: #6b7280; /* Gray 500 */
+  letter-spacing: 0.1em;
+  color: var(--color-journeo-text-subtle);
   padding-bottom: 0.5rem;
 }
 
-.dark .premium-calendar .rdp-head_cell {
-  color: #9ca3af; /* Gray 400 */
-}
-
 .premium-calendar .rdp-day {
-  border-radius: 10px;
+  border-radius: 2px;
   transition: all 0.2s ease;
-  font-weight: 500;
-  color: #374151; /* Gray 700 */
-}
-
-.dark .premium-calendar .rdp-day {
-  color: #d1d5db; /* Gray 300 */
+  font-weight: 400;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  color: var(--color-journeo-text-muted);
 }
 
 .premium-calendar .rdp-day:hover:not(.rdp-day_selected) {
-  background-color: #f3f4f6; /* Gray 100 */
+  background-color: var(--color-journeo-surface-hover);
+  color: var(--color-journeo-text);
 }
 
-.dark .premium-calendar .rdp-day:hover:not(.rdp-day_selected) {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-/* Výběr a rozmezí pro react-day-picker v10 */
+/* Výběr a rozmezí pro react-day-picker */
 .premium-calendar .rdp-selected {
-  background-color: #2563eb !important;
-  color: #ffffff !important;
-  font-weight: 800;
-  border-radius: 10px;
+  background-color: var(--color-journeo-accent) !important;
+  color: var(--color-journeo-dark) !important;
+  font-weight: 400;
+  border-radius: 2px;
 }
 
 /* Rozmezí (prostředek) - jen pro mode="range" */
 .premium-calendar .rdp-range_middle,
 .premium-calendar [data-selected].rdp-range_middle {
-  background-color: #eff6ff !important;
-  color: #2563eb !important;
+  background-color: rgba(194, 149, 107, 0.1) !important;
+  color: var(--color-journeo-accent) !important;
   opacity: 1 !important;
   border-radius: 0 !important;
 }
 
-.dark .premium-calendar .rdp-range_middle,
-.dark .premium-calendar [data-selected].rdp-range_middle {
-  background-color: rgba(37, 99, 235, 0.2) !important;
-  color: #60a5fa !important;
-}
-
 /* Začátek a konec */
 .premium-calendar .rdp-range_start {
-  background-color: #2563eb !important;
-  color: #ffffff !important;
-  border-radius: 10px 0 0 10px !important;
+  background-color: var(--color-journeo-accent) !important;
+  color: var(--color-journeo-dark) !important;
+  border-radius: 2px 0 0 2px !important;
 }
 
 .premium-calendar .rdp-range_end {
-  background-color: #2563eb !important;
-  color: #ffffff !important;
-  border-radius: 0 10px 10px 0 !important;
+  background-color: var(--color-journeo-accent) !important;
+  color: var(--color-journeo-dark) !important;
+  border-radius: 0 2px 2px 0 !important;
 }
 
 /* Dnešní den */
 .premium-calendar .rdp-today {
-  color: #2563eb !important;
-  font-weight: 900 !important;
+  color: var(--color-journeo-accent) !important;
+  font-weight: 400 !important;
   position: relative;
 }
 
@@ -111,7 +123,7 @@
   transform: translateX(-50%);
   width: 4px;
   height: 4px;
-  background-color: #2563eb;
+  background-color: var(--color-journeo-accent);
   border-radius: 50%;
 }
 
@@ -128,7 +140,7 @@
 
 /* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
+  width: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -136,18 +148,10 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #e5e7eb;
-  border-radius: 10px;
-}
-
-.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-journeo-border-strong);
+  border-radius: 2px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #d1d5db;
-}
-
-.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--color-journeo-text-subtle);
 }

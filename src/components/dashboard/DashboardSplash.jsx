@@ -23,10 +23,10 @@ const DashboardSplash = ({ children }) => {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, scale: 1.04 }}
           transition={{ duration: 0.6, ease: 'easeInOut' }}
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-journeo-dark"
         >
-          {/* Glowing background blob */}
-          <div className="absolute w-96 h-96 bg-indigo-600/25 rounded-full blur-[120px] pointer-events-none" />
+          {/* Subtle warm glow */}
+          <div className="absolute w-96 h-96 bg-journeo-accent/5 rounded-full blur-[120px] pointer-events-none" />
 
           <motion.img
             src={JourneoLogo}
@@ -34,7 +34,7 @@ const DashboardSplash = ({ children }) => {
             initial={{ opacity: 0, scale: 0.7 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, ease: 'backOut' }}
-            className="w-20 mb-6 relative z-10"
+            className="w-16 mb-8 relative z-10"
           />
 
           {/* Animated word */}
@@ -46,7 +46,7 @@ const DashboardSplash = ({ children }) => {
             {"Journeo".split('').map((char, i) => (
               <motion.span
                 key={i}
-                className="text-6xl sm:text-8xl font-extrabold text-white tracking-tight"
+                className="text-5xl sm:text-7xl font-serif text-journeo-text tracking-tight"
                 variants={{
                   hidden: { opacity: 0, y: 40 },
                   visible: { opacity: 1, y: 0 },
@@ -63,17 +63,17 @@ const DashboardSplash = ({ children }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.4, duration: 0.5 }}
-            className="relative z-10 text-gray-400 mt-4 text-sm tracking-widest uppercase"
+            className="relative z-10 text-journeo-text-subtle mt-6 text-[11px] font-medium tracking-[0.2em] uppercase"
           >
-            Váš cestovní deník
+            Váš cestovatelský deník
           </motion.p>
 
           {/* Loading bar */}
           <motion.div
-            className="relative z-10 mt-10 h-[2px] bg-white/10 rounded-full w-40 overflow-hidden"
+            className="relative z-10 mt-12 h-[2px] bg-journeo-border-strong rounded-full w-32 overflow-hidden"
           >
             <motion.div
-              className="h-full bg-indigo-400 rounded-full"
+              className="h-full bg-journeo-accent rounded-full"
               initial={{ width: '0%' }}
               animate={{ width: '100%' }}
               transition={{ duration: 1.8, ease: 'easeInOut' }}
@@ -86,6 +86,7 @@ const DashboardSplash = ({ children }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.4 }}
+          className="h-full w-full"
         >
           {children}
         </motion.div>

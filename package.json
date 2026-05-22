@@ -15,7 +15,6 @@
     "@tailwindcss/vite": "^4.1.8",
     "bcryptjs": "^3.0.3",
     "canvas-confetti": "^1.9.4",
-    "cobe": "^2.0.1",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
