@@ -123,7 +123,7 @@ const LocationAutocomplete = ({ value, onChange, placeholder, className }) => {
             if (inputValue.length >= 3) setShowSuggestions(true);
           }}
           placeholder={placeholder}
-          className={className}
+          className={`${className || ''} !pr-12`}
         />
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center">
           {isLoading ? (

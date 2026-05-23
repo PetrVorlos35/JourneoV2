@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, PlusSquare, Settings, LogOut, BarChart2, Wallet, X, Sun, Moon, Monitor } from 'lucide-react';
+import { Home, PlusSquare, Settings, LogOut, BarChart2, Wallet, X, Sun, Moon, Monitor, Mountain, Palmtree, Compass, Map, Plane, Camera, Menu } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useDialog } from '../ui/DialogModal';
 import JourneoLogo from '../../assets/Journeo_whitelogo.png';
 import JourneoLogoDark from '../../assets/Journeo_blacklogo.png';
 
@@ -29,6 +30,15 @@ const SidebarItem = ({ icon: Icon, label, path, active, onClick }) => (
   </Link>
 );
 
+const avatarPresets = {
+  mountain: Mountain,
+  beach: Palmtree,
+  city: Compass,
+  forest: Map,
+  travel: Plane,
+  photography: Camera,
+};
+
 const UserAvatar = ({ user, size = "md" }) => {
   const getInitials = () => {
     if (user?.first_name && user?.last_name) {
@@ -46,8 +56,24 @@ const UserAvatar = ({ user, size = "md" }) => {
     xl: "w-20 h-20 text-xl"
   };
 
+  const iconSizes = {
+    sm: 14,
+    md: 18,
+    lg: 24,
+    xl: 32
+  };
+
+  if (user?.avatar_url && avatarPresets[user.avatar_url]) {
+    const Icon = avatarPresets[user.avatar_url];
+    return (
+      <div className={`${sizeClasses[size]} rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-2 border-blue-600/30 flex items-center justify-center shrink-0`}>
+        <Icon size={iconSizes[size]} strokeWidth={2.5} />
+      </div>
+    );
+  }
+
   return (
-    <div className={`${sizeClasses[size]} rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 text-white flex items-center justify-center font-bold shrink-0 shadow-sm shadow-blue-500/30`}>
+    <div className={`${sizeClasses[size]} rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-2 border-blue-600/30 flex items-center justify-center font-bold shrink-0`}>
       {getInitials()}
     </div>
   );
@@ -86,20 +112,30 @@ const DashboardLayout = ({ children }) => {
   const navigate = useNavigate();
   const { logout, user } = useAuth();
   const { theme } = useTheme();
+  const { confirmDialog, ModalPortal } = useDialog();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   const isTripDetail = location.pathname.startsWith('/dashboard/trip/');
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
+  const handleLogout = async () => {
+    const ok = await confirmDialog({
+      title: 'Odhlásit se?',
+      message: 'Opravdu se chcete odhlásit ze svého účtu?',
+      variant: 'danger',
+      confirmLabel: 'Odhlásit se'
+    });
+    if (ok) {
+      logout();
+      navigate('/');
+    }
   };
 
   const closeMobile = () => setMobileOpen(false);
 
   return (
     <div className="h-[100dvh] overflow-hidden bg-[#fbfbfd] dark:bg-black text-gray-900 dark:text-[#f5f5f7] flex selection:bg-blue-500/30 font-sans relative transition-colors duration-500">
+      {ModalPortal}
       <Toaster
         position="top-right"
         toastOptions={{
@@ -121,11 +157,11 @@ const DashboardLayout = ({ children }) => {
       {/* ── Desktop Sidebar (Floating Glass Panel) ── */}
       <div className="hidden md:flex flex-col p-6 z-20 shrink-0 w-[280px]">
         <aside className="w-full h-full glass-card flex flex-col overflow-hidden">
-          <div className="px-8 py-8 flex items-center gap-3 group cursor-pointer" onClick={() => navigate('/')}>
+          <div className="px-8 py-8 flex items-center gap-3">
             <img 
               src={isDark ? JourneoLogo : JourneoLogoDark} 
               alt="Journeo Logo" 
-              className="h-8 w-auto object-contain transition-transform group-hover:scale-105" 
+              className="h-8 w-auto object-contain" 
             />
             <span className="font-bold text-xl tracking-tight mt-0.5">Journeo</span>
           </div>
@@ -158,7 +194,7 @@ const DashboardLayout = ({ children }) => {
                 <p className="text-[13px] font-bold truncate">
                   {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.email}
                 </p>
-                <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate uppercase tracking-widest mt-0.5 font-semibold">Cestovatel</p>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate mt-0.5 font-semibold">{user?.bio || 'Cestovatel'}</p>
               </div>
             </Link>
             <button
@@ -192,9 +228,7 @@ const DashboardLayout = ({ children }) => {
               onClick={() => setMobileOpen(true)}
               className="flex flex-col items-center gap-1.5 flex-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
-              <div className="scale-[0.8] origin-bottom shadow-sm rounded-full">
-                 <UserAvatar user={user} size="sm" />
-              </div>
+              <Menu size={22} strokeWidth={2} />
             </button>
           </nav>
         </div>
@@ -228,7 +262,7 @@ const DashboardLayout = ({ children }) => {
                   <p className="font-bold text-xl truncate mb-1">
                     {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : 'Můj Profil'}
                   </p>
-                  <p className="text-[13px] text-gray-500 dark:text-gray-400 truncate tracking-wide font-medium">{user?.email}</p>
+                  <p className="text-[13px] text-gray-500 dark:text-gray-400 truncate tracking-wide font-medium">{user?.bio || user?.email}</p>
                 </div>
               </div>
 
@@ -267,14 +301,14 @@ const DashboardLayout = ({ children }) => {
       <main className="flex-1 min-w-0 pb-28 md:pb-0 h-full flex flex-col relative z-10">
         {/* Mobile top bar */}
         <div className="md:hidden flex items-center justify-between p-4 glass sticky top-0 z-30 shrink-0">
-          <Link to="/" className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <img 
               src={isDark ? JourneoLogo : JourneoLogoDark} 
               alt="Journeo Logo" 
               className="h-7 w-auto object-contain" 
             />
             <span className="font-bold text-lg tracking-tight mt-0.5">Journeo</span>
-          </Link>
+          </div>
           <div className="flex items-center gap-4">
              <Link to="/dashboard/settings">
                <UserAvatar user={user} size="sm" />

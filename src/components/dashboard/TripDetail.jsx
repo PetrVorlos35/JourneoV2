@@ -156,68 +156,43 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
     navigate('/dashboard');
   };
 
-  // Mobile Components
-  const MobileBottomNav = () => (
-    <div className="md:hidden fixed bottom-6 left-6 right-6 z-50 flex justify-center pointer-events-none">
-      <div className="glass-panel w-full max-w-sm rounded-[2rem] flex justify-around items-center px-2 py-3 pointer-events-auto border border-gray-200 dark:border-white/10 shadow-2xl">
-        <button 
-          onClick={() => setMobileTab('itinerary')}
-          className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'itinerary' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-        >
-          <Layout size={20} strokeWidth={mobileTab === 'itinerary' ? 2.5 : 2} />
-          {mobileTab === 'itinerary' && <span className="text-[9px] font-bold uppercase tracking-widest">Itinerář</span>}
-        </button>
-        <button 
-          onClick={() => setMobileTab('tools')}
-          className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'tools' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-        >
-          <Briefcase size={20} strokeWidth={mobileTab === 'tools' ? 2.5 : 2} />
-          {mobileTab === 'tools' && <span className="text-[9px] font-bold uppercase tracking-widest">Nástroje</span>}
-        </button>
-        <button 
-          onClick={() => setMobileTab('info')}
-          className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'info' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-        >
-          <Info size={20} strokeWidth={mobileTab === 'info' ? 2.5 : 2} />
-          {mobileTab === 'info' && <span className="text-[9px] font-bold uppercase tracking-widest">Detaily</span>}
-        </button>
-        <button 
-          onClick={handleSave}
-          className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${hasUnsavedChanges ? 'text-amber-500 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-        >
-          <Save size={20} strokeWidth={hasUnsavedChanges ? 2.5 : 2} />
-          {hasUnsavedChanges && <span className="text-[9px] font-bold uppercase tracking-widest">Uložit</span>}
-        </button>
-      </div>
-    </div>
-  );
 
-  const DayPickerNav = () => (
-    <div className="flex gap-4 overflow-x-auto pb-4 mb-8 no-scrollbar -mx-4 sm:-mx-8 px-4 sm:px-8 md:hidden">
-      {dailyPlans.map((day, index) => (
-        <button
-          key={index}
-          onClick={() => setActiveView(index)}
-          className={`flex-shrink-0 min-w-[110px] p-5 rounded-3xl transition-all duration-300 border-2 ${
-            activeView === index
-              ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-md shadow-blue-500/10'
-              : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400'
-          }`}
-        >
-          <div className="text-[10px] font-bold uppercase tracking-widest mb-1">
-            {format(new Date(day.date), 'EEE', { locale: cs })}
-          </div>
-          <div className="text-3xl font-bold tracking-tighter leading-none mb-2">{format(new Date(day.date), 'd.')}</div>
-          <div className="text-[11px] truncate opacity-70 font-medium">{day.location || 'Bez lokace'}</div>
-        </button>
-      ))}
-    </div>
-  );
 
   return (
     <div className="w-full h-full flex flex-col min-h-0 pb-10">
       {ModalPortal}
-      <MobileBottomNav />
+      <div className="md:hidden fixed bottom-6 left-6 right-6 z-50 flex justify-center pointer-events-none">
+        <div className="glass-panel w-full max-w-sm rounded-[2rem] flex justify-around items-center px-2 py-3 pointer-events-auto border border-gray-200 dark:border-white/10 shadow-2xl">
+          <button 
+            onClick={() => setMobileTab('itinerary')}
+            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'itinerary' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+          >
+            <Layout size={20} strokeWidth={mobileTab === 'itinerary' ? 2.5 : 2} />
+            {mobileTab === 'itinerary' && <span className="text-[9px] font-bold uppercase tracking-widest">Itinerář</span>}
+          </button>
+          <button 
+            onClick={() => setMobileTab('tools')}
+            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'tools' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+          >
+            <Briefcase size={20} strokeWidth={mobileTab === 'tools' ? 2.5 : 2} />
+            {mobileTab === 'tools' && <span className="text-[9px] font-bold uppercase tracking-widest">Nástroje</span>}
+          </button>
+          <button 
+            onClick={() => setMobileTab('info')}
+            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'info' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+          >
+            <Info size={20} strokeWidth={mobileTab === 'info' ? 2.5 : 2} />
+            {mobileTab === 'info' && <span className="text-[9px] font-bold uppercase tracking-widest">Detaily</span>}
+          </button>
+          <button 
+            onClick={handleSave}
+            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${hasUnsavedChanges ? 'text-amber-500 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+          >
+            <Save size={20} strokeWidth={hasUnsavedChanges ? 2.5 : 2} />
+            {hasUnsavedChanges && <span className="text-[9px] font-bold uppercase tracking-widest">Uložit</span>}
+          </button>
+        </div>
+      </div>
       
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
@@ -413,13 +388,31 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
 
           {/* Mobile Itinerary View Navigation */}
           <div className={`${mobileTab === 'itinerary' && typeof activeView === 'number' ? 'block' : 'hidden'} md:block shrink-0`}>
-            <DayPickerNav />
+            <div className="flex gap-4 overflow-x-auto pb-4 mb-8 no-scrollbar -mx-4 sm:-mx-8 px-4 sm:px-8 md:hidden">
+              {dailyPlans.map((day, index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveView(index)}
+                  className={`flex-shrink-0 w-[120px] text-left p-4 rounded-3xl transition-all duration-300 border-2 ${
+                    activeView === index
+                      ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-md shadow-blue-500/10'
+                      : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400'
+                  }`}
+                >
+                  <div className="text-[10px] font-bold uppercase tracking-widest mb-1">
+                    {format(new Date(day.date), 'EEE', { locale: cs })}
+                  </div>
+                  <div className="text-3xl font-bold tracking-tighter leading-none mb-2">{format(new Date(day.date), 'd.')}</div>
+                  <div className="text-[11px] w-full truncate opacity-70 font-medium">{day.location || 'Bez lokace'}</div>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* ── Packing List View ── */}
-          <div className={`${activeView === 'packing' ? 'flex' : 'hidden'} ${mobileTab === 'tools' || mobileTab === 'itinerary' ? '' : 'max-md:hidden'} flex-col h-full min-h-0`}>
-            <div className="glass-card flex flex-col h-full min-h-0">
-              <div className="p-8 sm:p-10 border-b border-gray-100 dark:border-white/10 shrink-0">
+          <div className={`${activeView === 'packing' ? 'flex' : 'hidden'} ${mobileTab === 'tools' || mobileTab === 'itinerary' ? '' : 'max-md:hidden'} flex-col flex-1 lg:h-full lg:min-h-0`}>
+            <div className="glass-card flex flex-col flex-1 lg:h-full lg:min-h-0 mb-6 lg:mb-0">
+              <div className="p-5 sm:p-10 border-b border-gray-100 dark:border-white/10 shrink-0">
                 <h2 className="font-bold text-3xl tracking-tight text-gray-900 dark:text-white flex items-center gap-4 mb-8">
                   <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center">
                     <PackageOpen size={24} strokeWidth={2} /> 
@@ -434,12 +427,12 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                     type="text"
                     onKeyDown={addPackingItem}
                     placeholder="Přidat položku do batohu (stiskněte Enter)"
-                    className="glass-input !pl-14 py-4"
+                    className="glass-input !py-3 sm:!py-4 !pl-12 sm:!pl-14 text-[15px] sm:text-base"
                   />
                 </div>
               </div>
               
-              <div className="p-8 sm:p-10 flex-1 overflow-y-auto custom-scrollbar">
+              <div className="p-5 sm:p-10 flex-1 overflow-y-auto custom-scrollbar">
                 <div className="space-y-3">
                   {packingList.length === 0 ? (
                     <p className="text-gray-500 font-bold text-center py-12">Zatím tu nic není. Přidejte první věc do batohu!</p>
@@ -470,9 +463,9 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           </div>
 
           {/* ── Documents View ── */}
-          <div className={`${activeView === 'documents' ? 'flex' : 'hidden'} ${mobileTab === 'tools' || mobileTab === 'itinerary' ? '' : 'max-md:hidden'} flex-col h-full min-h-0`}>
-            <div className="glass-card flex flex-col h-full min-h-0">
-              <div className="p-8 sm:p-10 border-b border-gray-100 dark:border-white/10 shrink-0">
+          <div className={`${activeView === 'documents' ? 'flex' : 'hidden'} ${mobileTab === 'tools' || mobileTab === 'itinerary' ? '' : 'max-md:hidden'} flex-col flex-1 lg:h-full lg:min-h-0`}>
+            <div className="glass-card flex flex-col flex-1 lg:h-full lg:min-h-0 mb-6 lg:mb-0">
+              <div className="p-5 sm:p-10 border-b border-gray-100 dark:border-white/10 shrink-0">
                 <h2 className="font-bold text-3xl tracking-tight text-gray-900 dark:text-white flex items-center gap-4 mb-8">
                   <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center">
                     <LinkIcon size={24} strokeWidth={2} /> 
@@ -485,14 +478,14 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                     type="text"
                     required
                     placeholder="Název (např. Letenky, Airbnb)"
-                    className="glass-input border-none bg-white dark:bg-black/50 py-4 shadow-sm"
+                    className="glass-input border-none bg-white dark:bg-black/50 !py-3 sm:!py-4 shadow-sm text-[15px] sm:text-base"
                   />
                   <textarea
                     name="content"
                     required
                     placeholder="Vložte URL odkaz nebo libovolnou textovou poznámku..."
                     rows="2"
-                    className="glass-input border-none bg-white dark:bg-black/50 py-4 resize-y shadow-sm"
+                    className="glass-input border-none bg-white dark:bg-black/50 !py-3 sm:!py-4 resize-y shadow-sm text-[15px] sm:text-base min-h-[100px]"
                   ></textarea>
                   <button type="submit" className="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 transition-colors duration-300">
                     Uložit odkaz
@@ -500,7 +493,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                 </form>
               </div>
 
-              <div className="p-8 sm:p-10 flex-1 overflow-y-auto custom-scrollbar">
+              <div className="p-5 sm:p-10 flex-1 overflow-y-auto custom-scrollbar">
                 <div className="grid grid-cols-1 gap-4">
                   {documents.length === 0 ? (
                     <div className="py-12 text-center text-gray-500 font-bold border-2 border-dashed border-gray-200 dark:border-white/10 rounded-3xl">
@@ -535,8 +528,8 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           </div>
 
           {/* ── Diary View ── */}
-          <div className={`${activeView === 'diary' ? 'flex' : 'hidden'} ${mobileTab === 'info' || mobileTab === 'itinerary' ? '' : 'max-md:hidden'} flex-col h-full min-h-0`}>
-            <div className="glass-card flex-1 flex flex-col items-center justify-center p-8 text-center min-h-[400px]">
+          <div className={`${activeView === 'diary' ? 'flex' : 'hidden'} ${mobileTab === 'info' || mobileTab === 'itinerary' ? '' : 'max-md:hidden'} flex-col flex-1 lg:h-full lg:min-h-0`}>
+            <div className="glass-card flex-1 flex flex-col items-center justify-center p-5 sm:p-8 text-center min-h-[400px] mb-6 lg:mb-0">
               <div className="w-20 h-20 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-[2rem] flex items-center justify-center mb-8">
                 <ImageIcon size={32} strokeWidth={2} />
               </div>
@@ -551,14 +544,14 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           </div>
 
           {/* ── Itinerary Editor View ── */}
-          <div className={`${typeof activeView === 'number' ? 'flex' : 'hidden'} ${mobileTab === 'itinerary' ? '' : 'max-md:hidden'} flex-col h-full min-h-0`}>
+          <div className={`${typeof activeView === 'number' ? 'flex' : 'hidden'} ${mobileTab === 'itinerary' ? '' : 'max-md:hidden'} flex-col flex-1 lg:h-full lg:min-h-0`}>
             {dailyPlans.map((day, idx) => {
               if (activeView !== idx) return null;
               return (
-                <div key={idx} className="glass-card flex flex-col h-full min-h-0">
-                  <div className="p-8 sm:p-10 border-b border-gray-100 dark:border-white/10 shrink-0">
-                    <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 mb-8">
-                      <h2 className="font-bold text-3xl sm:text-4xl tracking-tight text-gray-900 dark:text-white">{day.title}</h2>
+                <div key={idx} className="glass-card flex flex-col flex-1 lg:h-full lg:min-h-0 mb-6 lg:mb-0">
+                  <div className="p-5 sm:p-10 border-b border-gray-100 dark:border-white/10 shrink-0">
+                    <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 mb-5 sm:mb-8">
+                      <h2 className="font-bold text-2xl sm:text-4xl tracking-tight text-gray-900 dark:text-white">{day.title}</h2>
                       <span className="text-[13px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest bg-blue-50 dark:bg-blue-500/10 px-3 py-1 rounded-full w-fit">
                         {format(new Date(day.date), 'EEEE, d. M.', { locale: cs })}
                       </span>
@@ -577,13 +570,13 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                           setHasUnsavedChanges(true);
                         }}
                         placeholder="Např. Eiffelova věž, Paříž"
-                        className="glass-input font-bold text-lg w-full"
+                        className="glass-input !py-3 sm:!py-4 !px-4 sm:!px-5 font-bold text-base sm:text-lg w-full"
                       />
                     </div>
                   </div>
 
-                  <div className="p-8 sm:p-10 flex-1 flex flex-col min-h-0">
-                    <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-4 uppercase tracking-widest">
+                  <div className="p-5 sm:p-10 flex-1 flex flex-col min-h-[300px] lg:min-h-0">
+                    <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-2 sm:mb-4 uppercase tracking-widest">
                       Co máte v plánu?
                     </label>
                     <textarea
@@ -595,7 +588,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                         setHasUnsavedChanges(true);
                       }}
                       placeholder="Napište si poznámky, aktivity, časy rezervací..."
-                      className="glass-input flex-1 resize-none font-medium leading-relaxed"
+                      className="glass-input flex-1 min-h-[250px] lg:min-h-0 resize-y font-medium text-[15px] sm:text-base leading-relaxed"
                     />
                   </div>
                 </div>

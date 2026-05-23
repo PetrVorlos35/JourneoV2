@@ -22,7 +22,7 @@ router.post('/register', async (req, res) => {
     // Check if user already exists
     const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
     if (existing.length > 0) {
-      return res.status(409).json({ error: 'Uživatel s tímto e-mailem již existuje.' });
+      return res.status(409).json({ error: 'Tento e-mail je již zaregistrovaný, zkuste se přihlásit.' });
     }
 
     // Hash password
@@ -71,7 +71,7 @@ router.post('/login', async (req, res) => {
       [email]
     );
     if (users.length === 0) {
-      return res.status(401).json({ error: 'Nesprávný e-mail nebo heslo.' });
+      return res.status(401).json({ error: 'Tento e-mail není v databázi, musíte se zaregistrovat.' });
     }
 
     const user = users[0];
@@ -79,7 +79,7 @@ router.post('/login', async (req, res) => {
     // Compare password
     const isValid = await bcrypt.compare(password, user.password_hash);
     if (!isValid) {
-      return res.status(401).json({ error: 'Nesprávný e-mail nebo heslo.' });
+      return res.status(401).json({ error: 'Špatné heslo nebo e-mail.' });
     }
 
     // Generate JWT

@@ -55,14 +55,14 @@ const CreateTrip = ({ onAddTrip }) => {
   };
 
   return (
-    <div className="w-full space-y-12 pb-10">
-      <div className="space-y-2">
-        <p className="text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Plánování</p>
-        <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Vytvořit nový výlet</h1>
+    <div className="w-full flex flex-col min-h-full flex-1 space-y-4 sm:space-y-8 pb-4 sm:pb-10">
+      <div className="space-y-1 sm:space-y-2">
+        <p className="text-[10px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Plánování</p>
+        <h1 className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Vytvořit nový výlet</h1>
       </div>
 
       {/* Progress Bar */}
-      <div className="max-w-3xl">
+      <div className="w-full">
         <div className="flex justify-between items-center mb-4">
           <span className="text-[12px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Krok {step} z {totalSteps}</span>
           <span className="text-[12px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{Math.round((step / totalSteps) * 100)}% hotovo</span>
@@ -77,7 +77,7 @@ const CreateTrip = ({ onAddTrip }) => {
         </div>
       </div>
 
-      <div className="min-h-[400px] max-w-3xl flex flex-col">
+      <div className="min-h-[400px] w-full flex flex-col mb-4 sm:mb-8">
         <AnimatePresence mode="wait">
           {step === 1 && (
             <motion.div
@@ -86,37 +86,28 @@ const CreateTrip = ({ onAddTrip }) => {
               initial="initial"
               animate="animate"
               exit="exit"
-              className="space-y-12"
+              className="space-y-8"
             >
               <div className="space-y-4">
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Kam se chystáte?</h2>
                 <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">Pojmenujte svůj výlet nebo zadejte cílovou destinaci.</p>
               </div>
 
-              <div className="relative group max-w-2xl">
-                <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors">
-                  <MapPin size={24} strokeWidth={2} />
+              <div className="relative group w-full">
+                <div className="absolute inset-y-0 left-4 sm:left-5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors">
+                  <MapPin strokeWidth={2} className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
                 <input
                   type="text"
                   autoFocus
-                  placeholder="např. Snová dovolená v Římě"
+                  placeholder="např. Víkend v Římě"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   onKeyDown={(e) => e.key === 'Enter' && nextStep()}
-                  className="glass-input !pl-14 text-2xl py-6"
+                  className="glass-input !pl-12 sm:!pl-14 text-lg sm:text-2xl py-4 sm:py-6"
                 />
               </div>
               
-              <div className="pt-8">
-                <button
-                  onClick={nextStep}
-                  className="group inline-flex items-center gap-3 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold transition-colors duration-300 shadow-md shadow-blue-500/20 active:scale-95"
-                >
-                  Pokračovat
-                  <ArrowRight size={18} strokeWidth={2.5} className="group-hover:translate-x-1 transition-transform" />
-                </button>
-              </div>
             </motion.div>
           )}
 
@@ -127,65 +118,58 @@ const CreateTrip = ({ onAddTrip }) => {
               initial="initial"
               animate="animate"
               exit="exit"
-              className="space-y-12"
+              className="space-y-4 sm:space-y-8 w-full xl:w-fit"
             >
-              <div className="space-y-4">
-                <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Kdy vyrážíte?</h2>
-                <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">Vyberte termín vaší cesty.</p>
-              </div>
-
-              <div className="space-y-8">
-                <div className="inline-block glass-card p-6 rounded-[2rem]">
-                  <DayPicker
-                    mode="range"
-                    selected={range}
-                    onSelect={(newRange) => {
-                      setRange(newRange);
-                      if (newRange?.from) {
-                        setFormData(prev => ({ ...prev, startDate: format(newRange.from, 'yyyy-MM-dd') }));
-                      }
-                      if (newRange?.to) {
-                        setFormData(prev => ({ ...prev, endDate: format(newRange.to, 'yyyy-MM-dd') }));
-                      }
-                    }}
-                    locale={cs}
-                    numberOfMonths={window.innerWidth > 768 ? 2 : 1}
-                    className="premium-calendar"
-                  />
+              <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 sm:gap-8 w-full">
+                <div className="space-y-1 sm:space-y-4">
+                  <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Kdy vyrážíte?</h2>
+                  <p className="hidden sm:block text-gray-500 dark:text-gray-400 text-lg font-medium">Vyberte termín vaší cesty.</p>
                 </div>
-                
-                {range?.from && (
-                  <div className="flex items-center gap-6 p-6 border-l-4 border-blue-500 glass-card max-w-fit rounded-r-[1rem] rounded-l-none">
-                    <div className="flex flex-col">
-                      <span className="text-[11px] uppercase text-gray-500 dark:text-gray-400 tracking-widest font-bold mb-1">Odjezd</span>
-                      <span className="text-lg font-bold text-gray-900 dark:text-white">{format(range.from, 'd. MMMM yyyy', { locale: cs })}</span>
-                    </div>
-                    <ArrowRight size={20} strokeWidth={2} className="text-gray-400 mx-2" />
-                    <div className="flex flex-col">
-                      <span className="text-[11px] uppercase text-gray-500 dark:text-gray-400 tracking-widest font-bold mb-1">Návrat</span>
-                      <span className={`text-lg font-bold ${range.to ? 'text-gray-900 dark:text-white' : 'text-gray-400 italic'}`}>
-                        {range.to ? format(range.to, 'd. MMMM yyyy', { locale: cs }) : 'Vyberte datum'}
-                      </span>
-                    </div>
+
+                <div className={`flex items-center gap-3 sm:gap-6 p-3 sm:p-6 border-l-4 ${range?.from ? 'border-blue-500' : 'border-gray-200 dark:border-white/10'} glass-card max-w-fit rounded-r-[1rem] rounded-l-none`}>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] sm:text-[11px] uppercase text-gray-500 dark:text-gray-400 tracking-widest font-bold mb-1">Odjezd</span>
+                    <span className={`text-sm sm:text-lg font-bold ${range?.from ? 'text-gray-900 dark:text-white' : 'text-gray-400 italic'}`}>
+                      {range?.from ? (
+                        <>
+                          <span className="sm:hidden">{format(range.from, 'd. M. yy', { locale: cs })}</span>
+                          <span className="hidden sm:inline">{format(range.from, 'd. MMMM yyyy', { locale: cs })}</span>
+                        </>
+                      ) : 'Vyberte'}
+                    </span>
                   </div>
-                )}
+                  <ArrowRight size={16} strokeWidth={2} className="text-gray-400 mx-1 sm:mx-2" />
+                  <div className="flex flex-col">
+                    <span className="text-[10px] sm:text-[11px] uppercase text-gray-500 dark:text-gray-400 tracking-widest font-bold mb-1">Návrat</span>
+                    <span className={`text-sm sm:text-lg font-bold ${range?.to ? 'text-gray-900 dark:text-white' : 'text-gray-400 italic'}`}>
+                      {range?.to ? (
+                        <>
+                          <span className="sm:hidden">{format(range.to, 'd. M. yy', { locale: cs })}</span>
+                          <span className="hidden sm:inline">{format(range.to, 'd. MMMM yyyy', { locale: cs })}</span>
+                        </>
+                      ) : 'Vyberte'}
+                    </span>
+                  </div>
+                </div>
               </div>
 
-              <div className="pt-4 flex items-center gap-6">
-                <button
-                  onClick={prevStep}
-                  className="flex items-center gap-2 px-6 py-4 text-[13px] text-gray-500 hover:text-gray-900 dark:hover:text-white uppercase tracking-widest font-bold transition-colors"
-                >
-                  <ArrowLeft size={16} strokeWidth={2.5} />
-                  Zpět
-                </button>
-                <button
-                  onClick={nextStep}
-                  className="group inline-flex items-center gap-3 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold transition-colors duration-300 shadow-md shadow-blue-500/20 active:scale-95"
-                >
-                  Další krok
-                  <ArrowRight size={18} strokeWidth={2.5} className="group-hover:translate-x-1 transition-transform" />
-                </button>
+              <div className="inline-block glass-card p-2 sm:p-6 rounded-2xl sm:rounded-[2rem]">
+                <DayPicker
+                  mode="range"
+                  selected={range}
+                  onSelect={(newRange) => {
+                    setRange(newRange);
+                    if (newRange?.from) {
+                      setFormData(prev => ({ ...prev, startDate: format(newRange.from, 'yyyy-MM-dd') }));
+                    }
+                    if (newRange?.to) {
+                      setFormData(prev => ({ ...prev, endDate: format(newRange.to, 'yyyy-MM-dd') }));
+                    }
+                  }}
+                  locale={cs}
+                  numberOfMonths={window.innerWidth > 1024 ? 2 : 1}
+                  className="premium-calendar"
+                />
               </div>
             </motion.div>
           )}
@@ -197,14 +181,14 @@ const CreateTrip = ({ onAddTrip }) => {
               initial="initial"
               animate="animate"
               exit="exit"
-              className="space-y-12"
+              className="space-y-8"
             >
               <div className="space-y-4">
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Vše připraveno?</h2>
                 <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">Zkontrolujte si údaje a můžete vyrazit.</p>
               </div>
 
-              <div className="glass-card rounded-[2rem] p-10 space-y-8 max-w-2xl">
+              <div className="glass-card rounded-[2rem] p-10 space-y-8 w-full max-w-xl">
                 <div className="flex items-start gap-6">
                   <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0">
                     <MapPin size={24} strokeWidth={2} />
@@ -228,25 +212,39 @@ const CreateTrip = ({ onAddTrip }) => {
                 </div>
               </div>
 
-              <div className="pt-4 flex items-center gap-6">
-                <button
-                  onClick={prevStep}
-                  className="flex items-center gap-2 px-6 py-4 text-[13px] text-gray-500 hover:text-gray-900 dark:hover:text-white uppercase tracking-widest font-bold transition-colors"
-                >
-                  <ArrowLeft size={16} strokeWidth={2.5} />
-                  Upravit
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  className="group inline-flex items-center gap-3 px-10 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold transition-colors duration-300 shadow-md shadow-blue-500/20 active:scale-95"
-                >
-                  <Rocket size={18} strokeWidth={2.5} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
-                  Vytvořit výlet
-                </button>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+
+      <div className="flex justify-between items-center pt-6 sm:pt-8 !mt-auto border-t border-gray-100 dark:border-white/10 w-full shrink-0">
+        {step > 1 ? (
+          <button
+            onClick={prevStep}
+            className="flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 text-[11px] sm:text-[13px] text-gray-500 hover:text-gray-900 dark:hover:text-white uppercase tracking-widest font-bold transition-colors bg-white/40 dark:bg-white/5 rounded-2xl"
+          >
+            <ArrowLeft size={16} strokeWidth={2.5} />
+            <span className="hidden sm:inline">{step === 3 ? 'Upravit' : 'Zpět'}</span>
+          </button>
+        ) : (
+          <div />
+        )}
+        <button
+          onClick={step === 3 ? handleSubmit : nextStep}
+          className="group inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold transition-colors duration-300 shadow-md shadow-blue-500/20 active:scale-95 text-sm sm:text-base"
+        >
+          {step === 3 ? (
+            <>
+              <Rocket size={18} strokeWidth={2.5} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
+              Vytvořit výlet
+            </>
+          ) : (
+            <>
+              {step === 1 ? 'Pokračovat' : 'Další krok'}
+              <ArrowRight size={18} strokeWidth={2.5} className="group-hover:translate-x-1 transition-transform" />
+            </>
+          )}
+        </button>
       </div>
     </div>
   );

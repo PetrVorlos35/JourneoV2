@@ -46,6 +46,15 @@
   border: none;
 }
 
+@media (max-width: 640px) {
+  .premium-calendar {
+    --rdp-day-width: 34px;
+    --rdp-day-height: 34px;
+    --rdp-day_button-width: 34px;
+    --rdp-day_button-height: 34px;
+  }
+}
+
 .dark .premium-calendar {
   --rdp-accent-color: #60a5fa;
   --rdp-range_start-color: #1c1c1e;

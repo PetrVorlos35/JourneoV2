@@ -3,7 +3,8 @@ import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
-import JourneoLogo from '../../assets/Journeo_whitelogo.png';
+import JourneoWhiteLogo from '../../assets/Journeo_whitelogo.png';
+import JourneoBlackLogo from '../../assets/Journeo_blacklogo.png';
 import GoogleIcon from '../../assets/google.png';
 
 const AuthFlow = () => {
@@ -14,23 +15,26 @@ const AuthFlow = () => {
     password: '',
     confirmPassword: '',
   });
+  const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { login, register } = useAuth();
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (errorMsg) setErrorMsg('');
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setErrorMsg('');
     setIsLoading(true);
     try {
       await login(formData.email, formData.password);
       toast.success('Vítejte zpět!');
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err.message || 'Chyba při přihlášení.');
+      setErrorMsg(err.message || 'Chyba při přihlášení.');
     } finally {
       setIsLoading(false);
     }
@@ -38,12 +42,13 @@ const AuthFlow = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+    setErrorMsg('');
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Hesla se neshodují');
+      setErrorMsg('Hesla se neshodují');
       return;
     }
     if (formData.password.length < 6) {
-      toast.error('Heslo musí mít alespoň 6 znaků');
+      setErrorMsg('Heslo musí mít alespoň 6 znaků');
       return;
     }
     setIsLoading(true);
@@ -52,7 +57,7 @@ const AuthFlow = () => {
       toast.success('Registrace úspěšná! Vítejte v Journeo.');
       navigate('/dashboard');
     } catch (err) {
-      toast.error(err.message || 'Chyba při registraci.');
+      setErrorMsg(err.message || 'Chyba při registraci.');
     } finally {
       setIsLoading(false);
     }
@@ -82,9 +87,8 @@ const AuthFlow = () => {
         <div className="glass-card p-8 sm:p-12 w-full">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-12 h-12 rounded-full bg-black dark:bg-white text-white dark:text-black font-bold text-lg flex items-center justify-center mx-auto mb-6 shadow-md">
-              J
-            </div>
+            <img src={JourneoBlackLogo} alt="Journeo Logo" className="h-12 w-auto object-contain mx-auto mb-6 drop-shadow-md block dark:hidden" />
+            <img src={JourneoWhiteLogo} alt="Journeo Logo" className="h-12 w-auto object-contain mx-auto mb-6 drop-shadow-md hidden dark:block" />
             <h1 className="text-3xl font-bold tracking-tight mb-2">
               {mode === 'login' ? 'Vítejte zpět' : 'Začněte psát'}
             </h1>
@@ -97,6 +101,11 @@ const AuthFlow = () => {
 
           {/* Form */}
           <div className="min-h-[280px]">
+            {errorMsg && (
+              <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm font-medium text-center animate-in fade-in slide-in-from-top-2">
+                {errorMsg}
+              </div>
+            )}
             <form onSubmit={mode === 'login' ? handleLogin : handleRegister} className="space-y-5">
               
               {/* Email */}
@@ -118,15 +127,10 @@ const AuthFlow = () => {
 
               {/* Password */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between px-4">
+                <div className="px-4">
                   <label htmlFor="auth-password" className="block text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">
                     Heslo
                   </label>
-                  {mode === 'login' && (
-                    <a href="#" className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline">
-                      Zapomenuté heslo?
-                    </a>
-                  )}
                 </div>
                 <div className="relative">
                   <input
@@ -182,13 +186,19 @@ const AuthFlow = () => {
             </form>
           </div>
 
-          <div className="mt-8 text-center">
+          <div className="mt-8 text-center flex items-center justify-center text-[13px] font-semibold text-gray-500 dark:text-gray-400 mx-auto">
+            <span>
+              {mode === 'login' ? 'Nemáte účet?' : 'Máte již účet?'}
+            </span>
             <button
-              onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-              className="text-[13px] font-semibold text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+              type="button"
+              onClick={() => {
+                setMode(mode === 'login' ? 'register' : 'login');
+                setErrorMsg('');
+              }}
+              className="text-black dark:text-white font-bold ml-1.5 cursor-pointer group"
             >
-              {mode === 'login' ? 'Nemáte účet? ' : 'Máte již účet? '}
-              <span className="text-black dark:text-white font-bold ml-1">
+              <span className="relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-0 after:bg-black dark:after:bg-white after:transition-all after:duration-300 group-hover:after:w-full">
                 {mode === 'login' ? 'Zaregistrujte se' : 'Přihlaste se'}
               </span>
             </button>
