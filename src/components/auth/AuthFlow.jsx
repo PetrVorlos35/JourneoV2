@@ -3,7 +3,6 @@ import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
-import authBg from '../../assets/auth_bg.png';
 import JourneoLogo from '../../assets/Journeo_whitelogo.png';
 import GoogleIcon from '../../assets/google.png';
 
@@ -60,99 +59,50 @@ const AuthFlow = () => {
   };
 
   return (
-    <div className="h-[100dvh] bg-journeo-dark flex overflow-hidden">
-      {/* Left — photo */}
-      <div className="hidden lg:block lg:w-[45%] xl:w-[50%] relative overflow-hidden h-full">
-        <img
-          src={authBg}
-          alt="Horský výhled při východu slunce"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-journeo-dark/80 via-transparent to-journeo-dark/30" />
+    <div className="min-h-[100dvh] w-full flex items-center justify-center p-4 relative overflow-hidden bg-[#fbfbfd] dark:bg-black text-[#1d1d1f] dark:text-[#f5f5f7] font-sans">
+      
+      {/* Subtle background glow */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none flex justify-center items-center">
+        <div className="absolute w-[800px] h-[800px] rounded-[100%] bg-blue-500/5 dark:bg-blue-500/10 blur-[120px]" />
+      </div>
 
-        {/* Branding overlay */}
-        <div className="absolute top-12 left-12">
+      <div className="w-full max-w-md relative z-10">
+        {/* Top Nav */}
+        <div className="mb-8 flex justify-center">
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-3 text-journeo-text-muted hover:text-journeo-text transition-colors duration-300 group"
+            className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 font-semibold text-[13px] uppercase tracking-widest glass px-5 py-2.5 rounded-full"
           >
-            <img src={JourneoLogo} alt="Journeo" className="w-6 h-6 object-contain opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
-            <span className="font-serif text-2xl tracking-tight mt-1">Journeo</span>
+            <ArrowLeft size={16} strokeWidth={2.5} />
+            <span>Zpět domů</span>
           </button>
         </div>
 
-        <div className="absolute bottom-16 left-12 right-12 max-w-lg">
-          <p className="font-serif text-[clamp(2rem,3vw,2.5rem)] text-journeo-text leading-[1.2] italic">
-            „Cestování je jediná věc,<br />
-            za kterou zaplatíte a&nbsp;přitom<br />
-            vás udělá bohatšími."
-          </p>
-        </div>
-      </div>
-
-      {/* Right — form */}
-      <div className="w-full lg:w-[55%] xl:w-[50%] flex flex-col justify-center px-6 sm:px-16 lg:px-20 xl:px-28 py-6 sm:py-8 lg:py-12 h-full overflow-y-auto no-scrollbar">
-        <div className="w-full max-w-[420px] mx-auto lg:mx-0">
-
-          {/* Mobile back + logo */}
-          <div className="mb-6 sm:mb-12 lg:mb-10 space-y-4 sm:space-y-6 lg:space-y-8">
-            <button
-              onClick={() => navigate('/')}
-              className="inline-flex items-center gap-2 text-journeo-text-subtle hover:text-journeo-text text-[13px] uppercase tracking-widest font-medium transition-colors duration-300"
-            >
-              <ArrowLeft size={16} />
-              <span>Zpět na hlavní stranu</span>
-            </button>
-
-            <div className="flex items-center gap-3 lg:hidden">
-              <img src={JourneoLogo} alt="Journeo" className="w-6 h-6 object-contain" />
-              <span className="font-serif text-2xl text-journeo-text tracking-tight mt-1">Journeo</span>
-            </div>
-          </div>
-
+        {/* Glass Card */}
+        <div className="glass-card p-8 sm:p-12 w-full">
           {/* Header */}
-          <div className="mb-6 sm:mb-10 lg:mb-8 space-y-2 sm:space-y-3">
-            <h1 className="font-serif text-3xl sm:text-4xl text-journeo-text">
+          <div className="text-center mb-8">
+            <div className="w-12 h-12 rounded-full bg-black dark:bg-white text-white dark:text-black font-bold text-lg flex items-center justify-center mx-auto mb-6 shadow-md">
+              J
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight mb-2">
               {mode === 'login' ? 'Vítejte zpět' : 'Začněte psát'}
             </h1>
-            <p className="text-sm sm:text-base text-journeo-text-muted font-light">
+            <p className="text-gray-500 dark:text-gray-400 font-medium">
               {mode === 'login'
-                ? 'Přihlaste se ke svému cestovatelskému deníku.'
-                : 'Vytvořte si účet a zaznamenejte svá dobrodružství.'}
+                ? 'Přihlaste se ke svému deníku.'
+                : 'Vytvořte si účet pro další cestu.'}
             </p>
           </div>
 
-          {/* Tabs */}
-          <div className="flex mb-6 sm:mb-8 border-b border-journeo-border">
-            <button
-              onClick={() => setMode('login')}
-              className={`pb-3 sm:pb-4 px-2 mr-8 text-[13px] sm:text-[14px] font-medium transition-colors duration-300 border-b-2 relative top-[1px] ${
-                mode === 'login'
-                  ? 'text-journeo-text border-journeo-accent'
-                  : 'text-journeo-text-subtle border-transparent hover:text-journeo-text-muted'
-              }`}
-            >
-              Přihlášení
-            </button>
-            <button
-              onClick={() => setMode('register')}
-              className={`pb-3 sm:pb-4 px-2 text-[13px] sm:text-[14px] font-medium transition-colors duration-300 border-b-2 relative top-[1px] ${
-                mode === 'register'
-                  ? 'text-journeo-text border-journeo-accent'
-                  : 'text-journeo-text-subtle border-transparent hover:text-journeo-text-muted'
-              }`}
-            >
-              Nová registrace
-            </button>
-          </div>
-
-          {/* Form Wrapper to prevent layout jumping */}
-          <div className="min-h-[280px] sm:min-h-[310px]">
-            <form onSubmit={mode === 'login' ? handleLogin : handleRegister} className="space-y-4 sm:space-y-5">
+          {/* Form */}
+          <div className="min-h-[280px]">
+            <form onSubmit={mode === 'login' ? handleLogin : handleRegister} className="space-y-5">
+              
               {/* Email */}
-              <div className="space-y-1 sm:space-y-2 group">
-                <label htmlFor="auth-email" className="block text-[11px] text-journeo-text-subtle uppercase tracking-widest font-medium transition-colors duration-300 group-focus-within:text-journeo-accent">
-                  E-mailová adresa
+              <div className="space-y-2">
+                <label htmlFor="auth-email" className="block text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold px-4">
+                  E-mail
                 </label>
                 <input
                   id="auth-email"
@@ -162,18 +112,18 @@ const AuthFlow = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="vas@email.cz"
-                  className="w-full bg-transparent border-b border-journeo-border-strong py-2 sm:py-3 text-base sm:text-lg text-journeo-text placeholder-journeo-text-subtle/50 focus:outline-none focus:border-journeo-accent transition-colors duration-300 font-light"
+                  className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-2xl px-5 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
                 />
               </div>
 
               {/* Password */}
-              <div className="space-y-1 sm:space-y-2 group">
-                <div className="flex items-center justify-between">
-                  <label htmlFor="auth-password" className="block text-[11px] text-journeo-text-subtle uppercase tracking-widest font-medium transition-colors duration-300 group-focus-within:text-journeo-accent">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between px-4">
+                  <label htmlFor="auth-password" className="block text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">
                     Heslo
                   </label>
                   {mode === 'login' && (
-                    <a href="#" className="text-[11px] sm:text-[12px] text-journeo-text-subtle hover:text-journeo-text transition-colors duration-300">
+                    <a href="#" className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline">
                       Zapomenuté heslo?
                     </a>
                   )}
@@ -187,22 +137,22 @@ const AuthFlow = () => {
                     value={formData.password}
                     onChange={handleInputChange}
                     placeholder="••••••••"
-                    className="w-full bg-transparent border-b border-journeo-border-strong py-2 sm:py-3 pr-12 text-base sm:text-lg text-journeo-text placeholder-journeo-text-subtle/50 focus:outline-none focus:border-journeo-accent transition-colors duration-300 font-light"
+                    className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-2xl px-5 py-3.5 pr-12 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 p-2 text-journeo-text-subtle hover:text-journeo-text transition-colors duration-300"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPassword ? <EyeOff size={18} strokeWidth={2.5} /> : <Eye size={18} strokeWidth={2.5} />}
                   </button>
                 </div>
               </div>
 
               {/* Confirm Password */}
               {mode === 'register' && (
-                <div className="space-y-1 sm:space-y-2 group">
-                  <label htmlFor="auth-confirm" className="block text-[11px] text-journeo-text-subtle uppercase tracking-widest font-medium transition-colors duration-300 group-focus-within:text-journeo-accent">
+                <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <label htmlFor="auth-confirm" className="block text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold px-4">
                     Potvrdit heslo
                   </label>
                   <input
@@ -213,7 +163,7 @@ const AuthFlow = () => {
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
                     placeholder="••••••••"
-                    className="w-full bg-transparent border-b border-journeo-border-strong py-2 sm:py-3 text-base sm:text-lg text-journeo-text placeholder-journeo-text-subtle/50 focus:outline-none focus:border-journeo-accent transition-colors duration-300 font-light"
+                    className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-2xl px-5 py-3.5 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
                   />
                 </div>
               )}
@@ -221,7 +171,7 @@ const AuthFlow = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3.5 sm:py-4 mt-2 sm:mt-4 bg-journeo-accent text-journeo-dark text-[15px] sm:text-base font-medium rounded-sm hover:bg-journeo-accent-hover transition-colors duration-300 disabled:opacity-40 disabled:pointer-events-none"
+                className="w-full py-4 mt-2 bg-black dark:bg-white text-white dark:text-black font-bold rounded-full hover:scale-[1.02] transition-transform duration-300 shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
               >
                 {isLoading
                   ? 'Zpracovávám...'
@@ -232,31 +182,18 @@ const AuthFlow = () => {
             </form>
           </div>
 
-          {/* Divider */}
-          <div className="flex items-center gap-4 sm:gap-6 my-6 sm:my-8 lg:my-6">
-            <div className="flex-1 h-px bg-journeo-border" />
-            <span className="text-[10px] sm:text-[11px] text-journeo-text-subtle uppercase tracking-widest font-medium">nebo</span>
-            <div className="flex-1 h-px bg-journeo-border" />
-          </div>
-
-          {/* Social */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            <button className="flex items-center justify-center gap-2 sm:gap-3 py-3 sm:py-3.5 border border-journeo-border-strong rounded-sm text-[13px] sm:text-[14px] font-medium text-journeo-text-muted hover:border-journeo-accent hover:text-journeo-text transition-all duration-300">
-              <img src={GoogleIcon} alt="Google" className="w-4 h-4 object-contain" />
-              Google
-            </button>
-            <button className="flex items-center justify-center gap-2 sm:gap-3 py-3 sm:py-3.5 border border-journeo-border-strong rounded-sm text-[13px] sm:text-[14px] font-medium text-journeo-text-muted hover:border-journeo-accent hover:text-journeo-text transition-all duration-300">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-              </svg>
-              GitHub
+          <div className="mt-8 text-center">
+            <button
+              onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
+              className="text-[13px] font-semibold text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+            >
+              {mode === 'login' ? 'Nemáte účet? ' : 'Máte již účet? '}
+              <span className="text-black dark:text-white font-bold ml-1">
+                {mode === 'login' ? 'Zaregistrujte se' : 'Přihlaste se'}
+              </span>
             </button>
           </div>
 
-          {/* Footer note */}
-          <p className="text-center text-[11px] sm:text-[12px] text-journeo-text-subtle mt-6 sm:mt-10 lg:mt-8 font-medium tracking-wide">
-            Šifrováno a chráněno · Journeo {new Date().getFullYear()}
-          </p>
         </div>
       </div>
     </div>

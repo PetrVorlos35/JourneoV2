@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, PlusSquare, Settings, LogOut, BarChart2, Wallet, X } from 'lucide-react';
+import { Home, PlusSquare, Settings, LogOut, BarChart2, Wallet, X, Sun, Moon, Monitor } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import JourneoLogo from '../../assets/Journeo_whitelogo.png';
+import JourneoLogoDark from '../../assets/Journeo_blacklogo.png';
 
 const navItems = [
   { icon: Home, label: 'Přehled', path: '/dashboard' },
@@ -16,14 +18,14 @@ const SidebarItem = ({ icon: Icon, label, path, active, onClick }) => (
   <Link
     to={path}
     onClick={onClick}
-    className={`flex items-center gap-3 px-4 py-3 rounded-sm transition-all duration-300 ${
+    className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 ${
       active
-        ? 'bg-journeo-surface border-l-2 border-journeo-accent text-journeo-accent'
-        : 'text-journeo-text-muted hover:text-journeo-text hover:bg-journeo-surface-hover border-l-2 border-transparent'
+        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10'
     }`}
   >
-    <Icon size={18} strokeWidth={active ? 2 : 1.5} />
-    <span className={`font-medium ${active ? 'tracking-wide' : ''}`}>{label}</span>
+    <Icon size={20} strokeWidth={active ? 2.5 : 2} />
+    <span className="font-semibold">{label}</span>
   </Link>
 );
 
@@ -38,15 +40,43 @@ const UserAvatar = ({ user, size = "md" }) => {
   };
 
   const sizeClasses = {
-    sm: "w-8 h-8 text-[10px]",
+    sm: "w-8 h-8 text-[11px]",
     md: "w-10 h-10 text-xs",
-    lg: "w-12 h-12 text-base",
-    xl: "w-16 h-16 text-xl"
+    lg: "w-14 h-14 text-base",
+    xl: "w-20 h-20 text-xl"
   };
 
   return (
-    <div className={`${sizeClasses[size]} rounded-full bg-journeo-surface border border-journeo-border-strong flex items-center justify-center text-journeo-text font-serif shrink-0`}>
+    <div className={`${sizeClasses[size]} rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 text-white flex items-center justify-center font-bold shrink-0 shadow-sm shadow-blue-500/30`}>
       {getInitials()}
+    </div>
+  );
+};
+
+const ThemeToggle = () => {
+  const { theme, setTheme } = useTheme();
+  const options = [
+    { value: 'light', icon: Sun, label: 'Světlý' },
+    { value: 'dark', icon: Moon, label: 'Tmavý' },
+    { value: 'system', icon: Monitor, label: 'Systém' },
+  ];
+
+  return (
+    <div className="flex items-center gap-1 p-1 rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200/50 dark:border-white/5">
+      {options.map(({ value, icon: Icon }) => (
+        <button
+          key={value}
+          onClick={() => setTheme(value)}
+          className={`flex-1 flex items-center justify-center p-2 rounded-xl transition-all duration-300 ${
+            theme === value
+              ? 'bg-white dark:bg-white/15 text-blue-600 dark:text-blue-400 shadow-sm'
+              : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
+          }`}
+          title={value}
+        >
+          <Icon size={16} strokeWidth={2} />
+        </button>
+      ))}
     </div>
   );
 };
@@ -55,7 +85,11 @@ const DashboardLayout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
+  const { theme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const isTripDetail = location.pathname.startsWith('/dashboard/trip/');
 
   const handleLogout = () => {
     logout();
@@ -65,117 +99,147 @@ const DashboardLayout = ({ children }) => {
   const closeMobile = () => setMobileOpen(false);
 
   return (
-    <div className="h-screen overflow-hidden bg-journeo-dark text-journeo-text flex font-sans selection:bg-journeo-accent/30">
+    <div className="h-[100dvh] overflow-hidden bg-[#fbfbfd] dark:bg-black text-gray-900 dark:text-[#f5f5f7] flex selection:bg-blue-500/30 font-sans relative transition-colors duration-500">
       <Toaster
         position="top-right"
         toastOptions={{
-          style: { background: '#161311', color: '#EBEAE4', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '4px' },
+          style: { 
+            background: isDark ? '#1C1C1E' : '#fff', 
+            color: isDark ? '#f5f5f7' : '#111827', 
+            borderRadius: '1rem', 
+            boxShadow: isDark ? '0 10px 15px -3px rgba(0,0,0,0.4)' : '0 10px 15px -3px rgba(0,0,0,0.1)',
+            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.05)',
+          },
         }}
       />
 
-      {/* ── Desktop Sidebar ── */}
-      <aside className="w-64 border-r border-journeo-border hidden md:flex flex-col bg-journeo-dark shrink-0">
-        <div className="px-8 py-8">
-          <Link to="/" className="flex items-center gap-3 group">
-            <img src={JourneoLogo} alt="Journeo" className="w-6 h-6 object-contain opacity-80 group-hover:opacity-100 transition-opacity" />
-            <span className="font-serif text-2xl tracking-tight mt-1">Journeo</span>
-          </Link>
-        </div>
+      {/* Subtle Background Glow */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none flex justify-center items-center">
+        <div className="absolute w-[800px] h-[800px] rounded-[100%] bg-blue-500/5 dark:bg-blue-500/10 blur-[120px]" />
+      </div>
 
-        <nav className="flex-1 px-4 py-2 space-y-1">
-          {navItems.map(item => (
-            <SidebarItem
-               key={item.path}
-               {...item}
-               active={location.pathname === item.path}
+      {/* ── Desktop Sidebar (Floating Glass Panel) ── */}
+      <div className="hidden md:flex flex-col p-6 z-20 shrink-0 w-[280px]">
+        <aside className="w-full h-full glass-card flex flex-col overflow-hidden">
+          <div className="px-8 py-8 flex items-center gap-3 group cursor-pointer" onClick={() => navigate('/')}>
+            <img 
+              src={isDark ? JourneoLogo : JourneoLogoDark} 
+              alt="Journeo Logo" 
+              className="h-8 w-auto object-contain transition-transform group-hover:scale-105" 
             />
-          ))}
-        </nav>
+            <span className="font-bold text-xl tracking-tight mt-0.5">Journeo</span>
+          </div>
 
-        <div className="p-4 border-t border-journeo-border space-y-1">
-          <SidebarItem
-            icon={Settings}
-            label="Nastavení"
-            path="/dashboard/settings"
-            active={location.pathname === '/dashboard/settings'}
-          />
-          <div className="px-4 py-4 flex items-center gap-4 mt-2">
-            <UserAvatar user={user} size="sm" />
-            <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-medium text-journeo-text truncate">
-                {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.email}
-              </p>
-              <p className="text-[11px] text-journeo-text-subtle truncate uppercase tracking-widest mt-0.5">{user?.bio || 'Cestovatel'}</p>
+          <nav className="flex-1 px-4 py-2 space-y-2">
+            {navItems.map(item => (
+              <SidebarItem
+                 key={item.path}
+                 {...item}
+                 active={location.pathname === item.path}
+              />
+            ))}
+          </nav>
+
+          <div className="p-4 border-t border-gray-100 dark:border-white/10 space-y-3">
+            {/* Theme Toggle */}
+            <div className="px-2 pb-2">
+              <ThemeToggle />
             </div>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-sm text-red-400/80 hover:text-red-400 hover:bg-red-500/10 transition-colors duration-300"
-          >
-            <LogOut size={18} strokeWidth={1.5} />
-            <span className="font-medium">Odhlásit se</span>
-          </button>
-        </div>
-      </aside>
 
-      {/* ── Mobile bottom navigation ── */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-journeo-dark/90 backdrop-blur-md border-t border-journeo-border flex justify-around items-center px-2 py-3 z-50">
-        {navItems.map(({ icon: Icon, label, path }) => (
-          <Link
-            key={path}
-            to={path}
-            className={`flex flex-col items-center gap-1.5 flex-1 transition-colors duration-300 ${
-              location.pathname === path ? 'text-journeo-accent' : 'text-journeo-text-subtle'
-            }`}
-          >
-            <Icon size={20} strokeWidth={location.pathname === path ? 2 : 1.5} />
-            <span className="text-[9px] font-medium uppercase tracking-widest">{label.split(' ')[0]}</span>
-          </Link>
-        ))}
-        <button
-          onClick={() => setMobileOpen(true)}
-          className="flex flex-col items-center gap-1.5 flex-1 text-journeo-text-subtle hover:text-journeo-text transition-colors"
-        >
-          <div className="scale-75 origin-bottom">
-             <UserAvatar user={user} size="sm" />
+            <SidebarItem
+              icon={Settings}
+              label="Nastavení"
+              path="/dashboard/settings"
+              active={location.pathname === '/dashboard/settings'}
+            />
+            <Link to="/dashboard/settings" className="px-4 py-4 flex items-center gap-3 mt-1 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+              <UserAvatar user={user} size="md" />
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-bold truncate">
+                  {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.email}
+                </p>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate uppercase tracking-widest mt-0.5 font-semibold">Cestovatel</p>
+              </div>
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors duration-300 font-semibold"
+            >
+              <LogOut size={20} strokeWidth={2} />
+              <span>Odhlásit se</span>
+            </button>
           </div>
-          <span className="text-[9px] font-medium uppercase tracking-widest">Více</span>
-        </button>
-      </nav>
+        </aside>
+      </div>
+
+      {/* ── Mobile bottom navigation (Floating Pill) ── */}
+      {!isTripDetail && (
+        <div className="md:hidden fixed bottom-6 left-6 right-6 z-50 flex justify-center pointer-events-none">
+          <nav className="glass-panel w-full max-w-sm rounded-[2rem] flex justify-around items-center px-2 py-3 pointer-events-auto">
+            {navItems.map(({ icon: Icon, label, path }) => (
+              <Link
+                key={path}
+                to={path}
+                className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${
+                  location.pathname === path ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                <Icon size={22} strokeWidth={location.pathname === path ? 2.5 : 2} />
+                {location.pathname === path && <span className="text-[9px] font-bold uppercase tracking-widest">{label.split(' ')[0]}</span>}
+              </Link>
+            ))}
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="flex flex-col items-center gap-1.5 flex-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            >
+              <div className="scale-[0.8] origin-bottom shadow-sm rounded-full">
+                 <UserAvatar user={user} size="sm" />
+              </div>
+            </button>
+          </nav>
+        </div>
+      )}
 
       {/* ── Mobile slide-over (for Settings/Logout) ── */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[60] flex md:hidden">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeMobile} />
-          <aside className="relative w-72 bg-journeo-surface border-r border-journeo-border flex flex-col h-full z-10 animate-in slide-in-from-left duration-300">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-md transition-opacity" onClick={closeMobile} />
+          <aside className="absolute right-0 top-0 bottom-0 w-[85%] max-w-[320px] bg-white dark:bg-[#1C1C1E] flex flex-col h-full z-10 animate-in slide-in-from-right duration-300 rounded-l-[2rem] shadow-2xl">
             <div className="p-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <img src={JourneoLogo} alt="Journeo" className="w-6 h-6 object-contain" />
-                <span className="font-serif text-xl tracking-tight text-journeo-text mt-1">Journeo</span>
+                <img 
+                  src={isDark ? JourneoLogo : JourneoLogoDark} 
+                  alt="Journeo Logo" 
+                  className="h-7 w-auto object-contain" 
+                />
+                <span className="font-bold text-xl tracking-tight mt-0.5">Journeo</span>
               </div>
-              <button onClick={closeMobile} className="text-journeo-text-subtle hover:text-journeo-text transition-colors">
-                <X size={22} strokeWidth={1.5} />
+              <button onClick={closeMobile} className="p-2 bg-gray-100 dark:bg-white/10 rounded-full text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+                <X size={20} strokeWidth={2.5} />
               </button>
             </div>
 
-            <div className="flex-1 px-4 py-4 space-y-8">
-              <div className="px-6 py-8 bg-journeo-dark border border-journeo-border-strong rounded-sm mx-2">
-                <div className="flex flex-col items-center text-center gap-4 mb-4">
+            <div className="flex-1 px-4 py-4 space-y-6 overflow-y-auto">
+              <div className="p-6 bg-gray-50 dark:bg-black border border-gray-100 dark:border-white/5 rounded-3xl mx-2 text-center">
+                <div className="flex justify-center mb-4">
                   <UserAvatar user={user} size="lg" />
-                  <div className="min-w-0">
-                    <p className="font-serif text-xl text-journeo-text truncate mb-1">
-                      {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : 'Můj Profil'}
-                    </p>
-                    <p className="text-[12px] text-journeo-text-subtle truncate tracking-wide">{user?.email}</p>
-                  </div>
                 </div>
-                {user?.bio && (
-                  <p className="text-[11px] text-journeo-text-muted text-center italic mt-4">"{user.bio}"</p>
-                )}
+                <div className="min-w-0">
+                  <p className="font-bold text-xl truncate mb-1">
+                    {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : 'Můj Profil'}
+                  </p>
+                  <p className="text-[13px] text-gray-500 dark:text-gray-400 truncate tracking-wide font-medium">{user?.email}</p>
+                </div>
+              </div>
+
+              {/* Mobile Theme Toggle */}
+              <div className="px-4 space-y-3">
+                <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Vzhled</p>
+                <ThemeToggle />
               </div>
 
               <div className="space-y-2">
-                <p className="px-4 text-[10px] font-medium text-journeo-text-subtle uppercase tracking-widest mb-4">Možnosti</p>
+                <p className="px-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">Možnosti</p>
                 <SidebarItem
                   icon={Settings}
                   label="Nastavení"
@@ -186,13 +250,13 @@ const DashboardLayout = ({ children }) => {
               </div>
             </div>
 
-            <div className="p-4 border-t border-journeo-border">
+            <div className="p-6">
               <button
                 onClick={() => { closeMobile(); handleLogout(); }}
-                className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-sm border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors duration-300"
+                className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors duration-300 font-bold"
               >
-                <LogOut size={18} strokeWidth={1.5} />
-                <span className="font-medium text-[14px]">Odhlásit se</span>
+                <LogOut size={20} strokeWidth={2.5} />
+                <span>Odhlásit se</span>
               </button>
             </div>
           </aside>
@@ -200,12 +264,16 @@ const DashboardLayout = ({ children }) => {
       )}
 
       {/* ── Main content ── */}
-      <main className="flex-1 min-w-0 pb-20 md:pb-0 h-full flex flex-col overflow-hidden">
+      <main className="flex-1 min-w-0 pb-28 md:pb-0 h-full flex flex-col relative z-10">
         {/* Mobile top bar */}
-        <div className="md:hidden flex items-center justify-between p-4 border-b border-journeo-border bg-journeo-dark/90 backdrop-blur-md sticky top-0 z-30 shrink-0">
+        <div className="md:hidden flex items-center justify-between p-4 glass sticky top-0 z-30 shrink-0">
           <Link to="/" className="flex items-center gap-2">
-            <img src={JourneoLogo} alt="Journeo" className="w-5 h-5 object-contain" />
-            <span className="font-serif text-xl text-journeo-text tracking-tight mt-1">Journeo</span>
+            <img 
+              src={isDark ? JourneoLogo : JourneoLogoDark} 
+              alt="Journeo Logo" 
+              className="h-7 w-auto object-contain" 
+            />
+            <span className="font-bold text-lg tracking-tight mt-0.5">Journeo</span>
           </Link>
           <div className="flex items-center gap-4">
              <Link to="/dashboard/settings">
@@ -214,7 +282,7 @@ const DashboardLayout = ({ children }) => {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 md:p-12 max-w-[1400px] mx-auto w-full flex flex-col min-h-0">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-8 md:p-10 max-w-[1400px] mx-auto w-full flex flex-col min-h-0 custom-scrollbar">
           {children}
         </div>
       </main>
