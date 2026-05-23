@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
 import AuthFlow from './components/auth/AuthFlow';
 import { useAuth } from './contexts/AuthContext';
+import { Analytics } from '@vercel/analytics/react';
 
 // Lazy load the dashboard to speed up initial landing page load
 const DashboardHome = lazy(() => import('./components/dashboard/DashboardHome'));
@@ -45,6 +46,7 @@ function App() {
           />
         </Routes>
       </Suspense>
+      <Analytics />
     </div>
   );
 }

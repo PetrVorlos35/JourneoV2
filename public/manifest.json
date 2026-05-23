@@ -1,0 +1,8 @@
+{
+  "name": "Journeo",
+  "short_name": "Journeo",
+  "display": "standalone",
+  "background_color": "#0C0A09",
+  "theme_color": "#0C0A09",
+  "start_url": "."
+}
