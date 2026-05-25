@@ -1,27 +1,40 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Save, MapPin, Calendar, Pencil, Check, PackageOpen, Link as LinkIcon, Plus, Trash2, ExternalLink, Image as ImageIcon, Printer, Layout, Briefcase, Info } from 'lucide-react';
 import { format, eachDayOfInterval } from 'date-fns';
 import { cs } from 'date-fns/locale';
 import toast from 'react-hot-toast';
 import { useDialog } from '../ui/DialogModal';
 import LocationAutocomplete from '../ui/LocationAutocomplete';
+import { useUnsavedChanges } from '../../contexts/UnsavedChangesContext';
 
 const TripDetail = ({ trips, onUpdateTrip }) => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const fromParam = searchParams.get('from');
   const { confirmDialog, ModalPortal } = useDialog();
   const trip = trips.find(t => t.id === id);
+
+  const backHref = fromParam === 'all' ? '/dashboard/all-trips' : '/dashboard';
+  const backText = fromParam === 'all' ? 'Zpět na Moje výlety' : 'Zpět na přehled';
 
   const [activeView, setActiveView] = useState(0); // 0, 1... for days, 'packing', 'documents', 'diary'
   const [mobileTab, setMobileTab] = useState('itinerary'); // 'itinerary', 'tools', 'info'
   const [dailyPlans, setDailyPlans] = useState([]);
   const [packingList, setPackingList] = useState(trip?.packingList || []);
   const [documents, setDocuments] = useState(trip?.documents || []);
+  const [newPackingItem, setNewPackingItem] = useState('');
   const [editingTitle, setEditingTitle] = useState(false);
   const [tripTitle, setTripTitle] = useState(trip?.title || '');
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const titleInputRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      setHasUnsavedChanges(false);
+    };
+  }, [setHasUnsavedChanges]);
 
   useEffect(() => {
     if (trip) setTripTitle(trip.title);
@@ -61,6 +74,32 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
         Výlet nebyl nalezen.
         <br />
         <Link to="/dashboard" className="text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors mt-4 inline-block text-[13px] uppercase tracking-widest font-bold">Zpět na přehled</Link>
+      </div>
+    );
+  }
+
+  if (trip.isGenerating) {
+    return (
+      <div className="w-full h-full min-h-[60vh] flex flex-col items-center justify-center p-6 animate-in fade-in duration-500">
+        <div className="glass-card p-10 sm:p-14 rounded-[3rem] flex flex-col items-center justify-center max-w-md w-full space-y-8 shadow-2xl relative overflow-hidden border border-white/10 dark:border-white/5">
+          {/* Shimmer effect background */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 via-transparent to-purple-500/5 animate-pulse"></div>
+          
+          <div className="relative">
+            <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
+            <div className="w-24 h-24 border-4 border-gray-100 dark:border-white/5 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin relative z-10 shadow-lg"></div>
+            <div className="absolute inset-0 flex items-center justify-center z-20">
+              <MapPin className="text-blue-600 dark:text-blue-400 animate-bounce" size={28} strokeWidth={2.5} />
+            </div>
+          </div>
+          
+          <div className="text-center space-y-3 relative z-10">
+            <h3 className="font-bold text-2xl tracking-tight text-gray-900 dark:text-white">Zakládáme váš výlet...</h3>
+            <p className="text-[15px] font-medium text-gray-500 dark:text-gray-400 leading-relaxed">
+              Připravujeme prostor pro váš itinerář, rozpočet a seznamy věcí. Hned budete moci začít s plánováním.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -111,11 +150,11 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
     }
   };
   const addPackingItem = (e) => {
-    if (e.key === 'Enter' && e.target.value.trim()) {
+    if (e.key === 'Enter' && newPackingItem.trim()) {
       e.preventDefault();
-      setPackingList([...packingList, { id: Date.now().toString(), text: e.target.value.trim(), checked: false }]);
+      setPackingList([...packingList, { id: Date.now().toString(), text: newPackingItem.trim(), checked: false }]);
       setHasUnsavedChanges(true);
-      e.target.value = '';
+      setNewPackingItem('');
     }
   };
 
@@ -153,7 +192,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
       });
       if (!ok) return;
     }
-    navigate('/dashboard');
+    navigate(backHref);
   };
 
 
@@ -186,7 +225,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           </button>
           <button 
             onClick={handleSave}
-            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${hasUnsavedChanges ? 'text-amber-500 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${hasUnsavedChanges ? 'text-red-500 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
           >
             <Save size={20} strokeWidth={hasUnsavedChanges ? 2.5 : 2} />
             {hasUnsavedChanges && <span className="text-[9px] font-bold uppercase tracking-widest">Uložit</span>}
@@ -198,7 +237,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div>
           <button onClick={handleBack} className="inline-flex items-center text-[12px] uppercase tracking-widest font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 transition-colors duration-300">
-            <ArrowLeft size={16} className="mr-2" strokeWidth={2.5} /> Zpět na přehled
+            <ArrowLeft size={16} className="mr-2" strokeWidth={2.5} /> {backText}
           </button>
 
           <div className="flex items-center gap-4 mb-3">
@@ -239,7 +278,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           onClick={handleSave}
           className={`hidden md:flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-bold transition-all duration-300 shrink-0 ${
             hasUnsavedChanges 
-              ? 'bg-amber-500 text-white shadow-md shadow-amber-500/20 active:scale-95' 
+              ? 'bg-red-500 text-white shadow-md shadow-red-500/20 active:scale-95 hover:bg-red-600' 
               : 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400 cursor-default'
           }`}
         >
@@ -425,10 +464,16 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                   </div>
                   <input
                     type="text"
+                    value={newPackingItem}
+                    onChange={(e) => setNewPackingItem(e.target.value)}
                     onKeyDown={addPackingItem}
+                    maxLength={255}
                     placeholder="Přidat položku do batohu (stiskněte Enter)"
-                    className="glass-input !py-3 sm:!py-4 !pl-12 sm:!pl-14 text-[15px] sm:text-base"
+                    className="glass-input !py-3 sm:!py-4 !pl-12 sm:!pl-14 text-[15px] sm:text-base w-full"
                   />
+                </div>
+                <div className="text-xs text-gray-500 dark:text-white/40 mt-1.5 text-right font-medium pr-1">
+                  {newPackingItem.length} / 255
                 </div>
               </div>
               
@@ -443,14 +488,14 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                           type="checkbox"
                           checked={item.checked}
                           onChange={() => togglePackingItem(item.id)}
-                          className="w-6 h-6 rounded-md border-2 border-gray-300 dark:border-gray-600 text-blue-600 bg-transparent focus:ring-blue-500 cursor-pointer"
+                          className="w-6 h-6 shrink-0 rounded-md border-2 border-gray-300 dark:border-gray-600 text-blue-600 bg-transparent focus:ring-blue-500 cursor-pointer"
                         />
-                        <span className={`flex-1 text-[15px] font-bold transition-colors ${item.checked ? 'text-gray-400 line-through' : 'text-gray-900 dark:text-white'}`}>
+                        <span className={`flex-1 min-w-0 break-words text-[15px] font-bold transition-colors ${item.checked ? 'text-gray-400 line-through' : 'text-gray-900 dark:text-white'}`}>
                           {item.text}
                         </span>
                         <button
                           onClick={() => deletePackingItem(item.id)}
-                          className="w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-100 dark:hover:bg-red-500/20"
+                          className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-100 dark:hover:bg-red-500/20"
                         >
                           <Trash2 size={18} strokeWidth={2} />
                         </button>
@@ -466,13 +511,16 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           <div className={`${activeView === 'documents' ? 'flex' : 'hidden'} ${mobileTab === 'tools' || mobileTab === 'itinerary' ? '' : 'max-md:hidden'} flex-col flex-1 lg:h-full lg:min-h-0`}>
             <div className="glass-card flex flex-col flex-1 lg:h-full lg:min-h-0 mb-6 lg:mb-0">
               <div className="p-5 sm:p-10 border-b border-gray-100 dark:border-white/10 shrink-0">
-                <h2 className="font-bold text-3xl tracking-tight text-gray-900 dark:text-white flex items-center gap-4 mb-8">
+                <h2 className="font-bold text-3xl tracking-tight text-gray-900 dark:text-white flex items-center gap-4">
                   <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center">
                     <LinkIcon size={24} strokeWidth={2} /> 
                   </div>
                   Odkazy a poznámky
                 </h2>
-                <form onSubmit={addDocument} className="p-6 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl space-y-4">
+              </div>
+              
+              <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col p-5 sm:p-10 gap-8">
+                <form onSubmit={addDocument} className="p-6 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl space-y-4 shrink-0">
                   <input
                     name="title"
                     type="text"
@@ -491,9 +539,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                     Uložit odkaz
                   </button>
                 </form>
-              </div>
 
-              <div className="p-5 sm:p-10 flex-1 overflow-y-auto custom-scrollbar">
                 <div className="grid grid-cols-1 gap-4">
                   {documents.length === 0 ? (
                     <div className="py-12 text-center text-gray-500 font-bold border-2 border-dashed border-gray-200 dark:border-white/10 rounded-3xl">
@@ -570,8 +616,12 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                           setHasUnsavedChanges(true);
                         }}
                         placeholder="Např. Eiffelova věž, Paříž"
+                        maxLength={255}
                         className="glass-input !py-3 sm:!py-4 !px-4 sm:!px-5 font-bold text-base sm:text-lg w-full"
                       />
+                      <div className="text-xs text-gray-500 dark:text-white/40 mt-1.5 text-right font-medium pr-1">
+                        {day.location?.length || 0} / 255
+                      </div>
                     </div>
                   </div>
 

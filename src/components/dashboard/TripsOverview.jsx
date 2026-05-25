@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { format, differenceInDays } from 'date-fns';
 import { cs } from 'date-fns/locale';
-import { MapPin, Calendar, Trash2, Clock, Plane, Plus, TrendingUp, ArrowRight, Wallet } from 'lucide-react';
+import { MapPin, Calendar, Trash2, Clock, Plane, Plus, TrendingUp, ArrowRight, Wallet, Search, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useDialog } from '../ui/DialogModal';
@@ -9,6 +9,8 @@ import { useDialog } from '../ui/DialogModal';
 const TripsOverview = ({ trips, onDeleteTrip }) => {
   const { confirmDialog, ModalPortal } = useDialog();
   const [activeCategory, setActiveCategory] = useState('ongoing');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
 
   const categorizeTrips = (trip) => {
     const start = new Date(trip.startDate);
@@ -21,10 +23,21 @@ const TripsOverview = ({ trips, onDeleteTrip }) => {
     return 'upcoming';
   };
 
+  const filterTrips = (tripList) => {
+    return tripList.filter(trip => {
+      if (searchQuery && !trip.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+      if (dateFilter) {
+        const tripStartStr = format(new Date(trip.startDate), 'yyyy-MM-dd');
+        if (tripStartStr !== dateFilter) return false;
+      }
+      return true;
+    });
+  };
+
   const tripsByCategory = {
-    ongoing: trips.filter(trip => categorizeTrips(trip) === 'ongoing'),
-    upcoming: trips.filter(trip => categorizeTrips(trip) === 'upcoming'),
-    past: trips.filter(trip => categorizeTrips(trip) === 'past'),
+    ongoing: filterTrips(trips.filter(trip => categorizeTrips(trip) === 'ongoing')),
+    upcoming: filterTrips(trips.filter(trip => categorizeTrips(trip) === 'upcoming')),
+    past: filterTrips(trips.filter(trip => categorizeTrips(trip) === 'past')),
   };
 
   const handleDelete = async (id, e) => {
@@ -41,8 +54,8 @@ const TripsOverview = ({ trips, onDeleteTrip }) => {
     }
   };
 
-  const upcomingTrips = [...tripsByCategory.upcoming].sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-  const nextTrip = upcomingTrips[0];
+  const allUpcoming = trips.filter(trip => categorizeTrips(trip) === 'upcoming').sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+  const nextTrip = allUpcoming[0];
   const daysUntilNextTrip = nextTrip ? Math.ceil(differenceInDays(new Date(nextTrip.startDate), new Date())) : null;
 
   const totalVisitedPlaces = trips.reduce((acc, t) => acc + (t.activities?.filter(a => a.location)?.length || 0), 0);
@@ -129,6 +142,38 @@ const TripsOverview = ({ trips, onDeleteTrip }) => {
         </div>
       </div>
 
+      {/* Filters */}
+      <div className="glass-card p-4 rounded-2xl flex flex-col sm:flex-row gap-4 mt-8">
+        <div className="relative flex-1">
+          <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+            <Search size={18} className="text-gray-400" />
+          </div>
+          <input
+            type="text"
+            placeholder="Hledat výlet podle názvu..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px]"
+          />
+        </div>
+        <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-4">
+          <input
+            type="date"
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
+            className="w-full sm:w-auto px-4 py-2 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px] cursor-pointer"
+          />
+          {(searchQuery || dateFilter) && (
+            <button
+              onClick={() => { setSearchQuery(''); setDateFilter(''); }}
+              className="flex items-center justify-center gap-1.5 text-sm font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-4 py-2 transition-all w-full sm:w-auto shrink-0"
+            >
+              <X size={16} strokeWidth={2.5} /> Resetovat
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Tabs */}
       <div className="flex border-b border-gray-200 dark:border-white/10 gap-8">
         {[
@@ -183,7 +228,7 @@ const TripsOverview = ({ trips, onDeleteTrip }) => {
                   <span>Aktivit: {trip.activities?.length || 0}</span>
                 </div>
                 <Link
-                  to={`/dashboard/trip/${trip.id}`}
+                  to={`/dashboard/trip/${trip.id}?from=dashboard`}
                   className="inline-flex items-center gap-1.5 text-[12px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors uppercase tracking-widest"
                 >
                   Otevřít <ArrowRight size={16} strokeWidth={2.5} />

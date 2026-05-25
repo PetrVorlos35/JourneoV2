@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { MapPin, Loader2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const LocationAutocomplete = ({ value, onChange, placeholder, className }) => {
+const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLength }) => {
   const [inputValue, setInputValue] = useState(value || '');
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -123,6 +123,7 @@ const LocationAutocomplete = ({ value, onChange, placeholder, className }) => {
             if (inputValue.length >= 3) setShowSuggestions(true);
           }}
           placeholder={placeholder}
+          maxLength={maxLength}
           className={`${className || ''} !pr-12`}
         />
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center">

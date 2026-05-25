@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Trash2, DollarSign, TrendingUp, Calendar, Car, Home, Utensils, Palmtree, MoreHorizontal, ChevronRight, Wallet, X } from 'lucide-react';
+import { Plus, Trash2, DollarSign, TrendingUp, Calendar, Car, Home, Utensils, Palmtree, MoreHorizontal, ChevronRight, Wallet, X, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import { cs } from 'date-fns/locale';
@@ -240,6 +240,15 @@ const Budget = ({ trips, onUpdateTrip }) => {
   const { confirmDialog, ModalPortal } = useDialog();
   const { currency } = useCurrency();
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+
+  const filteredExpenses = expenses.filter(expense => {
+    if (searchQuery && !expense.description.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (categoryFilter !== 'all' && expense.category !== categoryFilter) return false;
+    return true;
+  });
+
   const handleAddExpense = (expense) => {
     onUpdateTrip({ ...trip, expenses: [...expenses, expense] });
   };
@@ -412,14 +421,54 @@ const Budget = ({ trips, onUpdateTrip }) => {
 
           {/* Seznam výdajů */}
           <div className="space-y-6 pt-6">
+            
+            {/* Filter Bar */}
+            {expenses.length > 0 && (
+              <div className="glass-card p-4 rounded-2xl flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                  <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                    <Search size={18} className="text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Hledat výdaj podle popisu..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px]"
+                  />
+                </div>
+                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                  <div className="relative">
+                    <select
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      className="pl-4 pr-10 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px] appearance-none cursor-pointer h-full"
+                    >
+                      <option value="all">Všechny kategorie</option>
+                      {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                    </select>
+                    <ChevronRight size={16} strokeWidth={2.5} className="absolute right-4 top-1/2 -translate-y-1/2 rotate-90 text-gray-400 pointer-events-none" />
+                  </div>
+                  {(searchQuery || categoryFilter !== 'all') && (
+                    <button
+                      onClick={() => { setSearchQuery(''); setCategoryFilter('all'); }}
+                      className="flex items-center justify-center gap-1.5 text-sm font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-4 py-2.5 transition-all shrink-0"
+                    >
+                      <X size={16} strokeWidth={2.5} /> Resetovat
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center justify-between border-b border-gray-200 dark:border-white/10 pb-4">
               <h3 className="text-[13px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Historie výdajů</h3>
-              <span className="px-3 py-1 bg-gray-100 dark:bg-white/10 rounded-full text-[11px] font-bold text-gray-500 dark:text-gray-400">{expenses.length} položek</span>
+              <span className="px-3 py-1 bg-gray-100 dark:bg-white/10 rounded-full text-[11px] font-bold text-gray-500 dark:text-gray-400">{filteredExpenses.length} položek</span>
             </div>
 
-            {expenses.length > 0 ? (
+            {filteredExpenses.length > 0 ? (
               <div className="grid grid-cols-1 gap-4">
-                {[...expenses].reverse().map(expense => {
+                {[...filteredExpenses].reverse().map(expense => {
                   const cat = catInfo(expense.category);
                   const Icon = cat.icon;
                   return (
@@ -448,7 +497,7 @@ const Budget = ({ trips, onUpdateTrip }) => {
                         <span className="font-bold text-2xl tracking-tight text-gray-900 dark:text-white">{formatCurrency(expense.amount, currency)}</span>
                         <button
                           onClick={() => handleDeleteExpense(expense.id)}
-                          className="flex items-center gap-1.5 text-[11px] font-bold text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 uppercase tracking-widest opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all bg-gray-100 dark:bg-white/5 sm:bg-transparent px-3 py-1.5 sm:px-0 sm:py-0 rounded-full sm:rounded-none"
+                          className="flex items-center gap-1.5 text-[11px] font-bold text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 uppercase tracking-widest opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all sm:bg-transparent px-3 py-1.5 sm:px-0 sm:py-0 rounded-full sm:rounded-none"
                         >
                           <Trash2 size={14} strokeWidth={2} /> Smazat
                         </button>
@@ -456,6 +505,11 @@ const Budget = ({ trips, onUpdateTrip }) => {
                     </motion.div>
                   );
                 })}
+              </div>
+            ) : expenses.length > 0 ? (
+              <div className="text-center py-10 glass-card">
+                <p className="font-bold text-xl text-gray-900 dark:text-white tracking-tight mb-2">Žádné výsledky</p>
+                <p className="text-[14px] text-gray-500 dark:text-gray-400">Vašemu vyhledávání neodpovídají žádné výdaje. Zkuste změnit filtry.</p>
               </div>
             ) : (
               <div className="text-center py-20 glass-card">

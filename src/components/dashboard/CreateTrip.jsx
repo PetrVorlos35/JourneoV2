@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, ArrowRight, ArrowLeft, Rocket } from 'lucide-react';
+import { Calendar, MapPin, ArrowRight, ArrowLeft, Rocket, Check, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DayPicker } from 'react-day-picker';
 import { cs } from 'date-fns/locale';
-import { format } from 'date-fns';
+import { format, isValid as isValidDate } from 'date-fns';
 import 'react-day-picker/dist/style.css';
 
 const CreateTrip = ({ onAddTrip }) => {
@@ -13,6 +13,27 @@ const CreateTrip = ({ onAddTrip }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({ title: '', startDate: '', endDate: '' });
   const [range, setRange] = useState({ from: undefined, to: undefined });
+  const [isLoading, setIsLoading] = useState(false);
+  const [dateError, setDateError] = useState(false);
+
+  // Sync string dates back to range objects for Calendar step and validate
+  useEffect(() => {
+    if (!formData.startDate && !formData.endDate) return;
+
+    let valid = true;
+    const newFrom = formData.startDate ? new Date(formData.startDate) : undefined;
+    const newTo = formData.endDate ? new Date(formData.endDate) : undefined;
+
+    if (formData.startDate && (!newFrom || isNaN(newFrom.getTime()))) valid = false;
+    if (formData.endDate && (!newTo || isNaN(newTo.getTime()))) valid = false;
+    if (newFrom && newTo && newTo < newFrom) valid = false;
+
+    setDateError(!valid);
+
+    if (valid) {
+      setRange({ from: newFrom, to: newTo });
+    }
+  }, [formData.startDate, formData.endDate]);
 
   const totalSteps = 3;
 
@@ -33,18 +54,20 @@ const CreateTrip = ({ onAddTrip }) => {
   };
 
   const handleSubmit = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
     try {
       const createdTrip = await onAddTrip({
         title: formData.title,
         startDate: formData.startDate,
         endDate: formData.endDate,
       });
-      toast.success('Výlet byl úspěšně vytvořen!');
-      setTimeout(() => {
-        navigate(`/dashboard/trip/${createdTrip.id}`);
-      }, 1500);
+      // Immediate redirect to the Detail page
+      navigate(`/dashboard/trip/${createdTrip.id}`);
     } catch (err) {
       // Error toast is handled in DashboardHome
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -54,27 +77,89 @@ const CreateTrip = ({ onAddTrip }) => {
     exit: { opacity: 0, x: -20 }
   };
 
+  const steps = [
+    { id: 1, label: 'Destinace' },
+    { id: 2, label: 'Termín' },
+    { id: 3, label: 'Detaily' },
+  ];
+
   return (
     <div className="w-full flex flex-col min-h-full flex-1 space-y-4 sm:space-y-8 pb-4 sm:pb-10">
-      <div className="space-y-1 sm:space-y-2">
+      <div className="space-y-1 sm:space-y-2 mb-2 sm:mb-0">
         <p className="text-[10px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Plánování</p>
         <h1 className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Vytvořit nový výlet</h1>
       </div>
 
-      {/* Progress Bar */}
-      <div className="w-full">
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-[12px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest">Krok {step} z {totalSteps}</span>
-          <span className="text-[12px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{Math.round((step / totalSteps) * 100)}% hotovo</span>
-        </div>
-        <div className="h-[4px] w-full bg-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
-          <motion.div 
-            initial={{ width: 0 }}
-            animate={{ width: `${(step / totalSteps) * 100}%` }}
-            className="h-full bg-blue-600 dark:bg-blue-500 rounded-full"
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-          />
-        </div>
+      {/* Animated Stepper */}
+      <div className="w-full flex items-center justify-between mb-8 sm:mb-12 pt-2 pb-6">
+        {steps.map((s, i) => {
+          const isCompleted = step > s.id;
+          const isActive = step === s.id;
+          
+          return (
+            <div key={s.id} className="flex items-center flex-1 last:flex-none">
+              <div className="relative flex flex-col items-center">
+                <motion.div
+                  initial={false}
+                  animate={{
+                    borderColor: isActive ? 'rgba(37, 99, 235, 0.3)' : 'transparent',
+                  }}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm z-10 border-4 transition-colors duration-300 ${
+                    isCompleted || isActive 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-600'
+                  }`}
+                >
+                  <AnimatePresence mode="wait">
+                    {isCompleted ? (
+                      <motion.div
+                        key="check"
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Check size={18} strokeWidth={3} />
+                      </motion.div>
+                    ) : (
+                      <motion.span
+                        key="number"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {s.id}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+                <div className="absolute top-12 w-max text-center">
+                  <span className={`text-[10px] sm:text-[11px] font-bold uppercase tracking-widest transition-colors duration-300 ${
+                    isActive 
+                      ? 'text-blue-600 dark:text-blue-400' 
+                      : isCompleted 
+                        ? 'text-gray-900 dark:text-white' 
+                        : 'text-gray-400 dark:text-gray-600'
+                  }`}>
+                    {s.label}
+                  </span>
+                </div>
+              </div>
+
+              {i < steps.length - 1 && (
+                <div className="flex-1 h-[2px] mx-2 sm:mx-4 bg-gray-200 dark:bg-white/10 relative overflow-hidden rounded-full mt-[-20px] sm:mt-0">
+                  <motion.div
+                    className="absolute top-0 left-0 h-full bg-blue-600 dark:bg-blue-500 rounded-full"
+                    initial={{ width: "0%" }}
+                    animate={{ width: isCompleted ? "100%" : "0%" }}
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                  />
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div className="min-h-[400px] w-full flex flex-col mb-4 sm:mb-8">
@@ -193,9 +278,14 @@ const CreateTrip = ({ onAddTrip }) => {
                   <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0">
                     <MapPin size={24} strokeWidth={2} />
                   </div>
-                  <div>
-                    <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold mb-2">Destinace</p>
-                    <p className="font-bold text-3xl tracking-tight text-gray-900 dark:text-white leading-tight">{formData.title}</p>
+                  <div className="w-full">
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold mb-1 ml-2">Destinace</p>
+                    <input
+                      type="text"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      className="font-bold text-2xl sm:text-3xl tracking-tight text-gray-900 dark:text-white leading-tight bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 rounded-lg px-2 py-1 w-full transition-all -ml-2"
+                    />
                   </div>
                 </div>
 
@@ -203,11 +293,23 @@ const CreateTrip = ({ onAddTrip }) => {
                   <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0">
                     <Calendar size={24} strokeWidth={2} />
                   </div>
-                  <div>
-                    <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold mb-2">Termín</p>
-                    <p className="font-bold text-2xl tracking-tight text-gray-900 dark:text-white leading-tight">
-                      {formData.startDate && new Date(formData.startDate).toLocaleDateString('cs-CZ')} — {formData.endDate && new Date(formData.endDate).toLocaleDateString('cs-CZ')}
-                    </p>
+                  <div className="w-full">
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold mb-1 ml-2">Termín</p>
+                    <div className={`flex items-center flex-wrap gap-1 sm:gap-2 font-bold text-lg sm:text-2xl tracking-tight leading-tight ${dateError ? 'text-red-500' : 'text-gray-900 dark:text-white'}`}>
+                      <input
+                        type="date"
+                        value={formData.startDate}
+                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                        className={`bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 rounded-lg px-2 py-1 transition-all -ml-2 cursor-pointer ${dateError ? 'focus:ring-red-500 ring-1 ring-red-500/50' : 'focus:ring-black/10 dark:focus:ring-white/20'}`}
+                      />
+                      <span className="text-gray-300 dark:text-white/20">—</span>
+                      <input
+                        type="date"
+                        value={formData.endDate}
+                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                        className={`bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 rounded-lg px-2 py-1 transition-all cursor-pointer ${dateError ? 'focus:ring-red-500 ring-1 ring-red-500/50' : 'focus:ring-black/10 dark:focus:ring-white/20'}`}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -231,13 +333,21 @@ const CreateTrip = ({ onAddTrip }) => {
         )}
         <button
           onClick={step === 3 ? handleSubmit : nextStep}
-          className="group inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold transition-colors duration-300 shadow-md shadow-blue-500/20 active:scale-95 text-sm sm:text-base"
+          disabled={isLoading}
+          className="group inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold transition-colors duration-300 shadow-md shadow-blue-500/20 active:scale-95 text-sm sm:text-base disabled:opacity-70 disabled:cursor-not-allowed"
         >
           {step === 3 ? (
-            <>
-              <Rocket size={18} strokeWidth={2.5} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
-              Vytvořit výlet
-            </>
+            isLoading ? (
+              <>
+                <Loader2 size={18} strokeWidth={2.5} className="animate-spin" />
+                Vytvářím...
+              </>
+            ) : (
+              <>
+                <Rocket size={18} strokeWidth={2.5} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />
+                Vytvořit výlet
+              </>
+            )
           ) : (
             <>
               {step === 1 ? 'Pokračovat' : 'Další krok'}

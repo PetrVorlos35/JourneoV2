@@ -12,6 +12,7 @@ const TripDetail = lazy(() => import('./TripDetail'));
 const Statistics = lazy(() => import('./Statistics'));
 const Settings = lazy(() => import('./Settings'));
 const Budget = lazy(() => import('./Budget'));
+const AllTrips = lazy(() => import('./AllTrips'));
 
 const EXCHANGE_RATES = {
   CZK: { CZK: 1, EUR: 0.04, USD: 0.043, GBP: 0.034 },
@@ -54,8 +55,17 @@ const DashboardHome = () => {
         startDate: newTrip.startDate,
         endDate: newTrip.endDate,
       });
-      setTrips(prev => [...prev, data.trip]);
-      return data.trip;
+      
+      const createdTrip = { ...data.trip, isGenerating: true };
+      setTrips(prev => [...prev, createdTrip]);
+      
+      // Simulate heavy processing (AI generation, database inserts) in the background
+      setTimeout(() => {
+        setTrips(prev => prev.map(t => t.id === createdTrip.id ? { ...t, isGenerating: false } : t));
+        toast.success('Výlet byl úspěšně připraven!');
+      }, 4000);
+
+      return createdTrip;
     } catch (err) {
       toast.error(err.message || 'Nepodařilo se vytvořit výlet.');
       throw err;
@@ -136,6 +146,10 @@ const DashboardHome = () => {
             <Route 
               path="/" 
               element={<TripsOverview trips={trips} onDeleteTrip={handleDeleteTrip} />} 
+            />
+            <Route 
+              path="/all-trips" 
+              element={<AllTrips trips={trips} onDeleteTrip={handleDeleteTrip} />} 
             />
             <Route 
               path="/create" 

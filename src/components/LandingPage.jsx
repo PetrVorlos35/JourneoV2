@@ -1,3 +1,4 @@
+"use client";
 import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronRight, Clock, Plane, MapPin, Calendar, TrendingUp } from 'lucide-react';
@@ -6,6 +7,10 @@ import heroImage from '../assets/hero_travel.png';
 import JourneoLogo from '../assets/Journeo_whitelogo.png';
 
 const LandingPage = () => {
+  // Hero parallax hooks
+  const { scrollY } = useScroll();
+  const heroBackgroundY = useTransform(scrollY, [0, 1000], [0, 300]);
+
   // Scrollytelling reference and hooks
   const targetRef = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -82,11 +87,14 @@ const LandingPage = () => {
       <section className="relative h-[80vh] flex flex-col justify-center items-center text-center px-6 z-10 pt-20 overflow-hidden">
         
         {/* Giant Watermark Text */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0">
+        <motion.div 
+          className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0"
+          style={{ y: heroBackgroundY }}
+        >
           <span className="text-[20vw] font-black tracking-tighter text-white/[0.08] leading-none">
             JOURNEO
           </span>
-        </div>
+        </motion.div>
 
         <h1 className="relative z-10 text-[12vw] sm:text-[5rem] lg:text-[7rem] font-bold leading-[1.05] sm:leading-[0.95] tracking-tighter max-w-5xl mx-auto break-words mt-12">
           Zaznamenávejte <br className="hidden sm:block" />
