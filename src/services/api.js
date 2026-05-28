@@ -48,6 +48,12 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       }),
+      
+    googleLogin: (accessToken) =>
+      request('/auth/google', {
+        method: 'POST',
+        body: JSON.stringify({ access_token: accessToken }),
+      }),
 
     me: () => request('/auth/me'),
     updateProfile: (profileData) =>

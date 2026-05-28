@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useGoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../contexts/AuthContext';
 import JourneoWhiteLogo from '../../assets/Journeo_whitelogo.png';
 import JourneoBlackLogo from '../../assets/Journeo_blacklogo.png';
@@ -17,8 +18,28 @@ const AuthFlow = () => {
   });
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const navigate = useNavigate();
-  const { login, register } = useAuth();
+  const { login, register, loginWithGoogle } = useAuth();
+
+  const googleLoginFn = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setIsGoogleLoading(true);
+      setErrorMsg('');
+      try {
+        await loginWithGoogle(tokenResponse.access_token);
+        toast.success(mode === 'login' ? 'Vítejte zpět!' : 'Registrace úspěšná! Vítejte v Journeo.');
+        navigate('/dashboard');
+      } catch (err) {
+        setErrorMsg(err.message || 'Chyba při přihlášení přes Google.');
+      } finally {
+        setIsGoogleLoading(false);
+      }
+    },
+    onError: () => {
+      setErrorMsg('Přihlášení přes Google se nezdařilo.');
+    }
+  });
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -174,7 +195,7 @@ const AuthFlow = () => {
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || isGoogleLoading}
                 className="w-full py-4 mt-2 bg-black dark:bg-white text-white dark:text-black font-bold rounded-full hover:scale-[1.02] transition-transform duration-300 shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer disabled:cursor-not-allowed"
               >
                 {isLoading
@@ -182,6 +203,28 @@ const AuthFlow = () => {
                   : mode === 'login'
                     ? 'Přihlásit se'
                     : 'Vytvořit účet'}
+              </button>
+
+              <div className="relative flex items-center py-2">
+                <div className="flex-grow border-t border-gray-200 dark:border-white/10"></div>
+                <span className="flex-shrink-0 mx-4 text-gray-400 text-xs font-bold uppercase tracking-widest">Nebo</span>
+                <div className="flex-grow border-t border-gray-200 dark:border-white/10"></div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => googleLoginFn()}
+                disabled={isLoading || isGoogleLoading}
+                className="w-full flex items-center justify-center gap-3 py-3.5 bg-white/40 dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-full font-bold text-gray-900 dark:text-white hover:bg-white/80 dark:hover:bg-white/10 hover:scale-[1.02] transition-all duration-300 shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer disabled:cursor-not-allowed glass"
+              >
+                {isGoogleLoading ? (
+                  <span className="animate-pulse">Zpracovávám...</span>
+                ) : (
+                  <>
+                    <img src={GoogleIcon} alt="Google" className="w-5 h-5" />
+                    <span>Pokračovat přes Google</span>
+                  </>
+                )}
               </button>
             </form>
           </div>

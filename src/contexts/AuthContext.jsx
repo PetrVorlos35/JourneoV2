@@ -40,6 +40,13 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const loginWithGoogle = async (accessToken) => {
+    const data = await api.auth.googleLogin(accessToken);
+    localStorage.setItem('journeo_token', data.token);
+    setUser(data.user);
+    return data;
+  };
+
   const logout = () => {
     localStorage.removeItem('journeo_token');
     setUser(null);
@@ -52,7 +59,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );
