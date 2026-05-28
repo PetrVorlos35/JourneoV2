@@ -9,7 +9,7 @@ const router = Router();
 // ── POST /api/auth/register ─────────────────────────────────
 router.post('/register', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, first_name, last_name } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ error: 'E-mail a heslo jsou povinné.' });
@@ -31,8 +31,8 @@ router.post('/register', async (req, res) => {
 
     // Insert user
     const [result] = await pool.query(
-      'INSERT INTO users (email, password_hash) VALUES (?, ?)',
-      [email, passwordHash]
+      'INSERT INTO users (email, password_hash, first_name, last_name) VALUES (?, ?, ?, ?)',
+      [email, passwordHash, first_name || null, last_name || null]
     );
 
     const userId = result.insertId;
@@ -48,7 +48,7 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({
       token,
-      user: { id: userId, email, first_name: null, last_name: null, avatar_url: null, bio: null }
+      user: { id: userId, email, first_name: first_name || null, last_name: last_name || null, avatar_url: null, bio: null }
     });
   } catch (err) {
     console.error('Register error:', err);

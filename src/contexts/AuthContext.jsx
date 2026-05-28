@@ -33,8 +33,8 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  const register = async (email, password) => {
-    const data = await api.auth.register(email, password);
+  const register = async (firstName, lastName, email, password) => {
+    const data = await api.auth.register(firstName, lastName, email, password);
     localStorage.setItem('journeo_token', data.token);
     setUser(data.user);
     return data;

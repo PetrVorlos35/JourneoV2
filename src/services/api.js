@@ -37,10 +37,10 @@ async function request(endpoint, options = {}) {
 // ── Auth ────────────────────────────────────────────────────
 export const api = {
   auth: {
-    register: (email, password) =>
+    register: (firstName, lastName, email, password) =>
       request('/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ first_name: firstName, last_name: lastName, email, password }),
       }),
 
     login: (email, password) =>
