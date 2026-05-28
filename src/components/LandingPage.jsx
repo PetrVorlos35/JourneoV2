@@ -109,7 +109,7 @@ const LandingPage = () => {
           <Link to="/auth" className="group flex items-center gap-2 px-8 py-4 bg-white text-black text-[15px] font-semibold rounded-full hover:scale-105 transition-transform duration-300 shadow-xl shadow-white/10">
             Začít psát
           </Link>
-          <button onClick={() => window.scrollTo({ top: window.innerHeight * 0.8, behavior: 'smooth' })} className="group flex items-center gap-2 px-8 py-4 text-[15px] font-semibold hover:text-white text-gray-400 transition-colors">
+          <button onClick={() => window.scrollTo({ top: window.innerHeight * 0.8, behavior: 'smooth' })} className="group flex items-center gap-2 px-8 py-4 text-[15px] font-semibold hover:text-white text-gray-400 transition-colors cursor-pointer disabled:cursor-not-allowed">
             Zjistit více <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>

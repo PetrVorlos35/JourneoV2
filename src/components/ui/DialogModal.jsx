@@ -67,7 +67,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
             {/* Close btn */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 w-10 h-10 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+              className="absolute top-4 right-4 w-10 h-10 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer disabled:cursor-not-allowed"
             >
               <X size={20} strokeWidth={2.5} />
             </button>
@@ -121,7 +121,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
             <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end pt-2">
               <button
                 onClick={() => onCancel(false)}
-                className="w-full sm:w-auto px-6 py-4 rounded-2xl text-[13px] uppercase tracking-widest font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors"
+                className="w-full sm:w-auto px-6 py-4 rounded-2xl text-[13px] uppercase tracking-widest font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer disabled:cursor-not-allowed"
               >
                 {config?.cancelLabel || 'Zrušit'}
               </button>
@@ -136,7 +136,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
                   config?.variant === 'danger'
                     ? 'bg-red-500 text-white shadow-red-500/20 hover:bg-red-600'
                     : 'bg-blue-600 text-white shadow-blue-500/20 hover:bg-blue-500'
-                }`}
+                } cursor-pointer disabled:cursor-not-allowed`}
               >
                 {config?.confirmLabel || 'Potvrdit'}
               </button>

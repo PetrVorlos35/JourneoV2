@@ -323,7 +323,7 @@ const CreateTrip = ({ onAddTrip }) => {
         {step > 1 ? (
           <button
             onClick={prevStep}
-            className="flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 text-[11px] sm:text-[13px] text-gray-500 hover:text-gray-900 dark:hover:text-white uppercase tracking-widest font-bold transition-colors bg-white/40 dark:bg-white/5 rounded-2xl"
+            className="flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 text-[11px] sm:text-[13px] text-gray-500 hover:text-gray-900 dark:hover:text-white uppercase tracking-widest font-bold transition-colors bg-white/40 dark:bg-white/5 rounded-2xl cursor-pointer disabled:cursor-not-allowed"
           >
             <ArrowLeft size={16} strokeWidth={2.5} />
             <span className="hidden sm:inline">{step === 3 ? 'Upravit' : 'Zpět'}</span>
@@ -334,7 +334,7 @@ const CreateTrip = ({ onAddTrip }) => {
         <button
           onClick={step === 3 ? handleSubmit : nextStep}
           disabled={isLoading}
-          className="group inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold transition-colors duration-300 shadow-md shadow-blue-500/20 active:scale-95 text-sm sm:text-base disabled:opacity-70 disabled:cursor-not-allowed"
+          className="group inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold transition-colors duration-300 shadow-md shadow-blue-500/20 active:scale-95 text-sm sm:text-base disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer disabled:cursor-not-allowed"
         >
           {step === 3 ? (
             isLoading ? (

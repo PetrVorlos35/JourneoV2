@@ -166,7 +166,7 @@ const TripsOverview = ({ trips, onDeleteTrip }) => {
           {(searchQuery || dateFilter) && (
             <button
               onClick={() => { setSearchQuery(''); setDateFilter(''); }}
-              className="flex items-center justify-center gap-1.5 text-sm font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-4 py-2 transition-all w-full sm:w-auto shrink-0"
+              className="flex items-center justify-center gap-1.5 text-sm font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-4 py-2 transition-all w-full sm:w-auto shrink-0 cursor-pointer disabled:cursor-not-allowed"
             >
               <X size={16} strokeWidth={2.5} /> Resetovat
             </button>
@@ -188,7 +188,7 @@ const TripsOverview = ({ trips, onDeleteTrip }) => {
               activeCategory === cat.id
                 ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400'
                 : 'text-gray-500 border-transparent hover:text-gray-900 dark:hover:text-white'
-            }`}
+            } cursor-pointer disabled:cursor-not-allowed`}
           >
             {cat.label} <span className="ml-2 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-[11px] font-bold text-gray-500 dark:text-gray-400">{tripsByCategory[cat.id].length}</span>
           </button>
@@ -209,7 +209,7 @@ const TripsOverview = ({ trips, onDeleteTrip }) => {
                 </div>
                 <button
                   onClick={(e) => handleDelete(trip.id, e)}
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20"
+                  className="w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer disabled:cursor-not-allowed"
                   title="Smazat výlet"
                 >
                   <Trash2 size={18} strokeWidth={2} />

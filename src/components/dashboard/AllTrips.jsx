@@ -100,7 +100,7 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
           {(searchQuery || dateFilter || statusFilter !== 'all') && (
             <button
               onClick={() => { setSearchQuery(''); setDateFilter(''); setStatusFilter('all'); }}
-              className="flex items-center justify-center gap-1.5 text-sm font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-4 py-2.5 transition-all w-full sm:w-auto shrink-0"
+              className="flex items-center justify-center gap-1.5 text-sm font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-4 py-2.5 transition-all w-full sm:w-auto shrink-0 cursor-pointer disabled:cursor-not-allowed"
             >
               <X size={16} strokeWidth={2.5} /> Resetovat
             </button>
@@ -139,7 +139,7 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
                     </span>
                     <button
                       onClick={(e) => handleDelete(trip.id, e)}
-                      className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20"
+                      className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer disabled:cursor-not-allowed"
                       title="Smazat výlet"
                     >
                       <Trash2 size={14} strokeWidth={2} />

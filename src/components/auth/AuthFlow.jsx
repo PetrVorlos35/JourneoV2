@@ -76,7 +76,7 @@ const AuthFlow = () => {
         <div className="mb-8 flex justify-center">
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 font-semibold text-[13px] uppercase tracking-widest glass px-5 py-2.5 rounded-full"
+            className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 font-semibold text-[13px] uppercase tracking-widest glass px-5 py-2.5 rounded-full cursor-pointer disabled:cursor-not-allowed"
           >
             <ArrowLeft size={16} strokeWidth={2.5} />
             <span>Zpět domů</span>
@@ -146,7 +146,7 @@ const AuthFlow = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer disabled:cursor-not-allowed"
                   >
                     {showPassword ? <EyeOff size={18} strokeWidth={2.5} /> : <Eye size={18} strokeWidth={2.5} />}
                   </button>
@@ -175,7 +175,7 @@ const AuthFlow = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-4 mt-2 bg-black dark:bg-white text-white dark:text-black font-bold rounded-full hover:scale-[1.02] transition-transform duration-300 shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+                className="w-full py-4 mt-2 bg-black dark:bg-white text-white dark:text-black font-bold rounded-full hover:scale-[1.02] transition-transform duration-300 shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer disabled:cursor-not-allowed"
               >
                 {isLoading
                   ? 'Zpracovávám...'

@@ -132,7 +132,7 @@ const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLeng
           ) : inputValue ? (
             <button 
               onClick={clearInput}
-              className="text-gray-400 hover:text-red-500 transition-colors p-1"
+              className="text-gray-400 hover:text-red-500 transition-colors p-1 cursor-pointer disabled:cursor-not-allowed"
             >
               <X size={16} strokeWidth={2.5} />
             </button>
@@ -154,7 +154,7 @@ const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLeng
                 <li key={suggestion.id}>
                   <button
                     onClick={() => handleSelect(suggestion)}
-                    className="w-full text-left px-4 py-3 rounded-xl flex items-start gap-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors group"
+                    className="w-full text-left px-4 py-3 rounded-xl flex items-start gap-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors group cursor-pointer disabled:cursor-not-allowed"
                   >
                     <div className="mt-0.5 text-gray-400 group-hover:text-blue-500 transition-colors shrink-0">
                       <MapPin size={18} strokeWidth={2} />

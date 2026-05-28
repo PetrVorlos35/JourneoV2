@@ -204,28 +204,28 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
         <div className="glass-panel w-full max-w-sm rounded-[2rem] flex justify-around items-center px-2 py-3 pointer-events-auto border border-gray-200 dark:border-white/10 shadow-2xl">
           <button 
             onClick={() => setMobileTab('itinerary')}
-            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'itinerary' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'itinerary' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'} cursor-pointer disabled:cursor-not-allowed`}
           >
             <Layout size={20} strokeWidth={mobileTab === 'itinerary' ? 2.5 : 2} />
             {mobileTab === 'itinerary' && <span className="text-[9px] font-bold uppercase tracking-widest">Itinerář</span>}
           </button>
           <button 
             onClick={() => setMobileTab('tools')}
-            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'tools' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'tools' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'} cursor-pointer disabled:cursor-not-allowed`}
           >
             <Briefcase size={20} strokeWidth={mobileTab === 'tools' ? 2.5 : 2} />
             {mobileTab === 'tools' && <span className="text-[9px] font-bold uppercase tracking-widest">Nástroje</span>}
           </button>
           <button 
             onClick={() => setMobileTab('info')}
-            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'info' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'info' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'} cursor-pointer disabled:cursor-not-allowed`}
           >
             <Info size={20} strokeWidth={mobileTab === 'info' ? 2.5 : 2} />
             {mobileTab === 'info' && <span className="text-[9px] font-bold uppercase tracking-widest">Detaily</span>}
           </button>
           <button 
             onClick={handleSave}
-            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${hasUnsavedChanges ? 'text-red-500 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${hasUnsavedChanges ? 'text-red-500 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'} cursor-pointer disabled:cursor-not-allowed`}
           >
             <Save size={20} strokeWidth={hasUnsavedChanges ? 2.5 : 2} />
             {hasUnsavedChanges && <span className="text-[9px] font-bold uppercase tracking-widest">Uložit</span>}
@@ -236,7 +236,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div>
-          <button onClick={handleBack} className="inline-flex items-center text-[12px] uppercase tracking-widest font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 transition-colors duration-300">
+          <button onClick={handleBack} className="inline-flex items-center text-[12px] uppercase tracking-widest font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed">
             <ArrowLeft size={16} className="mr-2" strokeWidth={2.5} /> {backText}
           </button>
 
@@ -254,14 +254,14 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                   className="text-4xl md:text-5xl font-bold tracking-tight bg-transparent border-b-2 border-blue-600 text-gray-900 dark:text-white focus:outline-none w-full pb-1"
                   autoFocus
                 />
-                <button onClick={() => setEditingTitle(false)} className="text-gray-400 hover:text-blue-600 transition-colors p-2 bg-gray-100 dark:bg-white/10 rounded-full">
+                <button onClick={() => setEditingTitle(false)} className="text-gray-400 hover:text-blue-600 transition-colors p-2 bg-gray-100 dark:bg-white/10 rounded-full cursor-pointer disabled:cursor-not-allowed">
                   <Check size={20} strokeWidth={2.5} />
                 </button>
               </div>
             ) : (
               <div className="flex items-center gap-4 group">
                 <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight">{tripTitle}</h1>
-                <button onClick={() => setEditingTitle(true)} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity p-2 bg-gray-100 dark:bg-white/5 rounded-full hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10" title="Přejmenovat">
+                <button onClick={() => setEditingTitle(true)} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity p-2 bg-gray-100 dark:bg-white/5 rounded-full hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 cursor-pointer disabled:cursor-not-allowed" title="Přejmenovat">
                   <Pencil size={18} strokeWidth={2} />
                 </button>
               </div>
@@ -280,7 +280,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
             hasUnsavedChanges 
               ? 'bg-red-500 text-white shadow-md shadow-red-500/20 active:scale-95 hover:bg-red-600' 
               : 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400 cursor-default'
-          }`}
+          } cursor-pointer disabled:cursor-not-allowed`}
         >
           <Save size={18} strokeWidth={2.5} /> {hasUnsavedChanges ? 'Uložit změny' : 'Uložit plán'}
         </button>
@@ -300,7 +300,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                 activeView === 'packing'
                   ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
                   : 'text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
-              }`}
+              } cursor-pointer disabled:cursor-not-allowed`}
             >
               <PackageOpen size={18} strokeWidth={2.5} /> Balící seznam
             </button>
@@ -311,7 +311,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                 activeView === 'documents'
                   ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
                   : 'text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
-              }`}
+              } cursor-pointer disabled:cursor-not-allowed`}
             >
               <LinkIcon size={18} strokeWidth={2.5} /> Odkazy a poznámky
             </button>
@@ -321,7 +321,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                 activeView === 'diary'
                   ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
                   : 'text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
-              }`}
+              } cursor-pointer disabled:cursor-not-allowed`}
             >
               <ImageIcon size={18} strokeWidth={2.5} /> Deník a Galerie
             </button>
@@ -338,7 +338,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                     activeView === index
                       ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
                       : 'text-gray-900 dark:text-white bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10'
-                  }`}
+                  } cursor-pointer disabled:cursor-not-allowed`}
                 >
                   <div className="min-w-0">
                     <div className="font-bold truncate text-[15px]">{day.title}</div>
@@ -384,7 +384,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
             
             <button 
               onClick={() => setActiveView('diary')}
-              className="w-full glass-card p-6 font-bold flex items-center justify-center gap-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors duration-300 text-gray-900 dark:text-white"
+              className="w-full glass-card p-6 font-bold flex items-center justify-center gap-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors duration-300 text-gray-900 dark:text-white cursor-pointer disabled:cursor-not-allowed"
             >
               <ImageIcon size={20} strokeWidth={2.5} /> Otevřít deník
             </button>
@@ -399,7 +399,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                   activeView === 'packing' 
                     ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' 
                     : 'border-transparent glass-card text-gray-500 hover:text-gray-900'
-                }`}
+                } cursor-pointer disabled:cursor-not-allowed`}
               >
                 <PackageOpen size={28} strokeWidth={2} className="mb-4" />
                 <span className="font-bold text-[15px] block mb-1 text-gray-900 dark:text-white leading-tight">Batoh</span>
@@ -414,7 +414,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                   activeView === 'documents' 
                     ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' 
                     : 'border-transparent glass-card text-gray-500 hover:text-gray-900'
-                }`}
+                } cursor-pointer disabled:cursor-not-allowed`}
               >
                 <LinkIcon size={28} strokeWidth={2} className="mb-4" />
                 <span className="font-bold text-[15px] block mb-1 text-gray-900 dark:text-white leading-tight">Odkazy</span>
@@ -436,7 +436,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                     activeView === index
                       ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-md shadow-blue-500/10'
                       : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400'
-                  }`}
+                  } cursor-pointer disabled:cursor-not-allowed`}
                 >
                   <div className="text-[10px] font-bold uppercase tracking-widest mb-1">
                     {format(new Date(day.date), 'EEE', { locale: cs })}
@@ -495,7 +495,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                         </span>
                         <button
                           onClick={() => deletePackingItem(item.id)}
-                          className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-100 dark:hover:bg-red-500/20"
+                          className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer disabled:cursor-not-allowed"
                         >
                           <Trash2 size={18} strokeWidth={2} />
                         </button>
@@ -535,7 +535,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                     rows="2"
                     className="glass-input border-none bg-white dark:bg-black/50 !py-3 sm:!py-4 resize-y shadow-sm text-[15px] sm:text-base min-h-[100px]"
                   ></textarea>
-                  <button type="submit" className="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 transition-colors duration-300">
+                  <button type="submit" className="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed">
                     Uložit odkaz
                   </button>
                 </form>
@@ -552,13 +552,13 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                         <div key={doc.id} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-6 rounded-3xl group relative">
                           <button
                             onClick={() => deleteDocument(doc.id)}
-                            className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-100 dark:hover:bg-red-500/20"
+                            className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer disabled:cursor-not-allowed"
                           >
                             <Trash2 size={16} strokeWidth={2} />
                           </button>
                           <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-3 pr-10 tracking-tight">{doc.title}</h4>
                           {isUrl ? (
-                            <a href={doc.content} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-black text-[13px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors break-all rounded-xl shadow-sm border border-gray-100 dark:border-white/5">
+                            <a href={doc.content} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-black text-[13px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors break-all rounded-xl shadow-sm border border-gray-100 dark:border-white/5 cursor-pointer disabled:cursor-not-allowed">
                               <ExternalLink size={16} strokeWidth={2} /> Otevřít odkaz
                             </a>
                           ) : (

@@ -97,7 +97,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
               <h3 className="font-bold text-3xl tracking-tight text-gray-900 dark:text-white">Nový výdaj</h3>
               <button 
                 onClick={onClose}
-                className="w-10 h-10 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="w-10 h-10 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer disabled:cursor-not-allowed"
               >
                 <X size={20} strokeWidth={2.5} />
               </button>
@@ -181,7 +181,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
               </div>
               <button 
                 type="submit" 
-                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors duration-300 mt-8 shadow-md shadow-blue-500/20 active:scale-95"
+                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors duration-300 mt-8 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer disabled:cursor-not-allowed"
               >
                 Přidat výdaj
               </button>
@@ -356,7 +356,7 @@ const Budget = ({ trips, onUpdateTrip }) => {
           {trip && (
             <button 
               onClick={() => setIsAddModalOpen(true)} 
-              className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors duration-300 shrink-0 shadow-md shadow-blue-500/20 active:scale-95"
+              className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors duration-300 shrink-0 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer disabled:cursor-not-allowed"
             >
               <Plus size={20} strokeWidth={2.5} />
               Nová útrata
@@ -452,7 +452,7 @@ const Budget = ({ trips, onUpdateTrip }) => {
                   {(searchQuery || categoryFilter !== 'all') && (
                     <button
                       onClick={() => { setSearchQuery(''); setCategoryFilter('all'); }}
-                      className="flex items-center justify-center gap-1.5 text-sm font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-4 py-2.5 transition-all shrink-0"
+                      className="flex items-center justify-center gap-1.5 text-sm font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-4 py-2.5 transition-all shrink-0 cursor-pointer disabled:cursor-not-allowed"
                     >
                       <X size={16} strokeWidth={2.5} /> Resetovat
                     </button>
@@ -497,7 +497,7 @@ const Budget = ({ trips, onUpdateTrip }) => {
                         <span className="font-bold text-2xl tracking-tight text-gray-900 dark:text-white">{formatCurrency(expense.amount, currency)}</span>
                         <button
                           onClick={() => handleDeleteExpense(expense.id)}
-                          className="flex items-center gap-1.5 text-[11px] font-bold text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 uppercase tracking-widest opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all sm:bg-transparent px-3 py-1.5 sm:px-0 sm:py-0 rounded-full sm:rounded-none"
+                          className="flex items-center gap-1.5 text-[11px] font-bold text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 uppercase tracking-widest opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all sm:bg-transparent px-3 py-1.5 sm:px-0 sm:py-0 rounded-full sm:rounded-none cursor-pointer disabled:cursor-not-allowed"
                         >
                           <Trash2 size={14} strokeWidth={2} /> Smazat
                         </button>

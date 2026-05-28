@@ -133,7 +133,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                     !profileForm.avatar_url 
                       ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' 
                       : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-gray-900 dark:hover:text-white'
-                  }`}
+                  } cursor-pointer disabled:cursor-not-allowed`}
                   title="Použít iniciály"
                 >
                   <X strokeWidth={2.5} size={20} />
@@ -147,7 +147,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                       profileForm.avatar_url === preset.id 
                         ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' 
                         : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-gray-900 dark:hover:text-white'
-                    }`}
+                    } cursor-pointer disabled:cursor-not-allowed`}
                   >
                     <preset.Icon strokeWidth={2} size={24} />
                   </button>
@@ -204,7 +204,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                   hasUnsavedChanges
                     ? 'bg-amber-500 hover:bg-amber-400 shadow-amber-500/20'
                     : 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/20 disabled:hover:bg-blue-600'
-                }`}
+                } cursor-pointer disabled:cursor-not-allowed`}
               >
                 {saving ? (
                   <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -237,7 +237,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                   currency === id
                     ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
                     : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10'
-                }`}
+                } cursor-pointer disabled:cursor-not-allowed`}
               >
                 {label}
               </button>
@@ -266,7 +266,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                   theme === id
                     ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
                     : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10'
-                }`}
+                } cursor-pointer disabled:cursor-not-allowed`}
               >
                 <Icon size={24} strokeWidth={2} className="mr-4 sm:mr-0 sm:mb-2" />
                 <span className="font-bold text-[12px] uppercase tracking-widest">{label}</span>
@@ -288,7 +288,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
           </p>
           <button
             onClick={handleClear}
-            className="w-full sm:w-auto px-6 py-3 border-2 border-red-500/30 text-red-600 dark:text-red-400 rounded-2xl font-bold hover:bg-red-500 hover:text-white transition-colors duration-300 shadow-sm shadow-red-500/10 active:scale-95"
+            className="w-full sm:w-auto px-6 py-3 border-2 border-red-500/30 text-red-600 dark:text-red-400 rounded-2xl font-bold hover:bg-red-500 hover:text-white transition-colors duration-300 shadow-sm shadow-red-500/10 active:scale-95 cursor-pointer disabled:cursor-not-allowed"
           >
             Smazat všechna data
           </button>

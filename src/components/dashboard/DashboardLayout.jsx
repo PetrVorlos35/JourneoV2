@@ -29,7 +29,7 @@ const SidebarItem = ({ icon: Icon, label, path, active, onClick }) => (
       active
         ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
         : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10'
-    }`}
+    } cursor-pointer disabled:cursor-not-allowed`}
   >
     <Icon size={20} strokeWidth={active ? 2.5 : 2} />
     <span className="font-semibold">{label}</span>
@@ -103,7 +103,7 @@ const ThemeToggle = () => {
             theme === value
               ? 'bg-white dark:bg-white/15 text-blue-600 dark:text-blue-400 shadow-sm'
               : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
-          }`}
+          } cursor-pointer disabled:cursor-not-allowed`}
           title={value}
         >
           <Icon size={16} strokeWidth={2} />
@@ -213,7 +213,7 @@ const DashboardLayout = ({ children }) => {
                  {...item}
                  active={location.pathname === item.path}
                  onClick={(path, e) => handleNavigation(path, e)}
-              />
+               className="cursor-pointer disabled:cursor-not-allowed"/>
             ))}
           </nav>
 
@@ -229,8 +229,8 @@ const DashboardLayout = ({ children }) => {
               path="/dashboard/settings"
               active={location.pathname === '/dashboard/settings'}
               onClick={(path, e) => handleNavigation(path, e)}
-            />
-            <a href="/dashboard/settings" onClick={(e) => handleNavigation('/dashboard/settings', e)} className="px-4 py-4 flex items-center gap-3 mt-1 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
+             className="cursor-pointer disabled:cursor-not-allowed"/>
+            <a href="/dashboard/settings" onClick={(e) => handleNavigation('/dashboard/settings', e)} className="px-4 py-4 flex items-center gap-3 mt-1 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer disabled:cursor-not-allowed">
               <UserAvatar user={user} size="md" />
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-bold truncate">
@@ -241,7 +241,7 @@ const DashboardLayout = ({ children }) => {
             </a>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors duration-300 font-semibold"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors duration-300 font-semibold cursor-pointer disabled:cursor-not-allowed"
             >
               <LogOut size={20} strokeWidth={2} />
               <span>Odhlásit se</span>
@@ -261,7 +261,7 @@ const DashboardLayout = ({ children }) => {
                 onClick={(e) => handleNavigation(path, e)}
                 className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${
                   location.pathname === path ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-                }`}
+                } cursor-pointer disabled:cursor-not-allowed`}
               >
                 <Icon size={22} strokeWidth={location.pathname === path ? 2.5 : 2} />
                 {location.pathname === path && <span className="text-[9px] font-bold uppercase tracking-widest">{label.split(' ')[0]}</span>}
@@ -299,7 +299,7 @@ const DashboardLayout = ({ children }) => {
                   />
                   <span className="font-bold text-xl tracking-tight mt-0.5">Journeo</span>
                 </div>
-                <button onClick={closeMobile} className="p-2 bg-gray-100 dark:bg-white/10 rounded-full text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+                <button onClick={closeMobile} className="p-2 bg-gray-100 dark:bg-white/10 rounded-full text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer disabled:cursor-not-allowed">
                   <X size={20} strokeWidth={2.5} />
                 </button>
               </div>
@@ -331,14 +331,14 @@ const DashboardLayout = ({ children }) => {
                     path="/dashboard/settings"
                     active={location.pathname === '/dashboard/settings'}
                     onClick={(path, e) => handleNavigation(path, e, closeMobile)}
-                  />
+                   className="cursor-pointer disabled:cursor-not-allowed"/>
                 </div>
               </div>
 
               <div className="p-6">
                 <button
                   onClick={() => { closeMobile(); handleLogout(); }}
-                  className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors duration-300 font-bold"
+                  className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors duration-300 font-bold cursor-pointer disabled:cursor-not-allowed"
                 >
                   <LogOut size={20} strokeWidth={2.5} />
                   <span>Odhlásit se</span>
@@ -361,7 +361,7 @@ const DashboardLayout = ({ children }) => {
             />
             <span className="font-bold text-lg tracking-tight mt-0.5">Journeo</span>
           </div>
-          <button onClick={() => setMobileOpen(true)} className="w-10 h-10 flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors text-gray-900 dark:text-white">
+          <button onClick={() => setMobileOpen(true)} className="w-10 h-10 flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors text-gray-900 dark:text-white cursor-pointer disabled:cursor-not-allowed">
             <Menu size={24} strokeWidth={2.5} />
           </button>
         </div>
