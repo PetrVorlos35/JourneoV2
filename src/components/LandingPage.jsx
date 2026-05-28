@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronRight, Clock, Plane, MapPin, Calendar, TrendingUp } from 'lucide-react';
+import { ArrowRight, ChevronRight, ChevronDown, Clock, Plane, MapPin, Calendar, TrendingUp } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import heroImage from '../assets/hero_travel.png';
 import JourneoLogo from '../assets/Journeo_whitelogo.png';
@@ -106,13 +106,20 @@ const LandingPage = () => {
         </p>
 
         <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 mt-12">
-          <Link to="/auth" className="group flex items-center gap-2 px-8 py-4 bg-white text-black text-[15px] font-semibold rounded-full hover:scale-105 transition-transform duration-300 shadow-xl shadow-white/10">
-            Začít psát
+          <Link to="/auth" state={{ mode: 'register' }} className="group flex items-center gap-2 px-8 py-4 bg-white text-black text-[15px] font-semibold rounded-full hover:scale-105 transition-transform duration-300 shadow-xl shadow-white/10">
+            Vytvořit první výlet
           </Link>
-          <button onClick={() => window.scrollTo({ top: window.innerHeight * 0.8, behavior: 'smooth' })} className="group flex items-center gap-2 px-8 py-4 text-[15px] font-semibold hover:text-white text-gray-400 transition-colors cursor-pointer disabled:cursor-not-allowed">
-            Zjistit více <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
-          </button>
         </div>
+
+        {/* Scroll Indicator */}
+        <motion.button 
+          onClick={() => window.scrollTo({ top: window.innerHeight * 0.8, behavior: 'smooth' })}
+          animate={{ y: [0, 10, 0] }} 
+          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/50 hover:text-white transition-colors cursor-pointer z-10"
+        >
+          <ChevronDown size={28} strokeWidth={2} />
+        </motion.button>
       </section>
 
       {/* ===== Desktop Cinematic Scrollytelling Section (Hidden on Mobile) ===== */}
@@ -330,7 +337,7 @@ const LandingPage = () => {
             Připojte se a začněte tvořit svou osobní mapu světa. Bez závazků, bez zbytečností.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <Link to="/auth" className="group flex items-center justify-center gap-4 px-10 py-5 bg-white text-black text-lg font-bold rounded-full hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
+            <Link to="/auth" state={{ mode: 'register' }} className="group flex items-center justify-center gap-4 px-10 py-5 bg-white text-black text-lg font-bold rounded-full hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
               Začít zdarma
               <ArrowRight size={20} className="group-hover:translate-x-1.5 transition-transform duration-300" />
             </Link>
