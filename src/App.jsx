@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
 import AuthFlow from './components/auth/AuthFlow';
+import NotFound from './components/NotFound';
 import { useAuth } from './contexts/AuthContext';
 import { Analytics } from '@vercel/analytics/react';
 
@@ -44,6 +45,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
       <Analytics />

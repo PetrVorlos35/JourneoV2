@@ -3,6 +3,7 @@ import React, { useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ChevronRight, ChevronDown, Clock, Plane, MapPin, Calendar, TrendingUp } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import Navbar from './Navbar';
 import heroImage from '../assets/hero_travel.png';
 import JourneoLogo from '../assets/Journeo_whitelogo.png';
 
@@ -64,24 +65,7 @@ const LandingPage = () => {
         <div className="absolute w-[800px] h-[800px] rounded-[100%] bg-blue-500/10 blur-[120px]" />
       </div>
 
-      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-3xl rounded-full bg-[#1d1d1f]/70 backdrop-blur-[40px] saturate-[1.8] border border-white/10 shadow-sm px-2 py-2">
-        <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 pl-4 group">
-            <img 
-              src={JourneoLogo} 
-              alt="Journeo Logo" 
-              className="h-8 w-auto object-contain transition-transform group-hover:scale-105" 
-            />
-            <span className="font-semibold text-lg tracking-tight">Journeo</span>
-          </Link>
-          <div className="hidden md:flex items-center gap-8 text-[13px] font-medium text-gray-400"></div>
-          <div className="pr-1">
-            <Link to="/auth" className="inline-block text-[13px] font-medium bg-white text-black px-5 py-2.5 rounded-full hover:scale-105 transition-transform duration-300 shadow-lg">
-              Přihlásit se
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* ===== Hero Section ===== */}
       <section className="relative h-[80vh] flex flex-col justify-center items-center text-center px-6 z-10 pt-20 overflow-hidden">

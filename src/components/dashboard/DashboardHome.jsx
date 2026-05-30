@@ -2,6 +2,7 @@ import React, { Suspense, lazy, useState, useEffect, useCallback } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import DashboardLayout from './DashboardLayout';
 import DashboardSplash from './DashboardSplash';
+import DashboardNotFound from './DashboardNotFound';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -171,6 +172,7 @@ const DashboardHome = () => {
               path="/budget" 
               element={<Budget trips={trips} onUpdateTrip={handleUpdateTrip} />} 
             />
+            <Route path="*" element={<DashboardNotFound />} />
           </Routes>
         </Suspense>
       </DashboardLayout>
