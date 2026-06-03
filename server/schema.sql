@@ -104,3 +104,50 @@ CREATE TABLE IF NOT EXISTS trip_documents (
     INDEX idx_documents_trip (trip_id),
     FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ── Přátelství ───────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS friendships (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    requester_id INT UNSIGNED NOT NULL,
+    addressee_id INT UNSIGNED NOT NULL,
+    status ENUM('PENDING', 'ACCEPTED', 'DECLINED', 'BLOCKED') DEFAULT 'PENDING',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    UNIQUE KEY uq_friendship (requester_id, addressee_id),
+    INDEX idx_friendship_addressee (addressee_id),
+    FOREIGN KEY (requester_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (addressee_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ── Notifikace ───────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS notifications (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    type ENUM('FRIEND_REQUEST', 'FRIEND_ACCEPTED', 'TRIP_VOTED') NOT NULL,
+    reference_id INT UNSIGNED DEFAULT NULL COMMENT 'ID přátelství nebo výletu',
+    message TEXT DEFAULT NULL,
+    is_read TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_notif_user (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ── Hlasování (Reddit-style) ────────────────────────────────
+CREATE TABLE IF NOT EXISTS votes (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    trip_id INT UNSIGNED NOT NULL,
+    value TINYINT NOT NULL COMMENT '1 = upvote, -1 = downvote',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    UNIQUE KEY uq_user_trip_vote (user_id, trip_id),
+    INDEX idx_vote_trip (trip_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

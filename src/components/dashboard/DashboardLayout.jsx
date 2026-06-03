@@ -1,23 +1,28 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, PlusSquare, Settings, LogOut, BarChart2, Wallet, X, Sun, Moon, Monitor, Mountain, Palmtree, Compass, Map, Plane, Camera, Menu } from 'lucide-react';
+import { Home, PlusSquare, Settings, LogOut, BarChart2, Wallet, X, Sun, Moon, Monitor, Mountain, Palmtree, Compass, Map, Plane, Camera, Menu, Users } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useDialog } from '../ui/DialogModal';
 import { useUnsavedChanges } from '../../contexts/UnsavedChangesContext';
+import NotificationBell from '../ui/NotificationBell';
 import JourneoLogo from '../../assets/Journeo_whitelogo.png';
 import JourneoLogoDark from '../../assets/Journeo_blacklogo.png';
+import UserAvatar from '../ui/UserAvatar';
 
 const navItems = [
   { icon: Home, label: 'Přehled', path: '/dashboard' },
   { icon: Map, label: 'Moje výlety', path: '/dashboard/all-trips' },
   { icon: PlusSquare, label: 'Vytvořit výlet', path: '/dashboard/create' },
+  { icon: Users, label: 'Přátelé', path: '/dashboard/friends' },
   { icon: BarChart2, label: 'Statistiky', path: '/dashboard/statistics' },
   { icon: Wallet, label: 'Výdaje', path: '/dashboard/budget' },
 ];
 
+// eslint-disable-next-line no-unused-vars
 const SidebarItem = ({ icon: Icon, label, path, active, onClick }) => (
   <a
     href={path}
@@ -36,54 +41,7 @@ const SidebarItem = ({ icon: Icon, label, path, active, onClick }) => (
   </a>
 );
 
-const avatarPresets = {
-  mountain: Mountain,
-  beach: Palmtree,
-  city: Compass,
-  forest: Map,
-  travel: Plane,
-  photography: Camera,
-};
 
-const UserAvatar = ({ user, size = "md" }) => {
-  const getInitials = () => {
-    if (user?.first_name && user?.last_name) {
-      return `${user.first_name[0]}${user.last_name[0]}`.toUpperCase();
-    }
-    if (user?.first_name) return user.first_name[0].toUpperCase();
-    if (user?.email) return user.email.substring(0, 2).toUpperCase();
-    return '??';
-  };
-
-  const sizeClasses = {
-    sm: "w-8 h-8 text-[11px]",
-    md: "w-10 h-10 text-xs",
-    lg: "w-14 h-14 text-base",
-    xl: "w-20 h-20 text-xl"
-  };
-
-  const iconSizes = {
-    sm: 14,
-    md: 18,
-    lg: 24,
-    xl: 32
-  };
-
-  if (user?.avatar_url && avatarPresets[user.avatar_url]) {
-    const Icon = avatarPresets[user.avatar_url];
-    return (
-      <div className={`${sizeClasses[size]} rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-2 border-blue-600/30 flex items-center justify-center shrink-0`}>
-        <Icon size={iconSizes[size]} strokeWidth={2.5} />
-      </div>
-    );
-  }
-
-  return (
-    <div className={`${sizeClasses[size]} rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-2 border-blue-600/30 flex items-center justify-center font-bold shrink-0`}>
-      {getInitials()}
-    </div>
-  );
-};
 
 const ThemeToggle = () => {
   const { theme, setTheme } = useTheme();
@@ -94,21 +52,25 @@ const ThemeToggle = () => {
   ];
 
   return (
-    <div className="flex items-center gap-1 p-1 rounded-2xl bg-gray-100 dark:bg-white/5 border border-gray-200/50 dark:border-white/5">
-      {options.map(({ value, icon: Icon }) => (
+    <div className="w-full flex p-1 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/10">
+      {options.map(({ value, icon: Icon }) => {
+        // eslint-disable-next-line no-unused-vars
+        const unused = Icon;
+        return (
         <button
           key={value}
           onClick={() => setTheme(value)}
-          className={`flex-1 flex items-center justify-center p-2 rounded-xl transition-all duration-300 ${
+          className={`flex-1 flex items-center justify-center p-2 rounded-lg transition-all duration-300 ${
             theme === value
-              ? 'bg-white dark:bg-white/15 text-blue-600 dark:text-blue-400 shadow-sm'
+              ? 'bg-white dark:bg-[#2c2c2e] text-blue-600 dark:text-blue-400 shadow-sm'
               : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
           } cursor-pointer disabled:cursor-not-allowed`}
           title={value}
         >
           <Icon size={16} strokeWidth={2} />
         </button>
-      ))}
+      );
+      })}
     </div>
   );
 };
@@ -123,7 +85,9 @@ const DashboardLayout = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  const isTripDetail = location.pathname.startsWith('/dashboard/trip/');
+  const isTripDetail = location.pathname.includes('/trip/');
+
+  const mobileNavItems = navItems.filter(item => item.path !== '/dashboard/statistics');
 
   const handleNavigation = async (path, e, onClickCallback) => {
     if (e) e.preventDefault();
@@ -218,8 +182,7 @@ const DashboardLayout = ({ children }) => {
           </nav>
 
           <div className="p-4 border-t border-gray-100 dark:border-white/10 space-y-3">
-            {/* Theme Toggle */}
-            <div className="px-2 pb-2">
+            <div className="w-full px-2 pb-2">
               <ThemeToggle />
             </div>
 
@@ -254,7 +217,10 @@ const DashboardLayout = ({ children }) => {
       {!isTripDetail && (
         <div className="md:hidden fixed bottom-6 left-6 right-6 z-50 flex justify-center pointer-events-none">
           <nav className="glass-panel w-full max-w-sm rounded-[2rem] flex justify-around items-center px-2 py-3 pointer-events-auto">
-            {navItems.map(({ icon: Icon, label, path }) => (
+            {mobileNavItems.map(({ icon: Icon, label, path }) => {
+              // eslint-disable-next-line no-unused-vars
+              const unused = Icon;
+              return (
               <a
                 key={path}
                 href={path}
@@ -266,7 +232,8 @@ const DashboardLayout = ({ children }) => {
                 <Icon size={22} strokeWidth={location.pathname === path ? 2.5 : 2} />
                 {location.pathname === path && <span className="text-[9px] font-bold uppercase tracking-widest">{label.split(' ')[0]}</span>}
               </a>
-            ))}
+              );
+            })}
           </nav>
         </div>
       )}
@@ -326,6 +293,13 @@ const DashboardLayout = ({ children }) => {
                 <div className="space-y-2">
                   <p className="px-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">Možnosti</p>
                   <SidebarItem
+                    icon={BarChart2}
+                    label="Statistiky"
+                    path="/dashboard/statistics"
+                    active={location.pathname === '/dashboard/statistics'}
+                    onClick={(path, e) => handleNavigation(path, e, closeMobile)}
+                   className="cursor-pointer disabled:cursor-not-allowed"/>
+                  <SidebarItem
                     icon={Settings}
                     label="Nastavení"
                     path="/dashboard/settings"
@@ -361,9 +335,17 @@ const DashboardLayout = ({ children }) => {
             />
             <span className="font-bold text-lg tracking-tight mt-0.5">Journeo</span>
           </div>
-          <button onClick={() => setMobileOpen(true)} className="w-10 h-10 flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors text-gray-900 dark:text-white cursor-pointer disabled:cursor-not-allowed">
-            <Menu size={24} strokeWidth={2.5} />
-          </button>
+          <div className="flex items-center gap-1">
+            <NotificationBell />
+            <button onClick={() => setMobileOpen(true)} className="w-10 h-10 flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors text-gray-900 dark:text-white cursor-pointer disabled:cursor-not-allowed">
+              <Menu size={24} strokeWidth={2.5} />
+            </button>
+          </div>
+        </div>
+
+        {/* ── Desktop Floating Notification Bell ── */}
+        <div className="hidden md:block fixed top-6 right-6 z-50">
+          <NotificationBell />
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 sm:p-8 md:p-10 max-w-[1400px] mx-auto w-full flex flex-col min-h-0 custom-scrollbar">

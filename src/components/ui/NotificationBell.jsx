@@ -1,0 +1,231 @@
+import { useState, useEffect, useRef } from 'react';
+import { Bell, UserPlus, UserCheck, ChevronUp, Check, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import api from '../../services/api';
+import toast from 'react-hot-toast';
+
+const timeAgo = (dateStr) => {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffMs = now - date;
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return 'právě teď';
+  if (diffMin < 60) return `před ${diffMin} min`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `před ${diffHr} h`;
+  const diffDays = Math.floor(diffHr / 24);
+  if (diffDays < 7) return `před ${diffDays} d`;
+  return `před ${Math.floor(diffDays / 7)} týd.`;
+};
+
+const notifIcons = {
+  FRIEND_REQUEST: UserPlus,
+  FRIEND_ACCEPTED: UserCheck,
+  TRIP_VOTED: ChevronUp,
+};
+
+const NotificationBell = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const panelRef = useRef(null);
+
+  // Close on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (panelRef.current && !panelRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
+  // Fetch unread count on mount and every 30 seconds
+  useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        const data = await api.notifications.getUnreadCount();
+        setUnreadCount(data.count);
+      } catch (err) {
+        // Silently fail
+      }
+    };
+    fetchCount();
+    const interval = setInterval(fetchCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchNotifications = async () => {
+    setLoading(true);
+    try {
+      const data = await api.notifications.getAll();
+      setNotifications(data.notifications);
+    } catch (err) {
+      toast.error('Nepodařilo se načíst notifikace.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggle = () => {
+    if (!isOpen) {
+      fetchNotifications();
+    }
+    setIsOpen(!isOpen);
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await api.notifications.markAllRead();
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      toast.error('Chyba při označování notifikací.');
+    }
+  };
+
+  const handleAcceptRequest = async (friendshipId, notifId) => {
+    try {
+      await api.friends.accept(friendshipId);
+      await api.notifications.markRead(notifId);
+      setNotifications(prev => prev.filter(n => n.id !== notifId));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+      toast.success('Žádost o přátelství přijata!');
+    } catch (err) {
+      toast.error(err.message || 'Chyba při přijímání žádosti.');
+    }
+  };
+
+  const handleDeclineRequest = async (friendshipId, notifId) => {
+    try {
+      await api.friends.decline(friendshipId);
+      await api.notifications.markRead(notifId);
+      setNotifications(prev => prev.filter(n => n.id !== notifId));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (err) {
+      toast.error(err.message || 'Chyba při odmítání žádosti.');
+    }
+  };
+
+  return (
+    <div className="relative" ref={panelRef}>
+      <button
+        onClick={handleToggle}
+        className="relative w-10 h-10 flex items-center justify-center rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-300 cursor-pointer"
+      >
+        <Bell size={20} strokeWidth={2} className="text-gray-500 dark:text-gray-400" />
+        <AnimatePresence>
+          {unreadCount > 0 && (
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0 }}
+              className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-red-500 text-white text-[10px] font-bold rounded-full shadow-md shadow-red-500/30"
+            >
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.95 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
+            className="fixed md:absolute left-0 right-0 md:left-auto top-[72px] md:top-14 w-full md:w-96 max-h-[80vh] md:max-h-[420px] bg-white dark:bg-[#1c1c1e] shadow-2xl rounded-b-[2rem] md:rounded-2xl border-b md:border border-black/5 dark:border-white/10 overflow-hidden z-[100] flex flex-col"
+          >
+            {/* Header */}
+            <div className="px-5 py-4 border-b border-gray-100 dark:border-white/10 flex items-center justify-between">
+              <h3 className="font-bold text-[15px] text-gray-900 dark:text-white tracking-tight">Notifikace</h3>
+              {unreadCount > 0 && (
+                <button
+                  onClick={handleMarkAllRead}
+                  className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors uppercase tracking-widest cursor-pointer"
+                >
+                  Přečíst vše
+                </button>
+              )}
+            </div>
+
+            {/* List */}
+            <div className="overflow-y-auto max-h-[340px] custom-scrollbar">
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="w-5 h-5 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+                </div>
+              ) : notifications.length === 0 ? (
+                <div className="py-12 text-center">
+                  <Bell size={28} className="mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                  <p className="text-gray-500 dark:text-gray-400 text-[14px] font-bold">Žádné notifikace</p>
+                </div>
+              ) : (
+                notifications.map(n => {
+                  const Icon = notifIcons[n.type] || Bell;
+                  const isFriendRequest = n.type === 'FRIEND_REQUEST' && !n.isRead;
+
+                  return (
+                    <div
+                      key={n.id}
+                      className={`flex flex-col gap-1 p-4 border-b border-black/5 dark:border-white/10 last:border-0 transition-colors duration-200 ${
+                        !n.isRead ? 'bg-blue-50/50 dark:bg-blue-500/5' : ''
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                          n.type === 'FRIEND_REQUEST'
+                            ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                            : n.type === 'FRIEND_ACCEPTED'
+                              ? 'bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400'
+                              : 'bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400'
+                        }`}>
+                          <Icon size={16} strokeWidth={2.5} />
+                        </div>
+                        <div className="flex-1 min-w-0 flex flex-col gap-1">
+                          <p className={`text-sm leading-tight break-words ${!n.isRead ? 'font-bold text-gray-900 dark:text-white' : 'font-medium text-gray-600 dark:text-gray-400'}`}>
+                            {n.message}
+                          </p>
+                          <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
+                            {timeAgo(n.createdAt)}
+                          </p>
+
+                          {isFriendRequest && n.referenceId && (
+                            <div className="flex flex-row gap-2 mt-2">
+                              <button
+                                onClick={() => handleAcceptRequest(n.referenceId, n.id)}
+                                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-blue-600 text-white text-[12px] font-bold rounded-xl hover:bg-blue-500 transition-colors cursor-pointer"
+                              >
+                                <Check size={14} strokeWidth={3} /> Přijmout
+                              </button>
+                              <button
+                                onClick={() => handleDeclineRequest(n.referenceId, n.id)}
+                                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 text-[12px] font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/15 transition-colors cursor-pointer"
+                              >
+                                <X size={14} strokeWidth={3} /> Odmítnout
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        {!n.isRead && !isFriendRequest && (
+                          <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-1.5" />
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default NotificationBell;

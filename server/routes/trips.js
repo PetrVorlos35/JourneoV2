@@ -49,6 +49,19 @@ router.get('/', async (req, res) => {
         [trip.id]
       );
 
+      const [voteScore] = await pool.query(
+        `SELECT 
+           COALESCE(SUM(CASE WHEN value = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
+           COALESCE(SUM(CASE WHEN value = -1 THEN 1 ELSE 0 END), 0) AS downvotes
+         FROM votes WHERE trip_id = ?`,
+        [trip.id]
+      );
+
+      const [userVote] = await pool.query(
+        'SELECT value FROM votes WHERE user_id = ? AND trip_id = ?',
+        [userId, trip.id]
+      );
+
       return {
         ...trip,
         id: trip.id.toString(),
@@ -71,6 +84,9 @@ router.get('/', async (req, res) => {
           title: d.title,
           content: d.content,
         })),
+        upvotes: parseInt(voteScore[0].upvotes),
+        downvotes: parseInt(voteScore[0].downvotes),
+        userVote: userVote.length > 0 ? userVote[0].value : 0,
       };
     }));
 
@@ -213,6 +229,17 @@ router.put('/:id', async (req, res) => {
       'SELECT id, title, content FROM trip_documents WHERE trip_id = ? ORDER BY created_at ASC',
       [tripId]
     );
+    const [voteScore] = await pool.query(
+      `SELECT 
+         COALESCE(SUM(CASE WHEN value = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
+         COALESCE(SUM(CASE WHEN value = -1 THEN 1 ELSE 0 END), 0) AS downvotes
+       FROM votes WHERE trip_id = ?`,
+      [tripId]
+    );
+    const [userVote] = await pool.query(
+      'SELECT value FROM votes WHERE user_id = ? AND trip_id = ?',
+      [userId, tripId]
+    );
 
     res.json({
       trip: {
@@ -222,6 +249,9 @@ router.put('/:id', async (req, res) => {
         expenses: updatedExpenses.map(e => ({ ...e, id: e.id.toString(), amount: parseFloat(e.amount) })),
         packingList: updatedPacking.map(p => ({ id: p.id.toString(), text: p.text, checked: !!p.checked })),
         documents: updatedDocs.map(d => ({ id: d.id.toString(), title: d.title, content: d.content })),
+        upvotes: parseInt(voteScore[0].upvotes),
+        downvotes: parseInt(voteScore[0].downvotes),
+        userVote: userVote.length > 0 ? userVote[0].value : 0,
       }
     });
   } catch (err) {

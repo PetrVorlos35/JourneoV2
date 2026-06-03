@@ -95,6 +95,66 @@ export const api = {
         body: JSON.stringify(settings),
       }),
   },
+
+  // ── Friends ────────────────────────────────────────────────
+  friends: {
+    getAll: () => request('/friends'),
+
+    getRequests: () => request('/friends/requests'),
+
+    sendRequest: (addresseeId) =>
+      request('/friends/request', {
+        method: 'POST',
+        body: JSON.stringify({ addresseeId }),
+      }),
+
+    accept: (friendshipId) =>
+      request(`/friends/${friendshipId}/accept`, { method: 'PUT' }),
+
+    decline: (friendshipId) =>
+      request(`/friends/${friendshipId}/decline`, { method: 'PUT' }),
+
+    remove: (friendshipId) =>
+      request(`/friends/${friendshipId}`, { method: 'DELETE' }),
+
+    search: (query) => request(`/friends/search?q=${encodeURIComponent(query)}`),
+
+    getStatus: (userId) => request(`/friends/status/${userId}`),
+  },
+
+  // ── Profile (guarded) ─────────────────────────────────────
+  profile: {
+    get: (userId) => request(`/profile/${userId}`),
+
+    getTrip: (userId, tripId) => request(`/profile/${userId}/trip/${tripId}`),
+  },
+
+  // ── Votes ──────────────────────────────────────────────────
+  votes: {
+    cast: (tripId, value) =>
+      request('/votes', {
+        method: 'POST',
+        body: JSON.stringify({ tripId, value }),
+      }),
+
+    remove: (tripId) =>
+      request(`/votes/${tripId}`, { method: 'DELETE' }),
+
+    get: (tripId) => request(`/votes/${tripId}`),
+  },
+
+  // ── Notifications ──────────────────────────────────────────
+  notifications: {
+    getAll: () => request('/notifications'),
+
+    markRead: (id) =>
+      request(`/notifications/${id}/read`, { method: 'PUT' }),
+
+    markAllRead: () =>
+      request('/notifications/read-all', { method: 'PUT' }),
+
+    getUnreadCount: () => request('/notifications/unread-count'),
+  },
 };
 
 export default api;

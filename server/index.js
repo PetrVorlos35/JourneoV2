@@ -15,6 +15,10 @@ import auth from './middleware/auth.js';
 import authRoutes from './routes/auth.js';
 import tripRoutes from './routes/trips.js';
 import settingsRoutes from './routes/settings.js';
+import friendRoutes from './routes/friends.js';
+import profileRoutes from './routes/profile.js';
+import voteRoutes from './routes/votes.js';
+import notificationRoutes from './routes/notifications.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -28,6 +32,11 @@ app.use(express.json({ limit: '10mb' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/trips', auth, tripRoutes);
 app.use('/api/settings', auth, settingsRoutes);
+app.use('/api/friends', auth, friendRoutes);
+app.use('/api/profile', auth, profileRoutes);
+app.use('/api/votes', auth, voteRoutes);
+app.use('/api/notifications', auth, notificationRoutes);
+
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

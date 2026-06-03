@@ -14,6 +14,9 @@ const Statistics = lazy(() => import('./Statistics'));
 const Settings = lazy(() => import('./Settings'));
 const Budget = lazy(() => import('./Budget'));
 const AllTrips = lazy(() => import('./AllTrips'));
+const Friends = lazy(() => import('./Friends'));
+const FriendProfile = lazy(() => import('./FriendProfile'));
+const ReadOnlyTripView = lazy(() => import('./ReadOnlyTripView'));
 
 const EXCHANGE_RATES = {
   CZK: { CZK: 1, EUR: 0.04, USD: 0.043, GBP: 0.034 },
@@ -171,6 +174,18 @@ const DashboardHome = () => {
             <Route 
               path="/budget" 
               element={<Budget trips={trips} onUpdateTrip={handleUpdateTrip} />} 
+            />
+            <Route 
+              path="/friends" 
+              element={<Friends />} 
+            />
+            <Route 
+              path="/profile/:userId" 
+              element={<FriendProfile />} 
+            />
+            <Route 
+              path="/profile/:userId/trip/:tripId" 
+              element={<ReadOnlyTripView />} 
             />
             <Route path="*" element={<DashboardNotFound />} />
           </Routes>

@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { useDialog } from '../ui/DialogModal';
 import LocationAutocomplete from '../ui/LocationAutocomplete';
 import { useUnsavedChanges } from '../../contexts/UnsavedChangesContext';
+import VoteButton from '../ui/VoteButton';
 
 const TripDetail = ({ trips, onUpdateTrip }) => {
   const { id } = useParams();
@@ -235,7 +236,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
       
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-        <div>
+        <div className="flex-1">
           <button onClick={handleBack} className="inline-flex items-center text-[12px] uppercase tracking-widest font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed">
             <ArrowLeft size={16} className="mr-2" strokeWidth={2.5} /> {backText}
           </button>
@@ -274,16 +275,25 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           </p>
         </div>
 
-        <button
-          onClick={handleSave}
-          className={`hidden md:flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-bold transition-all duration-300 shrink-0 ${
-            hasUnsavedChanges 
-              ? 'bg-red-500 text-white shadow-md shadow-red-500/20 active:scale-95 hover:bg-red-600' 
-              : 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400 cursor-default'
-          } cursor-pointer disabled:cursor-not-allowed`}
-        >
-          <Save size={18} strokeWidth={2.5} /> {hasUnsavedChanges ? 'Uložit změny' : 'Uložit plán'}
-        </button>
+        <div className="flex items-center gap-4 shrink-0">
+          <VoteButton 
+            tripId={parseInt(trip.id)} 
+            initialUpvotes={trip.upvotes || 0} 
+            initialDownvotes={trip.downvotes || 0} 
+            initialUserVote={trip.userVote || 0} 
+          />
+          <button
+            onClick={handleSave}
+            disabled={!hasUnsavedChanges}
+            className={`hidden md:flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-bold transition-all duration-300 shrink-0 ${
+              hasUnsavedChanges 
+                ? 'bg-red-500 text-white shadow-md shadow-red-500/20 active:scale-95 hover:bg-red-600' 
+                : 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400 cursor-default'
+            } cursor-pointer disabled:cursor-not-allowed`}
+          >
+            <Save size={18} strokeWidth={2.5} /> {hasUnsavedChanges ? 'Uložit změny' : 'Uložit plán'}
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1 min-h-0">

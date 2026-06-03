@@ -84,7 +84,7 @@ const CreateTrip = ({ onAddTrip }) => {
   ];
 
   return (
-    <div className="w-full flex flex-col min-h-full flex-1 space-y-4 sm:space-y-8 pb-4 sm:pb-10">
+    <div className="w-full flex flex-col min-h-full flex-1 space-y-4 sm:space-y-8 pb-24 sm:pb-10">
       <div className="space-y-1 sm:space-y-2 mb-2 sm:mb-0">
         <p className="text-[10px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Plánování</p>
         <h1 className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Vytvořit nový výlet</h1>
@@ -205,9 +205,9 @@ const CreateTrip = ({ onAddTrip }) => {
               exit="exit"
               className="space-y-4 sm:space-y-8 w-full xl:w-fit"
             >
-              <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 sm:gap-8 w-full">
-                <div className="space-y-1 sm:space-y-4">
-                  <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Kdy vyrážíte?</h2>
+              <div className="flex flex-row justify-between items-center gap-2 sm:gap-8 w-full">
+                <div className="space-y-1 sm:space-y-4 shrink-0">
+                  <h2 className="text-xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Kdy vyrážíte?</h2>
                   <p className="hidden sm:block text-gray-500 dark:text-gray-400 text-lg font-medium">Vyberte termín vaší cesty.</p>
                 </div>
 
@@ -238,23 +238,25 @@ const CreateTrip = ({ onAddTrip }) => {
                 </div>
               </div>
 
-              <div className="inline-block glass-card p-2 sm:p-6 rounded-2xl sm:rounded-[2rem]">
-                <DayPicker
-                  mode="range"
-                  selected={range}
-                  onSelect={(newRange) => {
-                    setRange(newRange);
-                    if (newRange?.from) {
-                      setFormData(prev => ({ ...prev, startDate: format(newRange.from, 'yyyy-MM-dd') }));
-                    }
-                    if (newRange?.to) {
-                      setFormData(prev => ({ ...prev, endDate: format(newRange.to, 'yyyy-MM-dd') }));
-                    }
-                  }}
-                  locale={cs}
-                  numberOfMonths={window.innerWidth > 1024 ? 2 : 1}
-                  className="premium-calendar"
-                />
+              <div className="flex justify-center sm:justify-start w-full">
+                <div className="inline-block glass-card p-4 sm:p-6 rounded-2xl sm:rounded-[2rem]">
+                  <DayPicker
+                    mode="range"
+                    selected={range}
+                    onSelect={(newRange) => {
+                      setRange(newRange);
+                      if (newRange?.from) {
+                        setFormData(prev => ({ ...prev, startDate: format(newRange.from, 'yyyy-MM-dd') }));
+                      }
+                      if (newRange?.to) {
+                        setFormData(prev => ({ ...prev, endDate: format(newRange.to, 'yyyy-MM-dd') }));
+                      }
+                    }}
+                    locale={cs}
+                    numberOfMonths={window.innerWidth > 1024 ? 2 : 1}
+                    className="premium-calendar"
+                  />
+                </div>
               </div>
             </motion.div>
           )}
@@ -319,7 +321,7 @@ const CreateTrip = ({ onAddTrip }) => {
         </AnimatePresence>
       </div>
 
-      <div className="flex justify-between items-center pt-6 sm:pt-8 !mt-auto border-t border-gray-100 dark:border-white/10 w-full shrink-0">
+      <div className="flex justify-between items-center pt-2 sm:pt-8 !mt-auto border-t-0 sm:border-t border-gray-100 dark:border-white/10 w-full shrink-0">
         {step > 1 ? (
           <button
             onClick={prevStep}
