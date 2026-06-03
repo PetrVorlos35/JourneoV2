@@ -1,33 +1,185 @@
-import { Plane, CalendarDays, Map, CheckCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plane, CalendarDays, MapPin, ThumbsUp, Wallet, Backpack, Calendar, Crown, TrendingUp, Loader2 } from 'lucide-react';
 import { eachDayOfInterval } from 'date-fns';
+import { motion } from 'framer-motion';
+import { useCurrency } from '../../contexts/CurrencyContext';
+import api from '../../services/api';
 
-const StatCard = ({ icon: Icon, label, value }) => (
-  <div className="glass-card p-8 flex items-center gap-8">
-    <div className={`p-4 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-[1rem]`}>
-      <Icon size={32} strokeWidth={2} />
+// ── Category color mapping ──────────────────────────────────
+const CATEGORY_CONFIG = {
+  accommodation: { label: 'Ubytování', color: '#818cf8', darkColor: '#6366f1' },
+  transport:     { label: 'Doprava',   color: '#60a5fa', darkColor: '#3b82f6' },
+  food:          { label: 'Jídlo',     color: '#34d399', darkColor: '#10b981' },
+  activities:    { label: 'Aktivity',  color: '#fbbf24', darkColor: '#f59e0b' },
+  other:         { label: 'Ostatní',   color: '#f87171', darkColor: '#ef4444' },
+};
+
+// ── Currency symbol helper ──────────────────────────────────
+const CURRENCY_SYMBOLS = { CZK: 'Kč', EUR: '€', USD: '$', GBP: '£' };
+
+// ── Animated number counter ─────────────────────────────────
+const AnimatedValue = ({ value, suffix = '', prefix = '', className = '' }) => {
+  const [displayed, setDisplayed] = useState(0);
+
+  useEffect(() => {
+    const target = typeof value === 'number' ? value : 0;
+    if (target === 0) { setDisplayed(0); return; }
+
+    const duration = 800;
+    const steps = 30;
+    const increment = target / steps;
+    let current = 0;
+    let step = 0;
+
+    const timer = setInterval(() => {
+      step++;
+      current += increment;
+      if (step >= steps) {
+        setDisplayed(target);
+        clearInterval(timer);
+      } else {
+        setDisplayed(Math.round(current));
+      }
+    }, duration / steps);
+
+    return () => clearInterval(timer);
+  }, [value]);
+
+  return (
+    <span className={className}>
+      {prefix}{displayed.toLocaleString('cs-CZ')}{suffix}
+    </span>
+  );
+};
+
+// ── Key Metric Card ─────────────────────────────────────────
+const MetricCard = ({ icon: Icon, label, value, suffix = '', glowColor, delay = 0 }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay }}
+    className="glass-card p-5 sm:p-6 flex items-center gap-4 sm:gap-5"
+  >
+    <div
+      className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0"
+      style={{
+        backgroundColor: `${glowColor}15`,
+        boxShadow: `0 0 20px ${glowColor}20`,
+      }}
+    >
+      <Icon size={22} strokeWidth={2} style={{ color: glowColor }} />
     </div>
-    <div>
-      <p className="text-gray-500 dark:text-gray-400 text-[11px] uppercase tracking-widest font-bold mb-3">{label}</p>
-      <p className="text-5xl font-bold text-gray-900 dark:text-white tracking-tighter leading-none">{value}</p>
+    <div className="min-w-0">
+      <p className="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold mb-0.5">{label}</p>
+      <AnimatedValue
+        value={value}
+        suffix={suffix}
+        className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tighter leading-none"
+      />
     </div>
-  </div>
+  </motion.div>
 );
 
+// ── Highlight Card ──────────────────────────────────────────
+const HighlightCard = ({ icon: Icon, label, mainValue, subValue, glowColor, delay = 0, emptyText = '—' }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay }}
+    className="glass-card p-5 sm:p-6 flex flex-col justify-between min-h-[140px]"
+  >
+    <div className="flex items-center gap-3 mb-4">
+      <div
+        className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+        style={{
+          backgroundColor: `${glowColor}15`,
+          boxShadow: `0 0 16px ${glowColor}15`,
+        }}
+      >
+        <Icon size={18} strokeWidth={2} style={{ color: glowColor }} />
+      </div>
+      <p className="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">{label}</p>
+    </div>
+    <div>
+      <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight">
+        {mainValue || emptyText}
+      </p>
+      {subValue && (
+        <p className="text-[12px] sm:text-[13px] text-gray-500 dark:text-gray-400 font-medium mt-1">{subValue}</p>
+      )}
+    </div>
+  </motion.div>
+);
+
+// ── Expense Bar ─────────────────────────────────────────────
+const ExpenseBar = ({ breakdown }) => {
+  if (!breakdown || breakdown.length === 0) {
+    return (
+      <div className="w-full h-3 bg-gray-100 dark:bg-white/5 rounded-full" />
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="w-full h-3 rounded-full overflow-hidden flex bg-gray-100 dark:bg-white/5">
+        {breakdown.map((item, i) => (
+          <motion.div
+            key={item.category}
+            initial={{ width: 0 }}
+            animate={{ width: `${item.percentage}%` }}
+            transition={{ duration: 0.8, delay: 0.3 + i * 0.1, ease: 'easeOut' }}
+            className="h-full first:rounded-l-full last:rounded-r-full"
+            style={{ backgroundColor: CATEGORY_CONFIG[item.category]?.color || '#6b7280' }}
+            title={`${CATEGORY_CONFIG[item.category]?.label}: ${item.percentage}%`}
+          />
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-x-5 gap-y-2">
+        {breakdown.map((item) => (
+          <div key={item.category} className="flex items-center gap-2">
+            <div
+              className="w-2.5 h-2.5 rounded-full shrink-0"
+              style={{ backgroundColor: CATEGORY_CONFIG[item.category]?.color || '#6b7280' }}
+            />
+            <span className="text-[11px] sm:text-[12px] font-bold text-gray-500 dark:text-gray-400">
+              {CATEGORY_CONFIG[item.category]?.label || item.category}
+            </span>
+            <span className="text-[11px] sm:text-[12px] font-bold text-gray-900 dark:text-white">
+              {item.percentage}%
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ════════════════════════════════════════════════════════════
+// ── MAIN COMPONENT ──────────────────────────────────────────
+// ════════════════════════════════════════════════════════════
+
 const Statistics = ({ trips }) => {
+  const { currency } = useCurrency();
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch advanced stats from API
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await api.stats.get();
+        setStats(data.stats);
+      } catch (err) {
+        console.error('Failed to load stats:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  // ── Client-side computed values (from trips prop) ─────────
   const totalTrips = trips.length;
-
-  const categorizeTrips = (trip) => {
-    const start = new Date(trip.startDate);
-    const end = new Date(trip.endDate);
-    const now = new Date();
-    start.setHours(0,0,0,0);
-    end.setHours(23,59,59,999);
-    if (end < now) return 'past';
-    if (start <= now && end >= now) return 'ongoing';
-    return 'upcoming';
-  };
-
-  const pastTripsCount = trips.filter(t => categorizeTrips(t) === 'past').length;
 
   const totalDays = trips.reduce((acc, trip) => {
     try {
@@ -35,46 +187,179 @@ const Statistics = ({ trips }) => {
     } catch { return acc; }
   }, 0);
 
-  const totalActivities = trips.reduce((acc, trip) => {
-    if (!trip.activities) return acc;
-    return acc + trip.activities.filter(a => a.plan?.trim().length > 0 || a.location?.trim().length > 0).length;
-  }, 0);
+  const currencySymbol = CURRENCY_SYMBOLS[currency] || currency;
+
+  // ── Loading state ─────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="w-full space-y-12 pb-10">
+        <div className="space-y-2">
+          <p className="text-[10px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Přehled</p>
+          <h1 className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Statistiky cestování</h1>
+        </div>
+        <div className="flex items-center justify-center h-[50vh]">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 size={32} strokeWidth={2} className="animate-spin text-blue-500" />
+            <p className="text-[13px] text-gray-500 font-medium">Načítám vaše data…</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Empty state ───────────────────────────────────────────
+  if (totalTrips === 0) {
+    return (
+      <div className="w-full space-y-12 pb-10">
+        <div className="space-y-2">
+          <p className="text-[10px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Přehled</p>
+          <h1 className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Statistiky cestování</h1>
+        </div>
+        <div className="text-center p-16 glass-card">
+          <p className="text-gray-500 dark:text-gray-400 font-bold text-xl tracking-tight">
+            Zatím nemáte žádné výlety. Zkuste si nějaký vytvořit!
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full space-y-12 pb-10">
-      <div className="space-y-2">
-        <p className="text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Přehled</p>
-        <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Statistiky cestování</h1>
+    <div className="w-full space-y-6 sm:space-y-10 pb-24 sm:pb-10">
+
+      {/* ── Header ───────────────────────────────────────── */}
+      <div className="space-y-1 sm:space-y-2">
+        <p className="text-[10px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Přehled</p>
+        <h1 className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Statistiky cestování</h1>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <StatCard
+      {/* ── 1. TOP ROW — Key Metrics ─────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <MetricCard
           icon={Plane}
           label="Celkem výletů"
           value={totalTrips}
+          glowColor="#3b82f6"
+          delay={0}
         />
-        <StatCard
+        <MetricCard
           icon={CalendarDays}
-          label="Celkem dní na cestách"
+          label="Dní na cestách"
           value={totalDays}
+          glowColor="#8b5cf6"
+          delay={0.05}
         />
-        <StatCard
-          icon={CheckCircle}
-          label="Dokončených výletů"
-          value={pastTripsCount}
+        <MetricCard
+          icon={MapPin}
+          label="Unikátních míst"
+          value={stats?.travelHabits?.uniqueLocations ?? 0}
+          glowColor="#10b981"
+          delay={0.1}
         />
-        <StatCard
-          icon={Map}
-          label="Naplánovaných aktivit"
-          value={totalActivities}
+        <MetricCard
+          icon={ThumbsUp}
+          label="Celkem hlasů"
+          value={stats?.social?.communityScore ?? 0}
+          glowColor="#f59e0b"
+          delay={0.15}
         />
       </div>
 
-      {totalTrips === 0 && (
-        <div className="text-center p-16 glass-card">
-          <p className="text-gray-500 dark:text-gray-400 font-bold text-xl tracking-tight">Zatím nemáte žádné výlety. Zkuste si nějaký vytvořit!</p>
+      {/* ── 2. FINANCIAL SECTION ─────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="glass-card p-6 sm:p-8"
+      >
+        <div className="flex items-center gap-3 mb-6">
+          <div
+            className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+            style={{
+              backgroundColor: 'rgba(99, 102, 241, 0.12)',
+              boxShadow: '0 0 20px rgba(99, 102, 241, 0.15)',
+            }}
+          >
+            <Wallet size={18} strokeWidth={2} className="text-indigo-500" />
+          </div>
+          <p className="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Celkové výdaje</p>
         </div>
-      )}
+
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-baseline gap-2 sm:gap-3">
+            <AnimatedValue
+              value={Math.round(stats?.financial?.totalSpent ?? 0)}
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white tracking-tighter leading-none"
+            />
+            <span className="text-lg sm:text-xl font-bold text-gray-400 dark:text-gray-500">{currencySymbol}</span>
+          </div>
+          {stats?.financial?.mostExpensiveTrip && (
+            <p className="text-[12px] sm:text-[13px] text-gray-500 dark:text-gray-400 font-medium mt-2">
+              Nejdražší výlet: <span className="text-gray-900 dark:text-white font-bold">{stats.financial.mostExpensiveTrip.title}</span>
+              {' '}— {stats.financial.mostExpensiveTrip.total.toLocaleString('cs-CZ')} {currencySymbol}
+            </p>
+          )}
+        </div>
+
+        <ExpenseBar breakdown={stats?.financial?.expenseBreakdown} />
+      </motion.div>
+
+      {/* ── 3. HIGHLIGHTS & HABITS ───────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <HighlightCard
+          icon={TrendingUp}
+          label="Nejdelší výlet"
+          mainValue={
+            stats?.travelHabits?.longestTrip
+              ? `${stats.travelHabits.longestTrip.durationDays} dní`
+              : null
+          }
+          subValue={stats?.travelHabits?.longestTrip?.title}
+          glowColor="#06b6d4"
+          delay={0.25}
+        />
+        <HighlightCard
+          icon={Backpack}
+          label="Balící disciplína"
+          mainValue={
+            stats?.productivity?.packingDiscipline?.totalItems > 0
+              ? `${stats.productivity.packingDiscipline.percentage}%`
+              : null
+          }
+          subValue={
+            stats?.productivity?.packingDiscipline?.totalItems > 0
+              ? `${stats.productivity.packingDiscipline.checkedItems} z ${stats.productivity.packingDiscipline.totalItems} věcí`
+              : 'Žádné položky'
+          }
+          glowColor="#8b5cf6"
+          delay={0.3}
+        />
+        <HighlightCard
+          icon={Calendar}
+          label="Oblíbený měsíc"
+          mainValue={stats?.travelHabits?.favoriteMonth?.monthName}
+          subValue={
+            stats?.travelHabits?.favoriteMonth
+              ? `${stats.travelHabits.favoriteMonth.tripCount} výlet${stats.travelHabits.favoriteMonth.tripCount > 1 ? (stats.travelHabits.favoriteMonth.tripCount < 5 ? 'y' : 'ů') : ''}`
+              : null
+          }
+          glowColor="#f59e0b"
+          delay={0.35}
+        />
+        <HighlightCard
+          icon={Crown}
+          label="Nejpopulárnější"
+          mainValue={stats?.social?.mostPopularTrip?.title}
+          subValue={
+            stats?.social?.mostPopularTrip
+              ? `Skóre: ${stats.social.mostPopularTrip.netScore > 0 ? '+' : ''}${stats.social.mostPopularTrip.netScore}`
+              : null
+          }
+          glowColor="#ec4899"
+          delay={0.4}
+        />
+      </div>
+
     </div>
   );
 };

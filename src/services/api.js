@@ -155,6 +155,11 @@ export const api = {
 
     getUnreadCount: () => request('/notifications/unread-count'),
   },
+
+  // ── Stats (Analytics) ──────────────────────────────────────
+  stats: {
+    get: () => request('/stats'),
+  },
 };
 
 export default api;

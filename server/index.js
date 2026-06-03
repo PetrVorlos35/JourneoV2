@@ -19,6 +19,7 @@ import friendRoutes from './routes/friends.js';
 import profileRoutes from './routes/profile.js';
 import voteRoutes from './routes/votes.js';
 import notificationRoutes from './routes/notifications.js';
+import statsRoutes from './routes/stats.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -36,6 +37,7 @@ app.use('/api/friends', auth, friendRoutes);
 app.use('/api/profile', auth, profileRoutes);
 app.use('/api/votes', auth, voteRoutes);
 app.use('/api/notifications', auth, notificationRoutes);
+app.use('/api/stats', auth, statsRoutes);
 
 
 app.get('/api/health', (req, res) => {
