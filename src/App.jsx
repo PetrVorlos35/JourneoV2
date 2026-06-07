@@ -8,6 +8,8 @@ import { Analytics } from '@vercel/analytics/react';
 
 // Lazy load the dashboard to speed up initial landing page load
 const DashboardHome = lazy(() => import('./components/dashboard/DashboardHome'));
+const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
+const TermsOfService = lazy(() => import('./components/TermsOfService'));
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center">
@@ -45,6 +47,8 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
