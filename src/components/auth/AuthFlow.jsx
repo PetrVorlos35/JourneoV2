@@ -181,13 +181,14 @@ const AuthFlow = () => {
                   
                   {/* Registration Only Fields */}
                   {mode === 'register' && (
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <input
                         type="text"
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleInputChange}
                         placeholder="Jméno"
+                        autoComplete="given-name"
                         className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
                       />
                       <input
@@ -196,6 +197,7 @@ const AuthFlow = () => {
                         value={formData.lastName}
                         onChange={handleInputChange}
                         placeholder="Příjmení"
+                        autoComplete="family-name"
                         className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
                       />
                     </div>
@@ -209,6 +211,7 @@ const AuthFlow = () => {
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder="E-mail"
+                    autoComplete="email"
                     className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
                   />
 
@@ -221,11 +224,13 @@ const AuthFlow = () => {
                       value={formData.password}
                       onChange={handleInputChange}
                       placeholder="Heslo"
+                      autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                       className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 pr-12 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Skrýt heslo" : "Zobrazit heslo"}
                       className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer disabled:cursor-not-allowed"
                     >
                       {showPassword ? <EyeOff size={16} strokeWidth={2.5} /> : <Eye size={16} strokeWidth={2.5} />}
@@ -241,6 +246,7 @@ const AuthFlow = () => {
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
                       placeholder="Potvrdit heslo"
+                      autoComplete="new-password"
                       className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
                     />
                   )}
@@ -249,7 +255,7 @@ const AuthFlow = () => {
                   <button
                     type="submit"
                     disabled={isLoading || isGoogleLoading}
-                    className="w-full py-3.5 mt-2 bg-black dark:bg-white text-white dark:text-black text-sm font-bold rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer disabled:cursor-not-allowed"
+                    className="w-full py-3.5 mt-2 bg-black dark:bg-white text-white dark:text-black text-sm font-bold rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-lg active:scale-[0.98] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                   >
                     {isLoading
                       ? 'Zpracovávám...'
@@ -270,10 +276,13 @@ const AuthFlow = () => {
                   type="button"
                   onClick={() => googleLoginFn()}
                   disabled={isLoading || isGoogleLoading}
-                  className="w-full flex items-center justify-center gap-2.5 py-3 bg-white/40 dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-xl text-sm font-bold text-gray-900 dark:text-white hover:bg-white/80 dark:hover:bg-white/10 hover:scale-[1.02] transition-all duration-300 shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer disabled:cursor-not-allowed glass"
+                  className="w-full flex items-center justify-center gap-2.5 py-3 bg-white/40 dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-xl text-sm font-bold text-gray-900 dark:text-white hover:bg-white/80 dark:hover:bg-white/10 hover:scale-[1.02] transition-all duration-300 shadow-sm active:scale-[0.98] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed glass"
                 >
                   {isGoogleLoading ? (
-                    <span className="animate-pulse">Zpracovávám...</span>
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-gray-400 border-t-gray-900 dark:border-white/30 dark:border-t-white rounded-full animate-spin"></div>
+                      <span className="opacity-70">Zpracovávám...</span>
+                    </div>
                   ) : (
                     <>
                       <img src={GoogleIcon} alt="Google" className="w-[18px] h-[18px]" />

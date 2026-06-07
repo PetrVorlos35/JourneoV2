@@ -5,16 +5,15 @@ import { format, eachDayOfInterval } from 'date-fns';
 import { cs } from 'date-fns/locale';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
-import VoteButton from '../ui/VoteButton';
+import LikeButton from '../ui/LikeButton';
 import UserAvatar from '../ui/UserAvatar';
 
 const ReadOnlyTripView = () => {
   const { userId, tripId } = useParams();
   const [trip, setTrip] = useState(null);
   const [owner, setOwner] = useState(null);
-  const [upvotes, setUpvotes] = useState(0);
-  const [downvotes, setDownvotes] = useState(0);
-  const [userVote, setUserVote] = useState(0);
+  const [likes, setLikes] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState(0);
   const [mobileTab, setMobileTab] = useState('itinerary');
@@ -26,9 +25,8 @@ const ReadOnlyTripView = () => {
         const data = await api.profile.getTrip(userId, tripId);
         setTrip(data.trip);
         setOwner(data.owner);
-        setUpvotes(data.upvotes);
-        setDownvotes(data.downvotes);
-        setUserVote(data.userVote);
+        setLikes(data.likes);
+        setIsLiked(data.isLiked);
       } catch (err) {
         console.error('Failed to load trip:', err);
         toast.error(err.message || 'Nepodařilo se načíst výlet.');
@@ -143,11 +141,14 @@ const ReadOnlyTripView = () => {
 
         {/* Vote Button in header */}
         <div className="shrink-0 self-start md:self-auto">
-          <VoteButton 
+          <LikeButton 
             tripId={parseInt(tripId)} 
-            initialUpvotes={upvotes} 
-            initialDownvotes={downvotes} 
-            initialUserVote={userVote} 
+            initialLikes={likes} 
+            initialIsLiked={isLiked} 
+            onLikeChange={(newLikes, newIsLiked) => {
+              setLikes(newLikes);
+              setIsLiked(newIsLiked);
+            }} 
           />
         </div>
       </div>

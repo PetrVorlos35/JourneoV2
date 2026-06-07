@@ -23,19 +23,19 @@ router.get('/', async (req, res) => {
 
     // Get all trips
     const [trips] = await pool.query(
-      'SELECT id, title, start_date AS startDate, end_date AS endDate, created_at AS createdAt FROM trips WHERE user_id = ? ORDER BY start_date DESC',
+      "SELECT id, title, DATE_FORMAT(start_date, '%Y-%m-%d') AS startDate, DATE_FORMAT(end_date, '%Y-%m-%d') AS endDate, created_at AS createdAt FROM trips WHERE user_id = ? ORDER BY start_date DESC",
       [userId]
     );
 
     // For each trip, load sub-data
     const fullTrips = await Promise.all(trips.map(async (trip) => {
       const [activities] = await pool.query(
-        'SELECT id, day_index AS dayIndex, date, title, plan, location FROM trip_activities WHERE trip_id = ? ORDER BY day_index ASC',
+        "SELECT id, day_index AS dayIndex, DATE_FORMAT(date, '%Y-%m-%d') AS date, title, plan, location FROM trip_activities WHERE trip_id = ? ORDER BY day_index ASC",
         [trip.id]
       );
 
       const [expenses] = await pool.query(
-        'SELECT id, description, amount, category, date FROM trip_expenses WHERE trip_id = ? ORDER BY created_at DESC',
+        "SELECT id, description, amount, category, DATE_FORMAT(date, '%Y-%m-%d') AS date FROM trip_expenses WHERE trip_id = ? ORDER BY created_at DESC",
         [trip.id]
       );
 
@@ -50,10 +50,7 @@ router.get('/', async (req, res) => {
       );
 
       const [voteScore] = await pool.query(
-        `SELECT 
-           COALESCE(SUM(CASE WHEN value = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
-           COALESCE(SUM(CASE WHEN value = -1 THEN 1 ELSE 0 END), 0) AS downvotes
-         FROM votes WHERE trip_id = ?`,
+        `SELECT COUNT(*) AS likes FROM votes WHERE trip_id = ? AND value = 1`,
         [trip.id]
       );
 
@@ -84,9 +81,8 @@ router.get('/', async (req, res) => {
           title: d.title,
           content: d.content,
         })),
-        upvotes: parseInt(voteScore[0].upvotes),
-        downvotes: parseInt(voteScore[0].downvotes),
-        userVote: userVote.length > 0 ? userVote[0].value : 0,
+        likes: parseInt(voteScore[0].likes),
+        isLiked: userVote.length > 0 && userVote[0].value === 1,
       };
     }));
 
@@ -210,15 +206,15 @@ router.put('/:id', async (req, res) => {
 
     // Return the updated trip
     const [updatedTrips] = await pool.query(
-      'SELECT id, title, start_date AS startDate, end_date AS endDate FROM trips WHERE id = ?',
+      "SELECT id, title, DATE_FORMAT(start_date, '%Y-%m-%d') AS startDate, DATE_FORMAT(end_date, '%Y-%m-%d') AS endDate FROM trips WHERE id = ?",
       [tripId]
     );
     const [updatedActivities] = await pool.query(
-      'SELECT id, day_index AS dayIndex, date, title, plan, location FROM trip_activities WHERE trip_id = ? ORDER BY day_index ASC',
+      "SELECT id, day_index AS dayIndex, DATE_FORMAT(date, '%Y-%m-%d') AS date, title, plan, location FROM trip_activities WHERE trip_id = ? ORDER BY day_index ASC",
       [tripId]
     );
     const [updatedExpenses] = await pool.query(
-      'SELECT id, description, amount, category, date FROM trip_expenses WHERE trip_id = ? ORDER BY created_at DESC',
+      "SELECT id, description, amount, category, DATE_FORMAT(date, '%Y-%m-%d') AS date FROM trip_expenses WHERE trip_id = ? ORDER BY created_at DESC",
       [tripId]
     );
     const [updatedPacking] = await pool.query(
@@ -230,10 +226,7 @@ router.put('/:id', async (req, res) => {
       [tripId]
     );
     const [voteScore] = await pool.query(
-      `SELECT 
-         COALESCE(SUM(CASE WHEN value = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
-         COALESCE(SUM(CASE WHEN value = -1 THEN 1 ELSE 0 END), 0) AS downvotes
-       FROM votes WHERE trip_id = ?`,
+      `SELECT COUNT(*) AS likes FROM votes WHERE trip_id = ? AND value = 1`,
       [tripId]
     );
     const [userVote] = await pool.query(
@@ -249,9 +242,8 @@ router.put('/:id', async (req, res) => {
         expenses: updatedExpenses.map(e => ({ ...e, id: e.id.toString(), amount: parseFloat(e.amount) })),
         packingList: updatedPacking.map(p => ({ id: p.id.toString(), text: p.text, checked: !!p.checked })),
         documents: updatedDocs.map(d => ({ id: d.id.toString(), title: d.title, content: d.content })),
-        upvotes: parseInt(voteScore[0].upvotes),
-        downvotes: parseInt(voteScore[0].downvotes),
-        userVote: userVote.length > 0 ? userVote[0].value : 0,
+        likes: parseInt(voteScore[0].likes),
+        isLiked: userVote.length > 0 && userVote[0].value === 1,
       }
     });
   } catch (err) {

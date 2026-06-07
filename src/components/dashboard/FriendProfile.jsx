@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
-import VoteButton from '../ui/VoteButton';
+import LikeButton from '../ui/LikeButton';
 import UserAvatar from '../ui/UserAvatar';
 
 
@@ -253,18 +253,17 @@ const FriendProfile = () => {
                     </div>
                     {!isSelf && (
                       <div onClick={e => e.preventDefault()} className="absolute top-4 right-4 z-10 scale-90 origin-top-right">
-                        <VoteButton 
-                          tripId={parseInt(trip.id)} 
-                          initialUpvotes={trip.upvotes || 0} 
-                          initialDownvotes={trip.downvotes || 0} 
-                          initialUserVote={trip.userVote || 0} 
-                          onVoteChange={(up, down, userVote) => {
+                        <LikeButton 
+                          tripId={trip.id} 
+                          initialLikes={trip.likes || 0} 
+                          initialIsLiked={trip.isLiked || false} 
+                          onLikeChange={(likes, isLiked) => {
                             setTrips(prev => prev.map(t => 
                               t.id === trip.id 
-                                ? { ...t, upvotes: up, downvotes: down, userVote } 
+                                ? { ...t, likes, isLiked } 
                                 : t
                             ));
-                          }}
+                          }} 
                         />
                       </div>
                     )}

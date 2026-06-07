@@ -262,7 +262,7 @@ const Friends = () => {
                 <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/10">
                   <button
                     onClick={() => handleRemoveFriend(friend.id, friend.first_name || 'tohoto uživatele')}
-                    className="text-[11px] font-bold text-red-500 hover:text-red-400 transition-colors uppercase tracking-widest opacity-0 group-hover:opacity-100 cursor-pointer"
+                    className="text-[11px] font-bold text-red-500 hover:text-red-400 transition-colors uppercase tracking-widest opacity-100 lg:opacity-0 lg:group-hover:opacity-100 cursor-pointer"
                   >
                     Odebrat
                   </button>

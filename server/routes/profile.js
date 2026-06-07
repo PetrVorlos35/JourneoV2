@@ -52,9 +52,8 @@ router.get('/:userId', async (req, res) => {
 
     // Fetch user's trips (basic info only, no sub-data)
     const [trips] = await pool.query(
-      `SELECT t.id, t.title, t.start_date AS startDate, t.end_date AS endDate, t.created_at AS createdAt,
-              COALESCE(SUM(CASE WHEN v.value = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
-              COALESCE(SUM(CASE WHEN v.value = -1 THEN 1 ELSE 0 END), 0) AS downvotes
+      `SELECT t.id, t.title, DATE_FORMAT(t.start_date, '%Y-%m-%d') AS startDate, DATE_FORMAT(t.end_date, '%Y-%m-%d') AS endDate, t.created_at AS createdAt,
+              COALESCE(SUM(CASE WHEN v.value = 1 THEN 1 ELSE 0 END), 0) AS likes
        FROM trips t
        LEFT JOIN votes v ON v.trip_id = t.id
        WHERE t.user_id = ?
@@ -79,9 +78,8 @@ router.get('/:userId', async (req, res) => {
       return {
         ...trip,
         id: trip.id.toString(),
-        upvotes: parseInt(trip.upvotes),
-        downvotes: parseInt(trip.downvotes),
-        userVote: userVote.length > 0 ? userVote[0].value : 0,
+        likes: parseInt(trip.likes),
+        isLiked: userVote.length > 0 && userVote[0].value === 1,
         activityCount: activities.length,
         locations: activities.filter(a => a.location).map(a => a.location),
       };
@@ -112,7 +110,7 @@ router.get('/:userId/trip/:tripId', async (req, res) => {
 
     // Verify trip belongs to the target user
     const [trips] = await pool.query(
-      'SELECT id, title, start_date AS startDate, end_date AS endDate, created_at AS createdAt FROM trips WHERE id = ? AND user_id = ?',
+      "SELECT id, title, DATE_FORMAT(start_date, '%Y-%m-%d') AS startDate, DATE_FORMAT(end_date, '%Y-%m-%d') AS endDate, created_at AS createdAt FROM trips WHERE id = ? AND user_id = ?",
       [tripId, targetUserId]
     );
 
@@ -145,10 +143,7 @@ router.get('/:userId/trip/:tripId', async (req, res) => {
 
     // Get vote info
     const [voteScore] = await pool.query(
-      `SELECT 
-         COALESCE(SUM(CASE WHEN value = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
-         COALESCE(SUM(CASE WHEN value = -1 THEN 1 ELSE 0 END), 0) AS downvotes
-       FROM votes WHERE trip_id = ?`,
+      `SELECT COUNT(*) AS likes FROM votes WHERE trip_id = ? AND value = 1`,
       [tripId]
     );
 
@@ -173,9 +168,8 @@ router.get('/:userId/trip/:tripId', async (req, res) => {
         documents: documents.map(d => ({ id: d.id.toString(), title: d.title, content: d.content })),
       },
       owner: owner[0],
-      upvotes: parseInt(voteScore[0].upvotes),
-      downvotes: parseInt(voteScore[0].downvotes),
-      userVote: userVote.length > 0 ? userVote[0].value : 0,
+      likes: parseInt(voteScore[0].likes),
+      isLiked: userVote.length > 0 && userVote[0].value === 1,
     });
   } catch (err) {
     if (err.status === 403) {

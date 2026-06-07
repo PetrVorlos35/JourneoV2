@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 import { useDialog } from '../ui/DialogModal';
 import LocationAutocomplete from '../ui/LocationAutocomplete';
 import { useUnsavedChanges } from '../../contexts/UnsavedChangesContext';
-import VoteButton from '../ui/VoteButton';
+import LikeButton from '../ui/LikeButton';
 
 const TripDetail = ({ trips, onUpdateTrip }) => {
   const { id } = useParams();
@@ -226,7 +226,8 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           </button>
           <button 
             onClick={handleSave}
-            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${hasUnsavedChanges ? 'text-red-500 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'} cursor-pointer disabled:cursor-not-allowed`}
+            disabled={!hasUnsavedChanges}
+            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${hasUnsavedChanges ? 'text-red-500 scale-110 cursor-pointer' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white opacity-50 cursor-not-allowed'}`}
           >
             <Save size={20} strokeWidth={hasUnsavedChanges ? 2.5 : 2} />
             {hasUnsavedChanges && <span className="text-[9px] font-bold uppercase tracking-widest">Uložit</span>}
@@ -262,7 +263,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
             ) : (
               <div className="flex items-center gap-4 group">
                 <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight">{tripTitle}</h1>
-                <button onClick={() => setEditingTitle(true)} className="text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity p-2 bg-gray-100 dark:bg-white/5 rounded-full hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 cursor-pointer disabled:cursor-not-allowed" title="Přejmenovat">
+                <button onClick={() => setEditingTitle(true)} className="text-gray-400 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity p-2 bg-gray-100 dark:bg-white/5 rounded-full hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 cursor-pointer disabled:cursor-not-allowed" title="Přejmenovat">
                   <Pencil size={18} strokeWidth={2} />
                 </button>
               </div>
@@ -276,11 +277,13 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
         </div>
 
         <div className="flex items-center gap-4 shrink-0">
-          <VoteButton 
-            tripId={parseInt(trip.id)} 
-            initialUpvotes={trip.upvotes || 0} 
-            initialDownvotes={trip.downvotes || 0} 
-            initialUserVote={trip.userVote || 0} 
+          <LikeButton 
+            tripId={trip.id} 
+            initialLikes={trip.likes || 0} 
+            initialIsLiked={trip.isLiked || false} 
+            onLikeChange={(likes, isLiked) => {
+              setTrip(prev => ({ ...prev, likes, isLiked }));
+            }} 
           />
           <button
             onClick={handleSave}

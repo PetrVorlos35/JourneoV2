@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plane, CalendarDays, MapPin, ThumbsUp, Wallet, Backpack, Calendar, Crown, TrendingUp, Loader2 } from 'lucide-react';
+import { Plane, CalendarDays, MapPin, Heart, Wallet, Backpack, Calendar, Crown, TrendingUp, Loader2 } from 'lucide-react';
 import { eachDayOfInterval } from 'date-fns';
 import { motion } from 'framer-motion';
 import { useCurrency } from '../../contexts/CurrencyContext';
@@ -257,10 +257,10 @@ const Statistics = ({ trips }) => {
           delay={0.1}
         />
         <MetricCard
-          icon={ThumbsUp}
-          label="Celkem hlasů"
+          icon={Heart}
+          label="Celkem lajků"
           value={stats?.social?.communityScore ?? 0}
-          glowColor="#f59e0b"
+          glowColor="#ef4444"
           delay={0.15}
         />
       </div>
@@ -352,7 +352,7 @@ const Statistics = ({ trips }) => {
           mainValue={stats?.social?.mostPopularTrip?.title}
           subValue={
             stats?.social?.mostPopularTrip
-              ? `Skóre: ${stats.social.mostPopularTrip.netScore > 0 ? '+' : ''}${stats.social.mostPopularTrip.netScore}`
+              ? `${stats.social.mostPopularTrip.netScore} lajků`
               : null
           }
           glowColor="#ec4899"

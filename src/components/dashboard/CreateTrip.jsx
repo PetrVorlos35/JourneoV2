@@ -185,6 +185,7 @@ const CreateTrip = ({ onAddTrip }) => {
                 <input
                   type="text"
                   autoFocus
+                  aria-label="Cílová destinace"
                   placeholder="např. Víkend v Římě"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -284,6 +285,7 @@ const CreateTrip = ({ onAddTrip }) => {
                     <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold mb-1 ml-2">Destinace</p>
                     <input
                       type="text"
+                      aria-label="Destinace pro úpravu"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                       className="font-bold text-2xl sm:text-3xl tracking-tight text-gray-900 dark:text-white leading-tight bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 rounded-lg px-2 py-1 w-full transition-all -ml-2"
@@ -300,6 +302,7 @@ const CreateTrip = ({ onAddTrip }) => {
                     <div className={`flex items-center flex-wrap gap-1 sm:gap-2 font-bold text-lg sm:text-2xl tracking-tight leading-tight ${dateError ? 'text-red-500' : 'text-gray-900 dark:text-white'}`}>
                       <input
                         type="date"
+                        aria-label="Datum odjezdu"
                         value={formData.startDate}
                         onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
                         className={`bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 rounded-lg px-2 py-1 transition-all -ml-2 cursor-pointer ${dateError ? 'focus:ring-red-500 ring-1 ring-red-500/50' : 'focus:ring-black/10 dark:focus:ring-white/20'}`}
@@ -307,6 +310,7 @@ const CreateTrip = ({ onAddTrip }) => {
                       <span className="text-gray-300 dark:text-white/20">—</span>
                       <input
                         type="date"
+                        aria-label="Datum návratu"
                         value={formData.endDate}
                         onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
                         className={`bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 rounded-lg px-2 py-1 transition-all cursor-pointer ${dateError ? 'focus:ring-red-500 ring-1 ring-red-500/50' : 'focus:ring-black/10 dark:focus:ring-white/20'}`}

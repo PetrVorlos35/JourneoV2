@@ -114,10 +114,10 @@ router.get('/', async (req, res) => {
 
       // ─── 8. Social: Total community score ──────────────────────
       pool.query(`
-        SELECT COALESCE(SUM(v.value), 0) AS community_score
+        SELECT COUNT(v.id) AS community_score
         FROM votes v
         JOIN trips t ON v.trip_id = t.id
-        WHERE t.user_id = ?
+        WHERE t.user_id = ? AND v.value = 1
       `, [userId]),
 
       // ─── 9. Social: Most popular trip ──────────────────────────
@@ -125,9 +125,9 @@ router.get('/', async (req, res) => {
         SELECT
           t.id AS trip_id,
           t.title,
-          COALESCE(SUM(v.value), 0) AS net_score
+          COUNT(v.id) AS net_score
         FROM trips t
-        LEFT JOIN votes v ON v.trip_id = t.id
+        LEFT JOIN votes v ON v.trip_id = t.id AND v.value = 1
         WHERE t.user_id = ?
         GROUP BY t.id, t.title
         ORDER BY net_score DESC

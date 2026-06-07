@@ -8,10 +8,11 @@ const router = Router();
 router.post('/', async (req, res) => {
   try {
     const userId = req.userId;
-    const { tripId, value } = req.body;
+    const { tripId } = req.body;
+    const value = 1; // Vždy přidáváme like (value = 1)
 
-    if (!tripId || ![1, -1].includes(value)) {
-      return res.status(400).json({ error: 'Neplatné hlasování. Hodnota musí být 1 nebo -1.' });
+    if (!tripId) {
+      return res.status(400).json({ error: 'Neplatné hlasování. Chybí ID výletu.' });
     }
 
     // Check that the trip exists and get the owner
@@ -46,17 +47,13 @@ router.post('/', async (req, res) => {
 
     // Get updated score
     const [scoreRows] = await pool.query(
-      `SELECT 
-         COALESCE(SUM(CASE WHEN value = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
-         COALESCE(SUM(CASE WHEN value = -1 THEN 1 ELSE 0 END), 0) AS downvotes
-       FROM votes WHERE trip_id = ?`,
+      `SELECT COUNT(*) AS likes FROM votes WHERE trip_id = ? AND value = 1`,
       [tripId]
     );
 
     res.json({
-      upvotes: parseInt(scoreRows[0].upvotes),
-      downvotes: parseInt(scoreRows[0].downvotes),
-      userVote: value,
+      likes: parseInt(scoreRows[0].likes),
+      isLiked: true,
     });
   } catch (err) {
     console.error('Cast vote error:', err);
@@ -78,17 +75,13 @@ router.delete('/:tripId', async (req, res) => {
 
     // Get updated score
     const [scoreRows] = await pool.query(
-      `SELECT 
-         COALESCE(SUM(CASE WHEN value = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
-         COALESCE(SUM(CASE WHEN value = -1 THEN 1 ELSE 0 END), 0) AS downvotes
-       FROM votes WHERE trip_id = ?`,
+      `SELECT COUNT(*) AS likes FROM votes WHERE trip_id = ? AND value = 1`,
       [tripId]
     );
 
     res.json({
-      upvotes: parseInt(scoreRows[0].upvotes),
-      downvotes: parseInt(scoreRows[0].downvotes),
-      userVote: 0,
+      likes: parseInt(scoreRows[0].likes),
+      isLiked: false,
     });
   } catch (err) {
     console.error('Remove vote error:', err);
@@ -104,10 +97,7 @@ router.get('/:tripId', async (req, res) => {
     const tripId = parseInt(req.params.tripId);
 
     const [scoreRows] = await pool.query(
-      `SELECT 
-         COALESCE(SUM(CASE WHEN value = 1 THEN 1 ELSE 0 END), 0) AS upvotes,
-         COALESCE(SUM(CASE WHEN value = -1 THEN 1 ELSE 0 END), 0) AS downvotes
-       FROM votes WHERE trip_id = ?`,
+      `SELECT COUNT(*) AS likes FROM votes WHERE trip_id = ? AND value = 1`,
       [tripId]
     );
 
@@ -117,9 +107,8 @@ router.get('/:tripId', async (req, res) => {
     );
 
     res.json({
-      upvotes: parseInt(scoreRows[0].upvotes),
-      downvotes: parseInt(scoreRows[0].downvotes),
-      userVote: userVoteRows.length > 0 ? userVoteRows[0].value : 0,
+      likes: parseInt(scoreRows[0].likes),
+      isLiked: userVoteRows.length > 0 && userVoteRows[0].value === 1,
     });
   } catch (err) {
     console.error('Get vote error:', err);

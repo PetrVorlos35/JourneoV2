@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, UserPlus, UserCheck, ChevronUp, Check, X } from 'lucide-react';
+import { Bell, UserPlus, UserCheck, Heart, Check, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
@@ -21,7 +21,7 @@ const timeAgo = (dateStr) => {
 const notifIcons = {
   FRIEND_REQUEST: UserPlus,
   FRIEND_ACCEPTED: UserCheck,
-  TRIP_VOTED: ChevronUp,
+  TRIP_VOTED: Heart,
 };
 
 const NotificationBell = () => {
@@ -183,7 +183,7 @@ const NotificationBell = () => {
                             ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
                             : n.type === 'FRIEND_ACCEPTED'
                               ? 'bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400'
-                              : 'bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400'
+                              : 'bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400'
                         }`}>
                           <Icon size={16} strokeWidth={2.5} />
                         </div>

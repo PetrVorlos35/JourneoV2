@@ -23,22 +23,21 @@ const navItems = [
 ];
 
 // eslint-disable-next-line no-unused-vars
-const SidebarItem = ({ icon: Icon, label, path, active, onClick }) => (
-  <a
-    href={path}
+const SidebarItem = ({ icon: Icon, label, path, active, onClick, className }) => (
+  <Link
+    to={path}
     onClick={(e) => {
-      e.preventDefault();
       if (onClick) onClick(path, e);
     }}
     className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 ${
       active
         ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
         : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10'
-    } cursor-pointer disabled:cursor-not-allowed`}
+    } ${className || ''}`}
   >
     <Icon size={20} strokeWidth={active ? 2.5 : 2} />
     <span className="font-semibold">{label}</span>
-  </a>
+  </Link>
 );
 
 
@@ -90,7 +89,10 @@ const DashboardLayout = ({ children }) => {
   const mobileNavItems = navItems.filter(item => item.path !== '/dashboard/statistics');
 
   const handleNavigation = async (path, e, onClickCallback) => {
-    if (e) e.preventDefault();
+    if (e) {
+      if (e.ctrlKey || e.metaKey || e.shiftKey) return;
+      e.preventDefault();
+    }
     if (location.pathname === path) {
       if (onClickCallback) onClickCallback();
       return;
@@ -193,7 +195,7 @@ const DashboardLayout = ({ children }) => {
               active={location.pathname === '/dashboard/settings'}
               onClick={(path, e) => handleNavigation(path, e)}
              className="cursor-pointer disabled:cursor-not-allowed"/>
-            <a href="/dashboard/settings" onClick={(e) => handleNavigation('/dashboard/settings', e)} className="px-4 py-4 flex items-center gap-3 mt-1 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer disabled:cursor-not-allowed">
+            <Link to="/dashboard/settings" onClick={(e) => handleNavigation('/dashboard/settings', e)} className="px-4 py-4 flex items-center gap-3 mt-1 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer disabled:cursor-not-allowed">
               <UserAvatar user={user} size="md" />
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-bold truncate">
@@ -201,7 +203,7 @@ const DashboardLayout = ({ children }) => {
                 </p>
                 <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate mt-0.5 font-semibold">{user?.bio || 'Cestovatel'}</p>
               </div>
-            </a>
+            </Link>
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors duration-300 font-semibold cursor-pointer disabled:cursor-not-allowed"
@@ -221,9 +223,9 @@ const DashboardLayout = ({ children }) => {
               // eslint-disable-next-line no-unused-vars
               const unused = Icon;
               return (
-              <a
+              <Link
                 key={path}
-                href={path}
+                to={path}
                 onClick={(e) => handleNavigation(path, e)}
                 className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${
                   location.pathname === path ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
@@ -231,7 +233,7 @@ const DashboardLayout = ({ children }) => {
               >
                 <Icon size={22} strokeWidth={location.pathname === path ? 2.5 : 2} />
                 {location.pathname === path && <span className="text-[9px] font-bold uppercase tracking-widest">{label.split(' ')[0]}</span>}
-              </a>
+              </Link>
               );
             })}
           </nav>
