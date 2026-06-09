@@ -132,16 +132,16 @@ const Friends = () => {
       {/* Search */}
       <div className="glass-card p-6 rounded-[2rem] space-y-4">
         <h2 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Hledat uživatele</h2>
-        <div className="relative">
+        <div className="relative group/search">
           <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-            <Search size={20} className="text-gray-400" strokeWidth={2.5} />
+            <Search size={20} className="text-gray-400 group-focus-within/search:text-blue-500 transition-colors duration-300" strokeWidth={2.5} />
           </div>
           <input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Hledat podle jména nebo e-mailu..."
-            className="glass-input !pl-14"
+            className="glass-input !pl-14 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50"
           />
           {searchQuery && (
             <button
@@ -216,30 +216,47 @@ const Friends = () => {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`pb-4 px-2 text-[15px] font-bold transition-all duration-300 border-b-[3px] relative top-[2px] cursor-pointer ${
+            className={`pb-4 px-2 text-[15px] font-bold transition-all duration-300 relative cursor-pointer ${
               activeTab === tab.id
-                ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400'
-                : 'text-gray-500 border-transparent hover:text-gray-900 dark:hover:text-white'
+                ? 'text-blue-600 dark:text-blue-400'
+                : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
             }`}
           >
             {tab.label}
             <span className="ml-2 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-[11px] font-bold text-gray-500 dark:text-gray-400">
               {tab.count}
             </span>
+            {activeTab === tab.id && (
+              <motion.div
+                layoutId="friends-tab-indicator"
+                className="absolute bottom-[-1px] left-0 right-0 h-[3px] bg-blue-600 dark:bg-blue-400 rounded-t-full"
+                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+              />
+            )}
           </button>
         ))}
       </div>
 
       {/* Friends List */}
       {activeTab === 'friends' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <motion.div 
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+          }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
           {friends.length > 0 ? (
             friends.map(friend => (
               <motion.div
                 key={friend.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="glass-card p-6 sm:p-8 flex flex-col hover:-translate-y-1 transition-transform duration-300 group"
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0 }
+                }}
+                className="glass-card p-6 sm:p-8 flex flex-col hover:-translate-y-2 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)] transition-all duration-300 group"
               >
                 <div className="flex items-start gap-4 mb-6">
                   <UserAvatar user={friend} size="md" />
@@ -284,20 +301,30 @@ const Friends = () => {
               <p className="text-[15px] text-gray-500 font-medium max-w-md">Vyhledejte uživatele a pošlete jim žádost o přátelství.</p>
             </div>
           )}
-        </div>
+        </motion.div>
       )}
 
       {/* Requests List */}
       {activeTab === 'requests' && (
-        <div className="space-y-4">
+        <motion.div 
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+          }}
+          className="space-y-4"
+        >
           {requests.length > 0 ? (
             requests.map(req => (
               <motion.div
                 key={req.friendshipId}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
+                variants={{
+                  hidden: { opacity: 0, y: 20 },
+                  visible: { opacity: 1, y: 0 }
+                }}
                 exit={{ opacity: 0, x: -50 }}
-                className="glass-card p-6 flex items-center gap-4"
+                className="glass-card p-6 flex items-center gap-4 hover:-translate-y-1 transition-transform duration-300"
               >
                 <UserAvatar user={req} size="md" />
                 <div className="flex-1 min-w-0">
@@ -335,7 +362,7 @@ const Friends = () => {
               <p className="text-[15px] text-gray-500 font-medium max-w-md">Až vám někdo pošle žádost o přátelství, zobrazí se zde.</p>
             </div>
           )}
-        </div>
+        </motion.div>
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Plus, Trash2, DollarSign, TrendingUp, Calendar, Car, Home, Utensils, Palmtree, MoreHorizontal, ChevronRight, Wallet, X, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -57,6 +57,16 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
   });
   const [showCalendar, setShowCalendar] = useState(false);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   const tripStart = tripRange?.start ? new Date(tripRange.start) : null;
   const tripEnd = tripRange?.end ? new Date(tripRange.end) : null;
 
@@ -79,22 +89,23 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
   return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[150] flex items-end sm:items-center justify-center p-0 sm:p-6 overflow-hidden">
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm cursor-pointer"
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 12 }}
-            className="relative bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-[2rem] w-full max-w-lg p-8 sm:p-10 shadow-2xl overflow-visible"
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="relative w-full max-w-lg bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-t-[2rem] sm:rounded-[2rem] p-6 sm:p-10 shadow-2xl overflow-visible z-10"
           >
-            <div className="flex justify-between items-center mb-8 pb-6 border-b border-gray-200 dark:border-white/10">
-              <h3 className="font-bold text-3xl tracking-tight text-gray-900 dark:text-white">Nový výdaj</h3>
+            <div className="flex justify-between items-center mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-gray-200 dark:border-white/10">
+              <h3 className="font-bold text-2xl sm:text-3xl tracking-tight text-gray-900 dark:text-white">Nový výdaj</h3>
               <button 
                 onClick={onClose}
                 className="w-10 h-10 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer disabled:cursor-not-allowed"
@@ -181,7 +192,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
               </div>
               <button 
                 type="submit" 
-                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors duration-300 mt-8 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer disabled:cursor-not-allowed"
+                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors duration-300 mt-6 sm:mt-8 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer disabled:cursor-not-allowed"
               >
                 Přidat výdaj
               </button>
@@ -205,8 +216,8 @@ const CategoryBar = ({ expenses, currency }) => {
   })).filter(c => c.amount > 0);
 
   return (
-    <div className="space-y-8">
-      <div className="flex h-3 w-full gap-1 rounded-full overflow-hidden bg-gray-100 dark:bg-white/5">
+    <div className="space-y-6 sm:space-y-8">
+      <div className="flex h-5 sm:h-3 w-full gap-1 rounded-full overflow-hidden bg-gray-100 dark:bg-white/5">
         {byCategory.map((c, i) => (
           <div
             key={c.id}
@@ -270,10 +281,10 @@ const Budget = ({ trips, onUpdateTrip }) => {
     <div className="space-y-12 w-full pb-10">
       {ModalPortal}
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-12">
-        <div className="space-y-2">
-          <p className="text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Rozpočet</p>
-          <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Výdaje a rozpočet</h1>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 sm:gap-8 mb-8 sm:mb-12">
+        <div className="space-y-1 sm:space-y-2">
+          <p className="text-[11px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Rozpočet</p>
+          <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Výdaje a rozpočet</h1>
         </div>
 
         {/* Action area */}
@@ -356,9 +367,9 @@ const Budget = ({ trips, onUpdateTrip }) => {
           {trip && (
             <button 
               onClick={() => setIsAddModalOpen(true)} 
-              className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors duration-300 shrink-0 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer disabled:cursor-not-allowed"
+              className="hidden sm:flex w-full sm:w-auto items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3.5 sm:py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors duration-300 shrink-0 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer disabled:cursor-not-allowed text-[14px] sm:text-[16px]"
             >
-              <Plus size={20} strokeWidth={2.5} />
+              <Plus size={20} strokeWidth={2.5} className="w-5 h-5 sm:w-5 sm:h-5" />
               Nová útrata
             </button>
           )}
@@ -381,35 +392,34 @@ const Budget = ({ trips, onUpdateTrip }) => {
       ) : trip ? (
         <>
           {/* Souhrn */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="glass-card p-8 sm:p-10 lg:col-span-1 flex flex-col justify-center border-blue-500/30 dark:border-blue-500/20 shadow-blue-500/10">
-              <p className="text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-4">Celkové výdaje</p>
-              <p className="text-5xl lg:text-6xl font-bold tracking-tighter text-gray-900 dark:text-white leading-none">{formatCurrency(total, currency)}</p>
+          <div className="flex md:grid overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none no-scrollbar md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 -mx-4 px-4 md:mx-0 md:px-0 pb-2 md:pb-0">
+            <div className="min-w-[85vw] sm:min-w-[350px] md:min-w-0 snap-center glass-card p-6 sm:p-10 md:col-span-2 lg:col-span-1 flex flex-col justify-center border-blue-500/30 dark:border-blue-500/20 shadow-blue-500/10 shrink-0">
+              <p className="text-[10px] sm:text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2 sm:mb-4">Celkové výdaje</p>
+              <p className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-gray-900 dark:text-white leading-none">{formatCurrency(total, currency)}</p>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:col-span-2 gap-6">
-              <div className="glass-card p-8 sm:p-10 flex flex-col justify-center">
-                <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-4">Počet transakcí</p>
-                <p className="text-4xl lg:text-5xl font-bold tracking-tighter text-gray-900 dark:text-white">{expenses.length}</p>
-              </div>
-              <div className="glass-card p-8 sm:p-10 flex flex-col justify-center">
-                <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-4">Termín výletu</p>
-                <div className="space-y-1">
-                  <p className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tighter text-gray-900 dark:text-white">
-                    {format(new Date(trip.startDate), 'd. M. yyyy')}
-                  </p>
-                  <p className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tighter text-gray-400 dark:text-gray-500">
-                    — {format(new Date(trip.endDate), 'd. M. yyyy')}
-                  </p>
-                </div>
+            <div className="min-w-[70vw] sm:min-w-[280px] md:min-w-0 snap-center glass-card p-6 sm:p-10 flex flex-col justify-center shrink-0">
+              <p className="text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 sm:mb-4">Počet transakcí</p>
+              <p className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tighter text-gray-900 dark:text-white">{expenses.length}</p>
+            </div>
+            
+            <div className="min-w-[75vw] sm:min-w-[300px] md:min-w-0 snap-center glass-card p-6 sm:p-10 flex flex-col justify-center shrink-0">
+              <p className="text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 sm:mb-4">Termín výletu</p>
+              <div className="space-y-1">
+                <p className="text-xl sm:text-2xl lg:text-4xl font-bold tracking-tighter text-gray-900 dark:text-white">
+                  {format(new Date(trip.startDate), 'd. M. yyyy')}
+                </p>
+                <p className="text-lg sm:text-xl lg:text-3xl font-bold tracking-tighter text-gray-400 dark:text-gray-500">
+                  — {format(new Date(trip.endDate), 'd. M. yyyy')}
+                </p>
               </div>
             </div>
           </div>
 
           {/* Kategoriový pruh */}
           {expenses.length > 0 && (
-            <div className="glass-card p-8 sm:p-10 pt-12">
-              <h3 className="font-bold text-gray-900 dark:text-white text-xl mb-8 flex items-center gap-3">
+            <div className="glass-card p-6 sm:p-10 pt-8 sm:pt-12 mt-6 sm:mt-0">
+              <h3 className="font-bold text-gray-900 dark:text-white text-lg sm:text-xl mb-6 sm:mb-8 flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center shrink-0">
                   <TrendingUp size={20} strokeWidth={2} /> 
                 </div>
@@ -424,7 +434,7 @@ const Budget = ({ trips, onUpdateTrip }) => {
             
             {/* Filter Bar */}
             {expenses.length > 0 && (
-              <div className="glass-card p-4 rounded-2xl flex flex-col sm:flex-row gap-4">
+              <div className="glass-card p-3 sm:p-4 rounded-2xl flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <div className="relative flex-1">
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                     <Search size={18} className="text-gray-400" />
@@ -437,12 +447,12 @@ const Budget = ({ trips, onUpdateTrip }) => {
                     className="w-full pl-10 pr-4 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px]"
                   />
                 </div>
-                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
                   <div className="relative">
                     <select
                       value={categoryFilter}
                       onChange={(e) => setCategoryFilter(e.target.value)}
-                      className="pl-4 pr-10 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px] appearance-none cursor-pointer h-full"
+                      className="pl-4 pr-10 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px] appearance-none cursor-pointer h-full w-full sm:w-auto"
                     >
                       <option value="all">Všechny kategorie</option>
                       {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
@@ -476,15 +486,15 @@ const Budget = ({ trips, onUpdateTrip }) => {
                       key={expense.id} 
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between p-6 glass-card shadow-sm hover:shadow-md hover:-translate-y-0.5 group transition-all duration-300 gap-4 sm:gap-6"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-5 sm:p-6 glass-card shadow-sm hover:shadow-md hover:-translate-y-0.5 group transition-all duration-300 gap-4 sm:gap-6"
                     >
-                      <div className="flex items-center gap-6 min-w-0">
-                        <div className={`w-12 h-12 ${cat.lightBgClass} ${cat.textClass} rounded-[1rem] flex items-center justify-center shrink-0`}>
-                          <Icon size={24} strokeWidth={2} />
+                      <div className="flex items-center gap-4 sm:gap-6 min-w-0">
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 ${cat.lightBgClass} ${cat.textClass} rounded-[1rem] flex items-center justify-center shrink-0`}>
+                          <Icon size={20} strokeWidth={2} className="sm:w-6 sm:h-6" />
                         </div>
                         <div className="min-w-0">
                           <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 leading-none">{cat.label}</p>
-                          <p className="text-xl font-bold text-gray-900 dark:text-white truncate tracking-tight leading-tight mb-2">{expense.description}</p>
+                          <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate tracking-tight leading-tight mb-1.5 sm:mb-2">{expense.description}</p>
                           {expense.date && (
                             <div className="flex items-center gap-1.5 text-[12px] font-medium text-gray-500 dark:text-gray-400">
                               <Calendar size={14} strokeWidth={2} />
@@ -520,6 +530,16 @@ const Budget = ({ trips, onUpdateTrip }) => {
           </div>
         </>
       ) : null}
+
+      {/* FAB Mobile Button */}
+      {trip && (
+        <button
+          onClick={() => setIsAddModalOpen(true)}
+          className="sm:hidden fixed bottom-24 right-6 z-[100] w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(37,99,235,0.4)] active:scale-90 transition-transform cursor-pointer"
+        >
+          <Plus size={28} strokeWidth={2.5} />
+        </button>
+      )}
     </div>
   );
 };

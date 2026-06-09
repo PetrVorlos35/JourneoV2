@@ -5,8 +5,10 @@ import { MapPin, Calendar, Trash2, Clock, Plane, Plus, TrendingUp, ArrowRight, W
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useDialog } from '../ui/DialogModal';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion';
 
-const TripsOverview = ({ trips, onDeleteTrip }) => {
+const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
   const { confirmDialog, ModalPortal } = useDialog();
   const [activeCategory, setActiveCategory] = useState('ongoing');
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,86 +63,105 @@ const TripsOverview = ({ trips, onDeleteTrip }) => {
   const totalVisitedPlaces = trips.reduce((acc, t) => acc + (t.activities?.filter(a => a.location)?.length || 0), 0);
 
   return (
-    <div className="space-y-10 w-full pb-10">
+    <div className="space-y-6 sm:space-y-10 w-full pb-10">
       {ModalPortal}
       <div className="flex justify-between items-end">
-        <div className="space-y-2">
-          <p className="text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Přehled vašich cest</p>
-          <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Chytrá nástěnka</h1>
+        <div className="space-y-1 sm:space-y-2">
+          <p className="text-[11px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Přehled vašich cest</p>
+          <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Chytrá nástěnka</h1>
         </div>
       </div>
 
       {/* Smart Dashboard Widgets */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, staggerChildren: 0.1 }}
+        className="grid grid-cols-1 md:grid-cols-12 gap-6"
+      >
         {/* Next Trip Countdown */}
-        <div className="md:col-span-6 lg:col-span-5 glass-card p-8 rounded-[2rem] flex flex-col justify-between min-h-[220px]">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="md:col-span-6 lg:col-span-5 glass-card p-6 sm:p-8 rounded-[2rem] flex flex-col justify-between min-h-[160px] sm:min-h-[220px] relative overflow-hidden group"
+        >
           {nextTrip ? (
-            <>
-              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-[12px] font-bold uppercase tracking-widest mb-4 bg-blue-50 dark:bg-blue-500/10 self-start px-3 py-1.5 rounded-full">
-                <Clock size={16} strokeWidth={2.5} /> Další cesta za
+            <div className="flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-4 sm:gap-0 h-full">
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-[10px] sm:text-[12px] font-bold uppercase tracking-widest mb-2 sm:mb-4 bg-blue-50 dark:bg-blue-500/10 self-start px-3 py-1.5 rounded-full">
+                  <Clock size={14} strokeWidth={2.5} className="sm:w-4 sm:h-4" /> Další cesta za
+                </div>
+                <div className="flex items-baseline gap-2 sm:gap-3">
+                  <span className="text-5xl sm:text-7xl font-bold tracking-tighter text-gray-900 dark:text-white leading-none">{daysUntilNextTrip > 0 ? daysUntilNextTrip : 'Dnes'}</span>
+                  {daysUntilNextTrip > 0 && <span className="text-xs sm:text-sm font-bold text-gray-500 uppercase tracking-widest">dní</span>}
+                </div>
               </div>
-              <div className="flex items-baseline gap-3 mb-6">
-                <span className="text-7xl font-bold tracking-tighter text-gray-900 dark:text-white leading-none">{daysUntilNextTrip > 0 ? daysUntilNextTrip : 'Dnes'}</span>
-                {daysUntilNextTrip > 0 && <span className="text-sm font-bold text-gray-500 uppercase tracking-widest">dní</span>}
+              <div className="text-right sm:text-left pt-2 sm:pt-4 sm:mt-auto">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-0.5 sm:mb-1 truncate tracking-tight max-w-[140px] sm:max-w-none">{nextTrip.title}</h3>
+                <p className="text-gray-500 dark:text-gray-400 text-[12px] sm:text-[13px] font-medium">{format(new Date(nextTrip.startDate), 'd. M. yyyy', { locale: cs })}</p>
               </div>
-              <div className="pt-4 mt-auto">
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 truncate tracking-tight">{nextTrip.title}</h3>
-                <p className="text-gray-500 dark:text-gray-400 text-[13px] font-medium">{format(new Date(nextTrip.startDate), 'd. MMMM yyyy', { locale: cs })}</p>
-              </div>
-            </>
+            </div>
           ) : (
-            <div className="flex flex-col items-center justify-center text-center h-full space-y-4">
-              <div className="w-14 h-14 bg-gray-100 dark:bg-white/5 rounded-2xl flex items-center justify-center text-gray-400">
+            <div className="flex flex-col items-center justify-center text-center h-full space-y-4 py-4 sm:py-0">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gray-100 dark:bg-white/5 rounded-2xl flex items-center justify-center text-gray-400">
                 <Plane size={24} strokeWidth={2} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Žádný plán</h3>
-                <p className="text-[14px] font-medium text-gray-500">Kam vyrazíte příště?</p>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Žádný plán</h3>
+                <p className="text-[13px] sm:text-[14px] font-medium text-gray-500">Kam vyrazíte příště?</p>
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Quick Stats */}
-        <div className="md:col-span-6 lg:col-span-4 glass-card rounded-[2rem] p-8 flex flex-col justify-between">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="md:col-span-6 lg:col-span-4 glass-card rounded-[2rem] p-6 sm:p-8 flex flex-col justify-between group"
+        >
           <div>
-            <h3 className="text-gray-500 dark:text-gray-400 text-[12px] flex items-center gap-2 mb-6 uppercase tracking-widest font-bold">
+            <h3 className="text-gray-500 dark:text-gray-400 text-[11px] sm:text-[12px] flex items-center gap-2 mb-4 sm:mb-6 uppercase tracking-widest font-bold">
               <TrendingUp size={16} strokeWidth={2.5} /> Rychlá data
             </h3>
-            <div className="grid grid-cols-2 gap-8">
+            <div className="grid grid-cols-2 gap-4 sm:gap-8">
               <div className="space-y-1">
-                <span className="text-5xl font-bold text-gray-900 dark:text-white leading-none tracking-tighter">{trips.length}</span>
-                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Výletů</p>
+                <span className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white leading-none tracking-tighter">{trips.length}</span>
+                <p className="text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-widest">Výletů</p>
               </div>
               <div className="space-y-1">
-                <span className="text-5xl font-bold text-gray-900 dark:text-white leading-none tracking-tighter">{totalVisitedPlaces}</span>
-                <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest">Míst</p>
+                <span className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white leading-none tracking-tighter">{totalVisitedPlaces}</span>
+                <p className="text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-widest">Míst</p>
               </div>
             </div>
           </div>
-          <Link to="/dashboard/statistics" className="text-[13px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors duration-300 flex items-center gap-1.5 mt-8 pt-4">
-            Všechny statistiky <ArrowRight size={16} strokeWidth={2.5} />
+          <Link to="/dashboard/statistics" className="text-[12px] sm:text-[13px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors duration-300 flex items-center gap-1.5 mt-6 sm:mt-8 pt-4">
+            Všechny statistiky <ArrowRight size={16} strokeWidth={2.5} className="transition-transform group-hover:translate-x-1" />
           </Link>
-        </div>
+        </motion.div>
 
         {/* Quick Actions */}
-        <div className="md:col-span-12 lg:col-span-3 flex flex-row lg:flex-col gap-4">
-          <Link
-            to="/dashboard/create"
-            className="flex-1 lg:flex-none flex items-center justify-center gap-3 py-6 lg:py-8 px-4 bg-blue-600 text-white rounded-[2rem] hover:bg-blue-500 transition-all duration-300 shadow-md shadow-blue-500/20 active:scale-95"
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="md:col-span-12 lg:col-span-3 flex flex-row lg:flex-col gap-4"
+        >
+          <button
+            onClick={onOpenCreateModal}
+            className="hidden sm:flex flex-1 lg:flex-none items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 lg:py-8 px-4 bg-blue-600 text-white rounded-[2rem] hover:bg-blue-500 transition-all duration-300 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer"
           >
-            <Plus size={24} strokeWidth={2.5} /> 
-            <span className="font-bold text-[15px]">Nový výlet</span>
-          </Link>
+            <Plus size={22} strokeWidth={2.5} className="sm:w-6 sm:h-6" /> 
+            <span className="font-bold text-[14px] sm:text-[15px]">Nový výlet</span>
+          </button>
           <Link
             to="/dashboard/budget"
-            className="flex-1 lg:flex-none flex items-center justify-center gap-3 py-6 lg:py-8 px-4 glass-card hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 active:scale-95"
+            className="flex-1 lg:flex-none flex items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 lg:py-8 px-4 glass-card hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 active:scale-95"
           >
-            <Wallet size={24} strokeWidth={2} /> 
-            <span className="font-bold text-[15px]">Výdaje</span>
+            <Wallet size={22} strokeWidth={2} className="sm:w-6 sm:h-6" /> 
+            <span className="font-bold text-[14px] sm:text-[15px]">Výdaje</span>
           </Link>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Filters */}
       <div className="glass-card p-4 rounded-2xl flex flex-col sm:flex-row gap-4 mt-8">
@@ -175,7 +196,7 @@ const TripsOverview = ({ trips, onDeleteTrip }) => {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 dark:border-white/10 gap-8">
+      <div className="flex w-full justify-between sm:justify-start sm:gap-8 border-b border-gray-200 dark:border-white/10">
         {[
           { id: 'ongoing', label: 'Probíhající' },
           { id: 'upcoming', label: 'Plánované' },
@@ -184,24 +205,36 @@ const TripsOverview = ({ trips, onDeleteTrip }) => {
           <button
             key={cat.id}
             onClick={() => setActiveCategory(cat.id)}
-            className={`pb-4 px-2 text-[14px] sm:text-[15px] font-bold transition-all duration-300 border-b-[3px] relative top-[2px] ${
+            className={`pb-4 px-1 sm:px-2 text-[13px] sm:text-[15px] font-bold transition-all duration-300 border-b-[3px] relative top-[2px] ${
               activeCategory === cat.id
                 ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-blue-400'
                 : 'text-gray-500 border-transparent hover:text-gray-900 dark:hover:text-white'
             } cursor-pointer disabled:cursor-not-allowed`}
           >
-            {cat.label} <span className="ml-2 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-[11px] font-bold text-gray-500 dark:text-gray-400">{tripsByCategory[cat.id].length}</span>
+            {cat.label} <span className="ml-1 sm:ml-2 px-1.5 sm:px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400">{tripsByCategory[cat.id].length}</span>
           </button>
         ))}
       </div>
 
       {/* Trip List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <motion.div 
+        initial="hidden"
+        animate="visible"
+        variants={{
+          hidden: { opacity: 0 },
+          visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+        }}
+        className="flex md:grid overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none no-scrollbar pb-6 md:pb-0 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 -mx-4 px-4 md:mx-0 md:px-0"
+      >
         {tripsByCategory[activeCategory].length > 0 ? (
           tripsByCategory[activeCategory].map(trip => (
-            <div
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: { opacity: 1, y: 0 }
+              }}
               key={trip.id}
-              className="glass-card hover:-translate-y-1 transition-transform duration-300 p-6 sm:p-8 relative flex flex-col min-h-[220px] group"
+              className="min-w-[85vw] sm:min-w-[320px] md:min-w-0 snap-center glass-card hover:-translate-y-2 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)] transition-all duration-300 p-6 sm:p-8 relative flex flex-col min-h-[200px] sm:min-h-[220px] group shrink-0"
             >
               <div className="flex justify-between items-start mb-6">
                 <div className="w-12 h-12 rounded-[1rem] bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
@@ -231,18 +264,18 @@ const TripsOverview = ({ trips, onDeleteTrip }) => {
                   to={`/dashboard/trip/${trip.id}?from=dashboard`}
                   className="inline-flex items-center gap-1.5 text-[12px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors uppercase tracking-widest"
                 >
-                  Otevřít <ArrowRight size={16} strokeWidth={2.5} />
+                  Otevřít <ArrowRight size={16} strokeWidth={2.5} className="transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
-            </div>
+            </motion.div>
           ))
         ) : (
-          <div className="col-span-full py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none">
-            <p className="text-2xl text-gray-900 dark:text-white font-bold tracking-tight">Zatím prázdno</p>
-            <p className="text-[15px] text-gray-500 font-medium max-w-md">V této kategorii nemáte zatím žádné výlety. Zkuste si nějaký naplánovat.</p>
+          <div className="col-span-full py-10 sm:py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none min-h-[50vh] md:min-h-0">
+            <p className="text-xl sm:text-2xl text-gray-900 dark:text-white font-bold tracking-tight">Zatím prázdno</p>
+            <p className="text-[14px] sm:text-[15px] text-gray-500 font-medium max-w-md px-4">V této kategorii nemáte zatím žádné výlety. Zkuste si nějaký naplánovat.</p>
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 };

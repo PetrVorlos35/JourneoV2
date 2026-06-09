@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, PlusSquare, Settings, LogOut, BarChart2, Wallet, X, Sun, Moon, Monitor, Mountain, Palmtree, Compass, Map, Plane, Camera, Menu, Users } from 'lucide-react';
+import { Home, PlusSquare, Plus, Settings, LogOut, BarChart2, Wallet, X, Sun, Moon, Monitor, Mountain, Palmtree, Compass, Map, Plane, Camera, Menu, Users } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,27 +16,35 @@ import UserAvatar from '../ui/UserAvatar';
 const navItems = [
   { icon: Home, label: 'Přehled', path: '/dashboard' },
   { icon: Map, label: 'Moje výlety', path: '/dashboard/all-trips' },
-  { icon: PlusSquare, label: 'Vytvořit výlet', path: '/dashboard/create' },
-  { icon: Users, label: 'Přátelé', path: '/dashboard/friends' },
   { icon: BarChart2, label: 'Statistiky', path: '/dashboard/statistics' },
+  { icon: Users, label: 'Přátelé', path: '/dashboard/friends' },
   { icon: Wallet, label: 'Výdaje', path: '/dashboard/budget' },
 ];
 
 // eslint-disable-next-line no-unused-vars
-const SidebarItem = ({ icon: Icon, label, path, active, onClick, className }) => (
+const SidebarItem = ({ icon: Icon, label, path, active, onClick, className, layoutId = "sidebar-active-pill" }) => (
   <Link
     to={path}
     onClick={(e) => {
       if (onClick) onClick(path, e);
     }}
-    className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 ${
+    className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative group active:scale-[0.98] ${
       active
-        ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
+        ? 'text-white'
         : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10'
     } ${className || ''}`}
   >
-    <Icon size={20} strokeWidth={active ? 2.5 : 2} />
-    <span className="font-semibold">{label}</span>
+    {active && (
+      <motion.div
+        layoutId={layoutId}
+        className="absolute inset-0 bg-blue-600 rounded-2xl shadow-md shadow-blue-500/20"
+        transition={{ type: "spring", stiffness: 350, damping: 30 }}
+      />
+    )}
+    <div className="relative z-10 flex items-center gap-3">
+      <Icon size={20} strokeWidth={active ? 2.5 : 2} />
+      <span className="font-semibold">{label}</span>
+    </div>
   </Link>
 );
 
@@ -74,7 +82,7 @@ const ThemeToggle = () => {
   );
 };
 
-const DashboardLayout = ({ children }) => {
+const DashboardLayout = ({ children, onOpenCreateModal }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
@@ -86,7 +94,7 @@ const DashboardLayout = ({ children }) => {
   const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   const isTripDetail = location.pathname.includes('/trip/');
 
-  const mobileNavItems = navItems.filter(item => item.path !== '/dashboard/statistics');
+  const mobileNavItems = navItems;
 
   const handleNavigation = async (path, e, onClickCallback) => {
     if (e) {
@@ -155,9 +163,27 @@ const DashboardLayout = ({ children }) => {
         }}
       />
 
-      {/* Subtle Background Glow */}
+      {/* Subtle Background Glow with animation */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none flex justify-center items-center">
-        <div className="absolute w-[800px] h-[800px] rounded-[100%] bg-blue-500/5 dark:bg-blue-500/10 blur-[120px]" />
+        <motion.div 
+          animate={{ 
+            scale: [1, 1.1, 1],
+            opacity: [0.3, 0.5, 0.3],
+            rotate: [0, 5, -5, 0]
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute w-[800px] h-[800px] rounded-[100%] bg-blue-500/10 dark:bg-blue-500/15 blur-[120px]" 
+        />
+        <motion.div 
+          animate={{ 
+            scale: [1, 1.2, 1],
+            opacity: [0.2, 0.4, 0.2],
+            x: [0, 50, -50, 0],
+            y: [0, -50, 50, 0]
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute w-[600px] h-[600px] rounded-[100%] bg-purple-500/10 dark:bg-purple-500/15 blur-[100px] right-[-100px] top-[-100px]" 
+        />
       </div>
 
       {/* ── Desktop Sidebar (Floating Glass Panel) ── */}
@@ -181,6 +207,17 @@ const DashboardLayout = ({ children }) => {
                  onClick={(path, e) => handleNavigation(path, e)}
                className="cursor-pointer disabled:cursor-not-allowed"/>
             ))}
+            <div className="pt-2">
+              <button
+                onClick={onOpenCreateModal}
+                className="flex w-full items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative group active:scale-[0.98] text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer"
+              >
+                <div className="relative z-10 flex items-center gap-3">
+                  <PlusSquare size={20} strokeWidth={2} />
+                  <span className="font-semibold">Vytvořit výlet</span>
+                </div>
+              </button>
+            </div>
           </nav>
 
           <div className="p-4 border-t border-gray-100 dark:border-white/10 space-y-3">
@@ -195,7 +232,7 @@ const DashboardLayout = ({ children }) => {
               active={location.pathname === '/dashboard/settings'}
               onClick={(path, e) => handleNavigation(path, e)}
              className="cursor-pointer disabled:cursor-not-allowed"/>
-            <Link to="/dashboard/settings" onClick={(e) => handleNavigation('/dashboard/settings', e)} className="px-4 py-4 flex items-center gap-3 mt-1 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer disabled:cursor-not-allowed">
+            <Link to="/dashboard/settings" onClick={(e) => handleNavigation('/dashboard/settings', e)} className="px-4 py-4 flex items-center gap-3 mt-1 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-300 active:scale-95 cursor-pointer disabled:cursor-not-allowed">
               <UserAvatar user={user} size="md" />
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-bold truncate">
@@ -206,7 +243,7 @@ const DashboardLayout = ({ children }) => {
             </Link>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors duration-300 font-semibold cursor-pointer disabled:cursor-not-allowed"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-300 active:scale-95 font-semibold cursor-pointer disabled:cursor-not-allowed"
             >
               <LogOut size={20} strokeWidth={2} />
               <span>Odhlásit se</span>
@@ -294,12 +331,22 @@ const DashboardLayout = ({ children }) => {
 
                 <div className="space-y-2">
                   <p className="px-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">Možnosti</p>
+                  <button
+                    onClick={() => { closeMobile(); onOpenCreateModal(); }}
+                    className="flex w-full items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative group active:scale-[0.98] text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 mb-2 cursor-pointer"
+                  >
+                    <div className="relative z-10 flex items-center gap-3">
+                      <PlusSquare size={20} strokeWidth={2} />
+                      <span className="font-semibold">Vytvořit výlet</span>
+                    </div>
+                  </button>
                   <SidebarItem
                     icon={BarChart2}
                     label="Statistiky"
                     path="/dashboard/statistics"
                     active={location.pathname === '/dashboard/statistics'}
                     onClick={(path, e) => handleNavigation(path, e, closeMobile)}
+                    layoutId="mobile-sidebar-active-pill"
                    className="cursor-pointer disabled:cursor-not-allowed"/>
                   <SidebarItem
                     icon={Settings}
@@ -307,6 +354,7 @@ const DashboardLayout = ({ children }) => {
                     path="/dashboard/settings"
                     active={location.pathname === '/dashboard/settings'}
                     onClick={(path, e) => handleNavigation(path, e, closeMobile)}
+                    layoutId="mobile-sidebar-active-pill"
                    className="cursor-pointer disabled:cursor-not-allowed"/>
                 </div>
               </div>
@@ -353,6 +401,16 @@ const DashboardLayout = ({ children }) => {
         <div className="flex-1 overflow-y-auto p-4 sm:p-8 md:p-10 max-w-[1400px] mx-auto w-full flex flex-col min-h-0 custom-scrollbar">
           {children}
         </div>
+
+        {/* ── Global FAB for new trip (Mobile) ── */}
+        {!isTripDetail && !location.pathname.includes('/budget') && (
+          <button
+            onClick={onOpenCreateModal}
+            className="md:hidden fixed bottom-24 right-6 z-[100] w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(37,99,235,0.4)] active:scale-90 transition-transform cursor-pointer"
+          >
+            <Plus size={28} strokeWidth={2.5} />
+          </button>
+        )}
       </main>
     </div>
   );

@@ -3,12 +3,12 @@ import { Routes, Route } from 'react-router-dom';
 import DashboardLayout from './DashboardLayout';
 import DashboardSplash from './DashboardSplash';
 import DashboardNotFound from './DashboardNotFound';
+import CreateTripModal from './CreateTripModal';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
 // Lazy load dashboard sub-components
 const TripsOverview = lazy(() => import('./TripsOverview'));
-const CreateTrip = lazy(() => import('./CreateTrip'));
 const TripDetail = lazy(() => import('./TripDetail'));
 const Statistics = lazy(() => import('./Statistics'));
 const Settings = lazy(() => import('./Settings'));
@@ -34,6 +34,7 @@ const DashboardLoading = () => (
 const DashboardHome = () => {
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Load trips from API on mount
   const fetchTrips = useCallback(async () => {
@@ -144,20 +145,21 @@ const DashboardHome = () => {
 
   return (
     <DashboardSplash>
-      <DashboardLayout>
+      <DashboardLayout onOpenCreateModal={() => setIsCreateModalOpen(true)}>
+        <CreateTripModal 
+          isOpen={isCreateModalOpen} 
+          onClose={() => setIsCreateModalOpen(false)} 
+          onAddTrip={handleAddTrip} 
+        />
         <Suspense fallback={<DashboardLoading />}>
           <Routes>
             <Route 
               path="/" 
-              element={<TripsOverview trips={trips} onDeleteTrip={handleDeleteTrip} />} 
+              element={<TripsOverview trips={trips} onDeleteTrip={handleDeleteTrip} onOpenCreateModal={() => setIsCreateModalOpen(true)} />} 
             />
             <Route 
               path="/all-trips" 
               element={<AllTrips trips={trips} onDeleteTrip={handleDeleteTrip} />} 
-            />
-            <Route 
-              path="/create" 
-              element={<CreateTrip onAddTrip={handleAddTrip} />} 
             />
             <Route 
               path="/trip/:id" 

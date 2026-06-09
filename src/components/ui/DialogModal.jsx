@@ -45,24 +45,23 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
   return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-          onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-        >
+        <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-6 overflow-hidden">
           {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-md" />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-md cursor-pointer"
+          />
 
           {/* Dialog */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 8 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="relative z-10 bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-[2rem] w-full max-w-md p-8 shadow-2xl"
+            initial={{ opacity: 0, y: "100%" }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: "100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="relative z-10 bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-t-[2rem] sm:rounded-[2rem] w-full max-w-md p-6 sm:p-8 shadow-2xl"
           >
             {/* Close btn */}
             <button
@@ -142,7 +141,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
               </button>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       )}
     </AnimatePresence>,
     document.body
