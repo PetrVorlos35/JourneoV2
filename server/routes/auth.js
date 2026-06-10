@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
 import auth from '../middleware/auth.js';
+import { sendVerificationCode } from '../lib/mailer.js';
+import { waitUntil } from '@vercel/functions';
 
 const router = Router();
 
@@ -43,16 +45,106 @@ router.post('/register', async (req, res) => {
       [userId, 'dark', 'CZK']
     );
 
-    // Generate JWT
-    const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    // Generate OTP
+    const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
 
-    res.status(201).json({
-      token,
-      user: { id: userId, email, first_name: first_name || null, last_name: last_name || null, avatar_url: null, bio: null, role: 'user' }
-    });
+    // Save token
+    await pool.query(
+      'INSERT INTO verification_tokens (email, token, type, expires_at) VALUES (?, ?, ?, ?)',
+      [email, code, 'REGISTER', expiresAt]
+    );
+
+    // Send email (non-blocking)
+    waitUntil(
+      sendVerificationCode(email, code, 'REGISTER').catch(err => 
+        console.error('Email sending failed:', err)
+      )
+    );
+
+    // Return success without JWT
+    res.status(201).json({ message: 'Registrace úspěšná, zkontrolujte svůj e-mail.' });
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).json({ error: 'Chyba serveru při registraci.' });
+  }
+});
+
+// ── POST /api/auth/verify ───────────────────────────────────
+router.post('/verify', async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({ error: 'E-mail a kód jsou povinné.' });
+    }
+
+    const [tokens] = await pool.query(
+      'SELECT id, expires_at FROM verification_tokens WHERE email = ? AND token = ? AND type = "REGISTER" ORDER BY created_at DESC LIMIT 1',
+      [email, code]
+    );
+
+    if (tokens.length === 0) {
+      return res.status(400).json({ error: 'Neplatný nebo nesprávný kód.' });
+    }
+
+    const tokenRecord = tokens[0];
+    if (new Date(tokenRecord.expires_at) < new Date()) {
+      return res.status(400).json({ error: 'Platnost kódu vypršela. Nechte si zaslat nový.' });
+    }
+
+    // Mark user as verified
+    await pool.query('UPDATE users SET is_verified = 1 WHERE email = ?', [email]);
+
+    // Delete used token
+    await pool.query('DELETE FROM verification_tokens WHERE id = ?', [tokenRecord.id]);
+
+    res.json({ message: 'E-mail byl úspěšně ověřen. Nyní se můžete přihlásit.' });
+  } catch (err) {
+    console.error('Verify error:', err);
+    res.status(500).json({ error: 'Chyba serveru při ověřování.' });
+  }
+});
+
+// ── POST /api/auth/resend-otp ───────────────────────────────
+router.post('/resend-otp', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'E-mail je povinný.' });
+
+    // Check if user exists and is not verified
+    const [users] = await pool.query('SELECT is_verified FROM users WHERE email = ?', [email]);
+    if (users.length === 0) {
+      return res.status(404).json({ error: 'Uživatel nenalezen.' });
+    }
+    if (users[0].is_verified) {
+      return res.status(400).json({ error: 'Tento účet je již ověřen.' });
+    }
+
+    // Invalidate old tokens
+    await pool.query('DELETE FROM verification_tokens WHERE email = ? AND type = "REGISTER"', [email]);
+
+    // Generate new OTP
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    // Save token
+    await pool.query(
+      'INSERT INTO verification_tokens (email, token, type, expires_at) VALUES (?, ?, ?, ?)',
+      [email, code, 'REGISTER', expiresAt]
+    );
+
+    // Send email (non-blocking)
+    waitUntil(
+      sendVerificationCode(email, code, 'REGISTER').catch(err => 
+        console.error('Email sending failed:', err)
+      )
+    );
+
+    res.json({ message: 'Nový kód byl odeslán na váš e-mail.' });
+  } catch (err) {
+    console.error('Resend error:', err);
+    res.status(500).json({ error: 'Chyba při odesílání nového kódu.' });
   }
 });
 
@@ -67,7 +159,7 @@ router.post('/login', async (req, res) => {
 
     // Find user
     const [users] = await pool.query(
-      'SELECT id, email, password_hash, first_name, last_name, avatar_url, bio, role FROM users WHERE email = ?', 
+      'SELECT id, email, password_hash, first_name, last_name, avatar_url, bio, role, is_verified FROM users WHERE email = ?', 
       [email]
     );
     if (users.length === 0) {
@@ -80,6 +172,10 @@ router.post('/login', async (req, res) => {
     const isValid = await bcrypt.compare(password, user.password_hash);
     if (!isValid) {
       return res.status(401).json({ error: 'Špatné heslo nebo e-mail.' });
+    }
+
+    if (!user.is_verified) {
+      return res.status(403).json({ error: 'E-mail ještě nebyl ověřen.', needsVerification: true });
     }
 
     // Generate JWT
@@ -231,6 +327,118 @@ router.put('/profile', auth, async (req, res) => {
   } catch (err) {
     console.error('Update profile error:', err);
     res.status(500).json({ error: 'Chyba serveru při aktualizaci profilu.' });
+  }
+});
+
+// ── POST /api/auth/forgot-password ──────────────────────────
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'E-mail je povinný.' });
+
+    const [users] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
+    if (users.length === 0) {
+      // Vracíme stejnou hlášku z bezpečnostních důvodů (aby nešlo zjistit, jaké maily existují)
+      return res.json({ message: 'Pokud existuje účet s tímto e-mailem, byl na něj odeslán odkaz pro obnovu.' });
+    }
+
+    // Invalidate old RESET tokens
+    await pool.query('DELETE FROM verification_tokens WHERE email = ? AND type = "RESET"', [email]);
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await pool.query(
+      'INSERT INTO verification_tokens (email, token, type, expires_at) VALUES (?, ?, ?, ?)',
+      [email, code, 'RESET', expiresAt]
+    );
+
+    // Send email (non-blocking)
+    waitUntil(
+      sendVerificationCode(email, code, 'RESET').catch(err => 
+        console.error('Email sending failed:', err)
+      )
+    );
+
+    res.json({ message: 'Pokud existuje účet s tímto e-mailem, byl na něj odeslán odkaz pro obnovu.' });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ error: 'Chyba serveru při žádosti o obnovu.' });
+  }
+});
+
+// ── POST /api/auth/reset-password ───────────────────────────
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, code, new_password } = req.body;
+
+    if (!email || !code || !new_password) {
+      return res.status(400).json({ error: 'Vyplňte všechny údaje.' });
+    }
+
+    if (new_password.length < 8 || !/[A-Z]/.test(new_password) || !/[0-9]/.test(new_password)) {
+      return res.status(400).json({ error: 'Heslo nesplňuje bezpečnostní požadavky.' });
+    }
+
+    const [tokens] = await pool.query(
+      'SELECT id, expires_at FROM verification_tokens WHERE email = ? AND token = ? AND type = "RESET" ORDER BY created_at DESC LIMIT 1',
+      [email, code]
+    );
+
+    if (tokens.length === 0) {
+      return res.status(400).json({ error: 'Neplatný nebo nesprávný kód.' });
+    }
+
+    const tokenRecord = tokens[0];
+    if (new Date(tokenRecord.expires_at) < new Date()) {
+      return res.status(400).json({ error: 'Platnost kódu vypršela. Žádejte o obnovu znovu.' });
+    }
+
+    const salt = await bcrypt.genSalt(12);
+    const passwordHash = await bcrypt.hash(new_password, salt);
+
+    await pool.query('UPDATE users SET password_hash = ? WHERE email = ?', [passwordHash, email]);
+    await pool.query('DELETE FROM verification_tokens WHERE id = ?', [tokenRecord.id]);
+
+    res.json({ message: 'Vaše heslo bylo úspěšně změněno. Můžete se přihlásit.' });
+  } catch (err) {
+    console.error('Reset password error:', err);
+    res.status(500).json({ error: 'Chyba serveru při změně hesla.' });
+  }
+});
+
+// ── POST /api/auth/change-password ──────────────────────────
+router.post('/change-password', auth, async (req, res) => {
+  try {
+    const { old_password, new_password } = req.body;
+
+    if (!old_password || !new_password) {
+      return res.status(400).json({ error: 'Vyplňte obě hesla.' });
+    }
+
+    if (new_password.length < 8 || !/[A-Z]/.test(new_password) || !/[0-9]/.test(new_password)) {
+      return res.status(400).json({ error: 'Nové heslo nesplňuje bezpečnostní požadavky.' });
+    }
+
+    const [users] = await pool.query('SELECT password_hash FROM users WHERE id = ?', [req.userId]);
+    if (users.length === 0) {
+      return res.status(404).json({ error: 'Uživatel nenalezen.' });
+    }
+
+    const isValid = await bcrypt.compare(old_password, users[0].password_hash);
+    if (!isValid) {
+      return res.status(401).json({ error: 'Současné heslo je nesprávné.' });
+    }
+
+    const salt = await bcrypt.genSalt(12);
+    const passwordHash = await bcrypt.hash(new_password, salt);
+
+    await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [passwordHash, req.userId]);
+
+    res.json({ message: 'Heslo bylo úspěšně změněno.' });
+  } catch (err) {
+    console.error('Change password error:', err);
+    res.status(500).json({ error: 'Chyba serveru při změně hesla.' });
   }
 });
 

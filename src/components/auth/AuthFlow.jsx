@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Check, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useGoogleLogin } from '@react-oauth/google';
@@ -8,6 +8,14 @@ import { useAuth } from '../../contexts/AuthContext';
 import JourneoWhiteLogo from '../../assets/Journeo_whitelogo.png';
 import JourneoBlackLogo from '../../assets/Journeo_blacklogo.png';
 import GoogleIcon from '../../assets/google.png';
+
+const getPasswordStrength = (password) => {
+  let strength = 0;
+  if (password.length >= 8) strength++;
+  if (/[A-Z]/.test(password)) strength++;
+  if (/[0-9]/.test(password)) strength++;
+  return strength;
+};
 
 const AuthFlow = () => {
   const location = useLocation();
@@ -20,11 +28,12 @@ const AuthFlow = () => {
     password: '',
     confirmPassword: '',
   });
+  const [otpCode, setOtpCode] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const navigate = useNavigate();
-  const { login, register, loginWithGoogle } = useAuth();
+  const { login, register, loginWithGoogle, verify, resendOtp, forgotPassword, resetPassword } = useAuth();
 
   const googleLoginFn = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -72,17 +81,102 @@ const AuthFlow = () => {
       setErrorMsg('Hesla se neshodují');
       return;
     }
-    if (formData.password.length < 6) {
-      setErrorMsg('Heslo musí mít alespoň 6 znaků');
+    const strength = getPasswordStrength(formData.password);
+    if (strength < 3) {
+      setErrorMsg('Heslo nesplňuje bezpečnostní požadavky');
       return;
     }
     setIsLoading(true);
     try {
       await register(formData.firstName, formData.lastName, formData.email, formData.password);
-      toast.success('Registrace úspěšná! Vítejte v Journeo.');
-      navigate('/dashboard');
+      toast.success('Registrace úspěšná! Zkontrolujte e-mail pro ověřovací kód.');
+      setMode('otp');
     } catch (err) {
       setErrorMsg(err.message || 'Chyba při registraci.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    if (otpCode.length !== 6) {
+      setErrorMsg('Kód musí mít 6 číslic.');
+      return;
+    }
+    setIsLoading(true);
+    setErrorMsg('');
+    try {
+      await verify(formData.email, otpCode);
+      toast.success('E-mail ověřen! Nyní se můžete přihlásit.');
+      setMode('login');
+      // Vyčistíme hesla a kód
+      setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }));
+      setOtpCode('');
+    } catch (err) {
+      setErrorMsg(err.message || 'Chyba při ověřování.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setIsLoading(true);
+    setErrorMsg('');
+    try {
+      await resendOtp(formData.email);
+      toast.success('Nový kód byl úspěšně odeslán.');
+    } catch (err) {
+      setErrorMsg(err.message || 'Chyba při odesílání nového kódu.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    if (!formData.email) {
+      setErrorMsg('Zadejte prosím e-mail.');
+      return;
+    }
+    setIsLoading(true);
+    setErrorMsg('');
+    try {
+      const res = await forgotPassword(formData.email);
+      toast.success(res.message || 'Odkaz pro obnovu hesla odeslán.');
+      setMode('reset');
+    } catch (err) {
+      setErrorMsg(err.message || 'Chyba při žádosti o obnovu.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    if (otpCode.length !== 6) {
+      setErrorMsg('Kód musí mít 6 číslic.');
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMsg('Hesla se neshodují');
+      return;
+    }
+    const strength = getPasswordStrength(formData.password);
+    if (strength < 3) {
+      setErrorMsg('Heslo nesplňuje bezpečnostní požadavky');
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const res = await resetPassword(formData.email, otpCode, formData.password);
+      toast.success(res.message || 'Heslo bylo úspěšně změněno.');
+      setMode('login');
+      setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }));
+      setOtpCode('');
+    } catch (err) {
+      setErrorMsg(err.message || 'Chyba při změně hesla.');
     } finally {
       setIsLoading(false);
     }
@@ -116,17 +210,23 @@ const AuthFlow = () => {
             <img src={JourneoBlackLogo} alt="Journeo Logo" className="h-10 w-auto object-contain mx-auto mb-4 drop-shadow-md block dark:hidden" />
             <img src={JourneoWhiteLogo} alt="Journeo Logo" className="h-10 w-auto object-contain mx-auto mb-4 drop-shadow-md hidden dark:block" />
             <h1 className="text-2xl font-bold tracking-tight mb-1">
-              {mode === 'login' ? 'Vítejte zpět' : 'Začněte psát'}
+              {mode === 'login' ? 'Vítejte zpět' : 
+               mode === 'forgot' ? 'Zapomenuté heslo' :
+               mode === 'reset' ? 'Nové heslo' : 'Začněte psát'}
             </h1>
             <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium">
               {mode === 'login'
                 ? 'Přihlaste se ke svému deníku.'
+                : mode === 'forgot'
+                ? 'Zadejte e-mail pro obnovu hesla.'
+                : mode === 'reset'
+                ? 'Zadejte kód z e-mailu a nastavte si nové heslo.'
                 : 'Vytvořte si účet pro další cestu.'}
             </p>
           </div>
 
           {/* Pill Toggle */}
-          <div className="relative flex p-1 mb-6 bg-gray-100/80 dark:bg-white/5 rounded-full">
+          <div className={`relative flex p-1 mb-6 bg-gray-100/80 dark:bg-white/5 rounded-full ${['otp', 'forgot', 'reset'].includes(mode) ? 'hidden' : ''}`}>
             <button
               type="button"
               onClick={() => { setMode('login'); setErrorMsg(''); }}
@@ -167,7 +267,235 @@ const AuthFlow = () => {
                 exit={{ opacity: 0, x: mode === 'login' ? 15 : -15 }}
                 transition={{ duration: 0.25, ease: 'easeOut' }}
               >
-                {errorMsg && (
+                {mode === 'otp' ? (
+                  <div className="py-2">
+                    <div className="text-center space-y-3 mb-6">
+                      <div className="mx-auto w-14 h-14 bg-blue-500/10 dark:bg-blue-500/20 rounded-full flex items-center justify-center mb-2">
+                        <Check size={28} className="text-blue-500" strokeWidth={2.5} />
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">Zkontrolujte si e-mail</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Zadejte 6-místný kód, který jsme zaslali na <span className="font-semibold text-gray-900 dark:text-white">{formData.email}</span>
+                      </p>
+                    </div>
+
+                    {errorMsg && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
+                      >
+                        {errorMsg}
+                      </motion.div>
+                    )}
+
+                    <form onSubmit={handleVerify} className="space-y-4">
+                      <input
+                        type="text"
+                        name="otp"
+                        required
+                        maxLength={6}
+                        value={otpCode}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          setOtpCode(val);
+                          if (errorMsg) setErrorMsg('');
+                        }}
+                        placeholder="123456"
+                        className="w-full text-center tracking-[1em] text-2xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-4 text-gray-900 dark:text-white placeholder-gray-400/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-bold"
+                      />
+
+                      <button
+                        type="submit"
+                        disabled={isLoading || otpCode.length !== 6}
+                        className="w-full py-3.5 bg-black dark:bg-white text-white dark:text-black text-sm font-bold rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-lg active:scale-[0.98] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                      >
+                        {isLoading ? 'Ověřuji...' : 'Ověřit účet'}
+                      </button>
+                    </form>
+
+                    <div className="mt-6 flex flex-col items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleResendOtp}
+                        disabled={isLoading}
+                        className="text-sm font-semibold text-blue-500 hover:text-blue-600 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                      >
+                        Znovu odeslat kód
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setMode('login'); setErrorMsg(''); setOtpCode(''); }}
+                        className="text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                      >
+                        Vrátit se na přihlášení
+                      </button>
+                    </div>
+                  </div>
+                ) : mode === 'forgot' ? (
+                  <div className="py-2">
+                    {errorMsg && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
+                      >
+                        {errorMsg}
+                      </motion.div>
+                    )}
+                    <form onSubmit={handleForgotPassword} className="space-y-4">
+                      <input
+                        type="email"
+                        name="email"
+                        required
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="Zadejte svůj e-mail"
+                        autoComplete="email"
+                        className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+                      />
+                      <button
+                        type="submit"
+                        disabled={isLoading || !formData.email}
+                        className="w-full py-3.5 bg-black dark:bg-white text-white dark:text-black text-sm font-bold rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-lg active:scale-[0.98] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                      >
+                        {isLoading ? 'Zpracovávám...' : 'Odeslat odkaz'}
+                      </button>
+                    </form>
+                    <div className="mt-6 flex justify-center">
+                      <button
+                        type="button"
+                        onClick={() => { setMode('login'); setErrorMsg(''); }}
+                        className="text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                      >
+                        Vrátit se na přihlášení
+                      </button>
+                    </div>
+                  </div>
+                ) : mode === 'reset' ? (
+                  <div className="py-2">
+                    {errorMsg && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
+                      >
+                        {errorMsg}
+                      </motion.div>
+                    )}
+                    <form onSubmit={handleResetPassword} className="space-y-4">
+                      <div>
+                        <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">Kód z e-mailu</label>
+                        <input
+                          type="text"
+                          name="otp"
+                          required
+                          maxLength={6}
+                          value={otpCode}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/\D/g, '');
+                            setOtpCode(val);
+                            if (errorMsg) setErrorMsg('');
+                          }}
+                          placeholder="123456"
+                          className="w-full text-center tracking-[1em] text-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-bold"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">Nové heslo</label>
+                        <div className="relative">
+                          <input
+                            type={showPassword ? 'text' : 'password'}
+                            name="password"
+                            required
+                            value={formData.password}
+                            onChange={handleInputChange}
+                            placeholder="Zadejte nové heslo"
+                            className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 pr-12 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            aria-label={showPassword ? "Skrýt heslo" : "Zobrazit heslo"}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                          >
+                            {showPassword ? <EyeOff size={16} strokeWidth={2.5} /> : <Eye size={16} strokeWidth={2.5} />}
+                          </button>
+                        </div>
+                        
+                        {formData.password.length > 0 && (
+                          <div className="mt-2.5 space-y-2">
+                            {/* Strength Meter */}
+                            <div className="flex gap-1.5">
+                              {[1, 2, 3].map((segment) => {
+                                const strength = getPasswordStrength(formData.password);
+                                let bgClass = 'bg-black/10 dark:bg-white/10';
+                                if (strength >= segment) {
+                                  if (strength === 1) bgClass = 'bg-red-500';
+                                  else if (strength === 2) bgClass = 'bg-yellow-500';
+                                  else bgClass = 'bg-green-500';
+                                }
+                                return (
+                                  <div 
+                                    key={segment} 
+                                    className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${bgClass}`} 
+                                  />
+                                );
+                              })}
+                            </div>
+                            {/* Requirements List */}
+                            <div className="space-y-1.5 px-1">
+                              {[
+                                { label: 'Alespoň 8 znaků', met: formData.password.length >= 8 },
+                                { label: 'Obsahuje velké písmeno', met: /[A-Z]/.test(formData.password) },
+                                { label: 'Obsahuje číslici', met: /[0-9]/.test(formData.password) },
+                              ].map((req, i) => (
+                                <div key={i} className={`flex items-center gap-2 text-[11px] font-medium transition-colors duration-300 ${req.met ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                                  <div className={`p-0.5 rounded-full ${req.met ? 'bg-green-100 dark:bg-green-500/20' : 'bg-transparent'}`}>
+                                    {req.met ? <Check size={10} strokeWidth={4} /> : <X size={10} strokeWidth={3} className="opacity-50" />}
+                                  </div>
+                                  <span>{req.label}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          name="confirmPassword"
+                          required
+                          value={formData.confirmPassword}
+                          onChange={handleInputChange}
+                          placeholder="Potvrďte nové heslo"
+                          className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isLoading || otpCode.length !== 6 || !formData.password}
+                        className="w-full py-3.5 mt-2 bg-black dark:bg-white text-white dark:text-black text-sm font-bold rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-lg active:scale-[0.98] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                      >
+                        {isLoading ? 'Ukládám...' : 'Uložit nové heslo'}
+                      </button>
+                    </form>
+                    <div className="mt-6 flex justify-center">
+                      <button
+                        type="button"
+                        onClick={() => { setMode('login'); setErrorMsg(''); setOtpCode(''); }}
+                        className="text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                      >
+                        Vrátit se na přihlášení
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {errorMsg && (
                   <motion.div 
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -216,25 +544,77 @@ const AuthFlow = () => {
                   />
 
                   {/* Password */}
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      required
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      placeholder="Heslo"
-                      autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                      className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 pr-12 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      aria-label={showPassword ? "Skrýt heslo" : "Zobrazit heslo"}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer disabled:cursor-not-allowed"
-                    >
-                      {showPassword ? <EyeOff size={16} strokeWidth={2.5} /> : <Eye size={16} strokeWidth={2.5} />}
-                    </button>
+                  <div>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        name="password"
+                        required
+                        value={formData.password}
+                        onChange={handleInputChange}
+                        placeholder="Heslo"
+                        autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                        className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 pr-12 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? "Skrýt heslo" : "Zobrazit heslo"}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                      >
+                        {showPassword ? <EyeOff size={16} strokeWidth={2.5} /> : <Eye size={16} strokeWidth={2.5} />}
+                      </button>
+                    </div>
+                    {mode === 'login' && (
+                      <div className="mt-2 text-right">
+                        <button
+                          type="button"
+                          onClick={() => { setMode('forgot'); setErrorMsg(''); }}
+                          className="text-xs font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
+                        >
+                          Zapomněli jste heslo?
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Password Strength UI for Registration */}
+                    {mode === 'register' && formData.password.length > 0 && (
+                      <div className="mt-2.5 space-y-2">
+                        {/* Strength Meter */}
+                        <div className="flex gap-1.5">
+                          {[1, 2, 3].map((segment) => {
+                            const strength = getPasswordStrength(formData.password);
+                            let bgClass = 'bg-black/10 dark:bg-white/10';
+                            if (strength >= segment) {
+                              if (strength === 1) bgClass = 'bg-red-500';
+                              else if (strength === 2) bgClass = 'bg-yellow-500';
+                              else bgClass = 'bg-green-500';
+                            }
+                            return (
+                              <div 
+                                key={segment} 
+                                className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${bgClass}`} 
+                              />
+                            );
+                          })}
+                        </div>
+                        {/* Requirements List */}
+                        <div className="space-y-1.5 px-1">
+                          {[
+                            { label: 'Alespoň 8 znaků', met: formData.password.length >= 8 },
+                            { label: 'Obsahuje velké písmeno', met: /[A-Z]/.test(formData.password) },
+                            { label: 'Obsahuje číslici', met: /[0-9]/.test(formData.password) },
+                          ].map((req, i) => (
+                            <div key={i} className={`flex items-center gap-2 text-[11px] font-medium transition-colors duration-300 ${req.met ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                              <div className={`p-0.5 rounded-full ${req.met ? 'bg-green-100 dark:bg-green-500/20' : 'bg-transparent'}`}>
+                                {req.met ? <Check size={10} strokeWidth={4} /> : <X size={10} strokeWidth={3} className="opacity-50" />}
+                              </div>
+                              <span>{req.label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Confirm Password */}
@@ -290,6 +670,8 @@ const AuthFlow = () => {
                     </>
                   )}
                 </button>
+                  </>
+                )}
               </motion.div>
             </AnimatePresence>
           </div>

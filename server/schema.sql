@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
     avatar_url TEXT DEFAULT NULL,
     bio TEXT DEFAULT NULL,
     role ENUM('user', 'admin') DEFAULT 'user',
+    is_verified TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
@@ -151,4 +152,17 @@ CREATE TABLE IF NOT EXISTS votes (
     INDEX idx_vote_trip (trip_id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ── Ověřovací tokeny ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS verification_tokens (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    token VARCHAR(255) NOT NULL,
+    type ENUM('REGISTER', 'RESET') NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_tokens_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

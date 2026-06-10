@@ -1,4 +1,4 @@
-import { Trash2, DollarSign, User, Save, Camera, Mountain, Palmtree, Compass, Map, Plane, Monitor, Sun, Moon, X } from 'lucide-react';
+import { Trash2, DollarSign, User, Save, Camera, Mountain, Palmtree, Compass, Map, Plane, Monitor, Sun, Moon, X, KeyRound, Eye, EyeOff, Check } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useCurrency } from '../../contexts/CurrencyContext';
@@ -9,8 +9,16 @@ import { useDialog } from '../ui/DialogModal';
 const Settings = ({ onClearData, onConvertCurrency }) => {
   const { currency, setCurrency } = useCurrency();
   const { theme, setTheme } = useTheme();
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, changePassword } = useAuth();
   const { promptDialog, confirmDialog, ModalPortal } = useDialog();
+
+  const getPasswordStrength = (password) => {
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    return strength;
+  };
 
   const [profileForm, setProfileForm] = useState({
     first_name: user?.first_name || '',
@@ -20,6 +28,15 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
   });
   const [saving, setSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  const [pwdForm, setPwdForm] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [pwdError, setPwdError] = useState('');
+  const [savingPwd, setSavingPwd] = useState(false);
+  const [showPwd, setShowPwd] = useState({ old: false, new: false, confirm: false });
 
   const handleProfileChange = (field, value) => {
     setProfileForm(prev => ({ ...prev, [field]: value }));
@@ -37,6 +54,35 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
       toast.error('Nepodařilo se uložit profil.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handlePwdChange = (field, value) => {
+    setPwdForm(prev => ({ ...prev, [field]: value }));
+    setPwdError('');
+  };
+
+  const handlePwdSave = async (e) => {
+    e.preventDefault();
+    setPwdError('');
+    if (pwdForm.newPassword !== pwdForm.confirmPassword) {
+      setPwdError('Hesla se neshodují.');
+      return;
+    }
+    const strength = getPasswordStrength(pwdForm.newPassword);
+    if (strength < 3) {
+      setPwdError('Nové heslo nesplňuje bezpečnostní požadavky.');
+      return;
+    }
+    setSavingPwd(true);
+    try {
+      const res = await changePassword(pwdForm.oldPassword, pwdForm.newPassword);
+      toast.success(res.message || 'Heslo bylo úspěšně změněno.');
+      setPwdForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      setPwdError(err.message || 'Chyba při změně hesla.');
+    } finally {
+      setSavingPwd(false);
     }
   };
 
@@ -273,6 +319,131 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Change Password Section */}
+        <div className="glass-card p-8 md:p-10">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
+              <KeyRound size={20} strokeWidth={2} />
+            </div>
+            Změna hesla
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 font-medium mb-8">
+            Doporučujeme používat silné heslo. Pokud změníte heslo, zůstanete přihlášeni.
+          </p>
+
+          {pwdError && (
+            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold">
+              {pwdError}
+            </div>
+          )}
+
+          <form onSubmit={handlePwdSave} className="space-y-6 max-w-md">
+            <div>
+              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Současné heslo</label>
+              <div className="relative">
+                <input
+                  type={showPwd.old ? 'text' : 'password'}
+                  required
+                  value={pwdForm.oldPassword}
+                  onChange={e => handlePwdChange('oldPassword', e.target.value)}
+                  className="glass-input pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPwd(p => ({ ...p, old: !p.old }))}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                >
+                  {showPwd.old ? <EyeOff size={16} strokeWidth={2.5} /> : <Eye size={16} strokeWidth={2.5} />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Nové heslo</label>
+              <div className="relative">
+                <input
+                  type={showPwd.new ? 'text' : 'password'}
+                  required
+                  value={pwdForm.newPassword}
+                  onChange={e => handlePwdChange('newPassword', e.target.value)}
+                  className="glass-input pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPwd(p => ({ ...p, new: !p.new }))}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                >
+                  {showPwd.new ? <EyeOff size={16} strokeWidth={2.5} /> : <Eye size={16} strokeWidth={2.5} />}
+                </button>
+              </div>
+
+              {pwdForm.newPassword.length > 0 && (
+                <div className="mt-2.5 space-y-2">
+                  <div className="flex gap-1.5">
+                    {[1, 2, 3].map((segment) => {
+                      const strength = getPasswordStrength(pwdForm.newPassword);
+                      let bgClass = 'bg-black/10 dark:bg-white/10';
+                      if (strength >= segment) {
+                        if (strength === 1) bgClass = 'bg-red-500';
+                        else if (strength === 2) bgClass = 'bg-yellow-500';
+                        else bgClass = 'bg-green-500';
+                      }
+                      return (
+                        <div 
+                          key={segment} 
+                          className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${bgClass}`} 
+                        />
+                      );
+                    })}
+                  </div>
+                  <div className="space-y-1.5 px-1">
+                    {[
+                      { label: 'Alespoň 8 znaků', met: pwdForm.newPassword.length >= 8 },
+                      { label: 'Obsahuje velké písmeno', met: /[A-Z]/.test(pwdForm.newPassword) },
+                      { label: 'Obsahuje číslici', met: /[0-9]/.test(pwdForm.newPassword) },
+                    ].map((req, i) => (
+                      <div key={i} className={`flex items-center gap-2 text-[11px] font-medium transition-colors duration-300 ${req.met ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                        <div className={`p-0.5 rounded-full ${req.met ? 'bg-green-100 dark:bg-green-500/20' : 'bg-transparent'}`}>
+                          {req.met ? <Check size={10} strokeWidth={4} /> : <X size={10} strokeWidth={3} className="opacity-50" />}
+                        </div>
+                        <span>{req.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Potvrďte nové heslo</label>
+              <div className="relative">
+                <input
+                  type={showPwd.confirm ? 'text' : 'password'}
+                  required
+                  value={pwdForm.confirmPassword}
+                  onChange={e => handlePwdChange('confirmPassword', e.target.value)}
+                  className="glass-input pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPwd(p => ({ ...p, confirm: !p.confirm }))}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                >
+                  {showPwd.confirm ? <EyeOff size={16} strokeWidth={2.5} /> : <Eye size={16} strokeWidth={2.5} />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={savingPwd || !pwdForm.oldPassword || !pwdForm.newPassword || pwdForm.newPassword !== pwdForm.confirmPassword}
+              className="px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-bold transition-all duration-300 shadow-md active:scale-95 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+            >
+              {savingPwd ? 'Měním heslo...' : 'Změnit heslo'}
+            </button>
+          </form>
         </div>
 
         {/* Danger zone */}

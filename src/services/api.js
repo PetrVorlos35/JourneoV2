@@ -43,6 +43,36 @@ export const api = {
         body: JSON.stringify({ first_name: firstName, last_name: lastName, email, password }),
       }),
 
+    verify: (email, code) =>
+      request('/auth/verify', {
+        method: 'POST',
+        body: JSON.stringify({ email, code }),
+      }),
+
+    resendOtp: (email) =>
+      request('/auth/resend-otp', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      }),
+
+    forgotPassword: (email) =>
+      request('/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      }),
+
+    resetPassword: (email, code, newPassword) =>
+      request('/auth/reset-password', {
+        method: 'POST',
+        body: JSON.stringify({ email, code, new_password: newPassword }),
+      }),
+
+    changePassword: (oldPassword, newPassword) =>
+      request('/auth/change-password', {
+        method: 'POST',
+        body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
+      }),
+
     login: (email, password) =>
       request('/auth/login', {
         method: 'POST',

@@ -15,6 +15,7 @@
     "@react-oauth/google": "^0.13.5",
     "@tailwindcss/vite": "^4.1.8",
     "@vercel/analytics": "^2.0.1",
+    "@vercel/functions": "^3.7.0",
     "bcryptjs": "^3.0.3",
     "canvas-confetti": "^1.9.4",
     "cors": "^2.8.5",

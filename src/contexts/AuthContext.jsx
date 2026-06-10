@@ -35,9 +35,27 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (firstName, lastName, email, password) => {
     const data = await api.auth.register(firstName, lastName, email, password);
-    localStorage.setItem('journeo_token', data.token);
-    setUser(data.user);
-    return data;
+    return data; // No auto-login
+  };
+
+  const verify = async (email, code) => {
+    return await api.auth.verify(email, code);
+  };
+
+  const resendOtp = async (email) => {
+    return await api.auth.resendOtp(email);
+  };
+
+  const forgotPassword = async (email) => {
+    return await api.auth.forgotPassword(email);
+  };
+
+  const resetPassword = async (email, code, newPassword) => {
+    return await api.auth.resetPassword(email, code, newPassword);
+  };
+
+  const changePassword = async (oldPassword, newPassword) => {
+    return await api.auth.changePassword(oldPassword, newPassword);
   };
 
   const loginWithGoogle = async (accessToken) => {
@@ -61,7 +79,7 @@ export const AuthProvider = ({ children }) => {
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, loginWithGoogle, logout, updateProfile, isAdmin }}>
+    <AuthContext.Provider value={{ user, loading, login, register, verify, resendOtp, forgotPassword, resetPassword, changePassword, loginWithGoogle, logout, updateProfile, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );
