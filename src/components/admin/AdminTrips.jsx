@@ -99,7 +99,7 @@ const AdminTrips = () => {
           <h1 className="text-3xl md:text-4xl font-black tracking-tight">
             <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">Výlety</span>
           </h1>
-          <p className="text-gray-400 mt-1 font-medium">Celkem {pagination.total} výletů</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1 font-medium">Celkem {pagination.total} výletů</p>
         </div>
         
         <form onSubmit={handleSearch} className="flex gap-2">
@@ -110,12 +110,12 @@ const AdminTrips = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Hledat výlety..."
-              className="pl-9 pr-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm font-medium focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all w-64 placeholder:text-gray-600"
+              className="pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08] text-sm font-medium focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all w-64 placeholder:text-gray-600"
             />
           </div>
           <button
             type="submit"
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 text-white text-sm font-bold hover:shadow-lg hover:shadow-orange-500/20 transition-all active:scale-95 cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 text-gray-900 dark:text-white text-sm font-bold hover:shadow-lg hover:shadow-orange-500/20 transition-all active:scale-95 cursor-pointer"
           >
             Hledat
           </button>
@@ -127,7 +127,7 @@ const AdminTrips = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl overflow-hidden"
+        className="rounded-2xl border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none backdrop-blur-xl overflow-hidden"
       >
         {loading ? (
           <div className="flex items-center justify-center h-64">
@@ -148,14 +148,14 @@ const AdminTrips = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.03 }}
                   onClick={() => handleViewTrip(t.id)}
-                  className="p-4 hover:bg-white/[0.02] transition-colors active:bg-white/[0.04] cursor-pointer"
+                  className="p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors active:bg-gray-200 dark:active:bg-white/[0.04] cursor-pointer"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <p className="text-[14px] font-bold truncate">{t.title}</p>
                       <div className="flex items-center gap-2 mt-1.5">
                         <UserAvatar user={{ first_name: t.user.firstName, last_name: t.user.lastName, avatar_url: t.user.avatarUrl }} size="xs" />
-                        <span className="text-[11px] text-gray-400 truncate">{t.user.firstName ? `${t.user.firstName} ${t.user.lastName || ''}` : t.user.email}</span>
+                        <span className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{t.user.firstName ? `${t.user.firstName} ${t.user.lastName || ''}` : t.user.email}</span>
                       </div>
                       <div className="flex items-center gap-3 mt-2 text-[11px] text-gray-500">
                         <span className="flex items-center gap-1"><Calendar size={12} /> {t.durationDays}d</span>
@@ -186,7 +186,7 @@ const AdminTrips = () => {
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest border-b border-white/[0.06]">
+                  <tr className="text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest border-b border-gray-200 dark:border-white/[0.06]">
                     <th className="px-6 py-4">Výlet</th>
                     <th className="px-4 py-4">Uživatel</th>
                     <th className="px-4 py-4">Období</th>
@@ -204,7 +204,7 @@ const AdminTrips = () => {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.03 }}
-                      className="hover:bg-white/[0.02] transition-colors group cursor-pointer"
+                      className="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer"
                       onClick={() => handleViewTrip(t.id)}
                     >
                       <td className="px-6 py-4">
@@ -222,7 +222,7 @@ const AdminTrips = () => {
                         </div>
                       </td>
                       <td className="px-4 py-4">
-                        <span className="text-[12px] text-gray-400">{t.startDate} → {t.endDate}</span>
+                        <span className="text-[12px] text-gray-500 dark:text-gray-400">{t.startDate} → {t.endDate}</span>
                       </td>
                       <td className="px-4 py-4">
                         <span className="text-[13px] font-bold">{t.durationDays}</span>
@@ -240,14 +240,14 @@ const AdminTrips = () => {
                         <div className="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => handleViewTrip(t.id)}
-                            className="p-2 rounded-lg hover:bg-blue-500/10 text-gray-400 hover:text-blue-400 transition-colors cursor-pointer"
+                            className="p-2 rounded-lg hover:bg-blue-500/10 text-gray-500 dark:text-gray-400 hover:text-blue-400 transition-colors cursor-pointer"
                             title="Detail výletu"
                           >
                             <Eye size={16} />
                           </button>
                           <button
                             onClick={() => handleDeleteTrip(t.id, t.title)}
-                            className="p-2 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
+                            className="p-2 rounded-lg hover:bg-red-500/10 text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
                             title="Smazat výlet"
                           >
                             <Trash2 size={16} />
@@ -264,7 +264,7 @@ const AdminTrips = () => {
 
         {/* Pagination */}
         {pagination.totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-white/[0.06]">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-white/[0.06]">
             <p className="text-[12px] text-gray-500 font-medium">
               Stránka {pagination.page} z {pagination.totalPages} · {pagination.total} výletů
             </p>
@@ -272,14 +272,14 @@ const AdminTrips = () => {
               <button
                 onClick={() => fetchTrips(pagination.page - 1, search)}
                 disabled={pagination.page <= 1}
-                className="px-3 py-1.5 rounded-lg text-[12px] font-bold hover:bg-white/10 text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                className="px-3 py-1.5 rounded-lg text-[12px] font-bold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
               >
                 ← Předchozí
               </button>
               <button
                 onClick={() => fetchTrips(pagination.page + 1, search)}
                 disabled={pagination.page >= pagination.totalPages}
-                className="px-3 py-1.5 rounded-lg text-[12px] font-bold hover:bg-white/10 text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                className="px-3 py-1.5 rounded-lg text-[12px] font-bold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
               >
                 Další →
               </button>
@@ -298,7 +298,7 @@ const AdminTrips = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="absolute inset-0 bg-black/70 backdrop-blur-md"
+                className="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-md"
                 onClick={() => setSelectedTrip(null)}
               />
               <motion.div
@@ -306,7 +306,7 @@ const AdminTrips = () => {
                 animate={{ x: 0 }}
                 exit={{ x: '100%' }}
                 transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
-                className="relative w-full max-w-xl bg-[#111113] border-l border-white/[0.08] h-full overflow-y-auto z-10 custom-scrollbar shadow-2xl shadow-black/50"
+                className="relative w-full max-w-xl bg-white dark:bg-[#111113] border-l border-gray-200 dark:border-white/[0.08] h-full overflow-y-auto z-10 custom-scrollbar shadow-2xl shadow-black/50"
               >
                 {detailLoading || selectedTrip?.loading ? (
                   <div className="flex items-center justify-center h-full">
@@ -317,19 +317,19 @@ const AdminTrips = () => {
                     {/* Close button */}
                     <button
                       onClick={() => setSelectedTrip(null)}
-                      className="absolute top-6 right-6 p-2.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] transition-colors cursor-pointer group"
+                      className="absolute top-6 right-6 p-2.5 rounded-full bg-gray-100 dark:bg-white/[0.06] hover:bg-gray-200 dark:bg-white/[0.12] transition-colors cursor-pointer group"
                     >
-                      <X size={16} className="text-gray-400 group-hover:text-white transition-colors" />
+                      <X size={16} className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:text-white transition-colors" />
                     </button>
 
                     {/* Trip Header */}
                     <div className="pt-2">
                       <h2 className="text-2xl font-black tracking-tight pr-12">{selectedTrip.title}</h2>
                       <div className="flex items-center gap-3 mt-3 flex-wrap">
-                        <span className="text-[12px] text-gray-400 flex items-center gap-1.5 bg-white/[0.04] px-3 py-1.5 rounded-lg">
+                        <span className="text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5 bg-gray-100 dark:bg-white/[0.04] px-3 py-1.5 rounded-lg">
                           <Calendar size={13} /> {selectedTrip.startDate} → {selectedTrip.endDate}
                         </span>
-                        <span className="text-[12px] text-gray-400 flex items-center gap-1.5 bg-white/[0.04] px-3 py-1.5 rounded-lg">
+                        <span className="text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5 bg-gray-100 dark:bg-white/[0.04] px-3 py-1.5 rounded-lg">
                           <Clock size={13} /> {selectedTrip.durationDays} dní
                         </span>
                         <span className="text-[12px] text-red-400 flex items-center gap-1.5 bg-red-500/10 px-3 py-1.5 rounded-lg font-bold">
@@ -337,7 +337,7 @@ const AdminTrips = () => {
                         </span>
                       </div>
                       {/* Owner */}
-                      <div className="flex items-center gap-3 mt-4 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                      <div className="flex items-center gap-3 mt-4 p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <UserAvatar user={{ first_name: selectedTrip.user?.firstName, last_name: selectedTrip.user?.lastName, avatar_url: selectedTrip.user?.avatarUrl }} size="sm" />
                         <div>
                           <p className="text-[12px] font-bold">
@@ -350,19 +350,19 @@ const AdminTrips = () => {
 
                     {/* Stats row */}
                     <div className="grid grid-cols-4 gap-2">
-                      <div className="text-center p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                      <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <p className="text-lg font-black">{selectedTrip.activities?.length || 0}</p>
                         <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Dní</p>
                       </div>
-                      <div className="text-center p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                      <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <p className="text-lg font-black text-orange-400">{totalTripExpenses(selectedTrip).toLocaleString('cs-CZ')}</p>
                         <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Kč</p>
                       </div>
-                      <div className="text-center p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                      <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <p className="text-lg font-black">{selectedTrip.packingList?.length || 0}</p>
                         <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Balení</p>
                       </div>
-                      <div className="text-center p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                      <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <p className="text-lg font-black">{selectedTrip.documents?.length || 0}</p>
                         <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Poznámky</p>
                       </div>
@@ -376,7 +376,7 @@ const AdminTrips = () => {
                         </h3>
                         <div className="space-y-2">
                           {selectedTrip.activities.map((a, i) => (
-                            <div key={a.id} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                            <div key={a.id} className="p-4 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                               <div className="flex items-start gap-3">
                                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center shrink-0 mt-0.5">
                                   <span className="text-[11px] font-black text-blue-400">{i + 1}</span>
@@ -392,7 +392,7 @@ const AdminTrips = () => {
                                     </p>
                                   )}
                                   {a.plan && (
-                                    <p className="text-[12px] text-gray-400 mt-2 leading-relaxed whitespace-pre-wrap">{a.plan}</p>
+                                    <p className="text-[12px] text-gray-500 dark:text-gray-400 mt-2 leading-relaxed whitespace-pre-wrap">{a.plan}</p>
                                   )}
                                 </div>
                               </div>
@@ -412,7 +412,7 @@ const AdminTrips = () => {
                           {selectedTrip.expenses.map(e => {
                             const cat = categoryLabels[e.category] || categoryLabels.other;
                             return (
-                              <div key={e.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                              <div key={e.id} className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                                 <span className="text-lg">{cat.emoji}</span>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-[12px] font-bold truncate">{e.description}</p>
@@ -435,7 +435,7 @@ const AdminTrips = () => {
                         <div className="grid grid-cols-2 gap-1.5">
                           {selectedTrip.packingList.map(p => (
                             <div key={p.id} className={`flex items-center gap-2 p-2.5 rounded-lg text-[12px] ${
-                              p.checked ? 'text-gray-500 line-through bg-white/[0.02]' : 'text-gray-300 bg-white/[0.03]'
+                              p.checked ? 'text-gray-500 line-through bg-gray-50 dark:bg-white/[0.02]' : 'text-gray-600 dark:text-gray-300 bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none'
                             }`}>
                               {p.checked ? <CheckSquare size={14} className="text-green-500 shrink-0" /> : <Square size={14} className="text-gray-600 shrink-0" />}
                               <span className="truncate">{p.text}</span>
@@ -453,9 +453,9 @@ const AdminTrips = () => {
                         </h3>
                         <div className="space-y-2">
                           {selectedTrip.documents.map(d => (
-                            <div key={d.id} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                            <div key={d.id} className="p-4 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                               <p className="text-[13px] font-bold mb-2">{d.title}</p>
-                              <p className="text-[12px] text-gray-400 leading-relaxed whitespace-pre-wrap">{d.content}</p>
+                              <p className="text-[12px] text-gray-500 dark:text-gray-400 leading-relaxed whitespace-pre-wrap">{d.content}</p>
                             </div>
                           ))}
                         </div>
@@ -471,7 +471,7 @@ const AdminTrips = () => {
                     )}
 
                     {/* Delete button at bottom */}
-                    <div className="pt-4 border-t border-white/[0.06]">
+                    <div className="pt-4 border-t border-gray-200 dark:border-white/[0.06]">
                       <button
                         onClick={() => handleDeleteTrip(selectedTrip.id, selectedTrip.title)}
                         className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors font-bold text-[13px] cursor-pointer"

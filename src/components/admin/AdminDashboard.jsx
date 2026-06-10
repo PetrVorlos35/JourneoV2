@@ -10,7 +10,7 @@ const StatCard = ({ icon: Icon, label, value, subtitle, gradient, delay = 0 }) =
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5, delay }}
-    className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6 group hover:border-white/[0.1] transition-all duration-300"
+    className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none backdrop-blur-xl p-6 group hover:border-gray-300 dark:hover:border-white/[0.1] transition-all duration-300"
   >
     <div className={`absolute top-0 right-0 w-32 h-32 rounded-full blur-[60px] opacity-20 group-hover:opacity-30 transition-opacity ${gradient}`} />
     <div className="relative z-10">
@@ -19,7 +19,7 @@ const StatCard = ({ icon: Icon, label, value, subtitle, gradient, delay = 0 }) =
       </div>
       <p className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-1">{label}</p>
       <p className="text-3xl font-black tracking-tight">{value}</p>
-      {subtitle && <p className="text-[13px] text-gray-400 mt-1 font-medium">{subtitle}</p>}
+      {subtitle && <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1 font-medium">{subtitle}</p>}
     </div>
   </motion.div>
 );
@@ -52,7 +52,7 @@ const AdminDashboard = () => {
 
   if (!data) {
     return (
-      <div className="flex items-center justify-center h-[60vh] text-gray-400">
+      <div className="flex items-center justify-center h-[60vh] text-gray-500 dark:text-gray-400">
         Nepodařilo se načíst data.
       </div>
     );
@@ -77,7 +77,7 @@ const AdminDashboard = () => {
         <h1 className="text-3xl md:text-4xl font-black tracking-tight">
           Admin <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">Přehled</span>
         </h1>
-        <p className="text-gray-400 mt-2 font-medium">Statistiky a přehledy celé platformy Journeo</p>
+        <p className="text-gray-500 dark:text-gray-400 mt-2 font-medium">Statistiky a přehledy celé platformy Journeo</p>
       </motion.div>
 
       {/* Stats Grid */}
@@ -94,7 +94,7 @@ const AdminDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.25 }}
-          className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6"
+          className="rounded-2xl border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none backdrop-blur-xl p-6"
         >
           <div className="flex items-center gap-3 mb-6">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
@@ -112,7 +112,7 @@ const AdminDashboard = () => {
                 const monthKey = m.month.split('-')[1];
                 return (
                   <div key={m.month} className="flex-1 flex flex-col items-center gap-2">
-                    <span className="text-[11px] font-bold text-gray-400">{m.count}</span>
+                    <span className="text-[11px] font-bold text-gray-500 dark:text-gray-400">{m.count}</span>
                     <motion.div
                       initial={{ height: 0 }}
                       animate={{ height: `${(m.count / maxTripsInMonth) * 100}%` }}
@@ -134,7 +134,7 @@ const AdminDashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6"
+          className="rounded-2xl border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none backdrop-blur-xl p-6"
         >
           <div className="flex items-center gap-3 mb-6">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center shadow-lg">
@@ -148,7 +148,7 @@ const AdminDashboard = () => {
 
           <div className="space-y-3">
             {data.topUsers.map((u, i) => (
-              <div key={u.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/[0.03] transition-colors">
+              <div key={u.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-white/[0.03] transition-colors">
                 <span className="text-[13px] font-black text-gray-500 w-6 text-center">{i + 1}.</span>
                 <UserAvatar user={{ first_name: u.firstName, last_name: u.lastName, avatar_url: u.avatarUrl }} size="sm" />
                 <div className="flex-1 min-w-0">
@@ -169,7 +169,7 @@ const AdminDashboard = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.35 }}
-        className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl p-6"
+        className="rounded-2xl border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none backdrop-blur-xl p-6"
       >
         <div className="flex items-center gap-3 mb-6">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
@@ -184,7 +184,7 @@ const AdminDashboard = () => {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest border-b border-white/[0.06]">
+              <tr className="text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest border-b border-gray-200 dark:border-white/[0.06]">
                 <th className="pb-3 pr-4">Uživatel</th>
                 <th className="pb-3 pr-4 hidden sm:table-cell">E-mail</th>
                 <th className="pb-3 pr-4 hidden md:table-cell">Role</th>
@@ -194,7 +194,7 @@ const AdminDashboard = () => {
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
               {data.recentUsers.map(u => (
-                <tr key={u.id} className="hover:bg-white/[0.02] transition-colors">
+                <tr key={u.id} className="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors">
                   <td className="py-3 pr-4">
                     <div className="flex items-center gap-3">
                       <UserAvatar user={{ first_name: u.firstName, last_name: u.lastName, avatar_url: u.avatarUrl }} size="sm" />
@@ -204,11 +204,11 @@ const AdminDashboard = () => {
                     </div>
                   </td>
                   <td className="py-3 pr-4 hidden sm:table-cell">
-                    <span className="text-[13px] text-gray-400 truncate">{u.email}</span>
+                    <span className="text-[13px] text-gray-500 dark:text-gray-400 truncate">{u.email}</span>
                   </td>
                   <td className="py-3 pr-4 hidden md:table-cell">
                     <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${
-                      u.role === 'admin' ? 'bg-orange-500/20 text-orange-400' : 'bg-white/[0.06] text-gray-400'
+                      u.role === 'admin' ? 'bg-orange-500/20 text-orange-400' : 'bg-gray-100 dark:bg-white/[0.06] text-gray-500 dark:text-gray-400'
                     }`}>
                       {u.role || 'user'}
                     </span>

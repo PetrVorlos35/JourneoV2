@@ -147,6 +147,20 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
 
   const closeMobile = () => setMobileOpen(false);
 
+  const handleOpenCreateModal = async () => {
+    if (hasUnsavedChanges) {
+      const ok = await confirmDialog({
+        title: 'Máte neuložené změny',
+        message: 'Opravdu chcete odejít? Vaše změny nebudou uloženy.',
+        confirmLabel: 'Odejít bez uložení',
+        variant: 'danger'
+      });
+      if (!ok) return;
+      setHasUnsavedChanges(false);
+    }
+    onOpenCreateModal();
+  };
+
   return (
     <div className="h-[100dvh] overflow-hidden bg-[#fbfbfd] dark:bg-black text-gray-900 dark:text-[#f5f5f7] flex selection:bg-blue-500/30 font-sans relative transition-colors duration-500">
       {ModalPortal}
@@ -209,7 +223,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
             ))}
             <div className="pt-2">
               <button
-                onClick={onOpenCreateModal}
+                onClick={handleOpenCreateModal}
                 className="flex w-full items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative group active:scale-[0.98] text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer"
               >
                 <div className="relative z-10 flex items-center gap-3">
@@ -342,7 +356,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
                 <div className="space-y-2">
                   <p className="px-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">Možnosti</p>
                   <button
-                    onClick={() => { closeMobile(); onOpenCreateModal(); }}
+                    onClick={() => { closeMobile(); handleOpenCreateModal(); }}
                     className="flex w-full items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative group active:scale-[0.98] text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 mb-2 cursor-pointer"
                   >
                     <div className="relative z-10 flex items-center gap-3">
@@ -425,7 +439,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
         {/* ── Global FAB for new trip (Mobile) ── */}
         {!isTripDetail && !location.pathname.includes('/budget') && (
           <button
-            onClick={onOpenCreateModal}
+            onClick={handleOpenCreateModal}
             className="md:hidden fixed bottom-24 right-6 z-[100] w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(37,99,235,0.4)] active:scale-90 transition-transform cursor-pointer"
           >
             <Plus size={28} strokeWidth={2.5} />

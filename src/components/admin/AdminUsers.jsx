@@ -114,7 +114,7 @@ const AdminUsers = () => {
           <h1 className="text-3xl md:text-4xl font-black tracking-tight">
             <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">Uživatelé</span>
           </h1>
-          <p className="text-gray-400 mt-1 font-medium">Celkem {pagination.total} uživatelů</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1 font-medium">Celkem {pagination.total} uživatelů</p>
         </div>
         
         <form onSubmit={handleSearch} className="flex gap-2">
@@ -125,12 +125,12 @@ const AdminUsers = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Hledat e-mail, jméno..."
-              className="pl-9 pr-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm font-medium focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all w-64 placeholder:text-gray-600"
+              className="pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08] text-sm font-medium focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all w-64 placeholder:text-gray-600"
             />
           </div>
           <button
             type="submit"
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 text-white text-sm font-bold hover:shadow-lg hover:shadow-orange-500/20 transition-all active:scale-95 cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 text-gray-900 dark:text-white text-sm font-bold hover:shadow-lg hover:shadow-orange-500/20 transition-all active:scale-95 cursor-pointer"
           >
             Hledat
           </button>
@@ -142,7 +142,7 @@ const AdminUsers = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="rounded-2xl border border-white/[0.06] bg-white/[0.03] backdrop-blur-xl overflow-hidden"
+        className="rounded-2xl border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none backdrop-blur-xl overflow-hidden"
       >
         {loading ? (
           <div className="flex items-center justify-center h-64">
@@ -163,7 +163,7 @@ const AdminUsers = () => {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.03 }}
                   onClick={() => handleViewUser(u.id)}
-                  className="p-4 hover:bg-white/[0.02] transition-colors active:bg-white/[0.04] cursor-pointer"
+                  className="p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors active:bg-gray-200 dark:active:bg-white/[0.04] cursor-pointer"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -224,7 +224,7 @@ const AdminUsers = () => {
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest border-b border-white/[0.06]">
+                  <tr className="text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest border-b border-gray-200 dark:border-white/[0.06]">
                     <th className="px-6 py-4">Uživatel</th>
                     <th className="px-4 py-4">E-mail</th>
                     <th className="px-4 py-4">Role</th>
@@ -241,7 +241,7 @@ const AdminUsers = () => {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.03 }}
-                      className="hover:bg-white/[0.02] transition-colors group cursor-pointer"
+                      className="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer"
                       onClick={() => handleViewUser(u.id)}
                     >
                       <td className="px-6 py-4">
@@ -258,11 +258,11 @@ const AdminUsers = () => {
                         </div>
                       </td>
                       <td className="px-4 py-4">
-                        <span className="text-[13px] text-gray-400">{u.email}</span>
+                        <span className="text-[13px] text-gray-500 dark:text-gray-400">{u.email}</span>
                       </td>
                       <td className="px-4 py-4">
                         <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
-                          u.role === 'admin' ? 'bg-orange-500/20 text-orange-400' : 'bg-white/[0.06] text-gray-400'
+                          u.role === 'admin' ? 'bg-orange-500/20 text-orange-400' : 'bg-gray-100 dark:bg-white/[0.06] text-gray-500 dark:text-gray-400'
                         }`}>
                           {u.role}
                         </span>
@@ -280,7 +280,7 @@ const AdminUsers = () => {
                         <div className="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => handleViewUser(u.id)}
-                            className="p-2 rounded-lg hover:bg-blue-500/10 text-gray-400 hover:text-blue-400 transition-colors cursor-pointer"
+                            className="p-2 rounded-lg hover:bg-blue-500/10 text-gray-500 dark:text-gray-400 hover:text-blue-400 transition-colors cursor-pointer"
                             title="Detail uživatele"
                           >
                             <Eye size={16} />
@@ -320,7 +320,7 @@ const AdminUsers = () => {
 
         {/* Pagination */}
         {pagination.totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-white/[0.06]">
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-white/[0.06]">
             <p className="text-[12px] text-gray-500 font-medium">
               Stránka {pagination.page} z {pagination.totalPages} · {pagination.total} uživatelů
             </p>
@@ -328,14 +328,14 @@ const AdminUsers = () => {
               <button
                 onClick={() => fetchUsers(pagination.page - 1, search)}
                 disabled={pagination.page <= 1}
-                className="px-3 py-1.5 rounded-lg text-[12px] font-bold hover:bg-white/10 text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                className="px-3 py-1.5 rounded-lg text-[12px] font-bold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
               >
                 ← Předchozí
               </button>
               <button
                 onClick={() => fetchUsers(pagination.page + 1, search)}
                 disabled={pagination.page >= pagination.totalPages}
-                className="px-3 py-1.5 rounded-lg text-[12px] font-bold hover:bg-white/10 text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                className="px-3 py-1.5 rounded-lg text-[12px] font-bold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
               >
                 Další →
               </button>
@@ -354,7 +354,7 @@ const AdminUsers = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                className="absolute inset-0 bg-black/70 backdrop-blur-md"
+                className="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-md"
                 onClick={() => setSelectedUser(null)}
               />
               <motion.div
@@ -362,7 +362,7 @@ const AdminUsers = () => {
                 animate={{ x: 0 }}
                 exit={{ x: '100%' }}
                 transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
-                className="relative w-full max-w-lg bg-[#111113] border-l border-white/[0.08] h-full overflow-y-auto z-10 custom-scrollbar shadow-2xl shadow-black/50"
+                className="relative w-full max-w-lg bg-white dark:bg-[#111113] border-l border-gray-200 dark:border-white/[0.08] h-full overflow-y-auto z-10 custom-scrollbar shadow-2xl shadow-black/50"
               >
                 {detailLoading || selectedUser?.loading ? (
                   <div className="flex items-center justify-center h-full">
@@ -373,9 +373,9 @@ const AdminUsers = () => {
                     {/* Close button */}
                     <button
                       onClick={() => setSelectedUser(null)}
-                      className="absolute top-6 right-6 p-2.5 rounded-full bg-white/[0.06] hover:bg-white/[0.12] transition-colors cursor-pointer group"
+                      className="absolute top-6 right-6 p-2.5 rounded-full bg-gray-100 dark:bg-white/[0.06] hover:bg-gray-200 dark:bg-white/[0.12] transition-colors cursor-pointer group"
                     >
-                      <X size={16} className="text-gray-400 group-hover:text-white transition-colors" />
+                      <X size={16} className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:text-white transition-colors" />
                     </button>
 
                     {/* User Profile Header */}
@@ -392,10 +392,10 @@ const AdminUsers = () => {
                         <h2 className="text-xl font-black truncate">
                           {selectedUser.firstName ? `${selectedUser.firstName} ${selectedUser.lastName || ''}` : 'Bez jména'}
                         </h2>
-                        <p className="text-gray-400 text-sm truncate">{selectedUser.email}</p>
+                        <p className="text-gray-500 dark:text-gray-400 text-sm truncate">{selectedUser.email}</p>
                         <div className="flex items-center gap-2 mt-2.5 flex-wrap">
                           <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
-                            selectedUser.role === 'admin' ? 'bg-orange-500/20 text-orange-400' : 'bg-white/[0.06] text-gray-400'
+                            selectedUser.role === 'admin' ? 'bg-orange-500/20 text-orange-400' : 'bg-gray-100 dark:bg-white/[0.06] text-gray-500 dark:text-gray-400'
                           }`}>
                             {selectedUser.role}
                           </span>
@@ -408,22 +408,22 @@ const AdminUsers = () => {
                     </div>
 
                     {selectedUser.bio && (
-                      <p className="text-[13px] text-gray-400 leading-relaxed bg-white/[0.02] p-4 rounded-xl border border-white/[0.04] italic">
+                      <p className="text-[13px] text-gray-500 dark:text-gray-400 leading-relaxed bg-gray-50 dark:bg-white/[0.02] p-4 rounded-xl border border-gray-100 dark:border-white/[0.04] italic">
                         "{selectedUser.bio}"
                       </p>
                     )}
 
                     {/* Stats row */}
                     <div className="grid grid-cols-3 gap-3">
-                      <div className="text-center p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                      <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <p className="text-xl font-black">{selectedUser.trips?.length || 0}</p>
                         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Výlety</p>
                       </div>
-                      <div className="text-center p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                      <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <p className="text-xl font-black">{selectedUser.friends?.length || 0}</p>
                         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Přátelé</p>
                       </div>
-                      <div className="text-center p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                      <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <p className="text-xl font-black text-orange-400">
                           {selectedUser.trips?.reduce((sum, t) => sum + t.totalExpenses, 0).toLocaleString('cs-CZ') || 0}
                         </p>
@@ -438,7 +438,7 @@ const AdminUsers = () => {
                       </h3>
                       <div className="space-y-2">
                         {selectedUser.trips?.length > 0 ? selectedUser.trips.map(t => (
-                          <div key={t.id} className="p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.12] transition-all duration-200">
+                          <div key={t.id} className="p-4 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06] hover:border-gray-300 dark:hover:border-white/[0.12] transition-all duration-200">
                             <div className="flex items-center justify-between">
                               <div className="min-w-0 flex-1">
                                 <p className="text-[13px] font-bold truncate">{t.title}</p>
@@ -465,7 +465,7 @@ const AdminUsers = () => {
                       </h3>
                       <div className="space-y-1.5">
                         {selectedUser.friends?.length > 0 ? selectedUser.friends.map(f => (
-                          <div key={f.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/[0.03] transition-colors">
+                          <div key={f.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-white/[0.03] transition-colors">
                             <UserAvatar user={{ first_name: f.firstName, last_name: f.lastName, avatar_url: f.avatarUrl }} size="sm" />
                             <div className="min-w-0">
                               <p className="text-[13px] font-bold truncate">{f.firstName ? `${f.firstName} ${f.lastName || ''}` : f.email}</p>

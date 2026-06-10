@@ -22,7 +22,7 @@ const AdminSidebarItem = ({ icon: Icon, label, path, active, onClick }) => (
     className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative group active:scale-[0.98] ${
       active
         ? 'text-white'
-        : 'text-gray-400 hover:text-white hover:bg-white/10'
+        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10'
     }`}
   >
     {active && (
@@ -51,7 +51,7 @@ const AdminLayout = ({ children }) => {
   };
 
   return (
-    <div className="h-[100dvh] overflow-hidden bg-[#0a0a0b] text-[#f5f5f7] flex font-sans relative">
+    <div className="h-[100dvh] overflow-hidden bg-[#fbfbfd] dark:bg-[#0a0a0b] text-gray-900 dark:text-[#f5f5f7] flex font-sans relative">
       {/* Subtle Background Glow */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none flex justify-center items-center">
         <motion.div 
@@ -75,7 +75,7 @@ const AdminLayout = ({ children }) => {
 
       {/* ── Desktop Sidebar ── */}
       <div className="hidden md:flex flex-col p-6 z-20 shrink-0 w-[280px]">
-        <aside className="w-full h-full bg-white/[0.03] backdrop-blur-2xl border border-white/[0.06] rounded-3xl flex flex-col overflow-hidden shadow-2xl">
+        <aside className="w-full h-full bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none backdrop-blur-2xl border border-gray-200 dark:border-white/[0.06] rounded-3xl flex flex-col overflow-hidden shadow-2xl">
           {/* Logo / Brand */}
           <div className="px-8 py-8 flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg shadow-orange-500/20">
@@ -99,18 +99,18 @@ const AdminLayout = ({ children }) => {
           </nav>
 
           {/* Bottom section */}
-          <div className="p-4 border-t border-white/[0.06] space-y-3">
+          <div className="p-4 border-t border-gray-200 dark:border-white/[0.06] space-y-3">
             {/* Back to Dashboard */}
             <Link
               to="/dashboard"
-              className="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-300 active:scale-95 font-semibold"
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-300 active:scale-95 font-semibold"
             >
               <ArrowLeft size={20} strokeWidth={2} />
               <span>Zpět na dashboard</span>
             </Link>
 
             {/* User info */}
-            <div className="px-4 py-4 flex items-center gap-3 rounded-2xl bg-white/[0.03]">
+            <div className="px-4 py-4 flex items-center gap-3 rounded-2xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none">
               <UserAvatar user={user} size="md" />
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-bold truncate">
@@ -132,8 +132,8 @@ const AdminLayout = ({ children }) => {
       </div>
 
       {/* ── Mobile top bar ── */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 bg-[#0a0a0b]/80 backdrop-blur-xl border-b border-white/[0.06]">
-        <Link to="/dashboard" className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between p-4 bg-[#fbfbfd]/80 dark:bg-[#0a0a0b]/80 backdrop-blur-xl border-b border-gray-200 dark:border-white/[0.06]">
+        <Link to="/dashboard" className="w-10 h-10 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-white/10 rounded-full transition-colors text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
           <ArrowLeft size={20} strokeWidth={2.5} />
         </Link>
         <div className="flex items-center gap-2">
@@ -142,13 +142,13 @@ const AdminLayout = ({ children }) => {
           </div>
           <span className="font-bold text-lg tracking-tight">Admin</span>
         </div>
-        <button onClick={handleLogout} className="w-10 h-10 flex items-center justify-center hover:bg-red-500/10 rounded-full transition-colors text-gray-400 hover:text-red-500">
+        <button onClick={handleLogout} className="w-10 h-10 flex items-center justify-center hover:bg-red-500/10 rounded-full transition-colors text-gray-500 dark:text-gray-400 hover:text-red-500">
           <LogOut size={20} strokeWidth={2.5} />
         </button>
       </div>
 
       {/* ── Mobile Bottom Navigation ── */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0a0a0b]/90 backdrop-blur-xl border-t border-white/[0.06] pb-safe">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#fbfbfd]/90 dark:bg-[#0a0a0b]/90 backdrop-blur-xl border-t border-gray-200 dark:border-white/[0.06] pb-safe">
         <div className="flex items-center justify-around p-2">
           {adminNavItems.map(item => {
             const Icon = item.icon;
@@ -158,7 +158,7 @@ const AdminLayout = ({ children }) => {
                 key={item.path}
                 to={item.path}
                 className={`flex flex-col items-center justify-center w-16 h-14 rounded-xl relative transition-colors ${
-                  isActive ? 'text-orange-400' : 'text-gray-500 hover:text-gray-300'
+                  isActive ? 'text-orange-400' : 'text-gray-500 hover:text-gray-600 dark:text-gray-300'
                 }`}
               >
                 {isActive && (
