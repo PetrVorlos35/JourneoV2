@@ -48,7 +48,7 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({
       token,
-      user: { id: userId, email, first_name: first_name || null, last_name: last_name || null, avatar_url: null, bio: null }
+      user: { id: userId, email, first_name: first_name || null, last_name: last_name || null, avatar_url: null, bio: null, role: 'user' }
     });
   } catch (err) {
     console.error('Register error:', err);
@@ -67,7 +67,7 @@ router.post('/login', async (req, res) => {
 
     // Find user
     const [users] = await pool.query(
-      'SELECT id, email, password_hash, first_name, last_name, avatar_url, bio FROM users WHERE email = ?', 
+      'SELECT id, email, password_hash, first_name, last_name, avatar_url, bio, role FROM users WHERE email = ?', 
       [email]
     );
     if (users.length === 0) {
@@ -93,7 +93,8 @@ router.post('/login', async (req, res) => {
         first_name: user.first_name,
         last_name: user.last_name,
         avatar_url: user.avatar_url,
-        bio: user.bio
+        bio: user.bio,
+        role: user.role || 'user'
       }
     });
   } catch (err) {
@@ -135,7 +136,7 @@ router.post('/google', async (req, res) => {
 
     // Check if user already exists
     const [users] = await pool.query(
-      'SELECT id, email, first_name, last_name, avatar_url, bio FROM users WHERE email = ?', 
+      'SELECT id, email, first_name, last_name, avatar_url, bio, role FROM users WHERE email = ?', 
       [email]
     );
 
@@ -175,7 +176,8 @@ router.post('/google', async (req, res) => {
         first_name: firstName,
         last_name: lastName,
         avatar_url: avatarUrl,
-        bio: null
+        bio: null,
+        role: 'user'
       };
     }
 
@@ -196,7 +198,7 @@ router.post('/google', async (req, res) => {
 router.get('/me', auth, async (req, res) => {
   try {
     const [users] = await pool.query(
-      'SELECT id, email, first_name, last_name, avatar_url, bio, created_at FROM users WHERE id = ?', 
+      'SELECT id, email, first_name, last_name, avatar_url, bio, role, created_at FROM users WHERE id = ?', 
       [req.userId]
     );
     if (users.length === 0) {
@@ -221,7 +223,7 @@ router.put('/profile', auth, async (req, res) => {
     );
 
     const [users] = await pool.query(
-      'SELECT id, email, first_name, last_name, avatar_url, bio, created_at FROM users WHERE id = ?',
+      'SELECT id, email, first_name, last_name, avatar_url, bio, role, created_at FROM users WHERE id = ?',
       [req.userId]
     );
 

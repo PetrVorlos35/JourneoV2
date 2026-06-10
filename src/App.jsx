@@ -8,6 +8,7 @@ import { Analytics } from '@vercel/analytics/react';
 
 // Lazy load the dashboard to speed up initial landing page load
 const DashboardHome = lazy(() => import('./components/dashboard/DashboardHome'));
+const AdminHome = lazy(() => import('./components/admin/AdminHome'));
 const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./components/TermsOfService'));
 
@@ -32,6 +33,25 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
+// Admin Protected Route component
+const AdminProtectedRoute = ({ children }) => {
+  const { user, loading, isAdmin } = useAuth();
+
+  if (loading) {
+    return <LoadingFallback />;
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
+
 function App() {
   return (
     <div className="bg-gray-50 dark:bg-black min-h-screen text-gray-900 dark:text-white transition-colors duration-500">
@@ -45,6 +65,14 @@ function App() {
               <ProtectedRoute>
                 <DashboardHome />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/*"
+            element={
+              <AdminProtectedRoute>
+                <AdminHome />
+              </AdminProtectedRoute>
             }
           />
           <Route path="/privacy" element={<PrivacyPolicy />} />

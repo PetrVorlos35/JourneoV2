@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, PlusSquare, Plus, Settings, LogOut, BarChart2, Wallet, X, Sun, Moon, Monitor, Mountain, Palmtree, Compass, Map, Plane, Camera, Menu, Users } from 'lucide-react';
+import { Home, PlusSquare, Plus, Settings, LogOut, BarChart2, Wallet, X, Sun, Moon, Monitor, Mountain, Palmtree, Compass, Map, Plane, Camera, Menu, Users, Shield } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
@@ -85,7 +85,7 @@ const ThemeToggle = () => {
 const DashboardLayout = ({ children, onOpenCreateModal }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout, user } = useAuth();
+  const { logout, user, isAdmin } = useAuth();
   const { theme } = useTheme();
   const { confirmDialog, ModalPortal } = useDialog();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
@@ -248,6 +248,16 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
               <LogOut size={20} strokeWidth={2} />
               <span>Odhlásit se</span>
             </button>
+
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 text-orange-500 dark:text-orange-400 hover:from-orange-500/20 hover:to-red-500/20 transition-all duration-300 active:scale-95 font-semibold cursor-pointer"
+              >
+                <Shield size={20} strokeWidth={2} />
+                <span>Admin Panel</span>
+              </Link>
+            )}
           </div>
         </aside>
       </div>
@@ -367,6 +377,16 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
                   <LogOut size={20} strokeWidth={2.5} />
                   <span>Odhlásit se</span>
                 </button>
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    onClick={closeMobile}
+                    className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 text-orange-500 hover:from-orange-500/20 hover:to-red-500/20 transition-all font-bold mt-3"
+                  >
+                    <Shield size={20} strokeWidth={2.5} />
+                    <span>Admin Panel</span>
+                  </Link>
+                )}
               </div>
             </motion.aside>
           </div>

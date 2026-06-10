@@ -160,6 +160,31 @@ export const api = {
   stats: {
     get: () => request('/stats'),
   },
+
+  // ── Admin ──────────────────────────────────────────────────
+  admin: {
+    dashboard: () => request('/admin/dashboard'),
+
+    getUsers: (params = {}) => request(`/admin/users?${new URLSearchParams(params)}`),
+
+    getUser: (id) => request(`/admin/users/${id}`),
+
+    updateUserRole: (id, role) =>
+      request(`/admin/users/${id}/role`, {
+        method: 'PUT',
+        body: JSON.stringify({ role }),
+      }),
+
+    deleteUser: (id) =>
+      request(`/admin/users/${id}`, { method: 'DELETE' }),
+
+    getTrips: (params = {}) => request(`/admin/trips?${new URLSearchParams(params)}`),
+
+    getTrip: (id) => request(`/admin/trips/${id}`),
+
+    deleteTrip: (id) =>
+      request(`/admin/trips/${id}`, { method: 'DELETE' }),
+  },
 };
 
 export default api;

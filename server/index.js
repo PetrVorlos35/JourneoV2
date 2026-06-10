@@ -20,6 +20,8 @@ import profileRoutes from './routes/profile.js';
 import voteRoutes from './routes/votes.js';
 import notificationRoutes from './routes/notifications.js';
 import statsRoutes from './routes/stats.js';
+import adminRoutes from './routes/admin.js';
+import adminAuth from './middleware/adminAuth.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -38,6 +40,7 @@ app.use('/api/profile', auth, profileRoutes);
 app.use('/api/votes', auth, voteRoutes);
 app.use('/api/notifications', auth, notificationRoutes);
 app.use('/api/stats', auth, statsRoutes);
+app.use('/api/admin', adminAuth, adminRoutes);
 
 
 app.get('/api/health', (req, res) => {

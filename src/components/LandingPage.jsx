@@ -39,12 +39,12 @@ const LandingPage = () => {
         </motion.div>
 
         <h1 className="relative z-10 text-[12vw] sm:text-[5rem] lg:text-[7rem] font-bold leading-[1.05] sm:leading-[0.95] tracking-tighter max-w-5xl mx-auto break-words mt-12">
-          Zaznamenávejte <br className="hidden sm:block" />
-          svá dobrodružství.
+          Všechny vaše cesty <br className="hidden sm:block" />
+          na jednom místě.
         </h1>
 
         <p className="relative z-10 mt-8 text-xl sm:text-2xl text-gray-400 max-w-2xl mx-auto font-medium tracking-tight">
-          Každý krok, každý objev, každá vzpomínka. Váš osobní cestovatelský deník v čistém a minimalistickém designu.
+          Od nápadu až po cíl. Sestavte si jednoduché itineráře pro své vlastní výlety v čistém a minimalistickém designu.
         </p>
 
         <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 mt-12">
