@@ -300,7 +300,7 @@ const LandingPage = () => {
       {/* ===== Footer ===== */}
       <footer className="py-8 px-6 text-center text-sm font-medium text-gray-500 tracking-tight relative z-10 bg-black/80 backdrop-blur-md border-t border-white/5">
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <p>&copy; {new Date().getFullYear()} Petr Vorlíček. Vytvořeno s důrazem na detail.</p>
+          <p>&copy; {new Date().getFullYear()} <a href="https://vorlos.eu" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Petr Vorlíček</a>. Vytvořeno s důrazem na detail.</p>
           <div className="flex items-center gap-6">
             <Link to="/privacy" className="hover:text-white transition-colors">Ochrana soukromí</Link>
             <Link to="/terms" className="hover:text-white transition-colors">Podmínky použití</Link>
