@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, ArrowRight, ArrowLeft, Rocket, Check, Loader2, X } from 'lucide-react';
+import { Calendar, MapPin, ArrowRight, ArrowLeft, Rocket, Check, Loader2, X, AlertCircle } from 'lucide-react';
+import CharCount from '../ui/CharCount';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +20,7 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
   const [range, setRange] = useState({ from: undefined, to: undefined });
   const [isLoading, setIsLoading] = useState(false);
   const [dateError, setDateError] = useState(false);
+  const [nameError, setNameError] = useState(false);
 
   const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
 
@@ -29,6 +31,7 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
       setRange({ from: undefined, to: undefined });
       setIsLoading(false);
       setDateError(false);
+      setNameError(false);
     }
   }, [isOpen]);
 
@@ -59,12 +62,12 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
   const totalSteps = 3;
 
   const nextStep = () => {
-    if (step === 1 && !formData.title) {
-      toast.error(t('createTripModal.toasts.noName'));
+    if (step === 1 && !formData.title.trim()) {
+      setNameError(true);
       return;
     }
     if (step === 2 && (!formData.startDate || !formData.endDate)) {
-      toast.error(t('createTripModal.toasts.noDates'));
+      setDateError(true);
       return;
     }
     if (step < totalSteps) setStep(step + 1);
@@ -199,11 +202,34 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                           <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">{t('createTripModal.step1.subtitle')}</p>
                         </div>
                         <div className="relative group w-full">
-                          <div className="absolute inset-y-0 left-4 sm:left-5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors">
+                          <div className={`absolute inset-y-0 left-4 sm:left-5 flex items-center pointer-events-none transition-colors ${nameError ? 'text-red-500' : 'text-gray-400 group-focus-within:text-blue-500'}`}>
                             <MapPin strokeWidth={2} className="w-5 h-5 sm:w-6 sm:h-6" />
                           </div>
-                          <input type="text" autoFocus aria-label={t('createTripModal.step3.destinationLabel')} placeholder={t('createTripModal.step1.placeholder')} value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && nextStep()} className="glass-input !pl-12 sm:!pl-14 text-lg sm:text-2xl py-4 sm:py-6" />
+                          <input
+                            type="text"
+                            autoFocus
+                            maxLength={255}
+                            aria-label={t('createTripModal.step3.destinationLabel')}
+                            placeholder={t('createTripModal.step1.placeholder')}
+                            value={formData.title}
+                            onChange={(e) => { setFormData({ ...formData, title: e.target.value }); setNameError(false); }}
+                            onKeyDown={(e) => e.key === 'Enter' && nextStep()}
+                            className={`glass-input !pl-12 sm:!pl-14 text-lg sm:text-2xl py-4 sm:py-6 transition-colors ${nameError ? '!ring-2 !ring-red-500/60 !border-red-500/40' : ''}`}
+                          />
                         </div>
+                        <div className="flex justify-end pr-1 -mt-1">
+                          <CharCount value={formData.title} max={255} />
+                        </div>
+                        {nameError ? (
+                          <p className="flex items-center gap-1.5 text-red-500 text-[12px] font-semibold mt-2">
+                            <AlertCircle size={13} strokeWidth={2.5} />
+                            {t('createTripModal.errors.nameRequired')}
+                          </p>
+                        ) : (
+                          <p className="text-gray-400 dark:text-gray-500 text-[12px] font-medium mt-2">
+                            {t('createTripModal.step1.hint')}
+                          </p>
+                        )}
                       </motion.div>
                     )}
 
@@ -230,16 +256,23 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                             </div>
                           </div>
                         </div>
-                        <div className="flex justify-center w-full">
+                        <div className="flex flex-col items-center w-full gap-2">
                           <div className="inline-block glass-card p-2 sm:p-4 rounded-2xl sm:rounded-[2rem] w-fit flex justify-center overflow-hidden scale-95 sm:scale-100 origin-top">
                             <DayPicker mode="range" selected={range} onSelect={(newRange) => {
                                 setRange(newRange);
+                                setDateError(false);
                                 if (newRange?.from) setFormData(prev => ({ ...prev, startDate: format(newRange.from, 'yyyy-MM-dd') }));
                                 if (newRange?.to) setFormData(prev => ({ ...prev, endDate: format(newRange.to, 'yyyy-MM-dd') }));
                               }}
                               locale={dateLocale} numberOfMonths={1} className="premium-calendar"
                             />
                           </div>
+                          {dateError && (
+                            <p className="flex items-center gap-1.5 text-red-500 text-[12px] font-semibold">
+                              <AlertCircle size={13} strokeWidth={2.5} />
+                              {t('createTripModal.errors.datesRequired')}
+                            </p>
+                          )}
                         </div>
                       </motion.div>
                     )}
@@ -257,7 +290,10 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                             </div>
                             <div className="w-full">
                               <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold mb-1 ml-2">{t('createTripModal.step3.destinationLabel')}</p>
-                              <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="font-bold text-xl sm:text-3xl tracking-tight text-gray-900 dark:text-white leading-tight bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 rounded-lg px-2 py-1 w-full transition-all -ml-2" />
+                              <input type="text" maxLength={255} value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="font-bold text-xl sm:text-3xl tracking-tight text-gray-900 dark:text-white leading-tight bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 rounded-lg px-2 py-1 w-full transition-all -ml-2" />
+                              <div className="flex justify-end mt-1 pr-1">
+                                <CharCount value={formData.title} max={255} />
+                              </div>
                             </div>
                           </div>
                           <div className="flex items-start gap-4 sm:gap-6">

@@ -18,6 +18,7 @@ const AdminHome = () => {
     <AdminLayout>
       <Toaster
         position="top-right"
+        containerStyle={{ zIndex: 99999 }}
         toastOptions={{
           style: {
             background: '#1C1C1E',

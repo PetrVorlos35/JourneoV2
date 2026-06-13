@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useDialog } from '../ui/DialogModal';
 import DashboardLanguageSwitcher from './DashboardLanguageSwitcher';
+import CharCount from '../ui/CharCount';
 
 const Settings = ({ onClearData, onConvertCurrency }) => {
   const { currency, setCurrency } = useCurrency();
@@ -208,21 +209,29 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                 <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('settings.profile.firstName')}</label>
                 <input
                   type="text"
+                  maxLength={100}
                   placeholder={t('settings.profile.firstNamePlaceholder')}
                   value={profileForm.first_name}
                   onChange={e => handleProfileChange('first_name', e.target.value)}
                   className="glass-input"
                 />
+                <div className="flex justify-end mt-1.5 pr-1">
+                  <CharCount value={profileForm.first_name} max={100} />
+                </div>
               </div>
               <div>
                 <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('settings.profile.lastName')}</label>
                 <input
                   type="text"
+                  maxLength={100}
                   placeholder={t('settings.profile.lastNamePlaceholder')}
                   value={profileForm.last_name}
                   onChange={e => handleProfileChange('last_name', e.target.value)}
                   className="glass-input"
                 />
+                <div className="flex justify-end mt-1.5 pr-1">
+                  <CharCount value={profileForm.last_name} max={100} />
+                </div>
               </div>
             </div>
             <div>
@@ -230,10 +239,14 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
               <textarea
                 placeholder={t('settings.profile.bioPlaceholder')}
                 rows="3"
+                maxLength={300}
                 value={profileForm.bio}
                 onChange={e => handleProfileChange('bio', e.target.value)}
                 className="glass-input resize-none py-4"
               />
+              <div className="flex justify-end mt-1.5 pr-1">
+                <CharCount value={profileForm.bio} max={300} />
+              </div>
             </div>
             <div>
               <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('settings.profile.emailLabel')}</label>

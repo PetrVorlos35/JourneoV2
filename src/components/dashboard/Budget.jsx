@@ -8,6 +8,7 @@ import { enUS } from 'date-fns/locale';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import toast from 'react-hot-toast';
+import CharCount from '../ui/CharCount';
 import { useTranslation } from 'react-i18next';
 import { useDialog } from '../ui/DialogModal';
 import { useCurrency } from '../../contexts/CurrencyContext';
@@ -102,11 +103,15 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
                   <input
                     type="text"
                     required
+                    maxLength={255}
                     placeholder={t('budget.addModal.descriptionPlaceholder')}
                     value={form.description}
                     onChange={e => setForm({ ...form, description: e.target.value })}
                     className="glass-input"
                   />
+                  <div className="flex justify-end mt-1.5 pr-1">
+                    <CharCount value={form.description} max={255} />
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-6">
                   <div>

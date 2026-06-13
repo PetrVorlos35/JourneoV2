@@ -268,7 +268,8 @@
     "step1": {
       "title": "Kam se chystáte?",
       "subtitle": "Pojmenujte svůj výlet nebo zadejte cílovou destinaci.",
-      "placeholder": "např. Víkend v Římě"
+      "placeholder": "např. Víkend v Římě",
+      "hint": "Povinné pole · např. Víkend v Římě"
     },
     "step2": {
       "title": "Kdy vyrážíte?",
@@ -290,6 +291,10 @@
       "nextStep": "Další krok",
       "creating": "Vytvářím...",
       "create": "Vytvořit výlet"
+    },
+    "errors": {
+      "nameRequired": "Zadejte prosím název nebo cíl cesty.",
+      "datesRequired": "Vyberte prosím datum odjezdu i návratu."
     },
     "toasts": {
       "noName": "Zadejte prosím název nebo cíl cesty.",

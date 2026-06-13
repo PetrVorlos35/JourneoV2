@@ -268,7 +268,8 @@
     "step1": {
       "title": "Where are you headed?",
       "subtitle": "Name your trip or enter your destination.",
-      "placeholder": "e.g. Weekend in Rome"
+      "placeholder": "e.g. Weekend in Rome",
+      "hint": "Required · e.g. Weekend in Rome"
     },
     "step2": {
       "title": "When are you leaving?",
@@ -290,6 +291,10 @@
       "nextStep": "Next step",
       "creating": "Creating...",
       "create": "Create trip"
+    },
+    "errors": {
+      "nameRequired": "Please enter a trip name or destination.",
+      "datesRequired": "Please select both a start and end date."
     },
     "toasts": {
       "noName": "Please enter a trip name or destination.",

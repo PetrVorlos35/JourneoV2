@@ -161,6 +161,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
       {ModalPortal}
       <Toaster
         position="top-right"
+        containerStyle={{ zIndex: 99999 }}
         toastOptions={{
           style: {
             background: isDark ? '#1C1C1E' : '#fff',

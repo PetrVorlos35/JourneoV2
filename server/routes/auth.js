@@ -28,14 +28,22 @@ router.post('/register', async (req, res) => {
     }
 
     // Hash password
-    const salt = await bcrypt.genSalt(12);
+    const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Insert user
-    const [result] = await pool.query(
-      'INSERT INTO users (email, password_hash, first_name, last_name) VALUES (?, ?, ?, ?)',
-      [email, passwordHash, first_name || null, last_name || null]
-    );
+    // Insert user — catch duplicate email from concurrent requests
+    let result;
+    try {
+      [result] = await pool.query(
+        'INSERT INTO users (email, password_hash, first_name, last_name) VALUES (?, ?, ?, ?)',
+        [email, passwordHash, first_name || null, last_name || null]
+      );
+    } catch (insertErr) {
+      if (insertErr.code === 'ER_DUP_ENTRY') {
+        return res.status(409).json({ error: 'Tento e-mail je již zaregistrovaný, zkuste se přihlásit.' });
+      }
+      throw insertErr;
+    }
 
     const userId = result.insertId;
 
@@ -252,7 +260,7 @@ router.post('/google', async (req, res) => {
       // We still need a password hash field due to schema, we'll generate a random string as password hash 
       // since they will login with Google.
       const randomPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10);
-      const salt = await bcrypt.genSalt(12);
+      const salt = await bcrypt.genSalt(10);
       const passwordHash = await bcrypt.hash(randomPassword, salt);
 
       const [result] = await pool.query(
@@ -394,7 +402,7 @@ router.post('/reset-password', async (req, res) => {
       return res.status(400).json({ error: 'Platnost kódu vypršela. Žádejte o obnovu znovu.' });
     }
 
-    const salt = await bcrypt.genSalt(12);
+    const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(new_password, salt);
 
     await pool.query('UPDATE users SET password_hash = ? WHERE email = ?', [passwordHash, email]);
@@ -430,7 +438,7 @@ router.post('/change-password', auth, async (req, res) => {
       return res.status(401).json({ error: 'Současné heslo je nesprávné.' });
     }
 
-    const salt = await bcrypt.genSalt(12);
+    const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(new_password, salt);
 
     await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [passwordHash, req.userId]);

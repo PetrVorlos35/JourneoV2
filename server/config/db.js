@@ -19,7 +19,7 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
   port: parseInt(process.env.DB_PORT) || 3306,
   waitForConnections: true,
-  connectionLimit: 5, // Sníženo pro serverless
+  connectionLimit: 15,
   queueLimit: 0,
   connectTimeout: 10000,
 });

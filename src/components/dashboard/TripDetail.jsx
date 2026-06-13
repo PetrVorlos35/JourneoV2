@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useDialog } from '../ui/DialogModal';
 import LocationAutocomplete from '../ui/LocationAutocomplete';
+import CharCount from '../ui/CharCount';
 import { useUnsavedChanges } from '../../contexts/UnsavedChangesContext';
 import LikeButton from '../ui/LikeButton';
 
@@ -30,6 +31,8 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   const [packingList, setPackingList] = useState(trip?.packingList || []);
   const [documents, setDocuments] = useState(trip?.documents || []);
   const [newPackingItem, setNewPackingItem] = useState('');
+  const [docTitle, setDocTitle] = useState('');
+  const [docContent, setDocContent] = useState('');
   const [editingTitle, setEditingTitle] = useState(false);
   const [tripTitle, setTripTitle] = useState(trip?.title || '');
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
@@ -162,13 +165,13 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
 
   const addDocument = (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const title = formData.get('title').trim();
-    const content = formData.get('content').trim();
+    const title = docTitle.trim();
+    const content = docContent.trim();
     if (!title || !content) return;
     setDocuments([...documents, { id: Date.now().toString(), title, content }]);
     setHasUnsavedChanges(true);
-    e.target.reset();
+    setDocTitle('');
+    setDocContent('');
   };
 
   const handleBack = async () => {
@@ -232,21 +235,27 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
 
           <div className="flex items-center gap-4 mb-3">
             {editingTitle ? (
-              <div className="flex items-center gap-3 w-full max-w-md">
-                <input
-                  ref={titleInputRef}
-                  value={tripTitle}
-                  onChange={e => {
-                    setTripTitle(e.target.value);
-                    setHasUnsavedChanges(true);
-                  }}
-                  onKeyDown={e => { if (e.key === 'Enter') setEditingTitle(false); }}
-                  className="text-4xl md:text-5xl font-bold tracking-tight bg-transparent border-b-2 border-blue-600 text-gray-900 dark:text-white focus:outline-none w-full pb-1"
-                  autoFocus
-                />
-                <button onClick={() => setEditingTitle(false)} className="text-gray-400 hover:text-blue-600 transition-colors p-2 bg-gray-100 dark:bg-white/10 rounded-full cursor-pointer disabled:cursor-not-allowed">
-                  <Check size={20} strokeWidth={2.5} />
-                </button>
+              <div className="flex flex-col gap-1 w-full max-w-md">
+                <div className="flex items-center gap-3">
+                  <input
+                    ref={titleInputRef}
+                    value={tripTitle}
+                    maxLength={255}
+                    onChange={e => {
+                      setTripTitle(e.target.value);
+                      setHasUnsavedChanges(true);
+                    }}
+                    onKeyDown={e => { if (e.key === 'Enter') setEditingTitle(false); }}
+                    className="text-4xl md:text-5xl font-bold tracking-tight bg-transparent border-b-2 border-blue-600 text-gray-900 dark:text-white focus:outline-none w-full pb-1"
+                    autoFocus
+                  />
+                  <button onClick={() => setEditingTitle(false)} className="text-gray-400 hover:text-blue-600 transition-colors p-2 bg-gray-100 dark:bg-white/10 rounded-full cursor-pointer disabled:cursor-not-allowed">
+                    <Check size={20} strokeWidth={2.5} />
+                  </button>
+                </div>
+                <div className="flex justify-end pr-12">
+                  <CharCount value={tripTitle} max={255} />
+                </div>
               </div>
             ) : (
               <div className="flex items-center gap-4 group">
@@ -448,8 +457,8 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                     className="glass-input !py-3 sm:!py-4 !pl-12 sm:!pl-14 text-[15px] sm:text-base w-full"
                   />
                 </div>
-                <div className="text-xs text-gray-500 dark:text-white/40 mt-1.5 text-right font-medium pr-1">
-                  {newPackingItem.length} / 255
+                <div className="flex justify-end mt-1.5 pr-1">
+                  <CharCount value={newPackingItem} max={255} />
                 </div>
               </div>
               <div className="p-5 sm:p-10 flex-1 overflow-y-auto custom-scrollbar">
@@ -495,20 +504,34 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
               </div>
               <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col p-5 sm:p-10 gap-8">
                 <form onSubmit={addDocument} className="p-6 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl space-y-4 shrink-0">
-                  <input
-                    name="title"
-                    type="text"
-                    required
-                    placeholder={t('tripDetail.documents.titlePlaceholder')}
-                    className="glass-input border-none bg-white dark:bg-black/50 !py-3 sm:!py-4 shadow-sm text-[15px] sm:text-base"
-                  />
-                  <textarea
-                    name="content"
-                    required
-                    placeholder={t('tripDetail.documents.contentPlaceholder')}
-                    rows="2"
-                    className="glass-input border-none bg-white dark:bg-black/50 !py-3 sm:!py-4 resize-y shadow-sm text-[15px] sm:text-base min-h-[100px]"
-                  ></textarea>
+                  <div>
+                    <input
+                      type="text"
+                      required
+                      maxLength={255}
+                      placeholder={t('tripDetail.documents.titlePlaceholder')}
+                      value={docTitle}
+                      onChange={e => setDocTitle(e.target.value)}
+                      className="glass-input border-none bg-white dark:bg-black/50 !py-3 sm:!py-4 shadow-sm text-[15px] sm:text-base w-full"
+                    />
+                    <div className="flex justify-end mt-1.5 pr-1">
+                      <CharCount value={docTitle} max={255} />
+                    </div>
+                  </div>
+                  <div>
+                    <textarea
+                      required
+                      maxLength={2000}
+                      placeholder={t('tripDetail.documents.contentPlaceholder')}
+                      rows="2"
+                      value={docContent}
+                      onChange={e => setDocContent(e.target.value)}
+                      className="glass-input border-none bg-white dark:bg-black/50 !py-3 sm:!py-4 resize-y shadow-sm text-[15px] sm:text-base min-h-[100px] w-full"
+                    />
+                    <div className="flex justify-end mt-1.5 pr-1">
+                      <CharCount value={docContent} max={2000} />
+                    </div>
+                  </div>
                   <button type="submit" className="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed">
                     {t('tripDetail.documents.save')}
                   </button>
@@ -591,8 +614,8 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                         maxLength={255}
                         className="glass-input !py-3 sm:!py-4 !px-4 sm:!px-5 font-bold text-base sm:text-lg w-full"
                       />
-                      <div className="text-xs text-gray-500 dark:text-white/40 mt-1.5 text-right font-medium pr-1">
-                        {day.location?.length || 0} / 255
+                      <div className="flex justify-end mt-1.5 pr-1">
+                        <CharCount value={day.location} max={255} />
                       </div>
                     </div>
                   </div>
@@ -602,6 +625,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                     </label>
                     <textarea
                       value={day.plan}
+                      maxLength={2000}
                       onChange={(e) => {
                         const updated = [...dailyPlans];
                         updated[idx].plan = e.target.value;
@@ -611,6 +635,9 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                       placeholder={t('tripDetail.itinerary.planPlaceholder')}
                       className="glass-input flex-1 min-h-[250px] lg:min-h-0 resize-y font-medium text-[15px] sm:text-base leading-relaxed"
                     />
+                    <div className="flex justify-end mt-1.5 pr-1">
+                      <CharCount value={day.plan} max={2000} />
+                    </div>
                   </div>
                 </div>
               );
