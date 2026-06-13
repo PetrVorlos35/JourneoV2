@@ -2,22 +2,20 @@ import { useState, useEffect } from 'react';
 import { Plane, CalendarDays, MapPin, Heart, Wallet, Backpack, Calendar, Crown, TrendingUp, Loader2 } from 'lucide-react';
 import { eachDayOfInterval } from 'date-fns';
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import api from '../../services/api';
 
-// ── Category color mapping ──────────────────────────────────
 const CATEGORY_CONFIG = {
-  accommodation: { label: 'Ubytování', color: '#818cf8', darkColor: '#6366f1' },
-  transport:     { label: 'Doprava',   color: '#60a5fa', darkColor: '#3b82f6' },
-  food:          { label: 'Jídlo',     color: '#34d399', darkColor: '#10b981' },
-  activities:    { label: 'Aktivity',  color: '#fbbf24', darkColor: '#f59e0b' },
-  other:         { label: 'Ostatní',   color: '#f87171', darkColor: '#ef4444' },
+  accommodation: { color: '#818cf8', darkColor: '#6366f1' },
+  transport:     { color: '#60a5fa', darkColor: '#3b82f6' },
+  food:          { color: '#34d399', darkColor: '#10b981' },
+  activities:    { color: '#fbbf24', darkColor: '#f59e0b' },
+  other:         { color: '#f87171', darkColor: '#ef4444' },
 };
 
-// ── Currency symbol helper ──────────────────────────────────
 const CURRENCY_SYMBOLS = { CZK: 'Kč', EUR: '€', USD: '$', GBP: '£' };
 
-// ── Animated number counter ─────────────────────────────────
 const AnimatedValue = ({ value, suffix = '', prefix = '', className = '' }) => {
   const [displayed, setDisplayed] = useState(0);
 
@@ -52,7 +50,6 @@ const AnimatedValue = ({ value, suffix = '', prefix = '', className = '' }) => {
   );
 };
 
-// ── Key Metric Card ─────────────────────────────────────────
 const MetricCard = ({ icon: Icon, label, value, suffix = '', glowColor, delay = 0 }) => (
   <motion.div
     initial={{ opacity: 0, y: 16 }}
@@ -62,10 +59,7 @@ const MetricCard = ({ icon: Icon, label, value, suffix = '', glowColor, delay = 
   >
     <div
       className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0"
-      style={{
-        backgroundColor: `${glowColor}15`,
-        boxShadow: `0 0 20px ${glowColor}20`,
-      }}
+      style={{ backgroundColor: `${glowColor}15`, boxShadow: `0 0 20px ${glowColor}20` }}
     >
       <Icon size={22} strokeWidth={2} style={{ color: glowColor }} />
     </div>
@@ -80,7 +74,6 @@ const MetricCard = ({ icon: Icon, label, value, suffix = '', glowColor, delay = 
   </motion.div>
 );
 
-// ── Highlight Card ──────────────────────────────────────────
 const HighlightCard = ({ icon: Icon, label, mainValue, subValue, glowColor, delay = 0, emptyText = '—' }) => (
   <motion.div
     initial={{ opacity: 0, y: 16 }}
@@ -91,10 +84,7 @@ const HighlightCard = ({ icon: Icon, label, mainValue, subValue, glowColor, dela
     <div className="flex items-center gap-3 mb-4">
       <div
         className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-        style={{
-          backgroundColor: `${glowColor}15`,
-          boxShadow: `0 0 16px ${glowColor}15`,
-        }}
+        style={{ backgroundColor: `${glowColor}15`, boxShadow: `0 0 16px ${glowColor}15` }}
       >
         <Icon size={18} strokeWidth={2} style={{ color: glowColor }} />
       </div>
@@ -111,12 +101,11 @@ const HighlightCard = ({ icon: Icon, label, mainValue, subValue, glowColor, dela
   </motion.div>
 );
 
-// ── Expense Bar ─────────────────────────────────────────────
 const ExpenseBar = ({ breakdown }) => {
+  const { t } = useTranslation();
+
   if (!breakdown || breakdown.length === 0) {
-    return (
-      <div className="w-full h-3 bg-gray-100 dark:bg-white/5 rounded-full" />
-    );
+    return <div className="w-full h-3 bg-gray-100 dark:bg-white/5 rounded-full" />;
   }
 
   return (
@@ -130,7 +119,7 @@ const ExpenseBar = ({ breakdown }) => {
             transition={{ duration: 0.8, delay: 0.3 + i * 0.1, ease: 'easeOut' }}
             className="h-full first:rounded-l-full last:rounded-r-full"
             style={{ backgroundColor: CATEGORY_CONFIG[item.category]?.color || '#6b7280' }}
-            title={`${CATEGORY_CONFIG[item.category]?.label}: ${item.percentage}%`}
+            title={`${t('budget.categories.' + item.category)}: ${item.percentage}%`}
           />
         ))}
       </div>
@@ -142,7 +131,7 @@ const ExpenseBar = ({ breakdown }) => {
               style={{ backgroundColor: CATEGORY_CONFIG[item.category]?.color || '#6b7280' }}
             />
             <span className="text-[11px] sm:text-[12px] font-bold text-gray-500 dark:text-gray-400">
-              {CATEGORY_CONFIG[item.category]?.label || item.category}
+              {t('budget.categories.' + item.category)}
             </span>
             <span className="text-[11px] sm:text-[12px] font-bold text-gray-900 dark:text-white">
               {item.percentage}%
@@ -154,16 +143,12 @@ const ExpenseBar = ({ breakdown }) => {
   );
 };
 
-// ════════════════════════════════════════════════════════════
-// ── MAIN COMPONENT ──────────────────────────────────────────
-// ════════════════════════════════════════════════════════════
-
 const Statistics = ({ trips }) => {
   const { currency } = useCurrency();
+  const { t } = useTranslation();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch advanced stats from API
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -178,7 +163,6 @@ const Statistics = ({ trips }) => {
     fetchStats();
   }, []);
 
-  // ── Client-side computed values (from trips prop) ─────────
   const totalTrips = trips.length;
 
   const totalDays = trips.reduce((acc, trip) => {
@@ -189,83 +173,59 @@ const Statistics = ({ trips }) => {
 
   const currencySymbol = CURRENCY_SYMBOLS[currency] || currency;
 
-  // ── Loading state ─────────────────────────────────────────
   if (loading) {
     return (
       <div className="w-full space-y-12 pb-10">
         <div className="space-y-2">
-          <p className="text-[10px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Přehled</p>
-          <h1 className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Statistiky cestování</h1>
+          <p className="text-[10px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">{t('statistics.subtitle')}</p>
+          <h1 className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('statistics.title')}</h1>
         </div>
         <div className="flex items-center justify-center h-[50vh]">
           <div className="flex flex-col items-center gap-4">
             <Loader2 size={32} strokeWidth={2} className="animate-spin text-blue-500" />
-            <p className="text-[13px] text-gray-500 font-medium">Načítám vaše data…</p>
+            <p className="text-[13px] text-gray-500 font-medium">{t('statistics.loading')}</p>
           </div>
         </div>
       </div>
     );
   }
 
-  // ── Empty state ───────────────────────────────────────────
   if (totalTrips === 0) {
     return (
       <div className="w-full space-y-12 pb-10">
         <div className="space-y-2">
-          <p className="text-[10px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Přehled</p>
-          <h1 className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Statistiky cestování</h1>
+          <p className="text-[10px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">{t('statistics.subtitle')}</p>
+          <h1 className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('statistics.title')}</h1>
         </div>
         <div className="text-center p-16 glass-card">
-          <p className="text-gray-500 dark:text-gray-400 font-bold text-xl tracking-tight">
-            Zatím nemáte žádné výlety. Zkuste si nějaký vytvořit!
-          </p>
+          <p className="text-gray-500 dark:text-gray-400 font-bold text-xl tracking-tight">{t('statistics.empty')}</p>
         </div>
       </div>
     );
   }
 
+  const favTripCount = stats?.travelHabits?.favoriteMonth?.tripCount;
+  const tripCountLabel = favTripCount
+    ? (favTripCount > 1
+        ? (favTripCount < 5 ? t('statistics.highlights.tripCountFew') : t('statistics.highlights.tripCountMany'))
+        : t('statistics.highlights.tripCount'))
+    : null;
+
   return (
     <div className="w-full space-y-6 sm:space-y-10 pb-24 sm:pb-10">
 
-      {/* ── Header ───────────────────────────────────────── */}
       <div className="space-y-1 sm:space-y-2">
-        <p className="text-[10px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Přehled</p>
-        <h1 className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Statistiky cestování</h1>
+        <p className="text-[10px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">{t('statistics.subtitle')}</p>
+        <h1 className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('statistics.title')}</h1>
       </div>
 
-      {/* ── 1. TOP ROW — Key Metrics ─────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <MetricCard
-          icon={Plane}
-          label="Celkem výletů"
-          value={totalTrips}
-          glowColor="#3b82f6"
-          delay={0}
-        />
-        <MetricCard
-          icon={CalendarDays}
-          label="Dní na cestách"
-          value={totalDays}
-          glowColor="#8b5cf6"
-          delay={0.05}
-        />
-        <MetricCard
-          icon={MapPin}
-          label="Unikátních míst"
-          value={stats?.travelHabits?.uniqueLocations ?? 0}
-          glowColor="#10b981"
-          delay={0.1}
-        />
-        <MetricCard
-          icon={Heart}
-          label="Celkem lajků"
-          value={stats?.social?.communityScore ?? 0}
-          glowColor="#ef4444"
-          delay={0.15}
-        />
+        <MetricCard icon={Plane} label={t('statistics.metrics.trips')} value={totalTrips} glowColor="#3b82f6" delay={0} />
+        <MetricCard icon={CalendarDays} label={t('statistics.metrics.days')} value={totalDays} glowColor="#8b5cf6" delay={0.05} />
+        <MetricCard icon={MapPin} label={t('statistics.metrics.places')} value={stats?.travelHabits?.uniqueLocations ?? 0} glowColor="#10b981" delay={0.1} />
+        <MetricCard icon={Heart} label={t('statistics.metrics.likes')} value={stats?.social?.communityScore ?? 0} glowColor="#ef4444" delay={0.15} />
       </div>
 
-      {/* ── 2. FINANCIAL SECTION ─────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -275,14 +235,11 @@ const Statistics = ({ trips }) => {
         <div className="flex items-center gap-3 mb-6">
           <div
             className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-            style={{
-              backgroundColor: 'rgba(99, 102, 241, 0.12)',
-              boxShadow: '0 0 20px rgba(99, 102, 241, 0.15)',
-            }}
+            style={{ backgroundColor: 'rgba(99, 102, 241, 0.12)', boxShadow: '0 0 20px rgba(99, 102, 241, 0.15)' }}
           >
             <Wallet size={18} strokeWidth={2} className="text-indigo-500" />
           </div>
-          <p className="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Celkové výdaje</p>
+          <p className="text-[10px] sm:text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">{t('statistics.financial.label')}</p>
         </div>
 
         <div className="mb-6 sm:mb-8">
@@ -295,7 +252,7 @@ const Statistics = ({ trips }) => {
           </div>
           {stats?.financial?.mostExpensiveTrip && (
             <p className="text-[12px] sm:text-[13px] text-gray-500 dark:text-gray-400 font-medium mt-2">
-              Nejdražší výlet: <span className="text-gray-900 dark:text-white font-bold">{stats.financial.mostExpensiveTrip.title}</span>
+              {t('statistics.financial.mostExpensive')} <span className="text-gray-900 dark:text-white font-bold">{stats.financial.mostExpensiveTrip.title}</span>
               {' '}— {stats.financial.mostExpensiveTrip.total.toLocaleString('cs-CZ')} {currencySymbol}
             </p>
           )}
@@ -304,59 +261,46 @@ const Statistics = ({ trips }) => {
         <ExpenseBar breakdown={stats?.financial?.expenseBreakdown} />
       </motion.div>
 
-      {/* ── 3. HIGHLIGHTS & HABITS ───────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <HighlightCard
           icon={TrendingUp}
-          label="Nejdelší výlet"
-          mainValue={
-            stats?.travelHabits?.longestTrip
-              ? `${stats.travelHabits.longestTrip.durationDays} dní`
-              : null
-          }
+          label={t('statistics.highlights.longestTrip')}
+          mainValue={stats?.travelHabits?.longestTrip ? `${stats.travelHabits.longestTrip.durationDays} ${t('statistics.highlights.longestTripDays')}` : null}
           subValue={stats?.travelHabits?.longestTrip?.title}
           glowColor="#06b6d4"
           delay={0.25}
+          emptyText={t('statistics.highlights.empty')}
         />
         <HighlightCard
           icon={Backpack}
-          label="Balící disciplína"
-          mainValue={
-            stats?.productivity?.packingDiscipline?.totalItems > 0
-              ? `${stats.productivity.packingDiscipline.percentage}%`
-              : null
-          }
+          label={t('statistics.highlights.packing')}
+          mainValue={stats?.productivity?.packingDiscipline?.totalItems > 0 ? `${stats.productivity.packingDiscipline.percentage}%` : null}
           subValue={
             stats?.productivity?.packingDiscipline?.totalItems > 0
-              ? `${stats.productivity.packingDiscipline.checkedItems} z ${stats.productivity.packingDiscipline.totalItems} věcí`
-              : 'Žádné položky'
+              ? `${stats.productivity.packingDiscipline.checkedItems} ${t('statistics.highlights.packingOf')} ${stats.productivity.packingDiscipline.totalItems} ${t('statistics.highlights.packingItems')}`
+              : t('statistics.highlights.packingNoItems')
           }
           glowColor="#8b5cf6"
           delay={0.3}
+          emptyText={t('statistics.highlights.empty')}
         />
         <HighlightCard
           icon={Calendar}
-          label="Oblíbený měsíc"
+          label={t('statistics.highlights.favoriteMonth')}
           mainValue={stats?.travelHabits?.favoriteMonth?.monthName}
-          subValue={
-            stats?.travelHabits?.favoriteMonth
-              ? `${stats.travelHabits.favoriteMonth.tripCount} výlet${stats.travelHabits.favoriteMonth.tripCount > 1 ? (stats.travelHabits.favoriteMonth.tripCount < 5 ? 'y' : 'ů') : ''}`
-              : null
-          }
+          subValue={favTripCount && tripCountLabel ? `${favTripCount} ${tripCountLabel}` : null}
           glowColor="#f59e0b"
           delay={0.35}
+          emptyText={t('statistics.highlights.empty')}
         />
         <HighlightCard
           icon={Crown}
-          label="Nejpopulárnější"
+          label={t('statistics.highlights.mostPopular')}
           mainValue={stats?.social?.mostPopularTrip?.title}
-          subValue={
-            stats?.social?.mostPopularTrip
-              ? `${stats.social.mostPopularTrip.netScore} lajků`
-              : null
-          }
+          subValue={stats?.social?.mostPopularTrip ? `${stats.social.mostPopularTrip.netScore} ${t('statistics.highlights.likes')}` : null}
           glowColor="#ec4899"
           delay={0.4}
+          emptyText={t('statistics.highlights.empty')}
         />
       </div>
 

@@ -1,5 +1,6 @@
 import React, { Suspense, lazy, useState, useEffect, useCallback } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import DashboardLayout from './DashboardLayout';
 import DashboardSplash from './DashboardSplash';
 import DashboardNotFound from './DashboardNotFound';
@@ -32,6 +33,7 @@ const DashboardLoading = () => (
 );
 
 const DashboardHome = () => {
+  const { t } = useTranslation();
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -43,7 +45,7 @@ const DashboardHome = () => {
       setTrips(data.trips);
     } catch (err) {
       console.error('Failed to fetch trips:', err);
-      toast.error('Nepodařilo se načíst výlety.');
+      toast.error(t('dashboardHome.loadError'));
     } finally {
       setLoading(false);
     }
@@ -66,13 +68,13 @@ const DashboardHome = () => {
       
       // Simulate heavy processing (AI generation, database inserts) in the background
       setTimeout(() => {
-        setTrips(prev => prev.map(t => t.id === createdTrip.id ? { ...t, isGenerating: false } : t));
-        toast.success('Výlet byl úspěšně připraven!');
+        setTrips(prev => prev.map(trip => trip.id === createdTrip.id ? { ...trip, isGenerating: false } : trip));
+        toast.success(t('dashboardHome.tripReady'));
       }, 4000);
 
       return createdTrip;
     } catch (err) {
-      toast.error(err.message || 'Nepodařilo se vytvořit výlet.');
+      toast.error(err.message || t('dashboardHome.createError'));
       throw err;
     }
   };
@@ -82,7 +84,7 @@ const DashboardHome = () => {
       await api.trips.delete(id);
       setTrips(prev => prev.filter(trip => trip.id !== id));
     } catch (err) {
-      toast.error(err.message || 'Nepodařilo se smazat výlet.');
+      toast.error(err.message || t('dashboardHome.deleteError'));
     }
   };
 
@@ -92,7 +94,7 @@ const DashboardHome = () => {
       setTrips(prev => prev.map(trip => trip.id === data.trip.id ? data.trip : trip));
       return data.trip;
     } catch (err) {
-      toast.error(err.message || 'Nepodařilo se aktualizovat výlet.');
+      toast.error(err.message || t('dashboardHome.updateError'));
       throw err;
     }
   };
@@ -103,7 +105,7 @@ const DashboardHome = () => {
       await Promise.all(trips.map(trip => api.trips.delete(trip.id)));
       setTrips([]);
     } catch (err) {
-      toast.error('Nepodařilo se smazat data.');
+      toast.error(t('dashboardHome.clearError'));
     }
   };
 
@@ -129,7 +131,7 @@ const DashboardHome = () => {
       );
       setTrips(convertedTrips);
     } catch (err) {
-      toast.error('Chyba při přepočtu měny.');
+      toast.error(t('dashboardHome.currencyError'));
     }
   };
 

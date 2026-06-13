@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Users, Map, DollarSign, Heart, TrendingUp, UserPlus, Calendar } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import UserAvatar from '../ui/UserAvatar';
 
@@ -25,6 +26,7 @@ const StatCard = ({ icon: Icon, label, value, subtitle, gradient, delay = 0 }) =
 );
 
 const AdminDashboard = () => {
+  const { t, i18n } = useTranslation();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -53,15 +55,17 @@ const AdminDashboard = () => {
   if (!data) {
     return (
       <div className="flex items-center justify-center h-[60vh] text-gray-500 dark:text-gray-400">
-        Nepodařilo se načíst data.
+        {t('admin.dashboard.loadError')}
       </div>
     );
   }
 
-  const monthNames = {
-    '01': 'Led', '02': 'Úno', '03': 'Bře', '04': 'Dub',
-    '05': 'Kvě', '06': 'Čvn', '07': 'Čvc', '08': 'Srp',
-    '09': 'Zář', '10': 'Říj', '11': 'Lis', '12': 'Pro',
+  const getMonthLabel = (monthKey) => {
+    try {
+      return new Date(2024, parseInt(monthKey) - 1, 1).toLocaleString(i18n.language, { month: 'short' });
+    } catch {
+      return monthKey;
+    }
   };
 
   const maxTripsInMonth = Math.max(...(data.tripsPerMonth?.map(m => m.count) || [1]), 1);
@@ -75,17 +79,17 @@ const AdminDashboard = () => {
         transition={{ duration: 0.4 }}
       >
         <h1 className="text-3xl md:text-4xl font-black tracking-tight">
-          Admin <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">Přehled</span>
+          {t('admin.dashboard.title')} <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">{t('admin.dashboard.overview')}</span>
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-2 font-medium">Statistiky a přehledy celé platformy Journeo</p>
+        <p className="text-gray-500 dark:text-gray-400 mt-2 font-medium">{t('admin.dashboard.subtitle')}</p>
       </motion.div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard icon={Users} label="Uživatelé" value={data.totalUsers} subtitle={`+${data.newUsersWeek} tento týden`} gradient="from-blue-500 to-cyan-500" delay={0.05} />
-        <StatCard icon={Map} label="Výlety" value={data.totalTrips} gradient="from-purple-500 to-pink-500" delay={0.1} />
-        <StatCard icon={DollarSign} label="Celkové výdaje" value={`${data.totalExpenseAmount.toLocaleString('cs-CZ')} Kč`} subtitle={`${data.totalExpenses} položek`} gradient="from-emerald-500 to-teal-500" delay={0.15} />
-        <StatCard icon={Heart} label="Přátelství" value={data.totalFriendships} subtitle={`+${data.newUsersMonth} uživatelů za měsíc`} gradient="from-orange-500 to-red-500" delay={0.2} />
+        <StatCard icon={Users} label={t('admin.dashboard.stats.users')} value={data.totalUsers} subtitle={t('admin.dashboard.stats.newThisWeek', { count: data.newUsersWeek })} gradient="from-blue-500 to-cyan-500" delay={0.05} />
+        <StatCard icon={Map} label={t('admin.dashboard.stats.trips')} value={data.totalTrips} gradient="from-purple-500 to-pink-500" delay={0.1} />
+        <StatCard icon={DollarSign} label={t('admin.dashboard.stats.expenses')} value={`${data.totalExpenseAmount.toLocaleString(i18n.language)} Kč`} subtitle={t('admin.dashboard.stats.expenseItems', { count: data.totalExpenses })} gradient="from-emerald-500 to-teal-500" delay={0.15} />
+        <StatCard icon={Heart} label={t('admin.dashboard.stats.friendships')} value={data.totalFriendships} subtitle={t('admin.dashboard.stats.usersPerMonth', { count: data.newUsersMonth })} gradient="from-orange-500 to-red-500" delay={0.2} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -101,8 +105,8 @@ const AdminDashboard = () => {
               <TrendingUp size={18} className="text-white" strokeWidth={2} />
             </div>
             <div>
-              <h3 className="font-bold text-lg">Výlety za měsíc</h3>
-              <p className="text-[11px] text-gray-500 font-medium">Posledních 6 měsíců</p>
+              <h3 className="font-bold text-lg">{t('admin.dashboard.tripsChart.title')}</h3>
+              <p className="text-[11px] text-gray-500 font-medium">{t('admin.dashboard.tripsChart.subtitle')}</p>
             </div>
           </div>
           
@@ -119,13 +123,13 @@ const AdminDashboard = () => {
                       transition={{ duration: 0.6, delay: 0.3 + i * 0.1 }}
                       className="w-full min-h-[8px] rounded-xl bg-gradient-to-t from-purple-600 to-pink-500 shadow-lg shadow-purple-500/20"
                     />
-                    <span className="text-[10px] font-bold text-gray-500 uppercase">{monthNames[monthKey] || monthKey}</span>
+                    <span className="text-[10px] font-bold text-gray-500 uppercase">{getMonthLabel(monthKey)}</span>
                   </div>
                 );
               })}
             </div>
           ) : (
-            <div className="h-40 flex items-center justify-center text-gray-500 text-sm">Žádná data</div>
+            <div className="h-40 flex items-center justify-center text-gray-500 text-sm">{t('admin.dashboard.tripsChart.noData')}</div>
           )}
         </motion.div>
 
@@ -141,8 +145,8 @@ const AdminDashboard = () => {
               <Users size={18} className="text-white" strokeWidth={2} />
             </div>
             <div>
-              <h3 className="font-bold text-lg">Top uživatelé</h3>
-              <p className="text-[11px] text-gray-500 font-medium">Podle počtu výletů</p>
+              <h3 className="font-bold text-lg">{t('admin.dashboard.topUsers.title')}</h3>
+              <p className="text-[11px] text-gray-500 font-medium">{t('admin.dashboard.topUsers.subtitle')}</p>
             </div>
           </div>
 
@@ -157,7 +161,7 @@ const AdminDashboard = () => {
                   </p>
                   <p className="text-[11px] text-gray-500 truncate">{u.email}</p>
                 </div>
-                <span className="text-[13px] font-bold text-orange-400">{u.tripCount} výletů</span>
+                <span className="text-[13px] font-bold text-orange-400">{u.tripCount} {t('admin.dashboard.stats.tripCount')}</span>
               </div>
             ))}
           </div>
@@ -176,8 +180,8 @@ const AdminDashboard = () => {
             <UserPlus size={18} className="text-white" strokeWidth={2} />
           </div>
           <div>
-            <h3 className="font-bold text-lg">Poslední registrace</h3>
-            <p className="text-[11px] text-gray-500 font-medium">10 nejnovějších uživatelů</p>
+            <h3 className="font-bold text-lg">{t('admin.dashboard.recentUsers.title')}</h3>
+            <p className="text-[11px] text-gray-500 font-medium">{t('admin.dashboard.recentUsers.subtitle')}</p>
           </div>
         </div>
 
@@ -185,11 +189,11 @@ const AdminDashboard = () => {
           <table className="w-full">
             <thead>
               <tr className="text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest border-b border-gray-200 dark:border-white/[0.06]">
-                <th className="pb-3 pr-4">Uživatel</th>
-                <th className="pb-3 pr-4 hidden sm:table-cell">E-mail</th>
-                <th className="pb-3 pr-4 hidden md:table-cell">Role</th>
-                <th className="pb-3 pr-4">Výlety</th>
-                <th className="pb-3">Registrace</th>
+                <th className="pb-3 pr-4">{t('admin.dashboard.recentUsers.cols.user')}</th>
+                <th className="pb-3 pr-4 hidden sm:table-cell">{t('admin.dashboard.recentUsers.cols.email')}</th>
+                <th className="pb-3 pr-4 hidden md:table-cell">{t('admin.dashboard.recentUsers.cols.role')}</th>
+                <th className="pb-3 pr-4">{t('admin.dashboard.recentUsers.cols.trips')}</th>
+                <th className="pb-3">{t('admin.dashboard.recentUsers.cols.registration')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.04]">
@@ -218,7 +222,7 @@ const AdminDashboard = () => {
                   </td>
                   <td className="py-3">
                     <span className="text-[12px] text-gray-500">
-                      {new Date(u.createdAt).toLocaleDateString('cs-CZ')}
+                      {new Date(u.createdAt).toLocaleDateString(i18n.language)}
                     </span>
                   </td>
                 </tr>

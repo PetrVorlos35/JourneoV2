@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, PlusSquare, Plus, Settings, LogOut, BarChart2, Wallet, X, Sun, Moon, Monitor, Mountain, Palmtree, Compass, Map, Plane, Camera, Menu, Users, Shield } from 'lucide-react';
+import { Home, PlusSquare, Plus, Settings, LogOut, BarChart2, Wallet, X, Sun, Moon, Monitor, Map, Menu, Users, Shield } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useDialog } from '../ui/DialogModal';
@@ -12,14 +13,6 @@ import NotificationBell from '../ui/NotificationBell';
 import JourneoLogo from '../../assets/Journeo_whitelogo.png';
 import JourneoLogoDark from '../../assets/Journeo_blacklogo.png';
 import UserAvatar from '../ui/UserAvatar';
-
-const navItems = [
-  { icon: Home, label: 'Přehled', path: '/dashboard' },
-  { icon: Map, label: 'Moje výlety', path: '/dashboard/all-trips' },
-  { icon: BarChart2, label: 'Statistiky', path: '/dashboard/statistics' },
-  { icon: Users, label: 'Přátelé', path: '/dashboard/friends' },
-  { icon: Wallet, label: 'Výdaje', path: '/dashboard/budget' },
-];
 
 // eslint-disable-next-line no-unused-vars
 const SidebarItem = ({ icon: Icon, label, path, active, onClick, className, layoutId = "sidebar-active-pill" }) => (
@@ -48,22 +41,18 @@ const SidebarItem = ({ icon: Icon, label, path, active, onClick, className, layo
   </Link>
 );
 
-
-
 const ThemeToggle = () => {
   const { theme, setTheme } = useTheme();
+  const { t } = useTranslation();
   const options = [
-    { value: 'light', icon: Sun, label: 'Světlý' },
-    { value: 'dark', icon: Moon, label: 'Tmavý' },
-    { value: 'system', icon: Monitor, label: 'Systém' },
+    { value: 'light', icon: Sun, label: t('dashboardLayout.theme.light') },
+    { value: 'dark', icon: Moon, label: t('dashboardLayout.theme.dark') },
+    { value: 'system', icon: Monitor, label: t('dashboardLayout.theme.system') },
   ];
 
   return (
     <div className="w-full flex p-1 bg-gray-100/50 dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/10">
-      {options.map(({ value, icon: Icon }) => {
-        // eslint-disable-next-line no-unused-vars
-        const unused = Icon;
-        return (
+      {options.map(({ value, icon: Icon, label }) => (
         <button
           key={value}
           onClick={() => setTheme(value)}
@@ -72,12 +61,11 @@ const ThemeToggle = () => {
               ? 'bg-white dark:bg-[#2c2c2e] text-blue-600 dark:text-blue-400 shadow-sm'
               : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
           } cursor-pointer disabled:cursor-not-allowed`}
-          title={value}
+          title={label}
         >
           <Icon size={16} strokeWidth={2} />
         </button>
-      );
-      })}
+      ))}
     </div>
   );
 };
@@ -87,6 +75,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
   const navigate = useNavigate();
   const { logout, user, isAdmin } = useAuth();
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const { confirmDialog, ModalPortal } = useDialog();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -94,7 +83,13 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
   const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   const isTripDetail = location.pathname.includes('/trip/');
 
-  const mobileNavItems = navItems;
+  const navItems = [
+    { icon: Home, label: t('dashboardLayout.nav.overview'), path: '/dashboard' },
+    { icon: Map, label: t('dashboardLayout.nav.myTrips'), path: '/dashboard/all-trips' },
+    { icon: BarChart2, label: t('dashboardLayout.nav.statistics'), path: '/dashboard/statistics' },
+    { icon: Users, label: t('dashboardLayout.nav.friends'), path: '/dashboard/friends' },
+    { icon: Wallet, label: t('dashboardLayout.nav.budget'), path: '/dashboard/budget' },
+  ];
 
   const handleNavigation = async (path, e, onClickCallback) => {
     if (e) {
@@ -108,15 +103,15 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
 
     if (hasUnsavedChanges) {
       const ok = await confirmDialog({
-        title: 'Máte neuložené změny',
-        message: 'Opravdu chcete odejít? Vaše změny nebudou uloženy.',
-        confirmLabel: 'Odejít bez uložení',
+        title: t('dashboardLayout.dialogs.unsaved.title'),
+        message: t('dashboardLayout.dialogs.unsaved.message'),
+        confirmLabel: t('dashboardLayout.dialogs.unsaved.confirm'),
         variant: 'danger'
       });
       if (!ok) return;
       setHasUnsavedChanges(false);
     }
-    
+
     if (onClickCallback) onClickCallback();
     navigate(path);
   };
@@ -124,20 +119,20 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
   const handleLogout = async () => {
     if (hasUnsavedChanges) {
       const ok = await confirmDialog({
-        title: 'Máte neuložené změny',
-        message: 'Opravdu chcete odejít? Vaše změny nebudou uloženy.',
-        confirmLabel: 'Odejít bez uložení',
+        title: t('dashboardLayout.dialogs.unsaved.title'),
+        message: t('dashboardLayout.dialogs.unsaved.message'),
+        confirmLabel: t('dashboardLayout.dialogs.unsaved.confirm'),
         variant: 'danger'
       });
       if (!ok) return;
       setHasUnsavedChanges(false);
     }
-    
+
     const ok = await confirmDialog({
-      title: 'Odhlásit se?',
-      message: 'Opravdu se chcete odhlásit ze svého účtu?',
+      title: t('dashboardLayout.dialogs.logout.title'),
+      message: t('dashboardLayout.dialogs.logout.message'),
       variant: 'danger',
-      confirmLabel: 'Odhlásit se'
+      confirmLabel: t('dashboardLayout.dialogs.logout.confirm')
     });
     if (ok) {
       logout();
@@ -150,9 +145,9 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
   const handleOpenCreateModal = async () => {
     if (hasUnsavedChanges) {
       const ok = await confirmDialog({
-        title: 'Máte neuložené změny',
-        message: 'Opravdu chcete odejít? Vaše změny nebudou uloženy.',
-        confirmLabel: 'Odejít bez uložení',
+        title: t('dashboardLayout.dialogs.unsaved.title'),
+        message: t('dashboardLayout.dialogs.unsaved.message'),
+        confirmLabel: t('dashboardLayout.dialogs.unsaved.confirm'),
         variant: 'danger'
       });
       if (!ok) return;
@@ -167,10 +162,10 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
       <Toaster
         position="top-right"
         toastOptions={{
-          style: { 
-            background: isDark ? '#1C1C1E' : '#fff', 
-            color: isDark ? '#f5f5f7' : '#111827', 
-            borderRadius: '1rem', 
+          style: {
+            background: isDark ? '#1C1C1E' : '#fff',
+            color: isDark ? '#f5f5f7' : '#111827',
+            borderRadius: '1rem',
             boxShadow: isDark ? '0 10px 15px -3px rgba(0,0,0,0.4)' : '0 10px 15px -3px rgba(0,0,0,0.1)',
             border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.05)',
           },
@@ -179,24 +174,24 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
 
       {/* Subtle Background Glow with animation */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none flex justify-center items-center">
-        <motion.div 
-          animate={{ 
+        <motion.div
+          animate={{
             scale: [1, 1.1, 1],
             opacity: [0.3, 0.5, 0.3],
             rotate: [0, 5, -5, 0]
           }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute w-[800px] h-[800px] rounded-[100%] bg-blue-500/10 dark:bg-blue-500/15 blur-[120px]" 
+          className="absolute w-[800px] h-[800px] rounded-[100%] bg-blue-500/10 dark:bg-blue-500/15 blur-[120px]"
         />
-        <motion.div 
-          animate={{ 
+        <motion.div
+          animate={{
             scale: [1, 1.2, 1],
             opacity: [0.2, 0.4, 0.2],
             x: [0, 50, -50, 0],
             y: [0, -50, 50, 0]
           }}
           transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute w-[600px] h-[600px] rounded-[100%] bg-purple-500/10 dark:bg-purple-500/15 blur-[100px] right-[-100px] top-[-100px]" 
+          className="absolute w-[600px] h-[600px] rounded-[100%] bg-purple-500/10 dark:bg-purple-500/15 blur-[100px] right-[-100px] top-[-100px]"
         />
       </div>
 
@@ -204,10 +199,10 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
       <div className="hidden md:flex flex-col p-6 z-20 shrink-0 w-[280px]">
         <aside className="w-full h-full glass-card flex flex-col overflow-hidden">
           <div className="px-8 py-8 flex items-center gap-3">
-            <img 
-              src={isDark ? JourneoLogo : JourneoLogoDark} 
-              alt="Journeo Logo" 
-              className="h-8 w-auto object-contain" 
+            <img
+              src={isDark ? JourneoLogo : JourneoLogoDark}
+              alt="Journeo Logo"
+              className="h-8 w-auto object-contain"
             />
             <span className="font-bold text-xl tracking-tight mt-0.5">Journeo</span>
           </div>
@@ -228,7 +223,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
               >
                 <div className="relative z-10 flex items-center gap-3">
                   <PlusSquare size={20} strokeWidth={2} />
-                  <span className="font-semibold">Vytvořit výlet</span>
+                  <span className="font-semibold">{t('dashboardLayout.nav.createTrip')}</span>
                 </div>
               </button>
             </div>
@@ -241,7 +236,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
 
             <SidebarItem
               icon={Settings}
-              label="Nastavení"
+              label={t('dashboardLayout.nav.settings')}
               path="/dashboard/settings"
               active={location.pathname === '/dashboard/settings'}
               onClick={(path, e) => handleNavigation(path, e)}
@@ -252,7 +247,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
                 <p className="text-[13px] font-bold truncate">
                   {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.email}
                 </p>
-                <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate mt-0.5 font-semibold">{user?.bio || 'Cestovatel'}</p>
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate mt-0.5 font-semibold">{user?.bio || t('dashboardLayout.traveler')}</p>
               </div>
             </Link>
             <button
@@ -260,7 +255,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
               className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-300 active:scale-95 font-semibold cursor-pointer disabled:cursor-not-allowed"
             >
               <LogOut size={20} strokeWidth={2} />
-              <span>Odhlásit se</span>
+              <span>{t('dashboardLayout.dialogs.logout.confirm')}</span>
             </button>
 
             {isAdmin && (
@@ -269,7 +264,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 text-orange-500 dark:text-orange-400 hover:from-orange-500/20 hover:to-red-500/20 transition-all duration-300 active:scale-95 font-semibold cursor-pointer"
               >
                 <Shield size={20} strokeWidth={2} />
-                <span>Admin Panel</span>
+                <span>{t('dashboardLayout.nav.admin')}</span>
               </Link>
             )}
           </div>
@@ -280,10 +275,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
       {!isTripDetail && (
         <div className="md:hidden fixed bottom-6 left-6 right-6 z-50 flex justify-center pointer-events-none">
           <nav className="glass-panel w-full max-w-sm rounded-[2rem] flex justify-around items-center px-2 py-3 pointer-events-auto">
-            {mobileNavItems.map(({ icon: Icon, label, path }) => {
-              // eslint-disable-next-line no-unused-vars
-              const unused = Icon;
-              return (
+            {navItems.map(({ icon: Icon, label, path }) => (
               <Link
                 key={path}
                 to={path}
@@ -295,8 +287,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
                 <Icon size={22} strokeWidth={location.pathname === path ? 2.5 : 2} />
                 {location.pathname === path && <span className="text-[9px] font-bold uppercase tracking-widest">{label.split(' ')[0]}</span>}
               </Link>
-              );
-            })}
+            ))}
           </nav>
         </div>
       )}
@@ -305,27 +296,27 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
       <AnimatePresence>
         {mobileOpen && (
           <div className="fixed inset-0 z-[60] flex md:hidden">
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
-              transition={{ duration: 0.2 }} 
-              className="absolute inset-0 bg-black/40 backdrop-blur-md" 
-              onClick={closeMobile} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-0 bg-black/40 backdrop-blur-md"
+              onClick={closeMobile}
             />
-            <motion.aside 
-              initial={{ x: "100%" }} 
-              animate={{ x: 0 }} 
-              exit={{ x: "100%" }} 
-              transition={{ type: "spring", bounce: 0, duration: 0.4 }} 
+            <motion.aside
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
               className="absolute right-0 top-0 bottom-0 w-[85%] max-w-[320px] bg-white dark:bg-[#1C1C1E] flex flex-col h-full z-10 rounded-l-[2rem] shadow-2xl"
             >
               <div className="p-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <img 
-                    src={isDark ? JourneoLogo : JourneoLogoDark} 
-                    alt="Journeo Logo" 
-                    className="h-7 w-auto object-contain" 
+                  <img
+                    src={isDark ? JourneoLogo : JourneoLogoDark}
+                    alt="Journeo Logo"
+                    className="h-7 w-auto object-contain"
                   />
                   <span className="font-bold text-xl tracking-tight mt-0.5">Journeo</span>
                 </div>
@@ -341,7 +332,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
                   </div>
                   <div className="min-w-0">
                     <p className="font-bold text-xl truncate mb-1">
-                      {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : 'Můj Profil'}
+                      {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : t('dashboardLayout.mobile.myProfile')}
                     </p>
                     <p className="text-[13px] text-gray-500 dark:text-gray-400 truncate tracking-wide font-medium">{user?.bio || user?.email}</p>
                   </div>
@@ -349,24 +340,24 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
 
                 {/* Mobile Theme Toggle */}
                 <div className="px-4 space-y-3">
-                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Vzhled</p>
+                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">{t('dashboardLayout.mobile.appearance')}</p>
                   <ThemeToggle />
                 </div>
 
                 <div className="space-y-2">
-                  <p className="px-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">Možnosti</p>
+                  <p className="px-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">{t('dashboardLayout.mobile.options')}</p>
                   <button
                     onClick={() => { closeMobile(); handleOpenCreateModal(); }}
                     className="flex w-full items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative group active:scale-[0.98] text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 mb-2 cursor-pointer"
                   >
                     <div className="relative z-10 flex items-center gap-3">
                       <PlusSquare size={20} strokeWidth={2} />
-                      <span className="font-semibold">Vytvořit výlet</span>
+                      <span className="font-semibold">{t('dashboardLayout.nav.createTrip')}</span>
                     </div>
                   </button>
                   <SidebarItem
                     icon={BarChart2}
-                    label="Statistiky"
+                    label={t('dashboardLayout.nav.statistics')}
                     path="/dashboard/statistics"
                     active={location.pathname === '/dashboard/statistics'}
                     onClick={(path, e) => handleNavigation(path, e, closeMobile)}
@@ -374,7 +365,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
                    className="cursor-pointer disabled:cursor-not-allowed"/>
                   <SidebarItem
                     icon={Settings}
-                    label="Nastavení"
+                    label={t('dashboardLayout.nav.settings')}
                     path="/dashboard/settings"
                     active={location.pathname === '/dashboard/settings'}
                     onClick={(path, e) => handleNavigation(path, e, closeMobile)}
@@ -389,7 +380,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
                   className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors duration-300 font-bold cursor-pointer disabled:cursor-not-allowed"
                 >
                   <LogOut size={20} strokeWidth={2.5} />
-                  <span>Odhlásit se</span>
+                  <span>{t('dashboardLayout.dialogs.logout.confirm')}</span>
                 </button>
                 {isAdmin && (
                   <Link
@@ -398,7 +389,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
                     className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 text-orange-500 hover:from-orange-500/20 hover:to-red-500/20 transition-all font-bold mt-3"
                   >
                     <Shield size={20} strokeWidth={2.5} />
-                    <span>Admin Panel</span>
+                    <span>{t('dashboardLayout.nav.admin')}</span>
                   </Link>
                 )}
               </div>
@@ -412,10 +403,10 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
         {/* Mobile top bar */}
         <div className="md:hidden flex items-center justify-between p-4 glass sticky top-0 z-30 shrink-0">
           <div className="flex items-center gap-2">
-            <img 
-              src={isDark ? JourneoLogo : JourneoLogoDark} 
-              alt="Journeo Logo" 
-              className="h-7 w-auto object-contain" 
+            <img
+              src={isDark ? JourneoLogo : JourneoLogoDark}
+              alt="Journeo Logo"
+              className="h-7 w-auto object-contain"
             />
             <span className="font-bold text-lg tracking-tight mt-0.5">Journeo</span>
           </div>

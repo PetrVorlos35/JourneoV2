@@ -1,9 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Compass } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import Navbar from './Navbar';
 
 const NotFound = () => {
+  const { t } = useTranslation();
   return (
     <div className="relative min-h-[100dvh] w-full flex flex-col items-center justify-center p-4 overflow-hidden bg-[#fbfbfd] dark:bg-black text-[#1d1d1f] dark:text-[#f5f5f7] font-sans">
       <Navbar />
@@ -32,11 +34,11 @@ const NotFound = () => {
         </div>
         
         <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-black dark:text-white">
-          Mimo mapu
+          {t('notFound.title')}
         </h1>
-        
+
         <p className="text-gray-500 dark:text-gray-400 font-medium text-lg leading-relaxed px-4">
-          Vypadá to, že jste zabloudili. Tato destinace neexistuje nebo byla přesunuta.
+          {t('notFound.description')}
         </p>
       </motion.div>
 

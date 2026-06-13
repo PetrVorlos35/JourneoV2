@@ -1,16 +1,19 @@
-import { Trash2, DollarSign, User, Save, Camera, Mountain, Palmtree, Compass, Map, Plane, Monitor, Sun, Moon, X, KeyRound, Eye, EyeOff, Check } from 'lucide-react';
+import { Trash2, DollarSign, User, Save, Camera, Mountain, Palmtree, Compass, Map, Plane, Monitor, Sun, Moon, X, KeyRound, Eye, EyeOff, Check, Globe } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useDialog } from '../ui/DialogModal';
+import DashboardLanguageSwitcher from './DashboardLanguageSwitcher';
 
 const Settings = ({ onClearData, onConvertCurrency }) => {
   const { currency, setCurrency } = useCurrency();
   const { theme, setTheme } = useTheme();
   const { user, updateProfile, changePassword } = useAuth();
   const { promptDialog, confirmDialog, ModalPortal } = useDialog();
+  const { t } = useTranslation();
 
   const getPasswordStrength = (password) => {
     let strength = 0;
@@ -49,9 +52,9 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
     try {
       await updateProfile(profileForm);
       setHasUnsavedChanges(false);
-      toast.success('Profil byl úspěšně uložen.');
+      toast.success(t('settings.profile.saveSuccess'));
     } catch (err) {
-      toast.error('Nepodařilo se uložit profil.');
+      toast.error(t('settings.profile.saveError'));
     } finally {
       setSaving(false);
     }
@@ -66,40 +69,41 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
     e.preventDefault();
     setPwdError('');
     if (pwdForm.newPassword !== pwdForm.confirmPassword) {
-      setPwdError('Hesla se neshodují.');
+      setPwdError(t('settings.password.mismatch'));
       return;
     }
     const strength = getPasswordStrength(pwdForm.newPassword);
     if (strength < 3) {
-      setPwdError('Nové heslo nesplňuje bezpečnostní požadavky.');
+      setPwdError(t('settings.password.weak'));
       return;
     }
     setSavingPwd(true);
     try {
       const res = await changePassword(pwdForm.oldPassword, pwdForm.newPassword);
-      toast.success(res.message || 'Heslo bylo úspěšně změněno.');
+      toast.success(res.message || t('auth.toasts.resetSuccess'));
       setPwdForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err) {
-      setPwdError(err.message || 'Chyba při změně hesla.');
+      setPwdError(err.message || t('auth.errors.resetError'));
     } finally {
       setSavingPwd(false);
     }
   };
 
   const handleClear = async () => {
+    const requiredPhrase = t('settings.danger.requiredPhrase');
     const value = await promptDialog({
-      title: 'Smazat všechna data?',
-      message: 'Tato akce trvale smaže všechny výlety, dny i statistiky.',
-      inputLabel: "Pro potvrzení napište 'SMAZAT VŠE'",
-      placeholder: 'SMAZAT VŠE',
-      requiredPhrase: 'SMAZAT VŠE',
+      title: t('settings.danger.confirmTitle'),
+      message: t('settings.danger.confirmMessage'),
+      inputLabel: t('settings.danger.confirmLabel'),
+      placeholder: requiredPhrase,
+      requiredPhrase,
       variant: 'danger',
-      confirmLabel: 'Trvale smazat'
+      confirmLabel: t('settings.danger.confirmBtn')
     });
 
-    if (value === 'SMAZAT VŠE') {
+    if (value === requiredPhrase) {
       onClearData();
-      toast.success("Všechna data byla úspěšně smazána.");
+      toast.success(t('settings.danger.successMessage'));
     }
   };
 
@@ -120,31 +124,31 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
   ];
 
   const themeOptions = [
-    { id: 'light', label: 'Světlý', Icon: Sun },
-    { id: 'dark', label: 'Tmavý', Icon: Moon },
-    { id: 'system', label: 'Systémový', Icon: Monitor },
+    { id: 'light', label: t('settings.theme.light'), Icon: Sun },
+    { id: 'dark', label: t('settings.theme.dark'), Icon: Moon },
+    { id: 'system', label: t('settings.theme.system'), Icon: Monitor },
   ];
 
   const handleCurrencyChange = async (newCurr) => {
     if (newCurr === currency) return;
     const oldCurr = currency;
-    
+
     const result = await confirmDialog({
-      title: 'Změnit měnu?',
-      message: `Přejete si přepočítat stávající výdaje do nové měny (${newCurr}) pomocí kurzu, nebo jen změnit symbol měny a nechat částky beze změny?`,
-      confirmLabel: 'Ano, přepočítat',
-      cancelLabel: 'Ne, jen symbol',
+      title: t('settings.currency.changeTitle'),
+      message: t('settings.currency.changeMessage', { newCurr }),
+      confirmLabel: t('settings.currency.yes'),
+      cancelLabel: t('settings.currency.no'),
     });
-    
+
     if (result === null) return;
 
     setCurrency(newCurr);
-    
+
     if (result === true) {
       onConvertCurrency(oldCurr, newCurr);
-      toast.success(`Částky byly přepočítány do ${newCurr}`);
+      toast.success(t('settings.currency.recalculated', { currency: newCurr }));
     } else {
-      toast.success(`Symbol měny změněn na ${newCurr}`);
+      toast.success(t('settings.currency.symbolChanged', { currency: newCurr }));
     }
   };
 
@@ -152,13 +156,11 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
     <div className="w-full space-y-12 pb-10">
       {ModalPortal}
       <div className="space-y-2">
-        <p className="text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Správa profilu</p>
-        <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Nastavení</h1>
+        <p className="text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">{t('settings.subtitle')}</p>
+        <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('settings.title')}</h1>
       </div>
 
       <div className="space-y-8">
-        
-        {/* Appearance Section moved to bottom */}
 
         {/* Profile Section */}
         <div className="glass-card p-8 md:p-10">
@@ -166,21 +168,21 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
             <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
               <User size={20} strokeWidth={2} />
             </div>
-            Můj profil
+            {t('settings.profile.title')}
           </h2>
           <form onSubmit={handleProfileSave} className="space-y-8">
             <div>
-              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-4 block">Vyberte si avatar</label>
+              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-4 block">{t('settings.profile.avatarLabel')}</label>
               <div className="flex flex-wrap gap-4">
                 <button
                   type="button"
                   onClick={() => handleProfileChange('avatar_url', '')}
                   className={`relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 border-2 ${
-                    !profileForm.avatar_url 
-                      ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' 
+                    !profileForm.avatar_url
+                      ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
                       : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-gray-900 dark:hover:text-white'
                   } cursor-pointer disabled:cursor-not-allowed`}
-                  title="Použít iniciály"
+                  title={t('settings.profile.avatarDefault')}
                 >
                   <X strokeWidth={2.5} size={20} />
                 </button>
@@ -190,8 +192,8 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                     type="button"
                     onClick={() => handleProfileChange('avatar_url', preset.id)}
                     className={`relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 border-2 ${
-                      profileForm.avatar_url === preset.id 
-                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' 
+                      profileForm.avatar_url === preset.id
+                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
                         : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-gray-900 dark:hover:text-white'
                     } cursor-pointer disabled:cursor-not-allowed`}
                   >
@@ -203,20 +205,20 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div>
-                <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Jméno</label>
+                <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('settings.profile.firstName')}</label>
                 <input
                   type="text"
-                  placeholder="např. Jan"
+                  placeholder={t('settings.profile.firstNamePlaceholder')}
                   value={profileForm.first_name}
                   onChange={e => handleProfileChange('first_name', e.target.value)}
                   className="glass-input"
                 />
               </div>
               <div>
-                <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Příjmení</label>
+                <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('settings.profile.lastName')}</label>
                 <input
                   type="text"
-                  placeholder="např. Novák"
+                  placeholder={t('settings.profile.lastNamePlaceholder')}
                   value={profileForm.last_name}
                   onChange={e => handleProfileChange('last_name', e.target.value)}
                   className="glass-input"
@@ -224,9 +226,9 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
               </div>
             </div>
             <div>
-              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Napište něco o sobě (Bio)</label>
+              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('settings.profile.bio')}</label>
               <textarea
-                placeholder="např. Milovník hor a dobrodružství..."
+                placeholder={t('settings.profile.bioPlaceholder')}
                 rows="3"
                 value={profileForm.bio}
                 onChange={e => handleProfileChange('bio', e.target.value)}
@@ -234,7 +236,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
               />
             </div>
             <div>
-              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">E-mail (nelze změnit)</label>
+              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('settings.profile.emailLabel')}</label>
               <input
                 type="email"
                 disabled
@@ -257,7 +259,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                 ) : (
                   <Save size={18} strokeWidth={hasUnsavedChanges ? 2.5 : 2} className={hasUnsavedChanges ? 'animate-pulse' : ''} />
                 )}
-                {hasUnsavedChanges ? 'Uložit změny' : 'Uložit profil'}
+                {hasUnsavedChanges ? t('settings.profile.saveUnsaved') : t('settings.profile.save')}
               </button>
             </div>
           </form>
@@ -269,10 +271,10 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
             <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
               <DollarSign size={20} strokeWidth={2} />
             </div>
-            Měna rozpočtu
+            {t('settings.currency.title')}
           </h2>
           <p className="text-gray-500 dark:text-gray-400 font-medium mb-8">
-            Zvolte si výchozí měnu pro sledování výdajů na vašich cestách.
+            {t('settings.currency.subtitle')}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
             {currencyOptions.map(({ id, label }) => (
@@ -298,10 +300,10 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
               <Sun size={20} strokeWidth={2} className="dark:hidden" />
               <Moon size={20} strokeWidth={2} className="hidden dark:block" />
             </div>
-            Vzhled aplikace
+            {t('settings.appearance.title')}
           </h2>
           <p className="text-gray-500 dark:text-gray-400 font-medium mb-8">
-            Vyberte si motiv, který vám nejvíce vyhovuje.
+            {t('settings.appearance.subtitle')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             {themeOptions.map(({ id, label, Icon }) => (
@@ -321,16 +323,30 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
           </div>
         </div>
 
+        {/* Language Section */}
+        <div className="glass-card p-8 md:p-10">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
+              <Globe size={20} strokeWidth={2} />
+            </div>
+            {t('settings.language.title')}
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 font-medium mb-8">
+            {t('settings.language.subtitle')}
+          </p>
+          <DashboardLanguageSwitcher />
+        </div>
+
         {/* Change Password Section */}
         <div className="glass-card p-8 md:p-10">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
               <KeyRound size={20} strokeWidth={2} />
             </div>
-            Změna hesla
+            {t('settings.password.title')}
           </h2>
           <p className="text-gray-500 dark:text-gray-400 font-medium mb-8">
-            Doporučujeme používat silné heslo. Pokud změníte heslo, zůstanete přihlášeni.
+            {t('settings.password.subtitle')}
           </p>
 
           {pwdError && (
@@ -341,7 +357,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
 
           <form onSubmit={handlePwdSave} className="space-y-6 max-w-md">
             <div>
-              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Současné heslo</label>
+              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('settings.password.current')}</label>
               <div className="relative">
                 <input
                   type={showPwd.old ? 'text' : 'password'}
@@ -361,7 +377,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
             </div>
 
             <div>
-              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Nové heslo</label>
+              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('settings.password.new')}</label>
               <div className="relative">
                 <input
                   type={showPwd.new ? 'text' : 'password'}
@@ -391,18 +407,18 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                         else bgClass = 'bg-green-500';
                       }
                       return (
-                        <div 
-                          key={segment} 
-                          className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${bgClass}`} 
+                        <div
+                          key={segment}
+                          className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${bgClass}`}
                         />
                       );
                     })}
                   </div>
                   <div className="space-y-1.5 px-1">
                     {[
-                      { label: 'Alespoň 8 znaků', met: pwdForm.newPassword.length >= 8 },
-                      { label: 'Obsahuje velké písmeno', met: /[A-Z]/.test(pwdForm.newPassword) },
-                      { label: 'Obsahuje číslici', met: /[0-9]/.test(pwdForm.newPassword) },
+                      { label: t('settings.password.req.length'), met: pwdForm.newPassword.length >= 8 },
+                      { label: t('settings.password.req.uppercase'), met: /[A-Z]/.test(pwdForm.newPassword) },
+                      { label: t('settings.password.req.digit'), met: /[0-9]/.test(pwdForm.newPassword) },
                     ].map((req, i) => (
                       <div key={i} className={`flex items-center gap-2 text-[11px] font-medium transition-colors duration-300 ${req.met ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
                         <div className={`p-0.5 rounded-full ${req.met ? 'bg-green-100 dark:bg-green-500/20' : 'bg-transparent'}`}>
@@ -417,7 +433,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
             </div>
 
             <div>
-              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">Potvrďte nové heslo</label>
+              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('settings.password.confirm')}</label>
               <div className="relative">
                 <input
                   type={showPwd.confirm ? 'text' : 'password'}
@@ -441,7 +457,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
               disabled={savingPwd || !pwdForm.oldPassword || !pwdForm.newPassword || pwdForm.newPassword !== pwdForm.confirmPassword}
               className="px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-bold transition-all duration-300 shadow-md active:scale-95 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
             >
-              {savingPwd ? 'Měním heslo...' : 'Změnit heslo'}
+              {savingPwd ? t('settings.password.submitting') : t('settings.password.submit')}
             </button>
           </form>
         </div>
@@ -452,16 +468,16 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
             <div className="w-10 h-10 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl flex items-center justify-center">
               <Trash2 size={20} strokeWidth={2} />
             </div>
-            Nebezpečná zóna
+            {t('settings.danger.title')}
           </h2>
           <p className="text-red-500/80 font-medium mb-8">
-            Tato akce trvale smaže všechny vaše uložené výlety, dny i statistiky. Nelze ji vzít zpět.
+            {t('settings.danger.description')}
           </p>
           <button
             onClick={handleClear}
             className="w-full sm:w-auto px-6 py-3 border-2 border-red-500/30 text-red-600 dark:text-red-400 rounded-2xl font-bold hover:bg-red-500 hover:text-white transition-colors duration-300 shadow-sm shadow-red-500/10 active:scale-95 cursor-pointer disabled:cursor-not-allowed"
           >
-            Smazat všechna data
+            {t('settings.danger.button')}
           </button>
         </div>
       </div>

@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
 const LikeButton = ({ tripId, initialLikes = 0, initialIsLiked = false, onLikeChange }) => {
+  const { t } = useTranslation();
   const [likes, setLikes] = useState(initialLikes);
   const [isLiked, setIsLiked] = useState(initialIsLiked);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +30,7 @@ const LikeButton = ({ tripId, initialLikes = 0, initialIsLiked = false, onLikeCh
         if (onLikeChange) onLikeChange(data.likes, data.isLiked);
       }
     } catch (err) {
-      toast.error(err.message || 'Chyba při zpracování lajku.');
+      toast.error(err.message || t('likeButton.error'));
     } finally {
       setIsLoading(false);
     }
@@ -45,7 +47,7 @@ const LikeButton = ({ tripId, initialLikes = 0, initialIsLiked = false, onLikeCh
             ? 'bg-red-500/20 text-red-500 shadow-sm shadow-red-500/10'
             : 'text-gray-400 dark:text-gray-500 hover:text-red-500 hover:bg-red-500/10'
         }`}
-        title={isLiked ? "Odebrat To se mi líbí" : "To se mi líbí"}
+        title={isLiked ? t('likeButton.unlike') : t('likeButton.like')}
       >
         <AnimatePresence mode="wait">
           <motion.div

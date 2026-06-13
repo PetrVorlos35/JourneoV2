@@ -7,17 +7,17 @@ const router = Router();
 router.get('/', async (req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT theme, currency FROM user_settings WHERE user_id = ?',
+      'SELECT theme, currency, language FROM user_settings WHERE user_id = ?',
       [req.userId]
     );
 
     if (rows.length === 0) {
       // Create default settings if they don't exist
       await pool.query(
-        'INSERT INTO user_settings (user_id, theme, currency) VALUES (?, ?, ?)',
-        [req.userId, 'dark', 'CZK']
+        'INSERT INTO user_settings (user_id, theme, currency, language) VALUES (?, ?, ?, ?)',
+        [req.userId, 'dark', 'CZK', 'cs']
       );
-      return res.json({ settings: { theme: 'dark', currency: 'CZK' } });
+      return res.json({ settings: { theme: 'dark', currency: 'CZK', language: 'cs' } });
     }
 
     res.json({ settings: rows[0] });
@@ -30,15 +30,15 @@ router.get('/', async (req, res) => {
 // ── PUT /api/settings ───────────────────────────────────────
 router.put('/', async (req, res) => {
   try {
-    const { theme, currency } = req.body;
+    const { theme, currency, language } = req.body;
 
     await pool.query(
-      'UPDATE user_settings SET theme = COALESCE(?, theme), currency = COALESCE(?, currency) WHERE user_id = ?',
-      [theme, currency, req.userId]
+      'UPDATE user_settings SET theme = COALESCE(?, theme), currency = COALESCE(?, currency), language = COALESCE(?, language) WHERE user_id = ?',
+      [theme, currency, language, req.userId]
     );
 
     const [rows] = await pool.query(
-      'SELECT theme, currency FROM user_settings WHERE user_id = ?',
+      'SELECT theme, currency, language FROM user_settings WHERE user_id = ?',
       [req.userId]
     );
 

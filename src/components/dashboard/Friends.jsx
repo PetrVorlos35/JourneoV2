@@ -3,14 +3,14 @@ import { Search, UserPlus, UserCheck, UserX, Users, X, ArrowRight, Clock } from 
 import { Link } from 'react-router-dom';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { useDialog } from '../ui/DialogModal';
 import UserAvatar from '../ui/UserAvatar';
 
-
-
 const Friends = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('friends');
   const [friends, setFriends] = useState([]);
   const [requests, setRequests] = useState([]);
@@ -39,13 +39,11 @@ const Friends = () => {
     fetchData();
   }, [fetchData]);
 
-  // Search with debounce
   useEffect(() => {
     if (searchQuery.trim().length < 2) {
       setSearchResults([]);
       return;
     }
-
     const timeout = setTimeout(async () => {
       setIsSearching(true);
       try {
@@ -57,27 +55,26 @@ const Friends = () => {
         setIsSearching(false);
       }
     }, 400);
-
     return () => clearTimeout(timeout);
   }, [searchQuery]);
 
   const handleSendRequest = async (userId) => {
     try {
       await api.friends.sendRequest(userId);
-      toast.success('Žádost o přátelství odeslána!');
+      toast.success(t('friends.toasts.requestSent'));
       setSearchResults(prev => prev.map(u => u.id === userId ? { ...u, friendshipStatus: 'PENDING_SENT' } : u));
     } catch (err) {
-      toast.error(err.message || 'Chyba při odesílání žádosti.');
+      toast.error(err.message || t('friends.toasts.requestError'));
     }
   };
 
   const handleAccept = async (friendshipId) => {
     try {
       await api.friends.accept(friendshipId);
-      toast.success('Přátelství přijato!');
+      toast.success(t('friends.toasts.accepted'));
       fetchData();
     } catch (err) {
-      toast.error(err.message || 'Chyba při přijímání žádosti.');
+      toast.error(err.message || t('friends.toasts.acceptError'));
     }
   };
 
@@ -86,29 +83,28 @@ const Friends = () => {
       await api.friends.decline(friendshipId);
       setRequests(prev => prev.filter(r => r.friendshipId !== friendshipId));
     } catch (err) {
-      toast.error(err.message || 'Chyba při odmítání žádosti.');
+      toast.error(err.message || t('friends.toasts.declineError'));
     }
   };
 
   const handleRemoveFriend = async (friendId, name) => {
     const ok = await confirmDialog({
-      title: 'Odebrat přítele?',
-      message: `Opravdu chcete odebrat ${name} ze seznamu přátel? Ztratíte vzájemný přístup k výletům.`,
-      confirmLabel: 'Odebrat',
+      title: t('friends.remove.title'),
+      message: t('friends.remove.message', { name }),
+      confirmLabel: t('friends.remove.confirm'),
       variant: 'danger',
     });
     if (!ok) return;
 
     try {
-      // Find the friendship to get its ID
       const statusData = await api.friends.getStatus(friendId);
       if (statusData.friendshipId) {
         await api.friends.remove(statusData.friendshipId);
         setFriends(prev => prev.filter(f => f.id !== friendId));
-        toast.success('Přítel odebrán.');
+        toast.success(t('friends.toasts.removed'));
       }
     } catch (err) {
-      toast.error(err.message || 'Chyba při odebírání přítele.');
+      toast.error(err.message || t('friends.toasts.removeError'));
     }
   };
 
@@ -120,18 +116,23 @@ const Friends = () => {
     );
   }
 
+  const tabs = [
+    { id: 'friends', label: t('friends.tabs.friends'), count: friends.length },
+    { id: 'requests', label: t('friends.tabs.requests'), count: requests.length },
+  ];
+
   return (
     <div className="space-y-10 w-full pb-10">
       {ModalPortal}
 
       <div className="space-y-2">
-        <p className="text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Sociální síť</p>
-        <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Přátelé</h1>
+        <p className="text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">{t('friends.subtitle')}</p>
+        <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('friends.title')}</h1>
       </div>
 
       {/* Search */}
       <div className="glass-card p-6 rounded-[2rem] space-y-4">
-        <h2 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Hledat uživatele</h2>
+        <h2 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">{t('friends.search.label')}</h2>
         <div className="relative group/search">
           <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
             <Search size={20} className="text-gray-400 group-focus-within/search:text-blue-500 transition-colors duration-300" strokeWidth={2.5} />
@@ -140,7 +141,7 @@ const Friends = () => {
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Hledat podle jména nebo e-mailu..."
+            placeholder={t('friends.search.placeholder')}
             className="glass-input !pl-14 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50"
           />
           {searchQuery && (
@@ -180,22 +181,22 @@ const Friends = () => {
                       </div>
                       {user.friendshipStatus === 'ACCEPTED' ? (
                         <button disabled className="flex items-center gap-2 px-4 py-2.5 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 text-[12px] font-bold rounded-xl shrink-0 opacity-70 cursor-not-allowed">
-                          <UserCheck size={16} strokeWidth={2.5} /> Přátelé
+                          <UserCheck size={16} strokeWidth={2.5} /> {t('friends.status.alreadyFriends')}
                         </button>
                       ) : user.friendshipStatus === 'PENDING_SENT' ? (
                         <button disabled className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-[12px] font-bold rounded-xl shrink-0 opacity-70 cursor-not-allowed">
-                          <Clock size={16} strokeWidth={2.5} /> Žádost odeslána
+                          <Clock size={16} strokeWidth={2.5} /> {t('friends.status.requestSent')}
                         </button>
                       ) : user.friendshipStatus === 'PENDING_RECEIVED' ? (
                         <button disabled className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-[12px] font-bold rounded-xl shrink-0 opacity-70 cursor-not-allowed">
-                          <Clock size={16} strokeWidth={2.5} /> Čeká na přijetí
+                          <Clock size={16} strokeWidth={2.5} /> {t('friends.status.pendingReceived')}
                         </button>
                       ) : (
                         <button
                           onClick={() => handleSendRequest(user.id)}
                           className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-[12px] font-bold rounded-xl hover:bg-blue-500 transition-colors shrink-0 cursor-pointer"
                         >
-                          <UserPlus size={16} strokeWidth={2.5} /> Přidat
+                          <UserPlus size={16} strokeWidth={2.5} /> {t('friends.status.addButton')}
                         </button>
                       )}
                     </div>
@@ -209,10 +210,7 @@ const Friends = () => {
 
       {/* Tabs */}
       <div className="flex border-b border-gray-200 dark:border-white/10 gap-8">
-        {[
-          { id: 'friends', label: 'Přátelé', count: friends.length },
-          { id: 'requests', label: 'Žádosti', count: requests.length },
-        ].map(tab => (
+        {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
@@ -239,23 +237,17 @@ const Friends = () => {
 
       {/* Friends List */}
       {activeTab === 'friends' && (
-        <motion.div 
+        <motion.div
           initial="hidden"
           animate="visible"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
-          }}
+          variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           {friends.length > 0 ? (
             friends.map(friend => (
               <motion.div
                 key={friend.id}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: { opacity: 1, y: 0 }
-                }}
+                variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
                 className="glass-card p-6 sm:p-8 flex flex-col hover:-translate-y-2 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)] transition-all duration-300 group"
               >
                 <div className="flex items-start gap-4 mb-6">
@@ -273,21 +265,21 @@ const Friends = () => {
                 </div>
 
                 <div className="flex items-center gap-2 text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-6">
-                  <UserCheck size={14} strokeWidth={2.5} /> Přátelé
+                  <UserCheck size={14} strokeWidth={2.5} /> {t('friends.status.friends')}
                 </div>
 
                 <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/10">
                   <button
-                    onClick={() => handleRemoveFriend(friend.id, friend.first_name || 'tohoto uživatele')}
+                    onClick={() => handleRemoveFriend(friend.id, friend.first_name || t('friends.defaultName'))}
                     className="text-[11px] font-bold text-red-500 hover:text-red-400 transition-colors uppercase tracking-widest opacity-100 lg:opacity-0 lg:group-hover:opacity-100 cursor-pointer"
                   >
-                    Odebrat
+                    {t('friends.status.remove')}
                   </button>
                   <Link
                     to={`/dashboard/profile/${friend.id}`}
                     className="inline-flex items-center gap-1.5 text-[12px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors uppercase tracking-widest"
                   >
-                    Profil <ArrowRight size={16} strokeWidth={2.5} />
+                    {t('friends.status.profile')} <ArrowRight size={16} strokeWidth={2.5} />
                   </Link>
                 </div>
               </motion.div>
@@ -297,8 +289,8 @@ const Friends = () => {
               <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-2xl flex items-center justify-center text-gray-400 mb-2">
                 <Users size={28} strokeWidth={2} />
               </div>
-              <p className="text-2xl text-gray-900 dark:text-white font-bold tracking-tight">Zatím žádní přátelé</p>
-              <p className="text-[15px] text-gray-500 font-medium max-w-md">Vyhledejte uživatele a pošlete jim žádost o přátelství.</p>
+              <p className="text-2xl text-gray-900 dark:text-white font-bold tracking-tight">{t('friends.empty.friends.title')}</p>
+              <p className="text-[15px] text-gray-500 font-medium max-w-md">{t('friends.empty.friends.description')}</p>
             </div>
           )}
         </motion.div>
@@ -306,23 +298,17 @@ const Friends = () => {
 
       {/* Requests List */}
       {activeTab === 'requests' && (
-        <motion.div 
+        <motion.div
           initial="hidden"
           animate="visible"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
-          }}
+          variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } }}
           className="space-y-4"
         >
           {requests.length > 0 ? (
             requests.map(req => (
               <motion.div
                 key={req.friendshipId}
-                variants={{
-                  hidden: { opacity: 0, y: 20 },
-                  visible: { opacity: 1, y: 0 }
-                }}
+                variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
                 exit={{ opacity: 0, x: -50 }}
                 className="glass-card p-6 flex items-center gap-4 hover:-translate-y-1 transition-transform duration-300"
               >
@@ -334,7 +320,7 @@ const Friends = () => {
                       : req.email}
                   </h3>
                   <p className="text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5 font-medium mt-0.5">
-                    <Clock size={12} /> Čeká na potvrzení
+                    <Clock size={12} /> {t('friends.status.waitingConfirm')}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -342,13 +328,13 @@ const Friends = () => {
                     onClick={() => handleAccept(req.friendshipId)}
                     className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-[12px] font-bold rounded-xl hover:bg-blue-500 transition-colors cursor-pointer"
                   >
-                    <UserCheck size={16} strokeWidth={2.5} /> Přijmout
+                    <UserCheck size={16} strokeWidth={2.5} /> {t('friends.status.accept')}
                   </button>
                   <button
                     onClick={() => handleDecline(req.friendshipId)}
                     className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 text-[12px] font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/15 transition-colors cursor-pointer"
                   >
-                    <UserX size={16} strokeWidth={2.5} /> Odmítnout
+                    <UserX size={16} strokeWidth={2.5} /> {t('friends.status.decline')}
                   </button>
                 </div>
               </motion.div>
@@ -358,8 +344,8 @@ const Friends = () => {
               <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-2xl flex items-center justify-center text-gray-400 mb-2">
                 <UserPlus size={28} strokeWidth={2} />
               </div>
-              <p className="text-2xl text-gray-900 dark:text-white font-bold tracking-tight">Žádné nové žádosti</p>
-              <p className="text-[15px] text-gray-500 font-medium max-w-md">Až vám někdo pošle žádost o přátelství, zobrazí se zde.</p>
+              <p className="text-2xl text-gray-900 dark:text-white font-bold tracking-tight">{t('friends.empty.requests.title')}</p>
+              <p className="text-[15px] text-gray-500 font-medium max-w-md">{t('friends.empty.requests.description')}</p>
             </div>
           )}
         </motion.div>

@@ -4,18 +4,23 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, ArrowRight, ArrowLeft, Rocket, Check, Loader2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { DayPicker } from 'react-day-picker';
 import { cs } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { format } from 'date-fns';
 import 'react-day-picker/dist/style.css';
 
 const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({ title: '', startDate: '', endDate: '' });
   const [range, setRange] = useState({ from: undefined, to: undefined });
   const [isLoading, setIsLoading] = useState(false);
   const [dateError, setDateError] = useState(false);
+
+  const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
 
   useEffect(() => {
     if (!isOpen) {
@@ -55,11 +60,11 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
 
   const nextStep = () => {
     if (step === 1 && !formData.title) {
-      toast.error('Zadejte prosím název nebo cíl cesty.');
+      toast.error(t('createTripModal.toasts.noName'));
       return;
     }
     if (step === 2 && (!formData.startDate || !formData.endDate)) {
-      toast.error('Vyberte prosím datum od i do.');
+      toast.error(t('createTripModal.toasts.noDates'));
       return;
     }
     if (step < totalSteps) setStep(step + 1);
@@ -94,9 +99,9 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
   };
 
   const steps = [
-    { id: 1, label: 'Destinace' },
-    { id: 2, label: 'Termín' },
-    { id: 3, label: 'Detaily' },
+    { id: 1, label: t('createTripModal.steps.destination') },
+    { id: 2, label: t('createTripModal.steps.dates') },
+    { id: 3, label: t('createTripModal.steps.details') },
   ];
 
   return createPortal(
@@ -115,7 +120,7 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
             initial={{ opacity: 0, y: "100%" }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "100%" }}
-            transition={{ 
+            transition={{
               y: { type: "spring", damping: 25, stiffness: 200 },
               layout: { type: "spring", damping: 25, stiffness: 200 }
             }}
@@ -126,15 +131,15 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                 <X size={20} strokeWidth={2.5} />
               </button>
             </div>
-            
+
             <div className="w-full flex justify-center sm:hidden pt-4 pb-2">
               <div className="w-12 h-1.5 bg-gray-300 dark:bg-white/20 rounded-full" />
             </div>
             <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar p-5 sm:p-8 pt-2 sm:pt-4 flex flex-col">
               <div className="w-full flex flex-col flex-1 space-y-4 sm:space-y-5">
                 <div className="space-y-1 sm:space-y-2 mb-2 sm:mb-0 pr-12 sm:pr-0">
-                  <p className="text-[10px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Plánování</p>
-                  <h1 className="text-2xl sm:text-3xl text-gray-900 dark:text-white tracking-tight font-bold">Nový výlet</h1>
+                  <p className="text-[10px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">{t('createTripModal.planning')}</p>
+                  <h1 className="text-2xl sm:text-3xl text-gray-900 dark:text-white tracking-tight font-bold">{t('createTripModal.title')}</h1>
                 </div>
 
                 {/* Animated Stepper */}
@@ -142,7 +147,7 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                   {steps.map((s, i) => {
                     const isCompleted = step > s.id;
                     const isActive = step === s.id;
-                    
+
                     return (
                       <div key={s.id} className="flex items-center flex-1 last:flex-none">
                         <div className="relative flex flex-col items-center">
@@ -150,8 +155,8 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                             initial={false}
                             animate={{ borderColor: isActive ? 'rgba(37, 99, 235, 0.3)' : 'transparent' }}
                             className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm z-10 border-4 transition-colors duration-300 ${
-                              isCompleted || isActive 
-                                ? 'bg-blue-600 text-white' 
+                              isCompleted || isActive
+                                ? 'bg-blue-600 text-white'
                                 : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-600'
                             }`}
                           >
@@ -190,14 +195,14 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                     {step === 1 && (
                       <motion.div key="step1" variants={variants} initial="initial" animate="animate" exit="exit" className="space-y-6 w-full" style={{ gridArea: '1 / 1 / 2 / 2' }}>
                         <div className="space-y-2 sm:space-y-3">
-                          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Kam se chystáte?</h2>
-                          <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">Pojmenujte svůj výlet nebo zadejte cílovou destinaci.</p>
+                          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{t('createTripModal.step1.title')}</h2>
+                          <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">{t('createTripModal.step1.subtitle')}</p>
                         </div>
                         <div className="relative group w-full">
                           <div className="absolute inset-y-0 left-4 sm:left-5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors">
                             <MapPin strokeWidth={2} className="w-5 h-5 sm:w-6 sm:h-6" />
                           </div>
-                          <input type="text" autoFocus aria-label="Cílová destinace" placeholder="např. Víkend v Římě" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && nextStep()} className="glass-input !pl-12 sm:!pl-14 text-lg sm:text-2xl py-4 sm:py-6" />
+                          <input type="text" autoFocus aria-label={t('createTripModal.step3.destinationLabel')} placeholder={t('createTripModal.step1.placeholder')} value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} onKeyDown={(e) => e.key === 'Enter' && nextStep()} className="glass-input !pl-12 sm:!pl-14 text-lg sm:text-2xl py-4 sm:py-6" />
                         </div>
                       </motion.div>
                     )}
@@ -206,21 +211,21 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                       <motion.div key="step2" variants={variants} initial="initial" animate="animate" exit="exit" className="flex flex-col gap-4 sm:gap-6 w-full" style={{ gridArea: '1 / 1 / 2 / 2' }}>
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
                           <div className="space-y-1 sm:space-y-2">
-                            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Kdy vyrážíte?</h2>
-                            <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-medium">Vyberte termín vaší cesty.</p>
+                            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{t('createTripModal.step2.title')}</h2>
+                            <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-medium">{t('createTripModal.step2.subtitle')}</p>
                           </div>
                           <div className={`flex flex-row items-center justify-between sm:justify-center gap-4 px-5 py-3 sm:px-6 sm:py-4 border-l-4 ${range?.from ? 'border-blue-500' : 'border-gray-200 dark:border-white/10'} glass-card rounded-2xl w-full sm:w-fit max-w-full shrink-0`}>
                             <div className="flex flex-col min-w-0">
-                              <span className="text-[10px] sm:text-[11px] uppercase text-gray-500 dark:text-gray-400 tracking-widest font-bold mb-1">Odjezd</span>
+                              <span className="text-[10px] sm:text-[11px] uppercase text-gray-500 dark:text-gray-400 tracking-widest font-bold mb-1">{t('createTripModal.step2.departure')}</span>
                               <span className={`text-base sm:text-lg font-bold truncate ${range?.from ? 'text-gray-900 dark:text-white' : 'text-gray-400 italic'}`}>
-                                {range?.from ? format(range.from, 'd. M. yyyy', { locale: cs }) : 'Vyberte'}
+                                {range?.from ? format(range.from, 'd. M. yyyy', { locale: dateLocale }) : t('createTripModal.step2.select')}
                               </span>
                             </div>
                             <ArrowRight size={16} strokeWidth={2} className="text-gray-400 shrink-0 mx-1 sm:mx-2" />
                             <div className="flex flex-col min-w-0 text-right sm:text-left">
-                              <span className="text-[10px] sm:text-[11px] uppercase text-gray-500 dark:text-gray-400 tracking-widest font-bold mb-1">Návrat</span>
+                              <span className="text-[10px] sm:text-[11px] uppercase text-gray-500 dark:text-gray-400 tracking-widest font-bold mb-1">{t('createTripModal.step2.return')}</span>
                               <span className={`text-base sm:text-lg font-bold truncate ${range?.to ? 'text-gray-900 dark:text-white' : 'text-gray-400 italic'}`}>
-                                {range?.to ? format(range.to, 'd. M. yyyy', { locale: cs }) : 'Vyberte'}
+                                {range?.to ? format(range.to, 'd. M. yyyy', { locale: dateLocale }) : t('createTripModal.step2.select')}
                               </span>
                             </div>
                           </div>
@@ -232,7 +237,7 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                                 if (newRange?.from) setFormData(prev => ({ ...prev, startDate: format(newRange.from, 'yyyy-MM-dd') }));
                                 if (newRange?.to) setFormData(prev => ({ ...prev, endDate: format(newRange.to, 'yyyy-MM-dd') }));
                               }}
-                              locale={cs} numberOfMonths={1} className="premium-calendar"
+                              locale={dateLocale} numberOfMonths={1} className="premium-calendar"
                             />
                           </div>
                         </div>
@@ -242,8 +247,8 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                     {step === 3 && (
                       <motion.div key="step3" variants={variants} initial="initial" animate="animate" exit="exit" className="space-y-6 w-full" style={{ gridArea: '1 / 1 / 2 / 2' }}>
                         <div className="space-y-2 sm:space-y-3">
-                          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Vše připraveno?</h2>
-                          <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-medium">Zkontrolujte si údaje a můžete vyrazit.</p>
+                          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{t('createTripModal.step3.title')}</h2>
+                          <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-medium">{t('createTripModal.step3.subtitle')}</p>
                         </div>
                         <div className="glass-card rounded-[2rem] p-5 sm:p-8 space-y-6 w-full max-w-xl">
                           <div className="flex items-start gap-4 sm:gap-6">
@@ -251,7 +256,7 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                               <MapPin size={20} strokeWidth={2} className="sm:w-6 sm:h-6" />
                             </div>
                             <div className="w-full">
-                              <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold mb-1 ml-2">Destinace</p>
+                              <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold mb-1 ml-2">{t('createTripModal.step3.destinationLabel')}</p>
                               <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="font-bold text-xl sm:text-3xl tracking-tight text-gray-900 dark:text-white leading-tight bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 rounded-lg px-2 py-1 w-full transition-all -ml-2" />
                             </div>
                           </div>
@@ -260,7 +265,7 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                               <Calendar size={20} strokeWidth={2} className="sm:w-6 sm:h-6" />
                             </div>
                             <div className="w-full">
-                              <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold mb-1 ml-2">Termín</p>
+                              <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold mb-1 ml-2">{t('createTripModal.step3.datesLabel')}</p>
                               <div className={`flex items-center flex-wrap gap-1 sm:gap-2 font-bold text-lg sm:text-2xl tracking-tight leading-tight ${dateError ? 'text-red-500' : 'text-gray-900 dark:text-white'}`}>
                                 <input type="date" value={formData.startDate} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} className={`bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 rounded-lg px-2 py-1 transition-all -ml-2 cursor-pointer ${dateError ? 'focus:ring-red-500 ring-1 ring-red-500/50' : 'focus:ring-black/10 dark:focus:ring-white/20'}`} />
                                 <span className="text-gray-300 dark:text-white/20">—</span>
@@ -280,16 +285,16 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
               {step > 1 ? (
                 <button onClick={prevStep} className="flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 text-[11px] sm:text-[13px] text-gray-500 hover:text-gray-900 dark:hover:text-white uppercase tracking-widest font-bold transition-colors bg-white/40 dark:bg-white/5 rounded-2xl cursor-pointer disabled:cursor-not-allowed">
                   <ArrowLeft size={16} strokeWidth={2.5} />
-                  <span className="hidden sm:inline">{step === 3 ? 'Upravit' : 'Zpět'}</span>
+                  <span className="hidden sm:inline">{step === 3 ? t('createTripModal.nav.edit') : t('createTripModal.nav.back')}</span>
                 </button>
               ) : (
                 <div />
               )}
               <button onClick={step === 3 ? handleSubmit : nextStep} disabled={isLoading} className="group inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold transition-colors duration-300 shadow-md shadow-blue-500/20 active:scale-95 text-sm sm:text-base disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer">
                 {step === 3 ? (
-                  isLoading ? <><Loader2 size={18} strokeWidth={2.5} className="animate-spin" />Vytvářím...</> : <><Rocket size={18} strokeWidth={2.5} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />Vytvořit výlet</>
+                  isLoading ? <><Loader2 size={18} strokeWidth={2.5} className="animate-spin" />{t('createTripModal.nav.creating')}</> : <><Rocket size={18} strokeWidth={2.5} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />{t('createTripModal.nav.create')}</>
                 ) : (
-                  <>{step === 1 ? 'Pokračovat' : 'Další krok'}<ArrowRight size={18} strokeWidth={2.5} className="group-hover:translate-x-1 transition-transform" /></>
+                  <>{step === 1 ? t('createTripModal.nav.continue') : t('createTripModal.nav.nextStep')}<ArrowRight size={18} strokeWidth={2.5} className="group-hover:translate-x-1 transition-transform" /></>
                 )}
               </button>
             </div>

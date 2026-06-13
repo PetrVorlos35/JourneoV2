@@ -1,14 +1,15 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { cs } from 'date-fns/locale';
 import { MapPin, Calendar, Trash2, ArrowRight, Search, Filter, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { useDialog } from '../ui/DialogModal';
 
 const AllTrips = ({ trips, onDeleteTrip }) => {
   const { confirmDialog, ModalPortal } = useDialog();
-  
+  const { t } = useTranslation();
+
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -41,14 +42,14 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
   const handleDelete = async (id, e) => {
     e.preventDefault();
     const ok = await confirmDialog({
-      title: 'Smazat výlet?',
-      message: 'Opravdu chcete tento výlet trvale smazat? Tato akce nelze vrátit zpět.',
+      title: t('allTrips.delete.title'),
+      message: t('allTrips.delete.message'),
       variant: 'danger',
-      confirmLabel: 'Smazat'
+      confirmLabel: t('allTrips.delete.confirm')
     });
     if (ok) {
       onDeleteTrip(id);
-      toast.success('Výlet byl úspěšně smazán');
+      toast.success(t('allTrips.delete.success'));
     }
   };
 
@@ -56,8 +57,8 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
     <div className="space-y-8 w-full pb-10">
       {ModalPortal}
       <div className="space-y-2">
-        <p className="text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Vše na jednom místě</p>
-        <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Moje výlety</h1>
+        <p className="text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">{t('allTrips.subtitle')}</p>
+        <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('allTrips.title')}</h1>
       </div>
 
       {/* Filter Bar */}
@@ -68,13 +69,13 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
           </div>
           <input
             type="text"
-            placeholder="Hledat výlet podle názvu..."
+            placeholder={t('allTrips.search.placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[15px]"
           />
         </div>
-        
+
         <div className="flex flex-col sm:flex-row gap-4">
           <input
             type="date"
@@ -91,10 +92,10 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="pl-10 pr-10 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[15px] appearance-none cursor-pointer"
             >
-              <option value="all">Všechny stavy</option>
-              <option value="ongoing">Probíhající</option>
-              <option value="upcoming">Plánované</option>
-              <option value="past">Minulé</option>
+              <option value="all">{t('allTrips.filter.all')}</option>
+              <option value="ongoing">{t('allTrips.filter.ongoing')}</option>
+              <option value="upcoming">{t('allTrips.filter.upcoming')}</option>
+              <option value="past">{t('allTrips.filter.past')}</option>
             </select>
           </div>
           {(searchQuery || dateFilter || statusFilter !== 'all') && (
@@ -102,7 +103,7 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
               onClick={() => { setSearchQuery(''); setDateFilter(''); setStatusFilter('all'); }}
               className="flex items-center justify-center gap-1.5 text-sm font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-4 py-2.5 transition-all w-full sm:w-auto shrink-0 cursor-pointer disabled:cursor-not-allowed"
             >
-              <X size={16} strokeWidth={2.5} /> Resetovat
+              <X size={16} strokeWidth={2.5} /> {t('allTrips.filter.reset')}
             </button>
           )}
         </div>
@@ -119,9 +120,9 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
               past: 'bg-gray-500/10 text-gray-600 dark:text-gray-400'
             };
             const statusLabels = {
-              ongoing: 'Probíhající',
-              upcoming: 'Plánované',
-              past: 'Minulé'
+              ongoing: t('allTrips.filter.ongoing'),
+              upcoming: t('allTrips.filter.upcoming'),
+              past: t('allTrips.filter.past')
             };
 
             return (
@@ -140,29 +141,29 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
                     <button
                       onClick={(e) => handleDelete(trip.id, e)}
                       className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer disabled:cursor-not-allowed"
-                      title="Smazat výlet"
+                      title={t('allTrips.delete.title')}
                     >
                       <Trash2 size={14} strokeWidth={2} />
                     </button>
                   </div>
                 </div>
-                
+
                 <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white tracking-tight">{trip.title}</h3>
-                
+
                 <div className="flex items-center text-[13px] font-bold text-gray-500 gap-2 mb-8">
                   <Calendar size={16} strokeWidth={2} />
                   <span>{format(new Date(trip.startDate), 'd. M.')} — {format(new Date(trip.endDate), 'd. M. yyyy')}</span>
                 </div>
-                
+
                 <div className="mt-auto flex items-center justify-between pt-6 border-t border-gray-100 dark:border-white/10">
                   <div className="flex items-center gap-2 text-gray-400 text-[11px] uppercase tracking-widest font-bold">
-                    <span>Aktivit: {trip.activities?.length || 0}</span>
+                    <span>{t('allTrips.activities')} {trip.activities?.length || 0}</span>
                   </div>
                   <Link
                     to={`/dashboard/trip/${trip.id}?from=all`}
                     className="inline-flex items-center gap-1.5 text-[12px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors uppercase tracking-widest"
                   >
-                    Otevřít <ArrowRight size={16} strokeWidth={2.5} />
+                    {t('allTrips.open')} <ArrowRight size={16} strokeWidth={2.5} />
                   </Link>
                 </div>
               </div>
@@ -170,8 +171,8 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
           })
         ) : (
           <div className="col-span-full py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none">
-            <p className="text-2xl text-gray-900 dark:text-white font-bold tracking-tight">Žádné výsledky</p>
-            <p className="text-[15px] text-gray-500 font-medium max-w-md">Vašemu vyhledávání neodpovídají žádné výlety. Zkuste změnit filtry.</p>
+            <p className="text-2xl text-gray-900 dark:text-white font-bold tracking-tight">{t('allTrips.empty.title')}</p>
+            <p className="text-[15px] text-gray-500 font-medium max-w-md">{t('allTrips.empty.description')}</p>
           </div>
         )}
       </div>

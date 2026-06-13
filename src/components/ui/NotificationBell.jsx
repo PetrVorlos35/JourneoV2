@@ -1,22 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Bell, UserPlus, UserCheck, Heart, Check, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
-
-const timeAgo = (dateStr) => {
-  const now = new Date();
-  const date = new Date(dateStr);
-  const diffMs = now - date;
-  const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return 'právě teď';
-  if (diffMin < 60) return `před ${diffMin} min`;
-  const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `před ${diffHr} h`;
-  const diffDays = Math.floor(diffHr / 24);
-  if (diffDays < 7) return `před ${diffDays} d`;
-  return `před ${Math.floor(diffDays / 7)} týd.`;
-};
 
 const notifIcons = {
   FRIEND_REQUEST: UserPlus,
@@ -25,13 +12,27 @@ const notifIcons = {
 };
 
 const NotificationBell = () => {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const panelRef = useRef(null);
 
-  // Close on outside click
+  const timeAgo = (dateStr) => {
+    const now = new Date();
+    const date = new Date(dateStr);
+    const diffMs = now - date;
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 1) return t('notifications.timeAgo.justNow');
+    if (diffMin < 60) return t('notifications.timeAgo.minutesAgo', { count: diffMin });
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return t('notifications.timeAgo.hoursAgo', { count: diffHr });
+    const diffDays = Math.floor(diffHr / 24);
+    if (diffDays < 7) return t('notifications.timeAgo.daysAgo', { count: diffDays });
+    return t('notifications.timeAgo.weeksAgo', { count: Math.floor(diffDays / 7) });
+  };
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) {
@@ -44,7 +45,6 @@ const NotificationBell = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  // Fetch unread count on mount and every 30 seconds
   useEffect(() => {
     const fetchCount = async () => {
       try {
@@ -65,7 +65,7 @@ const NotificationBell = () => {
       const data = await api.notifications.getAll();
       setNotifications(data.notifications);
     } catch (err) {
-      toast.error('Nepodařilo se načíst notifikace.');
+      toast.error(t('notifications.toasts.loadError'));
     } finally {
       setLoading(false);
     }
@@ -84,7 +84,7 @@ const NotificationBell = () => {
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (err) {
-      toast.error('Chyba při označování notifikací.');
+      toast.error(t('notifications.toasts.markError'));
     }
   };
 
@@ -94,9 +94,9 @@ const NotificationBell = () => {
       await api.notifications.markRead(notifId);
       setNotifications(prev => prev.filter(n => n.id !== notifId));
       setUnreadCount(prev => Math.max(0, prev - 1));
-      toast.success('Žádost o přátelství přijata!');
+      toast.success(t('notifications.toasts.accepted'));
     } catch (err) {
-      toast.error(err.message || 'Chyba při přijímání žádosti.');
+      toast.error(err.message || t('notifications.toasts.acceptError'));
     }
   };
 
@@ -107,7 +107,7 @@ const NotificationBell = () => {
       setNotifications(prev => prev.filter(n => n.id !== notifId));
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (err) {
-      toast.error(err.message || 'Chyba při odmítání žádosti.');
+      toast.error(err.message || t('notifications.toasts.declineError'));
     }
   };
 
@@ -141,20 +141,18 @@ const NotificationBell = () => {
             transition={{ duration: 0.2, ease: 'easeOut' }}
             className="fixed md:absolute left-0 right-0 md:left-auto top-[72px] md:top-14 w-full md:w-96 max-h-[80vh] md:max-h-[420px] bg-white dark:bg-[#1c1c1e] shadow-2xl rounded-b-[2rem] md:rounded-2xl border-b md:border border-black/5 dark:border-white/10 overflow-hidden z-[100] flex flex-col"
           >
-            {/* Header */}
             <div className="px-5 py-4 border-b border-gray-100 dark:border-white/10 flex items-center justify-between">
-              <h3 className="font-bold text-[15px] text-gray-900 dark:text-white tracking-tight">Notifikace</h3>
+              <h3 className="font-bold text-[15px] text-gray-900 dark:text-white tracking-tight">{t('notifications.title')}</h3>
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
                   className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors uppercase tracking-widest cursor-pointer"
                 >
-                  Přečíst vše
+                  {t('notifications.markAllRead')}
                 </button>
               )}
             </div>
 
-            {/* List */}
             <div className="overflow-y-auto max-h-[340px] custom-scrollbar">
               {loading ? (
                 <div className="flex items-center justify-center py-12">
@@ -163,7 +161,7 @@ const NotificationBell = () => {
               ) : notifications.length === 0 ? (
                 <div className="py-12 text-center">
                   <Bell size={28} className="mx-auto text-gray-300 dark:text-gray-600 mb-3" />
-                  <p className="text-gray-500 dark:text-gray-400 text-[14px] font-bold">Žádné notifikace</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-[14px] font-bold">{t('notifications.empty')}</p>
                 </div>
               ) : (
                 notifications.map(n => {
@@ -201,13 +199,13 @@ const NotificationBell = () => {
                                 onClick={() => handleAcceptRequest(n.referenceId, n.id)}
                                 className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-blue-600 text-white text-[12px] font-bold rounded-xl hover:bg-blue-500 transition-colors cursor-pointer"
                               >
-                                <Check size={14} strokeWidth={3} /> Přijmout
+                                <Check size={14} strokeWidth={3} /> {t('notifications.accept')}
                               </button>
                               <button
                                 onClick={() => handleDeclineRequest(n.referenceId, n.id)}
                                 className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 text-[12px] font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/15 transition-colors cursor-pointer"
                               >
-                                <X size={14} strokeWidth={3} /> Odmítnout
+                                <X size={14} strokeWidth={3} /> {t('notifications.decline')}
                               </button>
                             </div>
                           )}

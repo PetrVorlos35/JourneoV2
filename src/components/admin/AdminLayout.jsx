@@ -3,14 +3,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Users, Map, LogOut, ArrowLeft, Shield } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import UserAvatar from '../ui/UserAvatar';
-
-const adminNavItems = [
-  { icon: LayoutDashboard, label: 'Přehled', path: '/admin' },
-  { icon: Users, label: 'Uživatelé', path: '/admin/users' },
-  { icon: Map, label: 'Výlety', path: '/admin/trips' },
-];
 
 // eslint-disable-next-line no-unused-vars
 const AdminSidebarItem = ({ icon: Icon, label, path, active, onClick }) => (
@@ -43,7 +38,14 @@ const AdminLayout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
+  const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const adminNavItems = [
+    { icon: LayoutDashboard, label: t('admin.nav.overview'), path: '/admin' },
+    { icon: Users, label: t('admin.nav.users'), path: '/admin/users' },
+    { icon: Map, label: t('admin.nav.trips'), path: '/admin/trips' },
+  ];
 
   const handleLogout = () => {
     logout();
@@ -106,7 +108,7 @@ const AdminLayout = ({ children }) => {
               className="flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-300 active:scale-95 font-semibold"
             >
               <ArrowLeft size={20} strokeWidth={2} />
-              <span>Zpět na dashboard</span>
+              <span>{t('admin.backToDashboard')}</span>
             </Link>
 
             {/* User info */}
@@ -116,7 +118,7 @@ const AdminLayout = ({ children }) => {
                 <p className="text-[13px] font-bold truncate">
                   {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.email}
                 </p>
-                <p className="text-[11px] text-orange-400 truncate mt-0.5 font-semibold">Administrátor</p>
+                <p className="text-[11px] text-orange-400 truncate mt-0.5 font-semibold">{t('admin.administrator')}</p>
               </div>
             </div>
 
@@ -125,7 +127,7 @@ const AdminLayout = ({ children }) => {
               className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-red-500 hover:bg-red-500/10 transition-all duration-300 active:scale-95 font-semibold cursor-pointer"
             >
               <LogOut size={20} strokeWidth={2} />
-              <span>Odhlásit se</span>
+              <span>{t('admin.logout')}</span>
             </button>
           </div>
         </aside>

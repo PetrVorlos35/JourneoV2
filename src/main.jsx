@@ -6,6 +6,7 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { CurrencyProvider } from './contexts/CurrencyContext'
 import { UnsavedChangesProvider } from './contexts/UnsavedChangesContext'
 import { GoogleOAuthProvider } from '@react-oauth/google'
+import './i18n'
 import './index.css'
 import App from './App.jsx'
 

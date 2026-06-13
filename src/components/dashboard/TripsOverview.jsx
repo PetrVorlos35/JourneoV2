@@ -1,18 +1,23 @@
 import { useState } from 'react';
 import { format, differenceInDays } from 'date-fns';
 import { cs } from 'date-fns/locale';
+import { enUS } from 'date-fns/locale';
 import { MapPin, Calendar, Trash2, Clock, Plane, Plus, TrendingUp, ArrowRight, Wallet, Search, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 import { useDialog } from '../ui/DialogModal';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 
 const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
   const { confirmDialog, ModalPortal } = useDialog();
+  const { t, i18n } = useTranslation();
   const [activeCategory, setActiveCategory] = useState('ongoing');
   const [searchQuery, setSearchQuery] = useState('');
   const [dateFilter, setDateFilter] = useState('');
+
+  const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
 
   const categorizeTrips = (trip) => {
     const start = new Date(trip.startDate);
@@ -45,14 +50,14 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
   const handleDelete = async (id, e) => {
     e.preventDefault();
     const ok = await confirmDialog({
-      title: 'Smazat výlet?',
-      message: 'Opravdu chcete tento výlet trvale smazat? Tato akce nelze vrátit zpět.',
+      title: t('tripsOverview.delete.title'),
+      message: t('tripsOverview.delete.message'),
       variant: 'danger',
-      confirmLabel: 'Smazat'
+      confirmLabel: t('tripsOverview.delete.confirm')
     });
     if (ok) {
       onDeleteTrip(id);
-      toast.success('Výlet byl úspěšně smazán');
+      toast.success(t('tripsOverview.delete.success'));
     }
   };
 
@@ -67,20 +72,20 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
       {ModalPortal}
       <div className="flex justify-between items-end">
         <div className="space-y-1 sm:space-y-2">
-          <p className="text-[11px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">Přehled vašich cest</p>
-          <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">Chytrá nástěnka</h1>
+          <p className="text-[11px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">{t('tripsOverview.subtitle')}</p>
+          <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('tripsOverview.title')}</h1>
         </div>
       </div>
 
       {/* Smart Dashboard Widgets */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, staggerChildren: 0.1 }}
         className="grid grid-cols-1 md:grid-cols-12 gap-6"
       >
         {/* Next Trip Countdown */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="md:col-span-6 lg:col-span-5 glass-card p-6 sm:p-8 rounded-[2rem] flex flex-col justify-between min-h-[160px] sm:min-h-[220px] relative overflow-hidden group"
@@ -89,16 +94,16 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
             <div className="flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-4 sm:gap-0 h-full">
               <div className="flex flex-col">
                 <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 text-[10px] sm:text-[12px] font-bold uppercase tracking-widest mb-2 sm:mb-4 bg-blue-50 dark:bg-blue-500/10 self-start px-3 py-1.5 rounded-full">
-                  <Clock size={14} strokeWidth={2.5} className="sm:w-4 sm:h-4" /> Další cesta za
+                  <Clock size={14} strokeWidth={2.5} className="sm:w-4 sm:h-4" /> {t('tripsOverview.countdown.label')}
                 </div>
                 <div className="flex items-baseline gap-2 sm:gap-3">
-                  <span className="text-5xl sm:text-7xl font-bold tracking-tighter text-gray-900 dark:text-white leading-none">{daysUntilNextTrip > 0 ? daysUntilNextTrip : 'Dnes'}</span>
-                  {daysUntilNextTrip > 0 && <span className="text-xs sm:text-sm font-bold text-gray-500 uppercase tracking-widest">dní</span>}
+                  <span className="text-5xl sm:text-7xl font-bold tracking-tighter text-gray-900 dark:text-white leading-none">{daysUntilNextTrip > 0 ? daysUntilNextTrip : t('tripsOverview.countdown.today')}</span>
+                  {daysUntilNextTrip > 0 && <span className="text-xs sm:text-sm font-bold text-gray-500 uppercase tracking-widest">{t('tripsOverview.countdown.days')}</span>}
                 </div>
               </div>
               <div className="text-right sm:text-left pt-2 sm:pt-4 sm:mt-auto">
                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-0.5 sm:mb-1 truncate tracking-tight max-w-[140px] sm:max-w-none">{nextTrip.title}</h3>
-                <p className="text-gray-500 dark:text-gray-400 text-[12px] sm:text-[13px] font-medium">{format(new Date(nextTrip.startDate), 'd. M. yyyy', { locale: cs })}</p>
+                <p className="text-gray-500 dark:text-gray-400 text-[12px] sm:text-[13px] font-medium">{format(new Date(nextTrip.startDate), 'd. M. yyyy', { locale: dateLocale })}</p>
               </div>
             </div>
           ) : (
@@ -107,41 +112,41 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
                 <Plane size={24} strokeWidth={2} />
               </div>
               <div>
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-1 tracking-tight">Žádný plán</h3>
-                <p className="text-[13px] sm:text-[14px] font-medium text-gray-500">Kam vyrazíte příště?</p>
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-1 tracking-tight">{t('tripsOverview.noTrip.title')}</h3>
+                <p className="text-[13px] sm:text-[14px] font-medium text-gray-500">{t('tripsOverview.noTrip.subtitle')}</p>
               </div>
             </div>
           )}
         </motion.div>
 
         {/* Quick Stats */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="md:col-span-6 lg:col-span-4 glass-card rounded-[2rem] p-6 sm:p-8 flex flex-col justify-between group"
         >
           <div>
             <h3 className="text-gray-500 dark:text-gray-400 text-[11px] sm:text-[12px] flex items-center gap-2 mb-4 sm:mb-6 uppercase tracking-widest font-bold">
-              <TrendingUp size={16} strokeWidth={2.5} /> Rychlá data
+              <TrendingUp size={16} strokeWidth={2.5} /> {t('tripsOverview.stats.label')}
             </h3>
             <div className="grid grid-cols-2 gap-4 sm:gap-8">
               <div className="space-y-1">
                 <span className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white leading-none tracking-tighter">{trips.length}</span>
-                <p className="text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-widest">Výletů</p>
+                <p className="text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-widest">{t('tripsOverview.stats.trips')}</p>
               </div>
               <div className="space-y-1">
                 <span className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white leading-none tracking-tighter">{totalVisitedPlaces}</span>
-                <p className="text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-widest">Míst</p>
+                <p className="text-[10px] sm:text-[11px] font-bold text-gray-500 uppercase tracking-widest">{t('tripsOverview.stats.places')}</p>
               </div>
             </div>
           </div>
           <Link to="/dashboard/statistics" className="text-[12px] sm:text-[13px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors duration-300 flex items-center gap-1.5 mt-6 sm:mt-8 pt-4">
-            Všechny statistiky <ArrowRight size={16} strokeWidth={2.5} className="transition-transform group-hover:translate-x-1" />
+            {t('tripsOverview.stats.link')} <ArrowRight size={16} strokeWidth={2.5} className="transition-transform group-hover:translate-x-1" />
           </Link>
         </motion.div>
 
         {/* Quick Actions */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="md:col-span-12 lg:col-span-3 flex flex-row lg:flex-col gap-4"
@@ -150,15 +155,15 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
             onClick={onOpenCreateModal}
             className="hidden sm:flex flex-1 lg:flex-none items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 lg:py-8 px-4 bg-blue-600 text-white rounded-[2rem] hover:bg-blue-500 transition-all duration-300 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer"
           >
-            <Plus size={22} strokeWidth={2.5} className="sm:w-6 sm:h-6" /> 
-            <span className="font-bold text-[14px] sm:text-[15px]">Nový výlet</span>
+            <Plus size={22} strokeWidth={2.5} className="sm:w-6 sm:h-6" />
+            <span className="font-bold text-[14px] sm:text-[15px]">{t('tripsOverview.actions.newTrip')}</span>
           </button>
           <Link
             to="/dashboard/budget"
             className="flex-1 lg:flex-none flex items-center justify-center gap-2 sm:gap-3 py-5 sm:py-6 lg:py-8 px-4 glass-card hover:bg-white/80 dark:hover:bg-white/5 transition-all duration-300 active:scale-95"
           >
-            <Wallet size={22} strokeWidth={2} className="sm:w-6 sm:h-6" /> 
-            <span className="font-bold text-[14px] sm:text-[15px]">Výdaje</span>
+            <Wallet size={22} strokeWidth={2} className="sm:w-6 sm:h-6" />
+            <span className="font-bold text-[14px] sm:text-[15px]">{t('tripsOverview.actions.budget')}</span>
           </Link>
         </motion.div>
       </motion.div>
@@ -171,7 +176,7 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
           </div>
           <input
             type="text"
-            placeholder="Hledat výlet podle názvu..."
+            placeholder={t('tripsOverview.search.placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px]"
@@ -189,7 +194,7 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
               onClick={() => { setSearchQuery(''); setDateFilter(''); }}
               className="flex items-center justify-center gap-1.5 text-sm font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-4 py-2 transition-all w-full sm:w-auto shrink-0 cursor-pointer disabled:cursor-not-allowed"
             >
-              <X size={16} strokeWidth={2.5} /> Resetovat
+              <X size={16} strokeWidth={2.5} /> {t('tripsOverview.filter.reset')}
             </button>
           )}
         </div>
@@ -198,9 +203,9 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
       {/* Tabs */}
       <div className="flex w-full justify-between sm:justify-start sm:gap-8 border-b border-gray-200 dark:border-white/10">
         {[
-          { id: 'ongoing', label: 'Probíhající' },
-          { id: 'upcoming', label: 'Plánované' },
-          { id: 'past', label: 'Minulé' }
+          { id: 'ongoing', label: t('tripsOverview.tabs.ongoing') },
+          { id: 'upcoming', label: t('tripsOverview.tabs.upcoming') },
+          { id: 'past', label: t('tripsOverview.tabs.past') }
         ].map(cat => (
           <button
             key={cat.id}
@@ -217,7 +222,7 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
       </div>
 
       {/* Trip List */}
-      <motion.div 
+      <motion.div
         initial="hidden"
         animate="visible"
         variants={{
@@ -243,36 +248,36 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
                 <button
                   onClick={(e) => handleDelete(trip.id, e)}
                   className="w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer disabled:cursor-not-allowed"
-                  title="Smazat výlet"
+                  title={t('tripsOverview.delete.title')}
                 >
                   <Trash2 size={18} strokeWidth={2} />
                 </button>
               </div>
-              
+
               <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white tracking-tight">{trip.title}</h3>
-              
+
               <div className="flex items-center text-[13px] font-bold text-gray-500 gap-2 mb-8">
                 <Calendar size={16} strokeWidth={2} />
                 <span>{format(new Date(trip.startDate), 'd. M.')} — {format(new Date(trip.endDate), 'd. M. yyyy')}</span>
               </div>
-              
+
               <div className="mt-auto flex items-center justify-between pt-6 border-t border-gray-100 dark:border-white/10">
                 <div className="flex items-center gap-2 text-gray-400 text-[11px] uppercase tracking-widest font-bold">
-                  <span>Aktivit: {trip.activities?.length || 0}</span>
+                  <span>{t('tripsOverview.activities')} {trip.activities?.length || 0}</span>
                 </div>
                 <Link
                   to={`/dashboard/trip/${trip.id}?from=dashboard`}
                   className="inline-flex items-center gap-1.5 text-[12px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors uppercase tracking-widest"
                 >
-                  Otevřít <ArrowRight size={16} strokeWidth={2.5} className="transition-transform group-hover:translate-x-1" />
+                  {t('tripsOverview.open')} <ArrowRight size={16} strokeWidth={2.5} className="transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
             </motion.div>
           ))
         ) : (
           <div className="col-span-full py-10 sm:py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none min-h-[50vh] md:min-h-0">
-            <p className="text-xl sm:text-2xl text-gray-900 dark:text-white font-bold tracking-tight">Zatím prázdno</p>
-            <p className="text-[14px] sm:text-[15px] text-gray-500 font-medium max-w-md px-4">V této kategorii nemáte zatím žádné výlety. Zkuste si nějaký naplánovat.</p>
+            <p className="text-xl sm:text-2xl text-gray-900 dark:text-white font-bold tracking-tight">{t('tripsOverview.empty.title')}</p>
+            <p className="text-[14px] sm:text-[15px] text-gray-500 font-medium max-w-md px-4">{t('tripsOverview.empty.description')}</p>
           </div>
         )}
       </motion.div>

@@ -1,21 +1,19 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import JourneoLogo from '../../assets/Journeo_whitelogo.png';
 import JourneoLogoDark from '../../assets/Journeo_blacklogo.png';
 import { useTheme } from '../../contexts/ThemeContext';
 
-/**
- * DashboardSplash – zobrazí se jednou při vstupu do dashboardu,
- * pak se plynule přepne na samotný obsah (children).
- */
 const DashboardSplash = ({ children }) => {
-  const [phase, setPhase] = useState('loading'); // 'loading' | 'done'
+  const [phase, setPhase] = useState('loading');
   const { theme } = useTheme();
+  const { t } = useTranslation();
   const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   useEffect(() => {
-    const t = setTimeout(() => setPhase('done'), 2200);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setPhase('done'), 2200);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -28,7 +26,6 @@ const DashboardSplash = ({ children }) => {
           transition={{ duration: 0.6, ease: 'easeInOut' }}
           className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#fbfbfd] dark:bg-black transition-colors duration-500"
         >
-          {/* Subtle glow */}
           <div className="absolute w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />
 
           <motion.img
@@ -40,7 +37,6 @@ const DashboardSplash = ({ children }) => {
             className="w-16 mb-8 relative z-10"
           />
 
-          {/* Animated word */}
           <motion.div
             className="relative z-10 flex overflow-hidden"
             initial="hidden"
@@ -61,20 +57,16 @@ const DashboardSplash = ({ children }) => {
             ))}
           </motion.div>
 
-          {/* Tagline */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.4, duration: 0.5 }}
             className="relative z-10 text-gray-500 dark:text-gray-400 mt-6 text-[11px] font-medium tracking-[0.2em] uppercase"
           >
-            Váš cestovatelský deník
+            {t('dashboardSplash.tagline')}
           </motion.p>
 
-          {/* Loading bar */}
-          <motion.div
-            className="relative z-10 mt-12 h-[2px] bg-black/10 dark:bg-white/10 rounded-full w-32 overflow-hidden"
-          >
+          <motion.div className="relative z-10 mt-12 h-[2px] bg-black/10 dark:bg-white/10 rounded-full w-32 overflow-hidden">
             <motion.div
               className="h-full bg-blue-500 rounded-full"
               initial={{ width: '0%' }}

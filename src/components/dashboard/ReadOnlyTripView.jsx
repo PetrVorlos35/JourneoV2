@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Calendar, PackageOpen, Link as LinkIcon, ExternalLink, Image as ImageIcon, Layout, Briefcase, Info } from 'lucide-react';
 import { format, eachDayOfInterval } from 'date-fns';
 import { cs } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import LikeButton from '../ui/LikeButton';
@@ -10,6 +11,7 @@ import UserAvatar from '../ui/UserAvatar';
 
 const ReadOnlyTripView = () => {
   const { userId, tripId } = useParams();
+  const { t } = useTranslation();
   const [trip, setTrip] = useState(null);
   const [owner, setOwner] = useState(null);
   const [likes, setLikes] = useState(0);
@@ -29,7 +31,7 @@ const ReadOnlyTripView = () => {
         setIsLiked(data.isLiked);
       } catch (err) {
         console.error('Failed to load trip:', err);
-        toast.error(err.message || 'Nepodařilo se načíst výlet.');
+        toast.error(err.message || t('readOnlyTrip.loadError'));
       } finally {
         setLoading(false);
       }
@@ -48,10 +50,10 @@ const ReadOnlyTripView = () => {
   if (!trip) {
     return (
       <div className="text-center py-20 text-gray-500 dark:text-gray-400 font-bold text-xl">
-        Výlet nebyl nalezen nebo nemáte přístup.
+        {t('readOnlyTrip.notFound')}
         <br />
         <Link to={`/dashboard/profile/${userId}`} className="text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors mt-4 inline-block text-[13px] uppercase tracking-widest font-bold">
-          Zpět na profil
+          {t('readOnlyTrip.backToProfile')}
         </Link>
       </div>
     );
@@ -81,8 +83,8 @@ const ReadOnlyTripView = () => {
   const documents = trip.documents || [];
 
   const ownerName = owner
-    ? `${owner.first_name || ''} ${owner.last_name || ''}`.trim() || 'Uživatel'
-    : 'Uživatel';
+    ? `${owner.first_name || ''} ${owner.last_name || ''}`.trim() || t('friends.defaultName')
+    : t('friends.defaultName');
 
   return (
     <div className="w-full h-full flex flex-col min-h-0 pb-10">
@@ -94,21 +96,21 @@ const ReadOnlyTripView = () => {
             className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'itinerary' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400'} cursor-pointer`}
           >
             <Layout size={20} strokeWidth={mobileTab === 'itinerary' ? 2.5 : 2} />
-            {mobileTab === 'itinerary' && <span className="text-[9px] font-bold uppercase tracking-widest">Itinerář</span>}
+            {mobileTab === 'itinerary' && <span className="text-[9px] font-bold uppercase tracking-widest">{t('readOnlyTrip.tabs.itinerary')}</span>}
           </button>
           <button
             onClick={() => setMobileTab('tools')}
             className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'tools' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400'} cursor-pointer`}
           >
             <Briefcase size={20} strokeWidth={mobileTab === 'tools' ? 2.5 : 2} />
-            {mobileTab === 'tools' && <span className="text-[9px] font-bold uppercase tracking-widest">Nástroje</span>}
+            {mobileTab === 'tools' && <span className="text-[9px] font-bold uppercase tracking-widest">{t('readOnlyTrip.tabs.tools')}</span>}
           </button>
           <button
             onClick={() => setMobileTab('info')}
             className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'info' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400'} cursor-pointer`}
           >
             <Info size={20} strokeWidth={mobileTab === 'info' ? 2.5 : 2} />
-            {mobileTab === 'info' && <span className="text-[9px] font-bold uppercase tracking-widest">Detaily</span>}
+            {mobileTab === 'info' && <span className="text-[9px] font-bold uppercase tracking-widest">{t('readOnlyTrip.tabs.details')}</span>}
           </button>
         </div>
       </div>
@@ -120,7 +122,7 @@ const ReadOnlyTripView = () => {
             to={`/dashboard/profile/${userId}`}
             className="inline-flex items-center text-[12px] uppercase tracking-widest font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 transition-colors duration-300"
           >
-            <ArrowLeft size={16} className="mr-2" strokeWidth={2.5} /> Zpět na profil {ownerName}
+            <ArrowLeft size={16} className="mr-2" strokeWidth={2.5} /> {t('readOnlyTrip.backToProfile')} {ownerName}
           </Link>
 
           <div className="flex items-center gap-4 mb-3">
@@ -129,7 +131,7 @@ const ReadOnlyTripView = () => {
             </h1>
             {/* Read-only badge */}
             <span className="px-3 py-1.5 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest rounded-full shrink-0">
-              Pouze ke čtení
+              {t('readOnlyTrip.readOnly')}
             </span>
           </div>
 
@@ -159,7 +161,7 @@ const ReadOnlyTripView = () => {
         <div className="hidden lg:flex lg:col-span-3 flex-col space-y-6 h-full min-h-0">
 
           <div className="glass-card p-6 space-y-2">
-            <h3 className="font-bold text-gray-400 uppercase tracking-widest text-[11px] mb-4 ml-2">Nástroje</h3>
+            <h3 className="font-bold text-gray-400 uppercase tracking-widest text-[11px] mb-4 ml-2">{t('readOnlyTrip.tabs.tools')}</h3>
 
             <button
               onClick={() => setActiveView('packing')}
@@ -169,7 +171,7 @@ const ReadOnlyTripView = () => {
                   : 'text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
               }`}
             >
-              <PackageOpen size={18} strokeWidth={2.5} /> Balící seznam
+              <PackageOpen size={18} strokeWidth={2.5} /> {t('readOnlyTrip.tools.packing')}
             </button>
 
             <button
@@ -180,12 +182,12 @@ const ReadOnlyTripView = () => {
                   : 'text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
               }`}
             >
-              <LinkIcon size={18} strokeWidth={2.5} /> Odkazy a poznámky
+              <LinkIcon size={18} strokeWidth={2.5} /> {t('readOnlyTrip.tools.documents')}
             </button>
           </div>
 
           <div className="glass-card p-6 space-y-2 flex-1 flex flex-col min-h-0">
-            <h3 className="font-bold text-gray-400 uppercase tracking-widest text-[11px] mb-4 ml-2">Itinerář</h3>
+            <h3 className="font-bold text-gray-400 uppercase tracking-widest text-[11px] mb-4 ml-2">{t('readOnlyTrip.tabs.itinerary')}</h3>
             <div className="space-y-2 overflow-y-auto pr-2 custom-scrollbar flex-1">
               {dailyPlans.map((day, index) => (
                 <button
@@ -219,29 +221,29 @@ const ReadOnlyTripView = () => {
                 <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
                   <Info size={20} strokeWidth={2.5} />
                 </div>
-                Přehled výletu
+                {t('readOnlyTrip.info.title')}
               </h2>
               <div className="space-y-6">
                 <div className="flex justify-between items-center pb-4 border-b border-gray-100 dark:border-white/10">
-                  <span className="text-gray-500 text-[11px] font-bold uppercase tracking-widest">Autor</span>
+                  <span className="text-gray-500 text-[11px] font-bold uppercase tracking-widest">{t('readOnlyTrip.info.author')}</span>
                   <div className="flex items-center gap-2">
                     <UserAvatar user={owner} size="sm" className="w-6 h-6 md:w-6 md:h-6 text-[9px]" />
                     <span className="font-bold text-gray-900 dark:text-white text-[15px]">{ownerName}</span>
                   </div>
                 </div>
                 <div className="flex justify-between items-center pb-4 border-b border-gray-100 dark:border-white/10">
-                  <span className="text-gray-500 text-[11px] font-bold uppercase tracking-widest">Datum</span>
+                  <span className="text-gray-500 text-[11px] font-bold uppercase tracking-widest">{t('readOnlyTrip.info.date')}</span>
                   <span className="font-bold text-gray-900 dark:text-white text-[15px]">
                     {format(new Date(trip.startDate), 'd. M. yyyy')} — {format(new Date(trip.endDate), 'd. M. yyyy')}
                   </span>
                 </div>
                 <div className="flex justify-between items-center pb-4 border-b border-gray-100 dark:border-white/10">
-                  <span className="text-gray-500 text-[11px] font-bold uppercase tracking-widest">Počet dní</span>
-                  <span className="font-bold text-gray-900 dark:text-white text-[15px]">{dailyPlans.length} dní</span>
+                  <span className="text-gray-500 text-[11px] font-bold uppercase tracking-widest">{t('readOnlyTrip.info.days')}</span>
+                  <span className="font-bold text-gray-900 dark:text-white text-[15px]">{dailyPlans.length} {t('readOnlyTrip.info.daysValue')}</span>
                 </div>
                 <div className="flex justify-between items-center pt-2">
-                  <span className="text-gray-500 text-[11px] font-bold uppercase tracking-widest">Režim</span>
-                  <span className="px-3 py-1 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest rounded-full">Pouze ke čtení</span>
+                  <span className="text-gray-500 text-[11px] font-bold uppercase tracking-widest">{t('readOnlyTrip.info.mode')}</span>
+                  <span className="px-3 py-1 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest rounded-full">{t('readOnlyTrip.readOnly')}</span>
                 </div>
               </div>
             </div>
@@ -259,9 +261,9 @@ const ReadOnlyTripView = () => {
                 }`}
               >
                 <PackageOpen size={28} strokeWidth={2} className="mb-4" />
-                <span className="font-bold text-[15px] block mb-1 text-gray-900 dark:text-white leading-tight">Batoh</span>
+                <span className="font-bold text-[15px] block mb-1 text-gray-900 dark:text-white leading-tight">{t('tripDetail.mobile.packing')}</span>
                 <span className="text-[10px] font-bold uppercase tracking-widest">
-                  {packingList.length} položek
+                  {packingList.length} {t('tripDetail.mobile.items')}
                 </span>
               </button>
               <button
@@ -273,9 +275,9 @@ const ReadOnlyTripView = () => {
                 }`}
               >
                 <LinkIcon size={28} strokeWidth={2} className="mb-4" />
-                <span className="font-bold text-[15px] block mb-1 text-gray-900 dark:text-white leading-tight">Odkazy</span>
+                <span className="font-bold text-[15px] block mb-1 text-gray-900 dark:text-white leading-tight">{t('tripDetail.mobile.links')}</span>
                 <span className="text-[10px] font-bold uppercase tracking-widest">
-                  {documents.length} záznamů
+                  {documents.length} {t('tripDetail.mobile.records')}
                 </span>
               </button>
             </div>
@@ -298,7 +300,7 @@ const ReadOnlyTripView = () => {
                     {format(new Date(day.date), 'EEE', { locale: cs })}
                   </div>
                   <div className="text-3xl font-bold tracking-tighter leading-none mb-2">{format(new Date(day.date), 'd.')}</div>
-                  <div className="text-[11px] w-full truncate opacity-70 font-medium">{day.location || 'Bez lokace'}</div>
+                  <div className="text-[11px] w-full truncate opacity-70 font-medium">{day.location || t('readOnlyTrip.noLocation')}</div>
                 </button>
               ))}
             </div>
@@ -312,14 +314,14 @@ const ReadOnlyTripView = () => {
                   <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center">
                     <PackageOpen size={24} strokeWidth={2} />
                   </div>
-                  Balící seznam
+                  {t('readOnlyTrip.packing.title')}
                 </h2>
               </div>
 
               <div className="p-5 sm:p-10 flex-1 overflow-y-auto custom-scrollbar">
                 <div className="space-y-3">
                   {packingList.length === 0 ? (
-                    <p className="text-gray-500 font-bold text-center py-12">Žádné položky v balícím seznamu.</p>
+                    <p className="text-gray-500 font-bold text-center py-12">{t('readOnlyTrip.packing.noItems')}</p>
                   ) : (
                     packingList.map(item => (
                       <div key={item.id} className="flex items-center gap-4 py-4 px-5 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
@@ -355,14 +357,14 @@ const ReadOnlyTripView = () => {
                   <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center">
                     <LinkIcon size={24} strokeWidth={2} />
                   </div>
-                  Odkazy a poznámky
+                  {t('readOnlyTrip.documents.title')}
                 </h2>
               </div>
 
               <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col p-5 sm:p-10 gap-4">
                 {documents.length === 0 ? (
                   <div className="py-12 text-center text-gray-500 font-bold border-2 border-dashed border-gray-200 dark:border-white/10 rounded-3xl">
-                    Žádné uložené odkazy.
+                    {t('readOnlyTrip.documents.empty')}
                   </div>
                 ) : (
                   documents.map(doc => {
@@ -372,7 +374,7 @@ const ReadOnlyTripView = () => {
                         <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-3 tracking-tight">{doc.title}</h4>
                         {isUrl ? (
                           <a href={doc.content} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-black text-[13px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors break-all rounded-xl shadow-sm border border-gray-100 dark:border-white/5 cursor-pointer">
-                            <ExternalLink size={16} strokeWidth={2} /> Otevřít odkaz
+                            <ExternalLink size={16} strokeWidth={2} /> {t('readOnlyTrip.documents.open')}
                           </a>
                         ) : (
                           <p className="text-[14px] text-gray-500 dark:text-gray-400 whitespace-pre-wrap font-medium">{doc.content}</p>
@@ -409,7 +411,7 @@ const ReadOnlyTripView = () => {
 
                   <div className="p-5 sm:p-10 flex-1 flex flex-col min-h-[300px] lg:min-h-0">
                     <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-2 sm:mb-4 uppercase tracking-widest">
-                      Plán na den
+                      {t('readOnlyTrip.dayPlan')}
                     </label>
                     {day.plan ? (
                       <div className="flex-1 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 p-5 sm:p-6 overflow-y-auto custom-scrollbar">
@@ -419,7 +421,7 @@ const ReadOnlyTripView = () => {
                       </div>
                     ) : (
                       <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-white/5 rounded-2xl border-2 border-dashed border-gray-200 dark:border-white/10">
-                        <p className="text-gray-400 dark:text-gray-500 font-bold text-[15px]">Žádné poznámky pro tento den.</p>
+                        <p className="text-gray-400 dark:text-gray-500 font-bold text-[15px]">{t('readOnlyTrip.noDayNotes')}</p>
                       </div>
                     )}
                   </div>

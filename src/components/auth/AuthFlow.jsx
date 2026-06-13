@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useGoogleLogin } from '@react-oauth/google';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import JourneoWhiteLogo from '../../assets/Journeo_whitelogo.png';
 import JourneoBlackLogo from '../../assets/Journeo_blacklogo.png';
@@ -19,6 +20,7 @@ const getPasswordStrength = (password) => {
 
 const AuthFlow = () => {
   const location = useLocation();
+  const { t } = useTranslation();
   const [mode, setMode] = useState(location.state?.mode || 'login');
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -41,16 +43,16 @@ const AuthFlow = () => {
       setErrorMsg('');
       try {
         await loginWithGoogle(tokenResponse.access_token);
-        toast.success(mode === 'login' ? 'Vítejte zpět!' : 'Registrace úspěšná! Vítejte v Journeo.');
+        toast.success(mode === 'login' ? t('auth.toasts.loginSuccess') : t('auth.toasts.googleRegisterSuccess'));
         navigate('/dashboard');
       } catch (err) {
-        setErrorMsg(err.message || 'Chyba při přihlášení přes Google.');
+        setErrorMsg(err.message || t('auth.errors.googleError'));
       } finally {
         setIsGoogleLoading(false);
       }
     },
     onError: () => {
-      setErrorMsg('Přihlášení přes Google se nezdařilo.');
+      setErrorMsg(t('auth.errors.googleFailed'));
     }
   });
 
@@ -65,10 +67,10 @@ const AuthFlow = () => {
     setIsLoading(true);
     try {
       await login(formData.email, formData.password);
-      toast.success('Vítejte zpět!');
+      toast.success(t('auth.toasts.loginSuccess'));
       navigate('/dashboard');
     } catch (err) {
-      setErrorMsg(err.message || 'Chyba při přihlášení.');
+      setErrorMsg(err.message || t('auth.errors.loginError'));
     } finally {
       setIsLoading(false);
     }
@@ -78,21 +80,21 @@ const AuthFlow = () => {
     e.preventDefault();
     setErrorMsg('');
     if (formData.password !== formData.confirmPassword) {
-      setErrorMsg('Hesla se neshodují');
+      setErrorMsg(t('auth.errors.mismatch'));
       return;
     }
     const strength = getPasswordStrength(formData.password);
     if (strength < 3) {
-      setErrorMsg('Heslo nesplňuje bezpečnostní požadavky');
+      setErrorMsg(t('auth.errors.weak'));
       return;
     }
     setIsLoading(true);
     try {
       await register(formData.firstName, formData.lastName, formData.email, formData.password);
-      toast.success('Registrace úspěšná! Zkontrolujte e-mail pro ověřovací kód.');
+      toast.success(t('auth.toasts.registerSuccess'));
       setMode('otp');
     } catch (err) {
-      setErrorMsg(err.message || 'Chyba při registraci.');
+      setErrorMsg(err.message || t('auth.errors.registerError'));
     } finally {
       setIsLoading(false);
     }
@@ -101,20 +103,19 @@ const AuthFlow = () => {
   const handleVerify = async (e) => {
     e.preventDefault();
     if (otpCode.length !== 6) {
-      setErrorMsg('Kód musí mít 6 číslic.');
+      setErrorMsg(t('auth.otp.codeMustBe6'));
       return;
     }
     setIsLoading(true);
     setErrorMsg('');
     try {
       await verify(formData.email, otpCode);
-      toast.success('E-mail ověřen! Nyní se můžete přihlásit.');
+      toast.success(t('auth.toasts.verifySuccess'));
       setMode('login');
-      // Vyčistíme hesla a kód
       setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }));
       setOtpCode('');
     } catch (err) {
-      setErrorMsg(err.message || 'Chyba při ověřování.');
+      setErrorMsg(err.message || t('auth.errors.verifyError'));
     } finally {
       setIsLoading(false);
     }
@@ -125,9 +126,9 @@ const AuthFlow = () => {
     setErrorMsg('');
     try {
       await resendOtp(formData.email);
-      toast.success('Nový kód byl úspěšně odeslán.');
+      toast.success(t('auth.toasts.resendSuccess'));
     } catch (err) {
-      setErrorMsg(err.message || 'Chyba při odesílání nového kódu.');
+      setErrorMsg(err.message || t('auth.errors.resendError'));
     } finally {
       setIsLoading(false);
     }
@@ -136,17 +137,17 @@ const AuthFlow = () => {
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     if (!formData.email) {
-      setErrorMsg('Zadejte prosím e-mail.');
+      setErrorMsg(t('auth.forgot.enterEmail'));
       return;
     }
     setIsLoading(true);
     setErrorMsg('');
     try {
       const res = await forgotPassword(formData.email);
-      toast.success(res.message || 'Odkaz pro obnovu hesla odeslán.');
+      toast.success(res.message || t('auth.toasts.resetSuccess'));
       setMode('reset');
     } catch (err) {
-      setErrorMsg(err.message || 'Chyba při žádosti o obnovu.');
+      setErrorMsg(err.message || t('auth.errors.forgotError'));
     } finally {
       setIsLoading(false);
     }
@@ -156,27 +157,27 @@ const AuthFlow = () => {
     e.preventDefault();
     setErrorMsg('');
     if (otpCode.length !== 6) {
-      setErrorMsg('Kód musí mít 6 číslic.');
+      setErrorMsg(t('auth.otp.codeMustBe6'));
       return;
     }
     if (formData.password !== formData.confirmPassword) {
-      setErrorMsg('Hesla se neshodují');
+      setErrorMsg(t('auth.errors.mismatch'));
       return;
     }
     const strength = getPasswordStrength(formData.password);
     if (strength < 3) {
-      setErrorMsg('Heslo nesplňuje bezpečnostní požadavky');
+      setErrorMsg(t('auth.errors.weak'));
       return;
     }
     setIsLoading(true);
     try {
       const res = await resetPassword(formData.email, otpCode, formData.password);
-      toast.success(res.message || 'Heslo bylo úspěšně změněno.');
+      toast.success(res.message || t('auth.toasts.resetSuccess'));
       setMode('login');
       setFormData(prev => ({ ...prev, password: '', confirmPassword: '' }));
       setOtpCode('');
     } catch (err) {
-      setErrorMsg(err.message || 'Chyba při změně hesla.');
+      setErrorMsg(err.message || t('auth.errors.resetError'));
     } finally {
       setIsLoading(false);
     }
@@ -184,7 +185,7 @@ const AuthFlow = () => {
 
   return (
     <div className="min-h-[100dvh] w-full flex items-center justify-center p-4 relative overflow-hidden bg-[#fbfbfd] dark:bg-black text-[#1d1d1f] dark:text-[#f5f5f7] font-sans">
-      
+
       {/* Subtle background glow */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none flex justify-center items-center">
         <div className="absolute w-[800px] h-[800px] rounded-[100%] bg-blue-500/5 dark:bg-blue-500/10 blur-[120px]" />
@@ -198,30 +199,30 @@ const AuthFlow = () => {
             className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 font-semibold text-[13px] uppercase tracking-widest glass px-5 py-2.5 rounded-full cursor-pointer disabled:cursor-not-allowed"
           >
             <ArrowLeft size={16} strokeWidth={2.5} />
-            <span>Zpět domů</span>
+            <span>{t('auth.backHome')}</span>
           </button>
         </div>
 
         {/* Glass Card */}
         <div className="glass-card p-6 sm:p-10 w-full max-w-md rounded-[2rem] relative overflow-hidden">
-          
+
           {/* Header */}
           <div className="text-center mb-6">
             <img src={JourneoBlackLogo} alt="Journeo Logo" className="h-10 w-auto object-contain mx-auto mb-4 drop-shadow-md block dark:hidden" />
             <img src={JourneoWhiteLogo} alt="Journeo Logo" className="h-10 w-auto object-contain mx-auto mb-4 drop-shadow-md hidden dark:block" />
             <h1 className="text-2xl font-bold tracking-tight mb-1">
-              {mode === 'login' ? 'Vítejte zpět' : 
-               mode === 'forgot' ? 'Zapomenuté heslo' :
-               mode === 'reset' ? 'Nové heslo' : 'Začněte psát'}
+              {mode === 'login' ? t('auth.title.login') :
+               mode === 'forgot' ? t('auth.title.forgot') :
+               mode === 'reset' ? t('auth.title.reset') : t('auth.title.register')}
             </h1>
             <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium">
               {mode === 'login'
-                ? 'Přihlaste se ke svému deníku.'
+                ? t('auth.subtitle.login')
                 : mode === 'forgot'
-                ? 'Zadejte e-mail pro obnovu hesla.'
+                ? t('auth.subtitle.forgot')
                 : mode === 'reset'
-                ? 'Zadejte kód z e-mailu a nastavte si nové heslo.'
-                : 'Vytvořte si účet pro další cestu.'}
+                ? t('auth.subtitle.reset')
+                : t('auth.subtitle.register')}
             </p>
           </div>
 
@@ -239,7 +240,7 @@ const AuthFlow = () => {
                   transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                 />
               )}
-              <span className="relative z-10">Přihlásit</span>
+              <span className="relative z-10">{t('auth.tab.login')}</span>
             </button>
             <button
               type="button"
@@ -253,7 +254,7 @@ const AuthFlow = () => {
                   transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                 />
               )}
-              <span className="relative z-10">Zaregistrovat</span>
+              <span className="relative z-10">{t('auth.tab.register')}</span>
             </button>
           </div>
 
@@ -273,14 +274,14 @@ const AuthFlow = () => {
                       <div className="mx-auto w-14 h-14 bg-blue-500/10 dark:bg-blue-500/20 rounded-full flex items-center justify-center mb-2">
                         <Check size={28} className="text-blue-500" strokeWidth={2.5} />
                       </div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">Zkontrolujte si e-mail</h3>
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t('auth.otp.checkEmail')}</h3>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                        Zadejte 6-místný kód, který jsme zaslali na <span className="font-semibold text-gray-900 dark:text-white">{formData.email}</span>
+                        {t('auth.otp.description')} <span className="font-semibold text-gray-900 dark:text-white">{formData.email}</span>
                       </p>
                     </div>
 
                     {errorMsg && (
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
@@ -310,7 +311,7 @@ const AuthFlow = () => {
                         disabled={isLoading || otpCode.length !== 6}
                         className="w-full py-3.5 bg-black dark:bg-white text-white dark:text-black text-sm font-bold rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-lg active:scale-[0.98] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                       >
-                        {isLoading ? 'Ověřuji...' : 'Ověřit účet'}
+                        {isLoading ? t('auth.otp.verifying') : t('auth.otp.verify')}
                       </button>
                     </form>
 
@@ -321,21 +322,21 @@ const AuthFlow = () => {
                         disabled={isLoading}
                         className="text-sm font-semibold text-blue-500 hover:text-blue-600 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                       >
-                        Znovu odeslat kód
+                        {t('auth.otp.resend')}
                       </button>
                       <button
                         type="button"
                         onClick={() => { setMode('login'); setErrorMsg(''); setOtpCode(''); }}
                         className="text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
                       >
-                        Vrátit se na přihlášení
+                        {t('auth.otp.backToLogin')}
                       </button>
                     </div>
                   </div>
                 ) : mode === 'forgot' ? (
                   <div className="py-2">
                     {errorMsg && (
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
@@ -350,7 +351,7 @@ const AuthFlow = () => {
                         required
                         value={formData.email}
                         onChange={handleInputChange}
-                        placeholder="Zadejte svůj e-mail"
+                        placeholder={t('auth.forgot.emailPlaceholder')}
                         autoComplete="email"
                         className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
                       />
@@ -359,7 +360,7 @@ const AuthFlow = () => {
                         disabled={isLoading || !formData.email}
                         className="w-full py-3.5 bg-black dark:bg-white text-white dark:text-black text-sm font-bold rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-lg active:scale-[0.98] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                       >
-                        {isLoading ? 'Zpracovávám...' : 'Odeslat odkaz'}
+                        {isLoading ? t('auth.forgot.submitting') : t('auth.forgot.submit')}
                       </button>
                     </form>
                     <div className="mt-6 flex justify-center">
@@ -368,14 +369,14 @@ const AuthFlow = () => {
                         onClick={() => { setMode('login'); setErrorMsg(''); }}
                         className="text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
                       >
-                        Vrátit se na přihlášení
+                        {t('auth.forgot.backToLogin')}
                       </button>
                     </div>
                   </div>
                 ) : mode === 'reset' ? (
                   <div className="py-2">
                     {errorMsg && (
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
@@ -385,7 +386,7 @@ const AuthFlow = () => {
                     )}
                     <form onSubmit={handleResetPassword} className="space-y-4">
                       <div>
-                        <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">Kód z e-mailu</label>
+                        <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">{t('auth.reset.codeLabel')}</label>
                         <input
                           type="text"
                           name="otp"
@@ -401,9 +402,9 @@ const AuthFlow = () => {
                           className="w-full text-center tracking-[1em] text-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-bold"
                         />
                       </div>
-                      
+
                       <div>
-                        <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">Nové heslo</label>
+                        <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">{t('auth.reset.newPasswordLabel')}</label>
                         <div className="relative">
                           <input
                             type={showPassword ? 'text' : 'password'}
@@ -411,22 +412,21 @@ const AuthFlow = () => {
                             required
                             value={formData.password}
                             onChange={handleInputChange}
-                            placeholder="Zadejte nové heslo"
+                            placeholder={t('auth.reset.newPasswordPlaceholder')}
                             className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 pr-12 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            aria-label={showPassword ? "Skrýt heslo" : "Zobrazit heslo"}
+                            aria-label={showPassword ? t('auth.password.hide') : t('auth.password.show')}
                             className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer disabled:cursor-not-allowed"
                           >
                             {showPassword ? <EyeOff size={16} strokeWidth={2.5} /> : <Eye size={16} strokeWidth={2.5} />}
                           </button>
                         </div>
-                        
+
                         {formData.password.length > 0 && (
                           <div className="mt-2.5 space-y-2">
-                            {/* Strength Meter */}
                             <div className="flex gap-1.5">
                               {[1, 2, 3].map((segment) => {
                                 const strength = getPasswordStrength(formData.password);
@@ -437,19 +437,18 @@ const AuthFlow = () => {
                                   else bgClass = 'bg-green-500';
                                 }
                                 return (
-                                  <div 
-                                    key={segment} 
-                                    className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${bgClass}`} 
+                                  <div
+                                    key={segment}
+                                    className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${bgClass}`}
                                   />
                                 );
                               })}
                             </div>
-                            {/* Requirements List */}
                             <div className="space-y-1.5 px-1">
                               {[
-                                { label: 'Alespoň 8 znaků', met: formData.password.length >= 8 },
-                                { label: 'Obsahuje velké písmeno', met: /[A-Z]/.test(formData.password) },
-                                { label: 'Obsahuje číslici', met: /[0-9]/.test(formData.password) },
+                                { label: t('auth.passwordReq.length'), met: formData.password.length >= 8 },
+                                { label: t('auth.passwordReq.uppercase'), met: /[A-Z]/.test(formData.password) },
+                                { label: t('auth.passwordReq.digit'), met: /[0-9]/.test(formData.password) },
                               ].map((req, i) => (
                                 <div key={i} className={`flex items-center gap-2 text-[11px] font-medium transition-colors duration-300 ${req.met ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
                                   <div className={`p-0.5 rounded-full ${req.met ? 'bg-green-100 dark:bg-green-500/20' : 'bg-transparent'}`}>
@@ -470,7 +469,7 @@ const AuthFlow = () => {
                           required
                           value={formData.confirmPassword}
                           onChange={handleInputChange}
-                          placeholder="Potvrďte nové heslo"
+                          placeholder={t('auth.reset.confirmPasswordPlaceholder')}
                           className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
                         />
                       </div>
@@ -480,7 +479,7 @@ const AuthFlow = () => {
                         disabled={isLoading || otpCode.length !== 6 || !formData.password}
                         className="w-full py-3.5 mt-2 bg-black dark:bg-white text-white dark:text-black text-sm font-bold rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-lg active:scale-[0.98] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                       >
-                        {isLoading ? 'Ukládám...' : 'Uložit nové heslo'}
+                        {isLoading ? t('auth.reset.submitting') : t('auth.reset.submit')}
                       </button>
                     </form>
                     <div className="mt-6 flex justify-center">
@@ -489,14 +488,14 @@ const AuthFlow = () => {
                         onClick={() => { setMode('login'); setErrorMsg(''); setOtpCode(''); }}
                         className="text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
                       >
-                        Vrátit se na přihlášení
+                        {t('auth.reset.backToLogin')}
                       </button>
                     </div>
                   </div>
                 ) : (
                   <>
                     {errorMsg && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
@@ -506,8 +505,7 @@ const AuthFlow = () => {
                 )}
 
                 <form onSubmit={mode === 'login' ? handleLogin : handleRegister} className="space-y-3">
-                  
-                  {/* Registration Only Fields */}
+
                   {mode === 'register' && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <input
@@ -515,7 +513,7 @@ const AuthFlow = () => {
                         name="firstName"
                         value={formData.firstName}
                         onChange={handleInputChange}
-                        placeholder="Jméno"
+                        placeholder={t('auth.fields.firstName')}
                         autoComplete="given-name"
                         className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
                       />
@@ -524,26 +522,24 @@ const AuthFlow = () => {
                         name="lastName"
                         value={formData.lastName}
                         onChange={handleInputChange}
-                        placeholder="Příjmení"
+                        placeholder={t('auth.fields.lastName')}
                         autoComplete="family-name"
                         className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
                       />
                     </div>
                   )}
 
-                  {/* Email */}
                   <input
                     type="email"
                     name="email"
                     required
                     value={formData.email}
                     onChange={handleInputChange}
-                    placeholder="E-mail"
+                    placeholder={t('auth.fields.email')}
                     autoComplete="email"
                     className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
                   />
 
-                  {/* Password */}
                   <div>
                     <div className="relative">
                       <input
@@ -552,14 +548,14 @@ const AuthFlow = () => {
                         required
                         value={formData.password}
                         onChange={handleInputChange}
-                        placeholder="Heslo"
+                        placeholder={t('auth.fields.password')}
                         autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
                         className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 pr-12 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        aria-label={showPassword ? "Skrýt heslo" : "Zobrazit heslo"}
+                        aria-label={showPassword ? t('auth.password.hide') : t('auth.password.show')}
                         className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer disabled:cursor-not-allowed"
                       >
                         {showPassword ? <EyeOff size={16} strokeWidth={2.5} /> : <Eye size={16} strokeWidth={2.5} />}
@@ -572,15 +568,13 @@ const AuthFlow = () => {
                           onClick={() => { setMode('forgot'); setErrorMsg(''); }}
                           className="text-xs font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
                         >
-                          Zapomněli jste heslo?
+                          {t('auth.forgotPassword')}
                         </button>
                       </div>
                     )}
 
-                    {/* Password Strength UI for Registration */}
                     {mode === 'register' && formData.password.length > 0 && (
                       <div className="mt-2.5 space-y-2">
-                        {/* Strength Meter */}
                         <div className="flex gap-1.5">
                           {[1, 2, 3].map((segment) => {
                             const strength = getPasswordStrength(formData.password);
@@ -591,19 +585,18 @@ const AuthFlow = () => {
                               else bgClass = 'bg-green-500';
                             }
                             return (
-                              <div 
-                                key={segment} 
-                                className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${bgClass}`} 
+                              <div
+                                key={segment}
+                                className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${bgClass}`}
                               />
                             );
                           })}
                         </div>
-                        {/* Requirements List */}
                         <div className="space-y-1.5 px-1">
                           {[
-                            { label: 'Alespoň 8 znaků', met: formData.password.length >= 8 },
-                            { label: 'Obsahuje velké písmeno', met: /[A-Z]/.test(formData.password) },
-                            { label: 'Obsahuje číslici', met: /[0-9]/.test(formData.password) },
+                            { label: t('auth.passwordReq.length'), met: formData.password.length >= 8 },
+                            { label: t('auth.passwordReq.uppercase'), met: /[A-Z]/.test(formData.password) },
+                            { label: t('auth.passwordReq.digit'), met: /[0-9]/.test(formData.password) },
                           ].map((req, i) => (
                             <div key={i} className={`flex items-center gap-2 text-[11px] font-medium transition-colors duration-300 ${req.met ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
                               <div className={`p-0.5 rounded-full ${req.met ? 'bg-green-100 dark:bg-green-500/20' : 'bg-transparent'}`}>
@@ -617,7 +610,6 @@ const AuthFlow = () => {
                     )}
                   </div>
 
-                  {/* Confirm Password */}
                   {mode === 'register' && (
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -625,30 +617,28 @@ const AuthFlow = () => {
                       required
                       value={formData.confirmPassword}
                       onChange={handleInputChange}
-                      placeholder="Potvrdit heslo"
+                      placeholder={t('auth.fields.confirmPassword')}
                       autoComplete="new-password"
                       className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
                     />
                   )}
 
-                  {/* Submit Button */}
                   <button
                     type="submit"
                     disabled={isLoading || isGoogleLoading}
                     className="w-full py-3.5 mt-2 bg-black dark:bg-white text-white dark:text-black text-sm font-bold rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-lg active:scale-[0.98] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                   >
                     {isLoading
-                      ? 'Zpracovávám...'
+                      ? t('auth.submit.loading')
                       : mode === 'login'
-                        ? 'Přihlásit se'
-                        : 'Vytvořit účet'}
+                        ? t('auth.submit.login')
+                        : t('auth.submit.register')}
                   </button>
                 </form>
 
-                {/* OAuth Section */}
                 <div className="relative flex items-center my-4">
                   <div className="flex-grow border-t border-gray-200 dark:border-white/10"></div>
-                  <span className="flex-shrink-0 mx-3 text-gray-400 text-[10px] font-bold uppercase tracking-widest">Nebo</span>
+                  <span className="flex-shrink-0 mx-3 text-gray-400 text-[10px] font-bold uppercase tracking-widest">{t('auth.or')}</span>
                   <div className="flex-grow border-t border-gray-200 dark:border-white/10"></div>
                 </div>
 
@@ -661,12 +651,12 @@ const AuthFlow = () => {
                   {isGoogleLoading ? (
                     <div className="flex items-center justify-center gap-2">
                       <div className="w-4 h-4 border-2 border-gray-400 border-t-gray-900 dark:border-white/30 dark:border-t-white rounded-full animate-spin"></div>
-                      <span className="opacity-70">Zpracovávám...</span>
+                      <span className="opacity-70">{t('auth.googleLoading')}</span>
                     </div>
                   ) : (
                     <>
                       <img src={GoogleIcon} alt="Google" className="w-[18px] h-[18px]" />
-                      <span>Pokračovat přes Google</span>
+                      <span>{t('auth.google')}</span>
                     </>
                   )}
                 </button>

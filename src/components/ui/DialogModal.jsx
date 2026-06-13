@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AlertTriangle, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Reusable confirm/prompt dialog that replaces browser alerts.
@@ -9,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // ── Internal modal UI ──────────────────────────────────────────────
 const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
+  const { t } = useTranslation();
   const inputRef = useRef(null);
   const [inputValue, setInputValue] = useState('');
 
@@ -82,7 +84,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
 
             {/* Title */}
             <h2 className="font-bold text-3xl tracking-tight text-gray-900 dark:text-white mb-4">
-              {config?.title || 'Potvrdit akci'}
+              {config?.title || t('dialog.defaultTitle')}
             </h2>
 
             {/* Message */}
@@ -96,7 +98,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
             {config?.type === 'prompt' && (
               <div className="mb-8">
                 <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest">
-                  {config.inputLabel || 'Zadejte text pro potvrzení'}
+                  {config.inputLabel || t('dialog.defaultInputLabel')}
                 </label>
                 <input
                   ref={inputRef}
@@ -110,7 +112,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
                 {config.requiredPhrase && inputValue && inputValue !== config.requiredPhrase && (
                   <p className="text-[11px] font-bold text-red-500 mt-3 uppercase tracking-wide flex items-center gap-1">
                     <AlertTriangle size={12} strokeWidth={3} />
-                    Napište přesně: <span className="italic">{config.requiredPhrase}</span>
+                    {t('dialog.typeExactly')} <span className="italic">{config.requiredPhrase}</span>
                   </p>
                 )}
               </div>
@@ -122,7 +124,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
                 onClick={() => onCancel(false)}
                 className="w-full sm:w-auto px-6 py-4 rounded-2xl text-[13px] uppercase tracking-widest font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer disabled:cursor-not-allowed"
               >
-                {config?.cancelLabel || 'Zrušit'}
+                {config?.cancelLabel || t('dialog.cancel')}
               </button>
               <button
                 onClick={handleConfirm}
@@ -137,7 +139,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
                     : 'bg-blue-600 text-white shadow-blue-500/20 hover:bg-blue-500'
                 } cursor-pointer disabled:cursor-not-allowed`}
               >
-                {config?.confirmLabel || 'Potvrdit'}
+                {config?.confirmLabel || t('dialog.confirm')}
               </button>
             </div>
           </motion.div>
