@@ -155,6 +155,22 @@ CREATE TABLE IF NOT EXISTS votes (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
+-- ── Spolupracovníci na výletech ─────────────────────────────
+CREATE TABLE IF NOT EXISTS trip_collaborators (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    trip_id INT UNSIGNED NOT NULL,
+    user_id INT UNSIGNED NOT NULL,
+    role ENUM('owner', 'editor', 'viewer') NOT NULL DEFAULT 'viewer',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    UNIQUE KEY uq_trip_user (trip_id, user_id),
+    INDEX idx_collab_user (user_id),
+    FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 -- ── Ověřovací tokeny ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS verification_tokens (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

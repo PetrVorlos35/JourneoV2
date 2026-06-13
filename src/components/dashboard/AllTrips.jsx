@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { MapPin, Calendar, Trash2, ArrowRight, Search, Filter, X } from 'lucide-react';
+import { MapPin, Calendar, Trash2, ArrowRight, Search, Filter, X, Users, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -135,6 +135,11 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
                     <MapPin size={24} strokeWidth={2} />
                   </div>
                   <div className="flex items-center gap-2">
+                    {(trip.role === 'editor' || trip.role === 'viewer') && (
+                      <span title={t('tripCard.sharedTrip')} className="flex items-center text-gray-400 dark:text-white/40">
+                        <Users size={16} strokeWidth={2} />
+                      </span>
+                    )}
                     <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full ${statusColors[status]}`}>
                       {statusLabels[status]}
                     </span>
@@ -156,8 +161,14 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
                 </div>
 
                 <div className="mt-auto flex items-center justify-between pt-6 border-t border-gray-100 dark:border-white/10">
-                  <div className="flex items-center gap-2 text-gray-400 text-[11px] uppercase tracking-widest font-bold">
+                  <div className="flex items-center gap-3 text-gray-400 text-[11px] uppercase tracking-widest font-bold">
                     <span>{t('allTrips.activities')} {trip.activities?.length || 0}</span>
+                    {trip.role === 'owner' && (
+                      <span className="flex items-center gap-1 normal-case tracking-normal">
+                        <Heart size={12} strokeWidth={2} />
+                        {trip.likes || 0}
+                      </span>
+                    )}
                   </div>
                   <Link
                     to={`/dashboard/trip/${trip.id}?from=all`}

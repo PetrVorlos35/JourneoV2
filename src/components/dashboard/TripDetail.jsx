@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Save, MapPin, Calendar, Pencil, Check, PackageOpen, Link as LinkIcon, Plus, Trash2, ExternalLink, Image as ImageIcon, Layout, Briefcase, Info } from 'lucide-react';
+import { ArrowLeft, Save, MapPin, Calendar, Pencil, Check, PackageOpen, Link as LinkIcon, Plus, Trash2, ExternalLink, Image as ImageIcon, Layout, Briefcase, Info, Users, Eye, Heart } from 'lucide-react';
 import { format, eachDayOfInterval } from 'date-fns';
 import { cs } from 'date-fns/locale';
 import { enUS } from 'date-fns/locale';
@@ -11,6 +11,7 @@ import LocationAutocomplete from '../ui/LocationAutocomplete';
 import CharCount from '../ui/CharCount';
 import { useUnsavedChanges } from '../../contexts/UnsavedChangesContext';
 import LikeButton from '../ui/LikeButton';
+import ShareTripModal from './ShareTripModal';
 
 const TripDetail = ({ trips, onUpdateTrip }) => {
   const { id } = useParams();
@@ -37,6 +38,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   const [tripTitle, setTripTitle] = useState(trip?.title || '');
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const titleInputRef = useRef(null);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -110,6 +112,8 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
       </div>
     );
   }
+
+  const isViewer = trip.role === 'viewer';
 
   const handleSave = () => {
     onUpdateTrip({
@@ -190,6 +194,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   return (
     <div className="w-full h-full flex flex-col min-h-0 pb-10">
       {ModalPortal}
+      <ShareTripModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} trip={trip} />
 
       {/* Mobile Bottom Nav */}
       <div className="md:hidden fixed bottom-6 left-6 right-6 z-50 flex justify-center pointer-events-none">
@@ -215,14 +220,16 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
             <Info size={20} strokeWidth={mobileTab === 'info' ? 2.5 : 2} />
             {mobileTab === 'info' && <span className="text-[9px] font-bold uppercase tracking-widest">{t('tripDetail.tabs.details')}</span>}
           </button>
-          <button
-            onClick={handleSave}
-            disabled={!hasUnsavedChanges}
-            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${hasUnsavedChanges ? 'text-red-500 scale-110 cursor-pointer' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white opacity-50 cursor-not-allowed'}`}
-          >
-            <Save size={20} strokeWidth={hasUnsavedChanges ? 2.5 : 2} />
-            {hasUnsavedChanges && <span className="text-[9px] font-bold uppercase tracking-widest">{t('tripDetail.tabs.save')}</span>}
-          </button>
+          {!isViewer && (
+            <button
+              onClick={handleSave}
+              disabled={!hasUnsavedChanges}
+              className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${hasUnsavedChanges ? 'text-red-500 scale-110 cursor-pointer' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white opacity-50 cursor-not-allowed'}`}
+            >
+              <Save size={20} strokeWidth={hasUnsavedChanges ? 2.5 : 2} />
+              {hasUnsavedChanges && <span className="text-[9px] font-bold uppercase tracking-widest">{t('tripDetail.tabs.save')}</span>}
+            </button>
+          )}
         </div>
       </div>
 
@@ -234,7 +241,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           </button>
 
           <div className="flex items-center gap-4 mb-3">
-            {editingTitle ? (
+            {!isViewer && editingTitle ? (
               <div className="flex flex-col gap-1 w-full max-w-md">
                 <div className="flex items-center gap-3">
                   <input
@@ -260,41 +267,74 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
             ) : (
               <div className="flex items-center gap-4 group">
                 <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight">{tripTitle}</h1>
-                <button onClick={() => setEditingTitle(true)} className="text-gray-400 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity p-2 bg-gray-100 dark:bg-white/5 rounded-full hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 cursor-pointer disabled:cursor-not-allowed" title={t('tripDetail.rename')}>
-                  <Pencil size={18} strokeWidth={2} />
-                </button>
+                {!isViewer && (
+                  <button onClick={() => setEditingTitle(true)} className="text-gray-400 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity p-2 bg-gray-100 dark:bg-white/5 rounded-full hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 cursor-pointer disabled:cursor-not-allowed" title={t('tripDetail.rename')}>
+                    <Pencil size={18} strokeWidth={2} />
+                  </button>
+                )}
               </div>
             )}
           </div>
 
-          <p className="text-gray-500 flex items-center gap-2 text-[13px] font-bold tracking-widest uppercase">
+          <p className="text-gray-500 flex items-center flex-wrap gap-2 text-[13px] font-bold tracking-widest uppercase">
             <Calendar size={16} strokeWidth={2.5} />
             {format(new Date(trip.startDate), 'dd.MM.yyyy')} — {format(new Date(trip.endDate), 'dd.MM.yyyy')}
+            {trip.role && trip.role !== 'owner' && (
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border normal-case tracking-widest ${
+                isViewer
+                  ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20'
+                  : 'bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-500/20'
+              }`}>
+                {isViewer ? <Eye size={10} strokeWidth={2.5} /> : <Pencil size={10} strokeWidth={2.5} />}
+                {t(`tripDetail.roles.${trip.role}`)}
+              </span>
+            )}
           </p>
         </div>
 
-        <div className="flex items-center gap-4 shrink-0">
-          <LikeButton
-            tripId={trip.id}
-            initialLikes={trip.likes || 0}
-            initialIsLiked={trip.isLiked || false}
-            onLikeChange={(likes, isLiked) => {
-              setTrip(prev => ({ ...prev, likes, isLiked }));
-            }}
-          />
-          <button
-            onClick={handleSave}
-            disabled={!hasUnsavedChanges}
-            className={`hidden md:flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-bold transition-all duration-300 shrink-0 ${
-              hasUnsavedChanges
-                ? 'bg-red-500 text-white shadow-md shadow-red-500/20 active:scale-95 hover:bg-red-600'
-                : 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400 cursor-default'
-            } cursor-pointer disabled:cursor-not-allowed`}
-          >
-            <Save size={18} strokeWidth={2.5} /> {hasUnsavedChanges ? t('tripDetail.save.unsaved') : t('tripDetail.save.saved')}
-          </button>
+        <div className="flex items-center gap-3 shrink-0">
+          {trip.role === 'owner' ? (
+            <div className="flex items-center gap-1.5 text-gray-400 dark:text-white/30 select-none">
+              <Heart size={16} strokeWidth={2} />
+              <span className="text-[13px] font-semibold tabular-nums">{trip.likes || 0}</span>
+            </div>
+          ) : (
+            <LikeButton
+              tripId={trip.id}
+              initialLikes={trip.likes || 0}
+              initialIsLiked={trip.isLiked || false}
+            />
+          )}
+          {trip.role === 'owner' && (
+            <button
+              onClick={() => setShowShareModal(true)}
+              className="hidden md:flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl font-bold transition-all duration-300 shrink-0 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-95 cursor-pointer"
+            >
+              <Users size={18} strokeWidth={2.5} /> {t('shareModal.shareButton')}
+            </button>
+          )}
+          {!isViewer && (
+            <button
+              onClick={handleSave}
+              disabled={!hasUnsavedChanges}
+              className={`hidden md:flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-bold transition-all duration-300 shrink-0 ${
+                hasUnsavedChanges
+                  ? 'bg-red-500 text-white shadow-md shadow-red-500/20 active:scale-95 hover:bg-red-600'
+                  : 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400 cursor-default'
+              } cursor-pointer disabled:cursor-not-allowed`}
+            >
+              <Save size={18} strokeWidth={2.5} /> {hasUnsavedChanges ? t('tripDetail.save.unsaved') : t('tripDetail.save.saved')}
+            </button>
+          )}
         </div>
       </div>
+
+      {isViewer && (
+        <div className="mb-8 flex items-center gap-3 px-4 sm:px-5 py-3.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl text-amber-700 dark:text-amber-400">
+          <Eye size={16} strokeWidth={2.5} className="shrink-0" />
+          <span className="text-[13px] font-bold">{t('tripDetail.viewerBanner')}</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1 min-h-0">
 
@@ -443,23 +483,27 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                   </div>
                   {t('tripDetail.packing.title')}
                 </h2>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                    <Plus size={20} className="text-blue-600 dark:text-blue-400" strokeWidth={2.5} />
-                  </div>
-                  <input
-                    type="text"
-                    value={newPackingItem}
-                    onChange={(e) => setNewPackingItem(e.target.value)}
-                    onKeyDown={addPackingItem}
-                    maxLength={255}
-                    placeholder={t('tripDetail.packing.placeholder')}
-                    className="glass-input !py-3 sm:!py-4 !pl-12 sm:!pl-14 text-[15px] sm:text-base w-full"
-                  />
-                </div>
-                <div className="flex justify-end mt-1.5 pr-1">
-                  <CharCount value={newPackingItem} max={255} />
-                </div>
+                {!isViewer && (
+                  <>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                        <Plus size={20} className="text-blue-600 dark:text-blue-400" strokeWidth={2.5} />
+                      </div>
+                      <input
+                        type="text"
+                        value={newPackingItem}
+                        onChange={(e) => setNewPackingItem(e.target.value)}
+                        onKeyDown={addPackingItem}
+                        maxLength={255}
+                        placeholder={t('tripDetail.packing.placeholder')}
+                        className="glass-input !py-3 sm:!py-4 !pl-12 sm:!pl-14 text-[15px] sm:text-base w-full"
+                      />
+                    </div>
+                    <div className="flex justify-end mt-1.5 pr-1">
+                      <CharCount value={newPackingItem} max={255} />
+                    </div>
+                  </>
+                )}
               </div>
               <div className="p-5 sm:p-10 flex-1 overflow-y-auto custom-scrollbar">
                 <div className="space-y-3">
@@ -471,18 +515,21 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                         <input
                           type="checkbox"
                           checked={item.checked}
-                          onChange={() => togglePackingItem(item.id)}
-                          className="w-6 h-6 shrink-0 rounded-md border-2 border-gray-300 dark:border-gray-600 text-blue-600 bg-transparent focus:ring-blue-500 cursor-pointer"
+                          onChange={isViewer ? () => {} : () => togglePackingItem(item.id)}
+                          disabled={isViewer}
+                          className={`w-6 h-6 shrink-0 rounded-md border-2 border-gray-300 dark:border-gray-600 text-blue-600 bg-transparent focus:ring-blue-500 ${isViewer ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
                         />
                         <span className={`flex-1 min-w-0 break-words text-[15px] font-bold transition-colors ${item.checked ? 'text-gray-400 line-through' : 'text-gray-900 dark:text-white'}`}>
                           {item.text}
                         </span>
-                        <button
-                          onClick={() => deletePackingItem(item.id)}
-                          className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer disabled:cursor-not-allowed"
-                        >
-                          <Trash2 size={18} strokeWidth={2} />
-                        </button>
+                        {!isViewer && (
+                          <button
+                            onClick={() => deletePackingItem(item.id)}
+                            className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer disabled:cursor-not-allowed"
+                          >
+                            <Trash2 size={18} strokeWidth={2} />
+                          </button>
+                        )}
                       </div>
                     ))
                   )}
@@ -503,39 +550,41 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                 </h2>
               </div>
               <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col p-5 sm:p-10 gap-8">
-                <form onSubmit={addDocument} className="p-6 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl space-y-4 shrink-0">
-                  <div>
-                    <input
-                      type="text"
-                      required
-                      maxLength={255}
-                      placeholder={t('tripDetail.documents.titlePlaceholder')}
-                      value={docTitle}
-                      onChange={e => setDocTitle(e.target.value)}
-                      className="glass-input border-none bg-white dark:bg-black/50 !py-3 sm:!py-4 shadow-sm text-[15px] sm:text-base w-full"
-                    />
-                    <div className="flex justify-end mt-1.5 pr-1">
-                      <CharCount value={docTitle} max={255} />
+                {!isViewer && (
+                  <form onSubmit={addDocument} className="p-6 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl space-y-4 shrink-0">
+                    <div>
+                      <input
+                        type="text"
+                        required
+                        maxLength={255}
+                        placeholder={t('tripDetail.documents.titlePlaceholder')}
+                        value={docTitle}
+                        onChange={e => setDocTitle(e.target.value)}
+                        className="glass-input border-none bg-white dark:bg-black/50 !py-3 sm:!py-4 shadow-sm text-[15px] sm:text-base w-full"
+                      />
+                      <div className="flex justify-end mt-1.5 pr-1">
+                        <CharCount value={docTitle} max={255} />
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <textarea
-                      required
-                      maxLength={2000}
-                      placeholder={t('tripDetail.documents.contentPlaceholder')}
-                      rows="2"
-                      value={docContent}
-                      onChange={e => setDocContent(e.target.value)}
-                      className="glass-input border-none bg-white dark:bg-black/50 !py-3 sm:!py-4 resize-y shadow-sm text-[15px] sm:text-base min-h-[100px] w-full"
-                    />
-                    <div className="flex justify-end mt-1.5 pr-1">
-                      <CharCount value={docContent} max={2000} />
+                    <div>
+                      <textarea
+                        required
+                        maxLength={2000}
+                        placeholder={t('tripDetail.documents.contentPlaceholder')}
+                        rows="2"
+                        value={docContent}
+                        onChange={e => setDocContent(e.target.value)}
+                        className="glass-input border-none bg-white dark:bg-black/50 !py-3 sm:!py-4 resize-y shadow-sm text-[15px] sm:text-base min-h-[100px] w-full"
+                      />
+                      <div className="flex justify-end mt-1.5 pr-1">
+                        <CharCount value={docContent} max={2000} />
+                      </div>
                     </div>
-                  </div>
-                  <button type="submit" className="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed">
-                    {t('tripDetail.documents.save')}
-                  </button>
-                </form>
+                    <button type="submit" className="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed">
+                      {t('tripDetail.documents.save')}
+                    </button>
+                  </form>
+                )}
                 <div className="grid grid-cols-1 gap-4">
                   {documents.length === 0 ? (
                     <div className="py-12 text-center text-gray-500 font-bold border-2 border-dashed border-gray-200 dark:border-white/10 rounded-3xl">
@@ -546,13 +595,15 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                       const isUrl = doc.content.startsWith('http://') || doc.content.startsWith('https://');
                       return (
                         <div key={doc.id} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-6 rounded-3xl group relative">
-                          <button
-                            onClick={() => deleteDocument(doc.id)}
-                            className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer disabled:cursor-not-allowed"
-                          >
-                            <Trash2 size={16} strokeWidth={2} />
-                          </button>
-                          <h4 className="font-bold text-lg text-gray-900 dark:text-white mb-3 pr-10 tracking-tight">{doc.title}</h4>
+                          {!isViewer && (
+                            <button
+                              onClick={() => deleteDocument(doc.id)}
+                              className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer disabled:cursor-not-allowed"
+                            >
+                              <Trash2 size={16} strokeWidth={2} />
+                            </button>
+                          )}
+                          <h4 className={`font-bold text-lg text-gray-900 dark:text-white mb-3 tracking-tight ${!isViewer ? 'pr-10' : ''}`}>{doc.title}</h4>
                           {isUrl ? (
                             <a href={doc.content} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-black text-[13px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors break-all rounded-xl shadow-sm border border-gray-100 dark:border-white/5 cursor-pointer disabled:cursor-not-allowed">
                               <ExternalLink size={16} strokeWidth={2} /> {t('tripDetail.documents.open')}
@@ -602,42 +653,58 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                       <label className="flex items-center gap-2 text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                         <MapPin size={16} strokeWidth={2.5} /> {t('tripDetail.itinerary.locationLabel')}
                       </label>
-                      <LocationAutocomplete
-                        value={day.location}
-                        onChange={(value) => {
-                          const updated = [...dailyPlans];
-                          updated[idx].location = value;
-                          setDailyPlans(updated);
-                          setHasUnsavedChanges(true);
-                        }}
-                        placeholder={t('tripDetail.itinerary.locationPlaceholder')}
-                        maxLength={255}
-                        className="glass-input !py-3 sm:!py-4 !px-4 sm:!px-5 font-bold text-base sm:text-lg w-full"
-                      />
-                      <div className="flex justify-end mt-1.5 pr-1">
-                        <CharCount value={day.location} max={255} />
-                      </div>
+                      {isViewer ? (
+                        <p className="py-3 sm:py-4 px-4 sm:px-5 font-bold text-base sm:text-lg text-gray-900 dark:text-white min-h-[52px]">
+                          {day.location || <span className="text-gray-400 dark:text-gray-500 font-normal italic">{t('tripDetail.itinerary.noLocation')}</span>}
+                        </p>
+                      ) : (
+                        <>
+                          <LocationAutocomplete
+                            value={day.location}
+                            onChange={(value) => {
+                              const updated = [...dailyPlans];
+                              updated[idx].location = value;
+                              setDailyPlans(updated);
+                              setHasUnsavedChanges(true);
+                            }}
+                            placeholder={t('tripDetail.itinerary.locationPlaceholder')}
+                            maxLength={255}
+                            className="glass-input !py-3 sm:!py-4 !px-4 sm:!px-5 font-bold text-base sm:text-lg w-full"
+                          />
+                          <div className="flex justify-end mt-1.5 pr-1">
+                            <CharCount value={day.location} max={255} />
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className="p-5 sm:p-10 flex-1 flex flex-col min-h-[300px] lg:min-h-0">
                     <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-2 sm:mb-4 uppercase tracking-widest">
                       {t('tripDetail.itinerary.planLabel')}
                     </label>
-                    <textarea
-                      value={day.plan}
-                      maxLength={2000}
-                      onChange={(e) => {
-                        const updated = [...dailyPlans];
-                        updated[idx].plan = e.target.value;
-                        setDailyPlans(updated);
-                        setHasUnsavedChanges(true);
-                      }}
-                      placeholder={t('tripDetail.itinerary.planPlaceholder')}
-                      className="glass-input flex-1 min-h-[250px] lg:min-h-0 resize-y font-medium text-[15px] sm:text-base leading-relaxed"
-                    />
-                    <div className="flex justify-end mt-1.5 pr-1">
-                      <CharCount value={day.plan} max={2000} />
-                    </div>
+                    {isViewer ? (
+                      <div className="flex-1 min-h-[250px] lg:min-h-0 py-3 sm:py-4 px-4 sm:px-5 text-[15px] sm:text-base font-medium leading-relaxed text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+                        {day.plan || <span className="text-gray-400 dark:text-gray-500 italic">{t('tripDetail.itinerary.planPlaceholder')}</span>}
+                      </div>
+                    ) : (
+                      <>
+                        <textarea
+                          value={day.plan}
+                          maxLength={2000}
+                          onChange={(e) => {
+                            const updated = [...dailyPlans];
+                            updated[idx].plan = e.target.value;
+                            setDailyPlans(updated);
+                            setHasUnsavedChanges(true);
+                          }}
+                          placeholder={t('tripDetail.itinerary.planPlaceholder')}
+                          className="glass-input flex-1 min-h-[250px] lg:min-h-0 resize-y font-medium text-[15px] sm:text-base leading-relaxed"
+                        />
+                        <div className="flex justify-end mt-1.5 pr-1">
+                          <CharCount value={day.plan} max={2000} />
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               );

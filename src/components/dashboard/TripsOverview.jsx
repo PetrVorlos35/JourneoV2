@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { format, differenceInDays } from 'date-fns';
 import { cs } from 'date-fns/locale';
 import { enUS } from 'date-fns/locale';
-import { MapPin, Calendar, Trash2, Clock, Plane, Plus, TrendingUp, ArrowRight, Wallet, Search, X } from 'lucide-react';
+import { MapPin, Calendar, Trash2, Clock, Plane, Plus, TrendingUp, ArrowRight, Wallet, Search, X, Users, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
@@ -245,13 +245,20 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
                 <div className="w-12 h-12 rounded-[1rem] bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                   <MapPin size={24} strokeWidth={2} />
                 </div>
-                <button
-                  onClick={(e) => handleDelete(trip.id, e)}
-                  className="w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer disabled:cursor-not-allowed"
-                  title={t('tripsOverview.delete.title')}
-                >
-                  <Trash2 size={18} strokeWidth={2} />
-                </button>
+                <div className="flex items-center gap-2">
+                  {(trip.role === 'editor' || trip.role === 'viewer') && (
+                    <span title={t('tripCard.sharedTrip')} className="flex items-center text-gray-400 dark:text-white/40">
+                      <Users size={16} strokeWidth={2} />
+                    </span>
+                  )}
+                  <button
+                    onClick={(e) => handleDelete(trip.id, e)}
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer disabled:cursor-not-allowed"
+                    title={t('tripsOverview.delete.title')}
+                  >
+                    <Trash2 size={18} strokeWidth={2} />
+                  </button>
+                </div>
               </div>
 
               <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white tracking-tight">{trip.title}</h3>
@@ -262,8 +269,14 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
               </div>
 
               <div className="mt-auto flex items-center justify-between pt-6 border-t border-gray-100 dark:border-white/10">
-                <div className="flex items-center gap-2 text-gray-400 text-[11px] uppercase tracking-widest font-bold">
+                <div className="flex items-center gap-3 text-gray-400 text-[11px] uppercase tracking-widest font-bold">
                   <span>{t('tripsOverview.activities')} {trip.activities?.length || 0}</span>
+                  {trip.role === 'owner' && (
+                    <span className="flex items-center gap-1 normal-case tracking-normal">
+                      <Heart size={12} strokeWidth={2} />
+                      {trip.likes || 0}
+                    </span>
+                  )}
                 </div>
                 <Link
                   to={`/dashboard/trip/${trip.id}?from=dashboard`}

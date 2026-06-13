@@ -339,6 +339,27 @@
       "noDates": "Vyberte prosím datum od i do."
     }
   },
+  "tripCard": {
+    "sharedTrip": "Sdílený výlet"
+  },
+  "shareModal": {
+    "title": "Sdílet výlet",
+    "addSection": "Přidat spolupracovníka",
+    "searchPlaceholder": "Hledat přítele...",
+    "onlyFriendsHint": "Výlet lze sdílet pouze s přijatými přáteli.",
+    "noFriendsFound": "Žádný přítel nenalezen.",
+    "collaboratorsSection": "Spolupracovníci",
+    "noCollaborators": "Zatím žádní spolupracovníci. Pozvěte přítele!",
+    "addedSuccess": "{{name}} byl přidán jako spolupracovník.",
+    "removedSuccess": "Přístup byl odebrán.",
+    "footer": "Vlastník může kdykoli změnit nebo odebrat přístup.",
+    "shareButton": "Sdílet",
+    "roles": {
+      "owner": "Vlastník",
+      "editor": "Editor",
+      "viewer": "Prohlížeč"
+    }
+  },
   "tripDetail": {
     "backToDashboard": "Zpět na přehled",
     "backToAll": "Zpět na Moje výlety",
@@ -420,6 +441,11 @@
       "title": "Máte neuložené změny",
       "message": "Opravdu chcete odejít? Vaše změny nebudou uloženy.",
       "confirm": "Odejít bez uložení"
+    },
+    "viewerBanner": "Tento výlet si prohlížíte pouze pro čtení. Nemůžete provádět změny.",
+    "roles": {
+      "viewer": "Prohlížeč",
+      "editor": "Editor"
     }
   },
   "allTrips": {

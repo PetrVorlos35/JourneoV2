@@ -3,14 +3,10 @@ import pool from '../config/db.js';
 
 const router = Router();
 
-// Pomocná funkce pro formátování data pro MariaDB (YYYY-MM-DD)
 const formatDateForDb = (date) => {
   if (!date) return null;
-  // Pokud je to už ve formátu YYYY-MM-DD, nešahej na to
   if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
-  // Pokud je to string s T (ISO), nebo cokoliv jiného, usekni to
   if (typeof date === 'string') return date.split('T')[0].split(' ')[0];
-  // Pokud je to Date objekt
   if (date instanceof Date) return date.toISOString().split('T')[0];
   return date;
 };
@@ -34,19 +30,50 @@ const validateTripDates = (startDate, endDate) => {
   return null;
 };
 
+// Returns 'owner' | 'editor' | 'viewer' | null (no access)
+const getTripRole = async (tripId, userId) => {
+  const [[owned]] = await pool.query(
+    'SELECT id FROM trips WHERE id = ? AND user_id = ?',
+    [tripId, userId]
+  );
+  if (owned) return 'owner';
+
+  const [[collab]] = await pool.query(
+    'SELECT role FROM trip_collaborators WHERE trip_id = ? AND user_id = ?',
+    [tripId, userId]
+  );
+  return collab ? collab.role : null;
+};
+
 // ── GET /api/trips ──────────────────────────────────────────
-// Vrátí všechny výlety uživatele včetně všech vnořených dat
+// Returns owned trips + trips shared with the user, each with their role
 router.get('/', async (req, res) => {
   try {
     const userId = req.userId;
 
-    // Get all trips
     const [trips] = await pool.query(
-      "SELECT id, title, DATE_FORMAT(start_date, '%Y-%m-%d') AS startDate, DATE_FORMAT(end_date, '%Y-%m-%d') AS endDate, created_at AS createdAt FROM trips WHERE user_id = ? ORDER BY start_date DESC",
-      [userId]
+      `SELECT t.id, t.title,
+         DATE_FORMAT(t.start_date, '%Y-%m-%d') AS startDate,
+         DATE_FORMAT(t.end_date, '%Y-%m-%d') AS endDate,
+         t.created_at AS createdAt,
+         'owner' AS role,
+         (SELECT COUNT(*) FROM votes v WHERE v.trip_id = t.id AND v.value = 1) AS likes
+       FROM trips t
+       WHERE t.user_id = ?
+       UNION
+       SELECT t.id, t.title,
+         DATE_FORMAT(t.start_date, '%Y-%m-%d') AS startDate,
+         DATE_FORMAT(t.end_date, '%Y-%m-%d') AS endDate,
+         t.created_at AS createdAt,
+         tc.role,
+         NULL AS likes
+       FROM trips t
+       JOIN trip_collaborators tc ON tc.trip_id = t.id AND tc.user_id = ?
+       WHERE t.user_id != ?
+       ORDER BY startDate DESC`,
+      [userId, userId, userId]
     );
 
-    // For each trip, load sub-data
     const fullTrips = await Promise.all(trips.map(async (trip) => {
       const [activities] = await pool.query(
         "SELECT id, day_index AS dayIndex, DATE_FORMAT(date, '%Y-%m-%d') AS date, title, plan, location FROM trip_activities WHERE trip_id = ? ORDER BY day_index ASC",
@@ -69,7 +96,7 @@ router.get('/', async (req, res) => {
       );
 
       const [voteScore] = await pool.query(
-        `SELECT COUNT(*) AS likes FROM votes WHERE trip_id = ? AND value = 1`,
+        'SELECT COUNT(*) AS likes FROM votes WHERE trip_id = ? AND value = 1',
         [trip.id]
       );
 
@@ -81,25 +108,10 @@ router.get('/', async (req, res) => {
       return {
         ...trip,
         id: trip.id.toString(),
-        activities: activities.map(a => ({
-          ...a,
-          id: a.id.toString(),
-        })),
-        expenses: expenses.map(e => ({
-          ...e,
-          id: e.id.toString(),
-          amount: parseFloat(e.amount),
-        })),
-        packingList: packingItems.map(p => ({
-          id: p.id.toString(),
-          text: p.text,
-          checked: !!p.checked,
-        })),
-        documents: documents.map(d => ({
-          id: d.id.toString(),
-          title: d.title,
-          content: d.content,
-        })),
+        activities: activities.map(a => ({ ...a, id: a.id.toString() })),
+        expenses: expenses.map(e => ({ ...e, id: e.id.toString(), amount: parseFloat(e.amount) })),
+        packingList: packingItems.map(p => ({ id: p.id.toString(), text: p.text, checked: !!p.checked })),
+        documents: documents.map(d => ({ id: d.id.toString(), title: d.title, content: d.content })),
         likes: parseInt(voteScore[0].likes),
         isLiked: userVote.length > 0 && userVote[0].value === 1,
       };
@@ -140,6 +152,7 @@ router.post('/', async (req, res) => {
         title,
         startDate,
         endDate,
+        role: 'owner',
         activities: [],
         expenses: [],
         packingList: [],
@@ -153,7 +166,7 @@ router.post('/', async (req, res) => {
 });
 
 // ── PUT /api/trips/:id ──────────────────────────────────────
-// Full update: replaces all sub-data (activities, expenses, packing, documents)
+// Owners and editors can update; viewers are blocked with 403
 router.put('/:id', async (req, res) => {
   const connection = await pool.getConnection();
   try {
@@ -163,17 +176,16 @@ router.put('/:id', async (req, res) => {
     const tripId = parseInt(req.params.id);
     const { title, startDate, endDate, activities, expenses, packingList, documents } = req.body;
 
-    // Verify ownership
-    const [owned] = await connection.query(
-      'SELECT id FROM trips WHERE id = ? AND user_id = ?',
-      [tripId, userId]
-    );
-    if (owned.length === 0) {
+    const role = await getTripRole(tripId, userId);
+    if (!role) {
       await connection.rollback();
       return res.status(404).json({ error: 'Výlet nenalezen.' });
     }
+    if (role === 'viewer') {
+      await connection.rollback();
+      return res.status(403).json({ error: 'Nemáte oprávnění upravovat tento výlet.' });
+    }
 
-    // Update trip basic info
     if (startDate || endDate) {
       const effectiveStart = startDate || (await connection.query("SELECT DATE_FORMAT(start_date, '%Y-%m-%d') AS d FROM trips WHERE id = ?", [tripId]))[0][0]?.d;
       const effectiveEnd = endDate || (await connection.query("SELECT DATE_FORMAT(end_date, '%Y-%m-%d') AS d FROM trips WHERE id = ?", [tripId]))[0][0]?.d;
@@ -191,7 +203,6 @@ router.put('/:id', async (req, res) => {
       );
     }
 
-    // Replace activities
     if (activities !== undefined) {
       await connection.query('DELETE FROM trip_activities WHERE trip_id = ?', [tripId]);
       for (let i = 0; i < activities.length; i++) {
@@ -203,7 +214,6 @@ router.put('/:id', async (req, res) => {
       }
     }
 
-    // Replace expenses
     if (expenses !== undefined) {
       await connection.query('DELETE FROM trip_expenses WHERE trip_id = ?', [tripId]);
       for (const e of expenses) {
@@ -214,7 +224,6 @@ router.put('/:id', async (req, res) => {
       }
     }
 
-    // Replace packing list
     if (packingList !== undefined) {
       await connection.query('DELETE FROM trip_packing_items WHERE trip_id = ?', [tripId]);
       for (const p of packingList) {
@@ -225,7 +234,6 @@ router.put('/:id', async (req, res) => {
       }
     }
 
-    // Replace documents
     if (documents !== undefined) {
       await connection.query('DELETE FROM trip_documents WHERE trip_id = ?', [tripId]);
       for (const d of documents) {
@@ -238,7 +246,6 @@ router.put('/:id', async (req, res) => {
 
     await connection.commit();
 
-    // Return the updated trip
     const [updatedTrips] = await pool.query(
       "SELECT id, title, DATE_FORMAT(start_date, '%Y-%m-%d') AS startDate, DATE_FORMAT(end_date, '%Y-%m-%d') AS endDate FROM trips WHERE id = ?",
       [tripId]
@@ -260,7 +267,7 @@ router.put('/:id', async (req, res) => {
       [tripId]
     );
     const [voteScore] = await pool.query(
-      `SELECT COUNT(*) AS likes FROM votes WHERE trip_id = ? AND value = 1`,
+      'SELECT COUNT(*) AS likes FROM votes WHERE trip_id = ? AND value = 1',
       [tripId]
     );
     const [userVote] = await pool.query(
@@ -272,6 +279,7 @@ router.put('/:id', async (req, res) => {
       trip: {
         ...updatedTrips[0],
         id: updatedTrips[0].id.toString(),
+        role,
         activities: updatedActivities.map(a => ({ ...a, id: a.id.toString() })),
         expenses: updatedExpenses.map(e => ({ ...e, id: e.id.toString(), amount: parseFloat(e.amount) })),
         packingList: updatedPacking.map(p => ({ id: p.id.toString(), text: p.text, checked: !!p.checked })),
@@ -290,6 +298,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // ── DELETE /api/trips/:id ───────────────────────────────────
+// Only the owner can delete a trip
 router.delete('/:id', async (req, res) => {
   try {
     const userId = req.userId;
@@ -301,13 +310,144 @@ router.delete('/:id', async (req, res) => {
     );
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Výlet nenalezen.' });
+      return res.status(404).json({ error: 'Výlet nenalezen nebo nemáte oprávnění jej smazat.' });
     }
 
     res.json({ message: 'Výlet byl smazán.' });
   } catch (err) {
     console.error('Delete trip error:', err);
     res.status(500).json({ error: 'Chyba při mazání výletu.' });
+  }
+});
+
+// ── GET /api/trips/:id/collaborators ────────────────────────
+router.get('/:id/collaborators', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const tripId = parseInt(req.params.id);
+
+    const role = await getTripRole(tripId, userId);
+    if (!role) return res.status(404).json({ error: 'Výlet nenalezen.' });
+
+    const [rows] = await pool.query(
+      `SELECT u.id, u.first_name, u.last_name, u.email, u.avatar_url, tc.role
+       FROM trip_collaborators tc
+       JOIN users u ON u.id = tc.user_id
+       WHERE tc.trip_id = ?
+       ORDER BY tc.created_at ASC`,
+      [tripId]
+    );
+
+    res.json({ collaborators: rows });
+  } catch (err) {
+    console.error('Get collaborators error:', err);
+    res.status(500).json({ error: 'Chyba při načítání spolupracovníků.' });
+  }
+});
+
+// ── POST /api/trips/:id/share ───────────────────────────────
+// Owner adds a friend as editor or viewer
+router.post('/:id/share', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const tripId = parseInt(req.params.id);
+    const { userId: targetUserId, role } = req.body;
+
+    if (!targetUserId || !role) {
+      return res.status(400).json({ error: 'userId a role jsou povinné.' });
+    }
+    if (!['editor', 'viewer'].includes(role)) {
+      return res.status(400).json({ error: 'Role musí být editor nebo viewer.' });
+    }
+    if (parseInt(targetUserId) === userId) {
+      return res.status(400).json({ error: 'Nemůžete sdílet výlet sami se sebou.' });
+    }
+
+    const callerRole = await getTripRole(tripId, userId);
+    if (!callerRole) return res.status(404).json({ error: 'Výlet nenalezen.' });
+    if (callerRole !== 'owner') return res.status(403).json({ error: 'Pouze vlastník může sdílet výlet.' });
+
+    const [[friendship]] = await pool.query(
+      `SELECT id FROM friendships
+       WHERE status = 'ACCEPTED'
+         AND ((requester_id = ? AND addressee_id = ?) OR (requester_id = ? AND addressee_id = ?))`,
+      [userId, targetUserId, targetUserId, userId]
+    );
+    if (!friendship) {
+      return res.status(400).json({ error: 'Výlet lze sdílet pouze s přáteli.' });
+    }
+
+    await pool.query(
+      `INSERT INTO trip_collaborators (trip_id, user_id, role) VALUES (?, ?, ?)
+       ON DUPLICATE KEY UPDATE role = VALUES(role), updated_at = CURRENT_TIMESTAMP`,
+      [tripId, targetUserId, role]
+    );
+
+    res.status(201).json({ message: 'Výlet byl sdílen.' });
+  } catch (err) {
+    console.error('Share trip error:', err);
+    res.status(500).json({ error: 'Chyba při sdílení výletu.' });
+  }
+});
+
+// ── PUT /api/trips/:id/share/:targetUserId ──────────────────
+// Owner updates a collaborator's role
+router.put('/:id/share/:targetUserId', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const tripId = parseInt(req.params.id);
+    const targetUserId = parseInt(req.params.targetUserId);
+    const { role } = req.body;
+
+    if (!role || !['editor', 'viewer'].includes(role)) {
+      return res.status(400).json({ error: 'Role musí být editor nebo viewer.' });
+    }
+
+    const callerRole = await getTripRole(tripId, userId);
+    if (!callerRole) return res.status(404).json({ error: 'Výlet nenalezen.' });
+    if (callerRole !== 'owner') return res.status(403).json({ error: 'Pouze vlastník může měnit oprávnění.' });
+
+    const [result] = await pool.query(
+      'UPDATE trip_collaborators SET role = ? WHERE trip_id = ? AND user_id = ?',
+      [role, tripId, targetUserId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Spolupracovník nenalezen.' });
+    }
+
+    res.json({ message: 'Oprávnění bylo aktualizováno.' });
+  } catch (err) {
+    console.error('Update share error:', err);
+    res.status(500).json({ error: 'Chyba při aktualizaci oprávnění.' });
+  }
+});
+
+// ── DELETE /api/trips/:id/share/:targetUserId ───────────────
+// Owner removes a collaborator's access
+router.delete('/:id/share/:targetUserId', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const tripId = parseInt(req.params.id);
+    const targetUserId = parseInt(req.params.targetUserId);
+
+    const callerRole = await getTripRole(tripId, userId);
+    if (!callerRole) return res.status(404).json({ error: 'Výlet nenalezen.' });
+    if (callerRole !== 'owner') return res.status(403).json({ error: 'Pouze vlastník může odebírat přístup.' });
+
+    const [result] = await pool.query(
+      'DELETE FROM trip_collaborators WHERE trip_id = ? AND user_id = ?',
+      [tripId, targetUserId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Spolupracovník nenalezen.' });
+    }
+
+    res.json({ message: 'Přístup byl odebrán.' });
+  } catch (err) {
+    console.error('Remove share error:', err);
+    res.status(500).json({ error: 'Chyba při odebírání přístupu.' });
   }
 });
 

@@ -233,6 +233,7 @@ const Budget = ({ trips, onUpdateTrip }) => {
   const trip = trips.find(tr => tr.id === selectedTripId);
   const expenses = trip?.expenses || [];
   const total = expenses.reduce((s, e) => s + e.amount, 0);
+  const isViewer = trip?.role === 'viewer';
   const { confirmDialog, ModalPortal } = useDialog();
   const { currency } = useCurrency();
 
@@ -330,7 +331,7 @@ const Budget = ({ trips, onUpdateTrip }) => {
             </div>
           )}
 
-          {trip && (
+          {trip && !isViewer && (
             <button
               onClick={() => setIsAddModalOpen(true)}
               className="hidden sm:flex w-full sm:w-auto items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3.5 sm:py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors duration-300 shrink-0 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer disabled:cursor-not-allowed text-[14px] sm:text-[16px]"
@@ -466,12 +467,14 @@ const Budget = ({ trips, onUpdateTrip }) => {
                       </div>
                       <div className="flex items-center sm:items-end justify-between sm:flex-col shrink-0 gap-2 border-t sm:border-t-0 border-gray-100 dark:border-white/5 pt-4 sm:pt-0">
                         <span className="font-bold text-2xl tracking-tight text-gray-900 dark:text-white">{formatCurrency(expense.amount, currency)}</span>
-                        <button
-                          onClick={() => handleDeleteExpense(expense.id)}
-                          className="flex items-center gap-1.5 text-[11px] font-bold text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 uppercase tracking-widest opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all sm:bg-transparent px-3 py-1.5 sm:px-0 sm:py-0 rounded-full sm:rounded-none cursor-pointer disabled:cursor-not-allowed"
-                        >
-                          <Trash2 size={14} strokeWidth={2} /> {t('budget.expenseDelete')}
-                        </button>
+                        {!isViewer && (
+                          <button
+                            onClick={() => handleDeleteExpense(expense.id)}
+                            className="flex items-center gap-1.5 text-[11px] font-bold text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 uppercase tracking-widest opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all sm:bg-transparent px-3 py-1.5 sm:px-0 sm:py-0 rounded-full sm:rounded-none cursor-pointer disabled:cursor-not-allowed"
+                          >
+                            <Trash2 size={14} strokeWidth={2} /> {t('budget.expenseDelete')}
+                          </button>
+                        )}
                       </div>
                     </motion.div>
                   );
@@ -492,7 +495,7 @@ const Budget = ({ trips, onUpdateTrip }) => {
         </>
       ) : null}
 
-      {trip && (
+      {trip && !isViewer && (
         <button
           onClick={() => setIsAddModalOpen(true)}
           className="sm:hidden fixed bottom-24 right-6 z-[100] w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(37,99,235,0.4)] active:scale-90 transition-transform cursor-pointer"

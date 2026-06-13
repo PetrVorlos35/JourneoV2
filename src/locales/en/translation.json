@@ -339,6 +339,27 @@
       "noDates": "Please select both start and end dates."
     }
   },
+  "tripCard": {
+    "sharedTrip": "Shared trip"
+  },
+  "shareModal": {
+    "title": "Share Trip",
+    "addSection": "Add collaborator",
+    "searchPlaceholder": "Search a friend...",
+    "onlyFriendsHint": "You can only share trips with accepted friends.",
+    "noFriendsFound": "No friends found.",
+    "collaboratorsSection": "Collaborators",
+    "noCollaborators": "No collaborators yet. Invite a friend!",
+    "addedSuccess": "{{name}} was added as a collaborator.",
+    "removedSuccess": "Access has been removed.",
+    "footer": "The owner can change or remove access at any time.",
+    "shareButton": "Share",
+    "roles": {
+      "owner": "Owner",
+      "editor": "Editor",
+      "viewer": "Viewer"
+    }
+  },
   "tripDetail": {
     "backToDashboard": "Back to overview",
     "backToAll": "Back to My Trips",
@@ -420,6 +441,11 @@
       "title": "You have unsaved changes",
       "message": "Are you sure you want to leave? Your changes will not be saved.",
       "confirm": "Leave without saving"
+    },
+    "viewerBanner": "You're viewing this trip in read-only mode. You cannot make changes.",
+    "roles": {
+      "viewer": "Viewer",
+      "editor": "Editor"
     }
   },
   "allTrips": {

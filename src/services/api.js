@@ -113,6 +113,23 @@ export const api = {
       request(`/trips/${id}`, {
         method: 'DELETE',
       }),
+
+    getCollaborators: (id) => request(`/trips/${id}/collaborators`),
+
+    share: (id, userId, role) =>
+      request(`/trips/${id}/share`, {
+        method: 'POST',
+        body: JSON.stringify({ userId, role }),
+      }),
+
+    updateShare: (id, userId, role) =>
+      request(`/trips/${id}/share/${userId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ role }),
+      }),
+
+    removeShare: (id, userId) =>
+      request(`/trips/${id}/share/${userId}`, { method: 'DELETE' }),
   },
 
   // ── Settings ────────────────────────────────────────────────
