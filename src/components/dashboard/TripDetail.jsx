@@ -306,12 +306,21 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
             />
           )}
           {trip.role === 'owner' && (
-            <button
-              onClick={() => setShowShareModal(true)}
-              className="hidden md:flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl font-bold transition-all duration-300 shrink-0 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-95 cursor-pointer"
-            >
-              <Users size={18} strokeWidth={2.5} /> {t('shareModal.shareButton')}
-            </button>
+            <>
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-95 transition-all duration-300 cursor-pointer shrink-0"
+                title={t('shareModal.shareButton')}
+              >
+                <Users size={18} strokeWidth={2.5} />
+              </button>
+              <button
+                onClick={() => setShowShareModal(true)}
+                className="hidden md:flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl font-bold transition-all duration-300 shrink-0 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-95 cursor-pointer"
+              >
+                <Users size={18} strokeWidth={2.5} /> {t('shareModal.shareButton')}
+              </button>
+            </>
           )}
           {!isViewer && (
             <button
