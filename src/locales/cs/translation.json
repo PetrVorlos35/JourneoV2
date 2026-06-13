@@ -294,7 +294,8 @@
     },
     "errors": {
       "nameRequired": "Zadejte prosím název nebo cíl cesty.",
-      "datesRequired": "Vyberte prosím datum odjezdu i návratu."
+      "datesRequired": "Vyberte prosím datum odjezdu i návratu.",
+      "durationExceeded": "Výlet nemůže být delší než 100 dní."
     },
     "toasts": {
       "noName": "Zadejte prosím název nebo cíl cesty.",

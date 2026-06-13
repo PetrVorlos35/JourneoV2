@@ -15,6 +15,25 @@ const formatDateForDb = (date) => {
   return date;
 };
 
+const MIN_TRIP_DATE = new Date('2024-01-01');
+const MAX_TRIP_DAYS = 100;
+
+const validateTripDates = (startDate, endDate) => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    return { status: 400, error: 'Neplatné datum.' };
+  }
+  if (start < MIN_TRIP_DATE) {
+    return { status: 400, error: 'Datum začátku musí být nejdříve 1. 1. 2024.' };
+  }
+  const diffDays = (end - start) / (1000 * 60 * 60 * 24);
+  if (diffDays > MAX_TRIP_DAYS) {
+    return { status: 400, error: 'Výlet nemůže být delší než 100 dní.' };
+  }
+  return null;
+};
+
 // ── GET /api/trips ──────────────────────────────────────────
 // Vrátí všechny výlety uživatele včetně všech vnořených dat
 router.get('/', async (req, res) => {
@@ -103,6 +122,11 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Název, datum od a datum do jsou povinné.' });
     }
 
+    const dateValidationError = validateTripDates(startDate, endDate);
+    if (dateValidationError) {
+      return res.status(dateValidationError.status).json({ error: dateValidationError.error });
+    }
+
     const [result] = await pool.query(
       'INSERT INTO trips (user_id, title, start_date, end_date) VALUES (?, ?, ?, ?)',
       [userId, title, formatDateForDb(startDate), formatDateForDb(endDate)]
@@ -150,6 +174,16 @@ router.put('/:id', async (req, res) => {
     }
 
     // Update trip basic info
+    if (startDate || endDate) {
+      const effectiveStart = startDate || (await connection.query("SELECT DATE_FORMAT(start_date, '%Y-%m-%d') AS d FROM trips WHERE id = ?", [tripId]))[0][0]?.d;
+      const effectiveEnd = endDate || (await connection.query("SELECT DATE_FORMAT(end_date, '%Y-%m-%d') AS d FROM trips WHERE id = ?", [tripId]))[0][0]?.d;
+      const dateValidationError = validateTripDates(effectiveStart, effectiveEnd);
+      if (dateValidationError) {
+        await connection.rollback();
+        return res.status(dateValidationError.status).json({ error: dateValidationError.error });
+      }
+    }
+
     if (title || startDate || endDate) {
       await connection.query(
         'UPDATE trips SET title = COALESCE(?, title), start_date = COALESCE(?, start_date), end_date = COALESCE(?, end_date) WHERE id = ?',

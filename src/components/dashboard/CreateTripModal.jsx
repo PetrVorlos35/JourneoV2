@@ -20,7 +20,11 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
   const [range, setRange] = useState({ from: undefined, to: undefined });
   const [isLoading, setIsLoading] = useState(false);
   const [dateError, setDateError] = useState(false);
+  const [durationError, setDurationError] = useState(false);
   const [nameError, setNameError] = useState(false);
+
+  const MIN_DATE = new Date('2024-01-01');
+  const MAX_DATE = new Date('2030-12-31');
 
   const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
 
@@ -31,6 +35,7 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
       setRange({ from: undefined, to: undefined });
       setIsLoading(false);
       setDateError(false);
+      setDurationError(false);
       setNameError(false);
     }
   }, [isOpen]);
@@ -66,9 +71,16 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
       setNameError(true);
       return;
     }
-    if (step === 2 && (!formData.startDate || !formData.endDate)) {
-      setDateError(true);
-      return;
+    if (step === 2) {
+      if (!formData.startDate || !formData.endDate) {
+        setDateError(true);
+        return;
+      }
+      const diffDays = (new Date(formData.endDate) - new Date(formData.startDate)) / (1000 * 60 * 60 * 24);
+      if (diffDays > 100) {
+        setDurationError(true);
+        return;
+      }
     }
     if (step < totalSteps) setStep(step + 1);
   };
@@ -261,9 +273,11 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                             <DayPicker mode="range" selected={range} onSelect={(newRange) => {
                                 setRange(newRange);
                                 setDateError(false);
+                                setDurationError(false);
                                 if (newRange?.from) setFormData(prev => ({ ...prev, startDate: format(newRange.from, 'yyyy-MM-dd') }));
                                 if (newRange?.to) setFormData(prev => ({ ...prev, endDate: format(newRange.to, 'yyyy-MM-dd') }));
                               }}
+                              fromDate={MIN_DATE} toDate={MAX_DATE}
                               locale={dateLocale} numberOfMonths={1} className="premium-calendar"
                             />
                           </div>
@@ -271,6 +285,12 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                             <p className="flex items-center gap-1.5 text-red-500 text-[12px] font-semibold">
                               <AlertCircle size={13} strokeWidth={2.5} />
                               {t('createTripModal.errors.datesRequired')}
+                            </p>
+                          )}
+                          {durationError && (
+                            <p className="flex items-center gap-1.5 text-red-500 text-[12px] font-semibold">
+                              <AlertCircle size={13} strokeWidth={2.5} />
+                              {t('createTripModal.errors.durationExceeded')}
                             </p>
                           )}
                         </div>
@@ -303,9 +323,9 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                             <div className="w-full">
                               <p className="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold mb-1 ml-2">{t('createTripModal.step3.datesLabel')}</p>
                               <div className={`flex items-center flex-wrap gap-1 sm:gap-2 font-bold text-lg sm:text-2xl tracking-tight leading-tight ${dateError ? 'text-red-500' : 'text-gray-900 dark:text-white'}`}>
-                                <input type="date" value={formData.startDate} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} className={`bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 rounded-lg px-2 py-1 transition-all -ml-2 cursor-pointer ${dateError ? 'focus:ring-red-500 ring-1 ring-red-500/50' : 'focus:ring-black/10 dark:focus:ring-white/20'}`} />
+                                <input type="date" value={formData.startDate} min="2024-01-01" max="2030-12-31" onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} className={`bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 rounded-lg px-2 py-1 transition-all -ml-2 cursor-pointer ${dateError ? 'focus:ring-red-500 ring-1 ring-red-500/50' : 'focus:ring-black/10 dark:focus:ring-white/20'}`} />
                                 <span className="text-gray-300 dark:text-white/20">—</span>
-                                <input type="date" value={formData.endDate} onChange={(e) => setFormData({ ...formData, endDate: e.target.value })} className={`bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 rounded-lg px-2 py-1 transition-all cursor-pointer ${dateError ? 'focus:ring-red-500 ring-1 ring-red-500/50' : 'focus:ring-black/10 dark:focus:ring-white/20'}`} />
+                                <input type="date" value={formData.endDate} min="2024-01-01" max="2030-12-31" onChange={(e) => setFormData({ ...formData, endDate: e.target.value })} className={`bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 rounded-lg px-2 py-1 transition-all cursor-pointer ${dateError ? 'focus:ring-red-500 ring-1 ring-red-500/50' : 'focus:ring-black/10 dark:focus:ring-white/20'}`} />
                               </div>
                             </div>
                           </div>

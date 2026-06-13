@@ -294,7 +294,8 @@
     },
     "errors": {
       "nameRequired": "Please enter a trip name or destination.",
-      "datesRequired": "Please select both a start and end date."
+      "datesRequired": "Please select both a start and end date.",
+      "durationExceeded": "Trip cannot exceed 100 days."
     },
     "toasts": {
       "noName": "Please enter a trip name or destination.",
