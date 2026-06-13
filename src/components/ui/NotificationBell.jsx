@@ -187,7 +187,11 @@ const NotificationBell = () => {
                         </div>
                         <div className="flex-1 min-w-0 flex flex-col gap-1">
                           <p className={`text-sm leading-tight break-words ${!n.isRead ? 'font-bold text-gray-900 dark:text-white' : 'font-medium text-gray-600 dark:text-gray-400'}`}>
-                            {n.message}
+                            {n.type === 'FRIEND_REQUEST'
+                              ? t('notifications.messages.friendRequest', { name: n.actorName || '?' })
+                              : n.type === 'FRIEND_ACCEPTED'
+                                ? t('notifications.messages.friendAccepted', { name: n.actorName || '?' })
+                                : n.actorName || '—'}
                           </p>
                           <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
                             {timeAgo(n.createdAt)}

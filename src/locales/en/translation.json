@@ -6,7 +6,44 @@
     "hero": {
       "title": "All your journeys in one place.",
       "subtitle": "From idea to destination. Build simple itineraries for your trips in a clean and minimalist design.",
-      "cta": "Create your first trip"
+      "cta": "Create your first trip",
+      "eyebrow": "Journeo — Your travel companion"
+    },
+    "problem": {
+      "label": "The old way",
+      "title": "Chaos.",
+      "titleAlt": "Every time.",
+      "filename": "Trip_FINAL_v7_REAL_final_ok.xlsx",
+      "col1": "Destination",
+      "col2": "Departure",
+      "col3": "Expenses",
+      "col4": "Status",
+      "chat": {
+        "name": "Jana 💬",
+        "msg": "wait, which hotel did we end up booking??",
+        "ago": "2 minutes ago"
+      },
+      "notes": {
+        "name": "Notes 📋",
+        "msg": "fix that formula in excel...",
+        "today": "today"
+      },
+      "rows": [
+        { "dest": "Japan",    "date": "10/12/2026", "expense": "#REF!",      "status": "❌ Error" },
+        { "dest": "Italy",    "date": "07/03/2025", "expense": "$1,100",     "status": "✓" },
+        { "dest": "Spain",    "date": "???",         "expense": "$1,300",     "status": "⚠️" },
+        { "dest": "Thailand", "date": "12/20/2025", "expense": "=SUM(???)", "status": "❌" },
+        { "dest": "France",   "date": "02/14/2026", "expense": "no idea...", "status": "🤔" }
+      ]
+    },
+    "solution": {
+      "label": "The new way — Journeo",
+      "destination": "Kyoto, Japan",
+      "dates": "Oct 12 – Oct 26, 2026",
+      "trip2": "Barcelona, Spain",
+      "trip2dates": "Apr 15 – Apr 22, 2026",
+      "activities1": "8 activities",
+      "activities2": "5 activities"
     },
     "mobile": {
       "phase1": { "title": "The world waits\nto be explored." },
@@ -640,6 +677,10 @@
       "hoursAgo": "{{count}}h ago",
       "daysAgo": "{{count}}d ago",
       "weeksAgo": "{{count}}w ago"
+    },
+    "messages": {
+      "friendRequest": "{{name}} sent you a friend request.",
+      "friendAccepted": "{{name}} accepted your friend request."
     }
   },
   "friendProfile": {
@@ -893,5 +934,59 @@
     "back": "Back",
     "open": "Open",
     "search": "Search"
+  },
+  "privacyPolicy": {
+    "back": "Back to home",
+    "title": "Privacy Policy",
+    "effectiveDate": "Effective date: January 1, 2026",
+    "section1": {
+      "title": "1. What data we collect",
+      "content": "We collect data you provide when registering (name, email), and data about your trips that you enter into the app yourself (locations, dates, expenses, notes, photos)."
+    },
+    "section2": {
+      "title": "2. How we use your data",
+      "content": "We use the collected data exclusively to provide the Journeo app services, synchronize your devices, and improve the user experience. Your trips are not public unless you choose to share them with friends through community features."
+    },
+    "section3": {
+      "title": "3. Sharing with third parties",
+      "content": "We do not sell your personal data to any third parties. Data may only be shared with technical infrastructure providers (e.g., hosting services, databases) who are bound by confidentiality."
+    },
+    "section4": {
+      "title": "4. Your rights (GDPR)",
+      "content": "You have the right to access your personal data, correct it, delete it (\"right to be forgotten\"), and to data portability. To exercise these rights, please contact us."
+    },
+    "section5": {
+      "title": "5. Contact",
+      "content": "If you have questions about this policy, contact us at podpora@journeo.app."
+    }
+  },
+  "termsOfService": {
+    "back": "Back to home",
+    "title": "Terms of Service",
+    "effectiveDate": "Effective date: January 1, 2026",
+    "section1": {
+      "title": "1. Acceptance of terms",
+      "content": "By using the Journeo app (\"Service\") you agree to these Terms of Service. If you do not agree, please do not use this app."
+    },
+    "section2": {
+      "title": "2. User accounts",
+      "content": "When creating an account you must provide accurate and complete information. You are responsible for keeping your password secure and for all activity that occurs on your account."
+    },
+    "section3": {
+      "title": "3. User content",
+      "content": "You retain all rights to content you upload to the Service (including photos and trip notes). By uploading content you grant us a non-exclusive licence to display that content for the purpose of providing the Service. You may not upload illegal, offensive, or harmful content."
+    },
+    "section4": {
+      "title": "4. Service availability",
+      "content": "The Service is provided \"as is\". We do not guarantee that it will always be error-free, secure, or uninterrupted. We reserve the right to suspend, modify, or discontinue the Service at any time."
+    },
+    "section5": {
+      "title": "5. Termination",
+      "content": "We may cancel or suspend your account without prior notice if you violate these Terms of Service. Upon account deletion, your data will be removed in accordance with our Privacy Policy."
+    },
+    "section6": {
+      "title": "6. Contact",
+      "content": "For any questions about these terms, contact us at podpora@journeo.app."
+    }
   }
 }

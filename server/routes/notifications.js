@@ -10,10 +10,27 @@ router.get('/', async (req, res) => {
     const userId = req.userId;
 
     const [rows] = await pool.query(
-      `SELECT id, type, reference_id AS referenceId, message, is_read AS isRead, created_at AS createdAt
-       FROM notifications
-       WHERE user_id = ?
-       ORDER BY created_at DESC
+      `SELECT
+         n.id,
+         n.type,
+         n.reference_id AS referenceId,
+         n.is_read      AS isRead,
+         n.created_at   AS createdAt,
+         TRIM(CONCAT(
+           COALESCE(CASE WHEN n.type = 'FRIEND_REQUEST'  THEN u_req.first_name
+                         WHEN n.type = 'FRIEND_ACCEPTED' THEN u_addr.first_name
+                    END, ''),
+           ' ',
+           COALESCE(CASE WHEN n.type = 'FRIEND_REQUEST'  THEN u_req.last_name
+                         WHEN n.type = 'FRIEND_ACCEPTED' THEN u_addr.last_name
+                    END, '')
+         )) AS actorName
+       FROM notifications n
+       LEFT JOIN friendships f     ON f.id = n.reference_id
+       LEFT JOIN users      u_req  ON u_req.id  = f.requester_id
+       LEFT JOIN users      u_addr ON u_addr.id = f.addressee_id
+       WHERE n.user_id = ?
+       ORDER BY n.created_at DESC
        LIMIT 50`,
       [userId]
     );
@@ -22,6 +39,7 @@ router.get('/', async (req, res) => {
       notifications: rows.map(n => ({
         ...n,
         isRead: !!n.isRead,
+        actorName: n.actorName || null,
       })),
     });
   } catch (err) {

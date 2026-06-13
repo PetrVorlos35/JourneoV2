@@ -1,300 +1,522 @@
 "use client";
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronRight, ChevronDown, Clock, Plane, MapPin, Calendar, TrendingUp, Wallet, Users, Globe, LineChart } from 'lucide-react';
-import { motion, useScroll, useTransform, useMotionTemplate } from 'framer-motion';
+import { ArrowRight, Home, Plane, Wallet, Users, LineChart, BarChart2 } from 'lucide-react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import Navbar from './Navbar';
-import HorizontalScrollCarousel from './ui/HorizontalScrollCarousel';
-import SpotlightCard from './ui/SpotlightCard';
-
 import JourneoLogo from '../assets/Journeo_whitelogo.png';
 
 const LandingPage = () => {
   const { t } = useTranslation();
-  // Hero parallax hooks
+  const scrollRef = useRef(null);
+
+  const sectionScrollRange = useMemo(
+    () => (typeof window !== 'undefined' ? window.innerHeight * 5 : 4500),
+    []
+  );
   const { scrollY } = useScroll();
-  const heroBackgroundY = useTransform(scrollY, [0, 1000], [0, 300]);
+  const scrollYProgress = useTransform(scrollY, [0, sectionScrollRange], [0, 1]);
 
+  // ── Phase 1 : HERO (0.00 → 0.20) ─────────────────────────────────────────
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.02, 0.14, 0.20], [1, 1, 1, 0]);
+  const heroScale   = useTransform(scrollYProgress, [0.02, 0.20], [1, 0.88]);
+  const heroY       = useTransform(scrollYProgress, [0.02, 0.20], [0, -80]);
+  const watermarkY  = useTransform(scrollYProgress, [0, 0.20], [0, -240]);
+  const orbY        = useTransform(scrollYProgress, [0, 0.20], [0, -100]);
+  const orbOp       = useTransform(scrollYProgress, [0, 0.14, 0.20], [1, 1, 0]);
 
+  // ── Phase 2 : PROBLEM (0.22 → 0.44) ──────────────────────────────────────
+  const probOpacity = useTransform(scrollYProgress, [0.22, 0.30, 0.37, 0.44], [0, 1, 1, 0]);
+  const probY       = useTransform(scrollYProgress, [0.22, 0.30], [100, 0]);
+  const probBlurRaw = useTransform(scrollYProgress, [0.37, 0.44], [0, 20]);
+  const probFilter  = useTransform(probBlurRaw, v => `blur(${v}px)`);
+
+  // ── Phase 3 : DASHBOARD (0.46 → 0.68) ────────────────────────────────────
+  const cardOpacity = useTransform(scrollYProgress, [0.46, 0.54, 0.61, 0.68], [0, 1, 1, 0]);
+  const cardY       = useTransform(scrollYProgress, [0.46, 0.54], [140, 0]);
+  const cardRotateX = useTransform(scrollYProgress, [0.54, 0.68], [0, -12]);
+  const cardGlowOp  = useTransform(scrollYProgress, [0.46, 0.54, 0.61, 0.68], [0, 1, 1, 0]);
+
+  // ── Phase 4 : FEATURES (0.70 → 0.87) ─────────────────────────────────────
+  const f1Op = useTransform(scrollYProgress, [0.70, 0.75, 0.82, 0.87], [0, 1, 1, 0]);
+  const f1Y  = useTransform(scrollYProgress, [0.70, 0.75], [80, 0]);
+  const f1X  = useTransform(scrollYProgress, [0.70, 0.75], [-40, 0]);
+  const f2Op = useTransform(scrollYProgress, [0.73, 0.78, 0.82, 0.87], [0, 1, 1, 0]);
+  const f2Y  = useTransform(scrollYProgress, [0.73, 0.78], [80, 0]);
+  const f3Op = useTransform(scrollYProgress, [0.76, 0.81, 0.82, 0.87], [0, 1, 1, 0]);
+  const f3Y  = useTransform(scrollYProgress, [0.76, 0.81], [80, 0]);
+  const f3X  = useTransform(scrollYProgress, [0.76, 0.81], [40, 0]);
+
+  // ── Phase 5 : CTA (0.89 → 1.00) ──────────────────────────────────────────
+  const ctaOpacity = useTransform(scrollYProgress, [0.89, 0.96], [0, 1]);
+  const ctaScale   = useTransform(scrollYProgress, [0.89, 0.96], [0.92, 1]);
+  const ctaY       = useTransform(scrollYProgress, [0.89, 0.96], [60, 0]);
+  const ctaPtr     = useTransform(ctaOpacity, v => (v > 0.15 ? 'auto' : 'none'));
+
+  const sheetCols = [
+    t('landing.problem.col1'),
+    t('landing.problem.col2'),
+    t('landing.problem.col3'),
+    t('landing.problem.col4'),
+  ];
+
+  const sheetRowMeta = [
+    { bg: 'bg-red-500/[0.06]',   colors: ['text-white/55', 'text-white/32', 'text-red-400 font-mono',         'text-red-400/70'] },
+    { bg: '',                     colors: ['text-white/55', 'text-white/32', 'text-emerald-400/65 font-mono', 'text-emerald-400/65'] },
+    { bg: 'bg-yellow-500/[0.04]', colors: ['text-white/55', 'text-white/22', 'text-white/38 font-mono',        'text-yellow-400/65'] },
+    { bg: 'bg-red-500/[0.04]',   colors: ['text-white/55', 'text-white/32', 'text-red-400/75 font-mono',      'text-red-400/70'] },
+    { bg: '',                     colors: ['text-white/38', 'text-white/22', 'text-white/18 font-mono',        'text-white/28'] },
+  ];
+
+  const sheetRows = t('landing.problem.rows', { returnObjects: true });
+
+  const dashTrips = [
+    {
+      dest: t('landing.solution.destination'),
+      dates: t('landing.solution.dates'),
+      activities: t('landing.solution.activities1'),
+      colorIcon: 'text-indigo-300',
+      colorBg: 'bg-indigo-500/15',
+      colorBtn: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/18',
+    },
+    {
+      dest: t('landing.solution.trip2'),
+      dates: t('landing.solution.trip2dates'),
+      activities: t('landing.solution.activities2'),
+      colorIcon: 'text-emerald-300',
+      colorBg: 'bg-emerald-500/15',
+      colorBtn: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/18',
+    },
+  ];
 
   return (
-    <div className="dark min-h-screen selection:bg-blue-500/30 bg-black text-[#f5f5f7] font-sans">
-
+    <div className="bg-neutral-950 text-[#f5f5f7] font-sans selection:bg-blue-500/30 min-h-screen">
       <Navbar />
 
-      {/* ===== Hero Section ===== */}
-      <section className="relative h-[80vh] flex flex-col justify-center items-center text-center px-6 z-10 pt-20 overflow-hidden">
+      <div ref={scrollRef} className="relative h-[600vh]">
+        <div className="sticky top-0 h-screen overflow-hidden bg-neutral-950">
 
-        {/* Giant Watermark Text */}
-        <motion.div 
-          className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0"
-          style={{ y: heroBackgroundY }}
-        >
-          <span className="text-[20vw] font-black tracking-tighter text-white/[0.08] leading-none">
-            JOURNEO
-          </span>
-        </motion.div>
+          {/* Dot grid */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: 'radial-gradient(rgba(255,255,255,0.055) 1px, transparent 1px)',
+              backgroundSize: '36px 36px',
+            }}
+          />
 
-        <h1 className="relative z-10 text-[12vw] sm:text-[5rem] lg:text-[7rem] font-bold leading-[1.05] sm:leading-[0.95] tracking-tighter max-w-5xl mx-auto break-words mt-12">
-          {t('landing.hero.title')}
-        </h1>
-
-        <p className="relative z-10 mt-8 text-xl sm:text-2xl text-gray-400 max-w-2xl mx-auto font-medium tracking-tight">
-          {t('landing.hero.subtitle')}
-        </p>
-
-        <div className="relative z-10 flex flex-col sm:flex-row items-center gap-4 mt-12">
-          <Link to="/auth" state={{ mode: 'register' }} className="group flex items-center gap-2 px-8 py-4 bg-white text-black text-[15px] font-semibold rounded-full hover:scale-105 transition-transform duration-300 shadow-xl shadow-white/10">
-            {t('landing.hero.cta')}
-          </Link>
-        </div>
-
-        {/* Scroll Indicator */}
-        <motion.button 
-          onClick={() => window.scrollTo({ top: window.innerHeight * 0.8, behavior: 'smooth' })}
-          animate={{ y: [0, 10, 0] }} 
-          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/50 hover:text-white transition-colors cursor-pointer z-10"
-        >
-          <ChevronDown size={28} strokeWidth={2} />
-        </motion.button>
-      </section>
-
-      {/* ===== Horizontal Features Showcase (Hidden on Mobile) ===== */}
-      <HorizontalScrollCarousel />
-
-      {/* ===== Mobile Storytelling Section (Standard Scrolling with Fade-ins) ===== */}
-      <section className="md:hidden relative w-full flex flex-col pb-20 pt-10">
-        <div className="relative z-10 flex flex-col gap-24 px-6 mt-10 w-full max-w-[360px] mx-auto">
-          
-          {/* Phase 1 */}
-          <motion.div 
-            initial={{opacity: 0, y: 40}} 
-            whileInView={{opacity: 1, y: 0}} 
-            viewport={{once: true, margin: "-50px"}} 
-            transition={{duration: 0.8}}
-            className="flex flex-col items-start text-left gap-6 w-full"
-          >
-            <h2 className="text-4xl font-bold tracking-tighter text-white drop-shadow-lg leading-[1.1]">
-              {t('landing.mobile.phase1.title')}
-            </h2>
-            <div className="glass-card bg-white/10 p-6 rounded-[2rem] border border-white/20 shadow-2xl backdrop-blur-3xl w-full flex flex-col text-left">
-              <div className="flex items-center gap-2 text-blue-300 text-[10px] font-bold uppercase tracking-widest mb-4 bg-blue-500/20 self-start px-3 py-1.5 rounded-full">
-                <Clock size={14} strokeWidth={2.5} /> {t('landing.mobile.countdown.label')}
-              </div>
-              <div className="flex items-baseline gap-2 mb-4">
-                <span className="text-5xl font-bold tracking-tighter text-white leading-none">14</span>
-                <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">{t('landing.mobile.countdown.days')}</span>
-              </div>
-              <h3 className="text-xl font-bold text-white mb-1 tracking-tight">{t('carousel.card1.destination')}</h3>
-              <p className="text-gray-300 text-[13px] font-medium">{t('carousel.card1.departure')}</p>
-            </div>
-          </motion.div>
-
-          {/* Phase 2 */}
-          <motion.div 
-            initial={{opacity: 0, y: 40}} 
-            whileInView={{opacity: 1, y: 0}} 
-            viewport={{once: true, margin: "-50px"}} 
-            transition={{duration: 0.8}}
-            className="flex flex-col items-start text-left gap-6 w-full"
-          >
-            <h2 className="text-4xl font-bold tracking-tighter text-white drop-shadow-lg leading-[1.1]">
-              {t('landing.mobile.phase2.title')}
-            </h2>
-            <div className="glass-card bg-white/10 p-6 rounded-[2rem] border border-white/20 shadow-2xl backdrop-blur-3xl w-full text-left">
-              <div className="w-12 h-12 mb-5 rounded-2xl bg-blue-500/20 text-blue-300 flex items-center justify-center">
-                <MapPin size={24} strokeWidth={2} />
-              </div>
-              <h3 className="text-2xl font-bold mb-2 text-white tracking-tight">{t('carousel.card2.destination')}</h3>
-              <div className="flex items-center text-[13px] font-bold text-gray-300 gap-2 mb-5">
-                <Calendar size={14} strokeWidth={2} />
-                <span>{t('landing.mobile.tripDates')}</span>
-              </div>
-              <div className="pt-4 border-t border-white/20 flex justify-between items-center">
-                <span className="text-gray-300 text-[11px] uppercase tracking-widest font-bold">{t('landing.mobile.activities')} 24</span>
-                <span className="text-[11px] font-bold text-blue-300 uppercase tracking-widest flex items-center gap-1">{t('landing.mobile.open')} <ArrowRight size={14}/></span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Phase 3 */}
-          <motion.div 
-            initial={{opacity: 0, y: 40}} 
-            whileInView={{opacity: 1, y: 0}} 
-            viewport={{once: true, margin: "-50px"}} 
-            transition={{duration: 0.8}}
-            className="flex flex-col items-start text-left gap-6 w-full"
-          >
-            <h2 className="text-4xl font-bold tracking-tighter text-white drop-shadow-lg leading-[1.1]">
-              {t('landing.mobile.phase3.title')}
-            </h2>
-            <div className="glass-card bg-white/10 p-6 rounded-[2rem] border border-white/20 shadow-2xl backdrop-blur-3xl w-full text-left">
-              <h3 className="text-gray-300 text-[11px] flex items-center gap-2 mb-6 uppercase tracking-widest font-bold">
-                <TrendingUp size={16} strokeWidth={2.5} /> {t('landing.mobile.yourData')}
-              </h3>
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <span className="text-5xl font-bold text-white leading-none tracking-tighter">12</span>
-                  <p className="text-[11px] font-bold text-gray-300 uppercase tracking-widest mt-2">{t('landing.mobile.countries')}</p>
-                </div>
-                <div>
-                  <span className="text-5xl font-bold text-white leading-none tracking-tighter">45</span>
-                  <p className="text-[11px] font-bold text-gray-300 uppercase tracking-widest mt-2">{t('landing.mobile.days')}</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Phase 4 */}
+          {/* ── PHASE 1 — HERO ─────────────────────────────────────────── */}
           <motion.div
-            initial={{opacity: 0, scale: 0.9}}
-            whileInView={{opacity: 1, scale: 1}}
-            viewport={{once: true, margin: "-50px"}}
-            transition={{duration: 0.8}}
-            className="flex flex-col items-center text-center gap-6 pt-10"
+            style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
+            className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-6"
           >
-            <img src={JourneoLogo} alt="Journeo Logo" className="h-16 w-auto object-contain mx-auto drop-shadow-2xl" />
-            <h2 className="text-5xl font-bold tracking-tighter text-white drop-shadow-2xl">
-              {t('landing.mobile.phase4.title')}
+            {/* JOURNEO watermark */}
+            <motion.div
+              style={{ y: watermarkY }}
+              className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
+            >
+              <span className="text-[24vw] font-black tracking-tighter text-white/[0.04] leading-none">
+                JOURNEO
+              </span>
+            </motion.div>
+
+            {/* Glow orb */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+              <motion.div style={{ y: orbY, opacity: orbOp }}>
+                <motion.div
+                  animate={{ scale: [1, 1.1, 1], opacity: [0.6, 1, 0.6] }}
+                  transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+                  className="w-[500px] h-[500px] sm:w-[700px] sm:h-[700px] rounded-full"
+                  style={{
+                    background:
+                      'radial-gradient(circle, rgba(99,102,241,0.22) 0%, rgba(139,92,246,0.09) 45%, transparent 70%)',
+                  }}
+                />
+              </motion.div>
+            </div>
+
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.9 }}
+              className="relative text-[10px] tracking-[0.45em] text-white/22 uppercase mb-5 sm:mb-10 font-semibold"
+            >
+              {t('landing.hero.eyebrow')}
+            </motion.p>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 44 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+              className="relative font-black tracking-tight text-white leading-[0.92] max-w-4xl"
+              style={{ fontSize: 'clamp(2.4rem, 6vw, 6rem)' }}
+            >
+              {t('landing.hero.title')}
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.9 }}
+              className="relative mt-4 sm:mt-8 text-white/35 max-w-xs sm:max-w-lg leading-relaxed text-sm sm:text-base"
+            >
+              {t('landing.hero.subtitle')}
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.5, duration: 1 }}
+              className="relative mt-8 sm:mt-16 flex flex-col items-center gap-3"
+            >
+              <span className="text-white/18 text-[9px] tracking-[0.4em] uppercase font-medium">
+                Scroll
+              </span>
+              <motion.div
+                animate={{ y: [0, 10, 0] }}
+                transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
+                className="w-px h-8 sm:h-10 bg-gradient-to-b from-white/22 to-transparent"
+              />
+            </motion.div>
+          </motion.div>
+
+          {/* ── PHASE 2 — PROBLEM ──────────────────────────────────────── */}
+          <motion.div
+            style={{ opacity: probOpacity, y: probY, filter: probFilter }}
+            className="absolute inset-0 z-20 flex flex-col items-center justify-center px-4 sm:px-6 pointer-events-none"
+          >
+            <div className="relative w-full max-w-2xl lg:max-w-3xl mb-5 sm:mb-8">
+              {/* Ghost rows — hidden on mobile so they don't overflow */}
+              <div className="hidden sm:block absolute -top-10 left-4 right-4 h-14 rounded-2xl bg-red-500/6 border border-red-500/12 rotate-[-2deg]" />
+              <div className="hidden sm:block absolute -top-4 left-0 right-10 h-14 rounded-2xl bg-yellow-500/6 border border-yellow-500/10 rotate-[1.5deg]" />
+
+              {/* Spreadsheet */}
+              <div className="relative rounded-2xl border border-white/8 bg-neutral-900/90 overflow-hidden">
+                <div className="flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-white/[0.03] border-b border-white/5">
+                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500/70" />
+                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500/70" />
+                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500/35" />
+                  <span className="ml-2 text-white/18 text-[10px] font-mono truncate">
+                    {t('landing.problem.filename')}
+                  </span>
+                </div>
+                {/* On mobile show 4 cols; on sm+ show 5 (with empty action col) */}
+                <div className="grid grid-cols-4 sm:grid-cols-5 bg-white/[0.03] border-b border-white/5">
+                  {sheetCols.map((h, i) => (
+                    <div key={i} className="px-2 sm:px-3 py-2 text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-white/18 border-r border-white/[0.04] last:border-r-0">
+                      {h}
+                    </div>
+                  ))}
+                  <div className="hidden sm:block px-3 py-2 border-l border-white/[0.04]" />
+                </div>
+                {sheetRows.map((row, i) => {
+                  const meta = sheetRowMeta[i];
+                  const cells = [row.dest, row.date, row.expense, row.status];
+                  return (
+                    <div key={i} className={`grid grid-cols-4 sm:grid-cols-5 border-b border-white/[0.03] last:border-b-0 ${meta.bg}`}>
+                      {cells.map((cell, j) => (
+                        <div key={j} className={`px-2 sm:px-3 py-2.5 sm:py-3 text-[10px] sm:text-[11px] border-r border-white/[0.03] last:border-r-0 truncate ${meta.colors[j]}`}>
+                          {cell}
+                        </div>
+                      ))}
+                      <div className="hidden sm:block border-l border-white/[0.03]" />
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Floating bubbles — desktop only */}
+              <div className="hidden sm:block absolute -right-14 top-8 bg-[#1c1c1e] border border-white/10 rounded-2xl p-3.5 w-52 shadow-2xl rotate-[2deg]">
+                <p className="text-white/75 text-xs font-semibold">{t('landing.problem.chat.name')}</p>
+                <p className="text-white/38 text-[11px] mt-1 leading-snug">{t('landing.problem.chat.msg')}</p>
+                <p className="text-white/18 text-[10px] mt-2">{t('landing.problem.chat.ago')}</p>
+              </div>
+              <div className="hidden sm:block absolute -left-14 bottom-8 bg-[#1c1c1e] border border-white/10 rounded-2xl p-3.5 w-46 shadow-2xl -rotate-[1.5deg]">
+                <p className="text-white/75 text-xs font-semibold">{t('landing.problem.notes.name')}</p>
+                <p className="text-white/38 text-[11px] mt-1 leading-snug">{t('landing.problem.notes.msg')}</p>
+                <p className="text-white/18 text-[10px] mt-2">{t('landing.problem.notes.today')}</p>
+              </div>
+            </div>
+
+            <p className="text-white/18 text-[10px] font-semibold tracking-[0.4em] uppercase mb-4">
+              {t('landing.problem.label')}
+            </p>
+            <h2
+              className="font-black tracking-tight text-white text-center leading-[0.92]"
+              style={{ fontSize: 'clamp(2rem, 7vw, 7rem)' }}
+            >
+              {t('landing.problem.title')}<br />
+              <span className="text-white/22">{t('landing.problem.titleAlt')}</span>
             </h2>
           </motion.div>
 
-        </div>
-      </section>
+          {/* ── PHASE 3 — DASHBOARD ────────────────────────────────────── */}
+          <motion.div
+            style={{ opacity: cardOpacity, y: cardY }}
+            className="absolute inset-0 z-30 flex flex-col items-center justify-center pointer-events-none px-4 sm:px-6"
+          >
+            <p className="text-white/18 text-[10px] font-semibold tracking-[0.4em] uppercase mb-4 sm:mb-8">
+              {t('landing.solution.label')}
+            </p>
 
-      {/* ===== Features Bento Grid ===== */}
-      <section className="relative z-10 py-24 md:py-32 px-6 bg-black border-t border-white/5 max-w-7xl mx-auto w-full">
-        <div className="text-center mb-16 md:mb-24">
-          <motion.h2 
-            initial={{opacity: 0, y: 20}} 
-            whileInView={{opacity: 1, y: 0}} 
-            viewport={{once: true}}
-            transition={{duration: 0.6}}
-            className="text-3xl md:text-5xl font-bold tracking-tighter text-white mb-6"
-          >
-            {t('landing.features.title')}
-          </motion.h2>
-          <motion.p
-            initial={{opacity: 0, y: 20}}
-            whileInView={{opacity: 1, y: 0}}
-            viewport={{once: true}}
-            transition={{duration: 0.6, delay: 0.1}}
-            className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto font-medium tracking-tight"
-          >
-            {t('landing.features.subtitle')}
-          </motion.p>
-        </div>
+            <div style={{ perspective: '1400px' }} className="relative w-full max-w-sm sm:max-w-lg lg:max-w-3xl">
+              {/* Glow */}
+              <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                <motion.div
+                  className="w-full h-full"
+                  style={{
+                    opacity: cardGlowOp,
+                    background:
+                      'radial-gradient(ellipse at center, rgba(99,102,241,0.35) 0%, rgba(139,92,246,0.15) 45%, transparent 70%)',
+                    filter: 'blur(50px)',
+                  }}
+                />
+              </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 auto-rows-[minmax(280px,auto)]">
-          {/* Card 1: Rozpočet */}
-          <motion.div 
-            initial={{opacity: 0, y: 30}} 
-            whileInView={{opacity: 1, y: 0}} 
-            viewport={{once: true}}
-            transition={{duration: 0.6, delay: 0.1}}
-            className="col-span-1 md:col-span-2"
-          >
-            <SpotlightCard className="h-full p-8 flex flex-col justify-between overflow-hidden">
-              <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-6 border border-emerald-500/20">
-                <Wallet size={24} strokeWidth={2} />
-              </div>
-              <div className="relative z-10">
-                <h3 className="text-2xl font-bold text-white mb-3">{t('landing.features.budget.title')}</h3>
-                <p className="text-gray-400 font-medium">{t('landing.features.budget.description')}</p>
-              </div>
-              <div className="absolute right-0 bottom-0 translate-x-1/4 translate-y-1/4 w-64 h-64 bg-emerald-500/10 blur-[80px] rounded-full pointer-events-none z-0" />
-            </SpotlightCard>
+              <motion.div style={{ rotateX: cardRotateX }}>
+                <div
+                  className="rounded-2xl sm:rounded-3xl p-[1.5px]"
+                  style={{
+                    background:
+                      'linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.02) 50%, rgba(99,102,241,0.3) 100%)',
+                  }}
+                >
+                  <div className="rounded-[18px] sm:rounded-[22px] bg-[#0c0c0f] overflow-hidden">
+
+                    {/* App header */}
+                    <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-white/5">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg flex items-center justify-center flex-shrink-0"
+                          style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+                        >
+                          <span className="text-white text-[9px] sm:text-[10px] font-black">J</span>
+                        </div>
+                        <span className="text-white/60 text-xs sm:text-sm font-semibold">
+                          {t('tripsOverview.title')}
+                        </span>
+                      </div>
+                      <div className="text-[10px] sm:text-[11px] text-white/40 bg-white/[0.04] border border-white/8 rounded-lg sm:rounded-xl px-2.5 sm:px-3 py-1 sm:py-1.5 flex items-center gap-1">
+                        <span className="text-indigo-400 font-bold leading-none">+</span>
+                        <span className="hidden sm:inline">{t('tripsOverview.actions.newTrip')}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex">
+                      {/* Sidebar — hidden on mobile */}
+                      <div className="hidden sm:flex w-12 lg:w-14 border-r border-white/5 flex-col items-center py-4 gap-4 lg:gap-5 flex-shrink-0">
+                        <Home size={14} className="text-indigo-400" />
+                        <Plane size={14} className="text-white/22" />
+                        <BarChart2 size={14} className="text-white/22" />
+                        <Users size={14} className="text-white/22" />
+                        <Wallet size={14} className="text-white/22" />
+                      </div>
+
+                      {/* Main content */}
+                      <div className="flex-1 p-3 sm:p-4 lg:p-5 space-y-2.5 sm:space-y-3 min-w-0">
+
+                        {/* Countdown */}
+                        <div className="rounded-xl sm:rounded-2xl bg-indigo-500/8 border border-indigo-500/14 px-3 sm:px-4 py-3 sm:py-4">
+                          <p className="text-white/28 text-[8px] sm:text-[9px] uppercase tracking-widest mb-1.5 font-semibold">
+                            {t('tripsOverview.countdown.label')}
+                          </p>
+                          <div className="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
+                            <span className="text-white font-black text-3xl sm:text-4xl lg:text-5xl leading-none tracking-tighter">
+                              121
+                            </span>
+                            <span className="text-white/35 text-[10px] sm:text-xs uppercase tracking-widest font-medium">
+                              {t('tripsOverview.countdown.days')}
+                            </span>
+                            <span className="text-white/38 text-xs sm:text-sm ml-0.5 truncate">
+                              · {t('landing.solution.destination')}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Stats */}
+                        <div className="grid grid-cols-3 gap-2">
+                          {[
+                            { num: '8',   label: t('tripsOverview.stats.trips') },
+                            { num: '156', label: t('tripsOverview.countdown.days') },
+                            { num: '24',  label: t('tripsOverview.stats.places') },
+                          ].map((stat, i) => (
+                            <div key={i} className="rounded-lg sm:rounded-xl bg-white/[0.04] border border-white/5 px-2 sm:px-3 py-2.5 sm:py-3 text-center">
+                              <p className="text-white font-bold text-lg sm:text-xl lg:text-2xl">{stat.num}</p>
+                              <p className="text-white/25 text-[8px] sm:text-[9px] uppercase tracking-wider mt-0.5 sm:mt-1 font-semibold">
+                                {stat.label}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Trip cards */}
+                        {dashTrips.map((trip, i) => (
+                          <div key={i} className="rounded-lg sm:rounded-xl bg-white/[0.04] border border-white/5 px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                              <div className={`w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 rounded-lg sm:rounded-xl flex-shrink-0 flex items-center justify-center ${trip.colorBg}`}>
+                                <Plane size={11} className={trip.colorIcon} />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-white/80 text-[11px] sm:text-xs font-semibold truncate">{trip.dest}</p>
+                                <p className="text-white/30 text-[9px] sm:text-[10px] truncate">{trip.dates}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                              <span className="text-white/22 text-[10px] hidden lg:block">{trip.activities}</span>
+                              <span className={`text-[10px] font-medium border rounded-md sm:rounded-lg px-2 sm:px-2.5 py-0.5 sm:py-1 ${trip.colorBtn}`}>
+                                {t('tripsOverview.open')}
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
           </motion.div>
 
-          {/* Card 2: Cestovatelská komunita */}
-          <motion.div 
-            initial={{opacity: 0, y: 30}} 
-            whileInView={{opacity: 1, y: 0}} 
-            viewport={{once: true}}
-            transition={{duration: 0.6, delay: 0.2}}
-            className="col-span-1"
-          >
-            <SpotlightCard className="h-full p-8 flex flex-col justify-between overflow-hidden">
-              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-6 border border-blue-500/20">
-                <Users size={24} strokeWidth={2} />
+          {/* ── PHASE 4 — FEATURES ─────────────────────────────────────── */}
+          <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none px-4 sm:px-6">
+            <div className="w-full max-w-xs sm:max-w-2xl lg:max-w-6xl">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 lg:gap-7">
+                {[
+                  {
+                    op: f1Op, y: f1Y, x: f1X,
+                    num: '01',
+                    icon: <Wallet size={22} className="sm:hidden" />,
+                    iconLg: <Wallet size={26} className="hidden sm:block" />,
+                    iconBg: 'bg-emerald-500/14', iconColor: 'text-emerald-400',
+                    border: 'border-emerald-500/10', from: 'from-emerald-500/7',
+                    title: t('landing.features.budget.title'),
+                    desc: t('landing.features.budget.description'),
+                  },
+                  {
+                    op: f2Op, y: f2Y, x: 0,
+                    num: '02',
+                    icon: <Users size={22} className="sm:hidden" />,
+                    iconLg: <Users size={26} className="hidden sm:block" />,
+                    iconBg: 'bg-blue-500/14', iconColor: 'text-blue-400',
+                    border: 'border-blue-500/10', from: 'from-blue-500/7',
+                    title: t('landing.features.community.title'),
+                    desc: t('landing.features.community.description'),
+                  },
+                  {
+                    op: f3Op, y: f3Y, x: f3X,
+                    num: '03',
+                    icon: <LineChart size={22} className="sm:hidden" />,
+                    iconLg: <LineChart size={26} className="hidden sm:block" />,
+                    iconBg: 'bg-violet-500/14', iconColor: 'text-violet-400',
+                    border: 'border-violet-500/10', from: 'from-violet-500/7',
+                    title: t('landing.features.stats.title'),
+                    desc: t('landing.features.stats.description'),
+                  },
+                ].map((feat, i) => (
+                  <motion.div key={i} style={{ opacity: feat.op, y: feat.y, x: feat.x }}>
+                    <div className={`rounded-2xl sm:rounded-3xl bg-gradient-to-b ${feat.from} to-transparent border ${feat.border} p-5 sm:p-7 lg:p-10 h-full`}>
+                      <div className="flex items-start justify-between mb-4 sm:mb-7 lg:mb-8">
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 rounded-xl sm:rounded-2xl ${feat.iconBg} flex items-center justify-center ${feat.iconColor} flex-shrink-0`}>
+                          {feat.icon}
+                          {feat.iconLg}
+                        </div>
+                        <span
+                          className="font-black text-5xl sm:text-6xl lg:text-7xl leading-none select-none"
+                          style={{ color: 'rgba(255,255,255,0.05)' }}
+                        >
+                          {feat.num}
+                        </span>
+                      </div>
+                      <h3 className="text-white font-bold text-sm sm:text-base lg:text-2xl mb-2 sm:mb-3">{feat.title}</h3>
+                      <p className="text-white/30 text-xs sm:text-sm lg:text-base leading-relaxed line-clamp-3 sm:line-clamp-none">{feat.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
               </div>
-              <div className="relative z-10">
-                <h3 className="text-2xl font-bold text-white mb-3">{t('landing.features.community.title')}</h3>
-                <p className="text-gray-400 font-medium">{t('landing.features.community.description')}</p>
-              </div>
-              <div className="absolute right-0 bottom-0 translate-x-1/3 translate-y-1/3 w-48 h-48 bg-blue-500/10 blur-[60px] rounded-full pointer-events-none z-0" />
-            </SpotlightCard>
-          </motion.div>
-
-          {/* Card 3: Detailní statistiky */}
-          <motion.div 
-            initial={{opacity: 0, y: 30}} 
-            whileInView={{opacity: 1, y: 0}} 
-            viewport={{once: true}}
-            transition={{duration: 0.6, delay: 0.3}}
-            className="col-span-1"
-          >
-            <SpotlightCard className="h-full p-8 flex flex-col justify-between overflow-hidden">
-              <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-6 border border-purple-500/20">
-                <LineChart size={24} strokeWidth={2} />
-              </div>
-              <div className="relative z-10">
-                <h3 className="text-2xl font-bold text-white mb-3">{t('landing.features.stats.title')}</h3>
-                <p className="text-gray-400 font-medium">{t('landing.features.stats.description')}</p>
-              </div>
-              <div className="absolute left-0 top-0 -translate-x-1/3 -translate-y-1/3 w-48 h-48 bg-purple-500/10 blur-[60px] rounded-full pointer-events-none z-0" />
-            </SpotlightCard>
-          </motion.div>
-
-          {/* Card 4: Všechny cesty na jednom místě */}
-          <motion.div 
-            initial={{opacity: 0, y: 30}} 
-            whileInView={{opacity: 1, y: 0}} 
-            viewport={{once: true}}
-            transition={{duration: 0.6, delay: 0.4}}
-            className="col-span-1 md:col-span-2"
-          >
-            <SpotlightCard className="h-full p-8 flex flex-col justify-between overflow-hidden">
-              <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center mb-6 border border-rose-500/20">
-                <Globe size={24} strokeWidth={2} />
-              </div>
-              <div className="relative z-10">
-                <h3 className="text-2xl font-bold text-white mb-3">{t('landing.features.everything.title')}</h3>
-                <p className="text-gray-400 font-medium">{t('landing.features.everything.description')}</p>
-              </div>
-              <div className="absolute left-1/2 bottom-0 translate-x-[-50%] translate-y-1/2 w-64 h-32 bg-rose-500/10 blur-[60px] rounded-full pointer-events-none z-0" />
-            </SpotlightCard>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ===== Minimalist CTA Section ===== */}
-      <section className="relative z-10 flex flex-col justify-center items-center py-40 md:py-60 px-6 bg-black border-t border-white/5">
-        <div className="max-w-3xl text-center">
-          <h2 className="text-4xl md:text-6xl font-bold tracking-tighter text-white mb-8 leading-[1.1]">
-            {t('landing.cta.title')}
-          </h2>
-          <p className="text-xl text-gray-500 mb-12 font-medium">
-            {t('landing.cta.subtitle')}
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <Link to="/auth" state={{ mode: 'register' }} className="group flex items-center justify-center gap-4 px-10 py-5 bg-white text-black text-lg font-bold rounded-full hover:scale-105 transition-transform duration-300 shadow-[0_0_40px_rgba(255,255,255,0.15)]">
-              {t('landing.cta.button')}
-              <ArrowRight size={20} className="group-hover:translate-x-1.5 transition-transform duration-300" />
-            </Link>
+            </div>
           </div>
-        </div>
-      </section>
 
-      {/* ===== Footer ===== */}
-      <footer className="py-8 px-6 text-center text-sm font-medium text-gray-500 tracking-tight relative z-10 bg-black/80 backdrop-blur-md border-t border-white/5">
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <p>&copy; {new Date().getFullYear()} <a href="https://vorlos.eu" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Petr Vorlíček</a>. {t('landing.footer.madeWith')}</p>
+          {/* ── PHASE 5 — CTA ──────────────────────────────────────────── */}
+          <motion.div
+            style={{ opacity: ctaOpacity, scale: ctaScale, y: ctaY, pointerEvents: ctaPtr }}
+            className="absolute inset-0 z-50 flex items-center justify-center px-4 sm:px-6"
+          >
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
+              <motion.div
+                animate={{ scale: [1, 1.06, 1], opacity: [0.18, 0.26, 0.18] }}
+                transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+                className="w-[350px] h-[350px] sm:w-[650px] sm:h-[650px] rounded-full"
+                style={{
+                  background:
+                    'radial-gradient(circle, rgba(99,102,241,0.45) 0%, rgba(139,92,246,0.2) 40%, transparent 70%)',
+                  filter: 'blur(70px)',
+                }}
+              />
+            </div>
+
+            <div className="relative text-center w-full max-w-sm sm:max-w-xl lg:max-w-3xl">
+              <div
+                className="rounded-2xl sm:rounded-3xl p-[1.5px]"
+                style={{
+                  background:
+                    'linear-gradient(135deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.02) 50%, rgba(99,102,241,0.28) 100%)',
+                }}
+              >
+                <div className="rounded-[18px] sm:rounded-[22px] bg-[#09090c] backdrop-blur-3xl p-7 sm:p-10 lg:p-16">
+                  <img
+                    src={JourneoLogo}
+                    alt="Journeo"
+                    className="h-6 sm:h-8 lg:h-10 w-auto object-contain mx-auto mb-5 sm:mb-8 opacity-65"
+                  />
+                  <h2
+                    className="text-white font-black tracking-tight leading-[0.92] mb-4 sm:mb-5"
+                    style={{ fontSize: 'clamp(1.8rem, 5.5vw, 5.5rem)' }}
+                  >
+                    {t('landing.cta.title')}
+                  </h2>
+                  <p className="text-white/32 leading-relaxed mb-7 sm:mb-10 max-w-xs sm:max-w-md mx-auto text-sm sm:text-base">
+                    {t('landing.cta.subtitle')}
+                  </p>
+                  <Link
+                    to="/auth"
+                    state={{ mode: 'register' }}
+                    className="inline-flex items-center gap-2 sm:gap-3 bg-white text-neutral-950 font-bold rounded-full text-sm sm:text-base px-6 sm:px-10 py-3 sm:py-4 lg:py-5 hover:scale-[1.04] hover:shadow-[0_0_50px_rgba(255,255,255,0.14)] transition-all duration-300 shadow-lg"
+                  >
+                    {t('landing.cta.button')}
+                    <ArrowRight size={15} />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="py-6 sm:py-8 px-6 text-center text-sm font-medium text-white/28 bg-neutral-950 border-t border-white/5">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+          <p>
+            &copy; {new Date().getFullYear()}{' '}
+            <a
+              href="https://vorlos.eu"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-white transition-colors"
+            >
+              Petr Vorlíček
+            </a>
+            . {t('landing.footer.madeWith')}
+          </p>
           <div className="flex items-center gap-6">
-            <Link to="/privacy" className="hover:text-white transition-colors">{t('landing.footer.privacy')}</Link>
-            <Link to="/terms" className="hover:text-white transition-colors">{t('landing.footer.terms')}</Link>
+            <Link to="/privacy" className="hover:text-white transition-colors">
+              {t('landing.footer.privacy')}
+            </Link>
+            <Link to="/terms" className="hover:text-white transition-colors">
+              {t('landing.footer.terms')}
+            </Link>
           </div>
         </div>
       </footer>

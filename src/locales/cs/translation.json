@@ -6,7 +6,44 @@
     "hero": {
       "title": "Všechny vaše cesty na jednom místě.",
       "subtitle": "Od nápadu až po cíl. Sestavte si jednoduché itineráře pro své vlastní výlety v čistém a minimalistickém designu.",
-      "cta": "Vytvořit první výlet"
+      "cta": "Vytvořit první výlet",
+      "eyebrow": "Journeo — Cestovní společník"
+    },
+    "problem": {
+      "label": "Starý způsob",
+      "title": "Chaos.",
+      "titleAlt": "Vždy.",
+      "filename": "Trip_FINAL_v7_REAL_final_ok.xlsx",
+      "col1": "Destinace",
+      "col2": "Odjezd",
+      "col3": "Výdaje",
+      "col4": "Status",
+      "chat": {
+        "name": "Jana 💬",
+        "msg": "počkej, který hotel jsme nakonec objednali??",
+        "ago": "před 2 minutami"
+      },
+      "notes": {
+        "name": "Poznámky 📋",
+        "msg": "opravit ten vzorec v excelu...",
+        "today": "dnes"
+      },
+      "rows": [
+        { "dest": "Japonsko",  "date": "12.10.2026", "expense": "#REF!",      "status": "❌ Chyba" },
+        { "dest": "Itálie",    "date": "03.07.2025", "expense": "28 000 Kč", "status": "✓" },
+        { "dest": "Španělsko", "date": "???",         "expense": "32 000 Kč", "status": "⚠️" },
+        { "dest": "Thajsko",   "date": "20.12.2025", "expense": "=SUM(???)", "status": "❌" },
+        { "dest": "Francie",   "date": "14.02.2026", "expense": "nevím...",  "status": "🤔" }
+      ]
+    },
+    "solution": {
+      "label": "Nový způsob — Journeo",
+      "destination": "Kjóto, Japonsko",
+      "dates": "12. 10. – 26. 10. 2026",
+      "trip2": "Barcelona, Španělsko",
+      "trip2dates": "15. 04. – 22. 04. 2026",
+      "activities1": "8 aktivit",
+      "activities2": "5 aktivit"
     },
     "mobile": {
       "phase1": { "title": "Svět čeká\nna objevení." },
@@ -640,6 +677,10 @@
       "hoursAgo": "před {{count}} h",
       "daysAgo": "před {{count}} d",
       "weeksAgo": "před {{count}} týd."
+    },
+    "messages": {
+      "friendRequest": "{{name}} vám poslal/a žádost o přátelství.",
+      "friendAccepted": "{{name}} přijal/a vaši žádost o přátelství."
     }
   },
   "friendProfile": {
@@ -893,5 +934,59 @@
     "back": "Zpět",
     "open": "Otevřít",
     "search": "Hledat"
+  },
+  "privacyPolicy": {
+    "back": "Zpět na hlavní stránku",
+    "title": "Zásady ochrany osobních údajů",
+    "effectiveDate": "Datum účinnosti: 1. ledna 2026",
+    "section1": {
+      "title": "1. Jaké údaje shromažďujeme",
+      "content": "Shromažďujeme údaje, které nám poskytnete při registraci (jméno, e-mail), a údaje o vašich cestách, které do aplikace sami vložíte (lokace, data, výdaje, poznámky, fotografie)."
+    },
+    "section2": {
+      "title": "2. Jak údaje využíváme",
+      "content": "Získané údaje používáme výhradně k poskytování služeb aplikace Journeo, synchronizaci vašich zařízení a vylepšování uživatelského zážitku. Vaše cesty nejsou veřejné, pokud se je nerozhodnete sdílet s přáteli v rámci komunitních funkcí."
+    },
+    "section3": {
+      "title": "3. Sdílení údajů s třetími stranami",
+      "content": "Vaše osobní údaje neprodáváme žádným třetím stranám. Údaje mohou být sdíleny pouze s poskytovateli technické infrastruktury (např. hostingové služby, databáze), kteří jsou vázáni mlčenlivostí."
+    },
+    "section4": {
+      "title": "4. Vaše práva (GDPR)",
+      "content": "Máte právo na přístup k vašim osobním údajům, jejich opravu, výmaz (\"právo být zapomenut\") a přenositelnost. Pro uplatnění těchto práv nás kontaktujte."
+    },
+    "section5": {
+      "title": "5. Kontakt",
+      "content": "Pokud máte otázky ohledně těchto zásad, kontaktujte nás na e-mailu podpora@journeo.app."
+    }
+  },
+  "termsOfService": {
+    "back": "Zpět na hlavní stránku",
+    "title": "Obchodní podmínky",
+    "effectiveDate": "Datum účinnosti: 1. ledna 2026",
+    "section1": {
+      "title": "1. Přijetí podmínek",
+      "content": "Používáním aplikace Journeo (\"Služba\") souhlasíte s těmito Obchodními podmínkami. Pokud s nimi nesouhlasíte, nepoužívejte prosím tuto aplikaci."
+    },
+    "section2": {
+      "title": "2. Uživatelské účty",
+      "content": "Při vytváření účtu musíte poskytnout přesné a úplné informace. Jste zodpovědní za zabezpečení svého hesla a za veškerou aktivitu, která se na vašem účtu odehrává."
+    },
+    "section3": {
+      "title": "3. Uživatelský obsah",
+      "content": "Vlastníte veškerá práva k obsahu, který do Služby nahrajete (včetně fotografií a poznámek z cest). Nahráním obsahu nám udělujete nevýhradní licenci k zobrazení tohoto obsahu za účelem poskytování Služby. Nesmíte nahrávat nezákonný, urážlivý nebo škodlivý obsah."
+    },
+    "section4": {
+      "title": "4. Dostupnost Služby",
+      "content": "Službu poskytujeme \"tak jak je\". Nezaručujeme, že bude vždy bez chyb, bezpečná nebo bez výpadků. Vyhrazujeme si právo Službu kdykoli pozastavit, upravit nebo ukončit."
+    },
+    "section5": {
+      "title": "5. Ukončení",
+      "content": "Váš účet můžeme zrušit nebo pozastavit bez předchozího upozornění, pokud porušíte tyto Obchodní podmínky. Zrušením účtu budou vaše data smazána v souladu s našimi Zásadami ochrany osobních údajů."
+    },
+    "section6": {
+      "title": "6. Kontakt",
+      "content": "Pro jakékoli dotazy ohledně těchto podmínek nás kontaktujte na podpora@journeo.app."
+    }
   }
 }
