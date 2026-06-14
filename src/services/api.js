@@ -130,6 +130,22 @@ export const api = {
 
     removeShare: (id, userId) =>
       request(`/trips/${id}/share/${userId}`, { method: 'DELETE' }),
+
+    generateShareLink: (id) =>
+      request(`/trips/${id}/share-link`, { method: 'POST' }),
+
+    revokeShareLink: (id) =>
+      request(`/trips/${id}/share-link`, { method: 'DELETE' }),
+  },
+
+  // ── Public (no auth) ───────────────────────────────────────
+  public: {
+    getTrip: async (token) => {
+      const res = await fetch(`${API_BASE}/public/trips/${token}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Nepodařilo se načíst výlet.');
+      return data;
+    },
   },
 
   // ── Settings ────────────────────────────────────────────────

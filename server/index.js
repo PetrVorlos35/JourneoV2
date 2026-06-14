@@ -22,6 +22,7 @@ import notificationRoutes from './routes/notifications.js';
 import statsRoutes from './routes/stats.js';
 import adminRoutes from './routes/admin.js';
 import adminAuth from './middleware/adminAuth.js';
+import publicRoutes from './routes/public.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -32,6 +33,7 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '10mb' }));
 
+app.use('/api/public', publicRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/trips', auth, tripRoutes);
 app.use('/api/settings', auth, settingsRoutes);

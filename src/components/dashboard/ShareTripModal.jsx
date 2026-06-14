@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Users, Search, Trash2, Shield, Eye, Loader2, ChevronDown } from 'lucide-react';
+import { X, Users, Search, Trash2, Shield, Eye, Loader2, ChevronDown, Link as LinkIcon, Copy, Check, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
@@ -60,6 +60,10 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
   const [addingId, setAddingId] = useState(null);
   const [removingId, setRemovingId] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
+  const [shareToken, setShareToken] = useState(null);
+  const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  const [isRevokingLink, setIsRevokingLink] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -87,8 +91,10 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
       setSearchQuery('');
       setSelectedRole('viewer');
       setShowDropdown(false);
+      setShareToken(trip?.shareToken || null);
+      setLinkCopied(false);
     }
-  }, [isOpen, loadData]);
+  }, [isOpen, loadData, trip?.shareToken]);
 
   useEffect(() => {
     const handleKey = (e) => { if (e.key === 'Escape') onClose(); };
@@ -160,6 +166,40 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
     }
   };
 
+  const shareUrl = shareToken ? `${window.location.origin}/share/${shareToken}` : null;
+
+  const handleGenerateLink = async () => {
+    setIsGeneratingLink(true);
+    try {
+      const { token } = await api.trips.generateShareLink(trip.id);
+      setShareToken(token);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setIsGeneratingLink(false);
+    }
+  };
+
+  const handleRevokeLink = async () => {
+    setIsRevokingLink(true);
+    try {
+      await api.trips.revokeShareLink(trip.id);
+      setShareToken(null);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setIsRevokingLink(false);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    if (!shareUrl) return;
+    await navigator.clipboard.writeText(shareUrl);
+    setLinkCopied(true);
+    toast.success(t('shareModal.linkCopied'));
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
+
   return createPortal(
     <AnimatePresence>
       {isOpen && (
@@ -207,6 +247,55 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
 
             {/* Scrollable body */}
             <div className="flex-1 overflow-y-auto custom-scrollbar">
+
+              {/* Share via link */}
+              <div className="px-6 py-5 border-b border-white/10">
+                <div className="flex items-center gap-2 mb-3">
+                  <LinkIcon size={13} className="text-white/50" strokeWidth={2.5} />
+                  <p className="text-white/50 text-[11px] font-bold uppercase tracking-widest">
+                    {t('shareModal.linkSection')}
+                  </p>
+                </div>
+
+                {shareToken ? (
+                  <div className="space-y-2">
+                    {/* URL display + copy */}
+                    <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5">
+                      <span className="flex-1 text-[12px] text-white/60 font-mono truncate select-all">
+                        {shareUrl}
+                      </span>
+                      <button
+                        onClick={handleCopyLink}
+                        className="shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all cursor-pointer"
+                        title={t('shareModal.linkCopy')}
+                      >
+                        {linkCopied ? <Check size={14} strokeWidth={2.5} className="text-green-400" /> : <Copy size={14} strokeWidth={2} />}
+                      </button>
+                    </div>
+                    {/* Revoke */}
+                    <button
+                      onClick={handleRevokeLink}
+                      disabled={isRevokingLink}
+                      className="flex items-center gap-2 text-[11px] font-bold text-red-400/70 hover:text-red-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isRevokingLink ? <Loader2 size={12} className="animate-spin" /> : <X size={12} strokeWidth={2.5} />}
+                      {t('shareModal.linkDisable')}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-white/30 text-[12px] font-medium">{t('shareModal.linkHint')}</p>
+                    <button
+                      onClick={handleGenerateLink}
+                      disabled={isGeneratingLink}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/15 border border-white/10 rounded-2xl text-[13px] font-bold text-white/80 hover:text-white transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isGeneratingLink ? <Loader2 size={14} className="animate-spin" /> : <LinkIcon size={14} strokeWidth={2} />}
+                      {t('shareModal.linkEnable')}
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {/* Add collaborator */}
               <div className="px-6 py-5 border-b border-white/10">

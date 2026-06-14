@@ -344,6 +344,12 @@
   },
   "shareModal": {
     "title": "Sdílet výlet",
+    "linkSection": "Sdílet odkazem",
+    "linkEnable": "Vytvořit odkaz",
+    "linkDisable": "Zrušit odkaz",
+    "linkCopy": "Kopírovat odkaz",
+    "linkCopied": "Odkaz zkopírován!",
+    "linkHint": "Kdokoli s odkazem si bude moci výlet prohlédnout.",
     "addSection": "Přidat spolupracovníka",
     "searchPlaceholder": "Hledat přítele...",
     "onlyFriendsHint": "Výlet lze sdílet pouze s přijatými přáteli.",
@@ -359,6 +365,41 @@
       "editor": "Editor",
       "viewer": "Prohlížeč"
     }
+  },
+  "publicTrip": {
+    "readOnly": "Jen pro čtení",
+    "day": "Den",
+    "days": "dní",
+    "prev": "Předchozí",
+    "next": "Další",
+    "noDayNotes": "Pro tento den nejsou žádné poznámky.",
+    "tabs": {
+      "itinerary": "Itinerář",
+      "packing": "Balení",
+      "documents": "Dokumenty"
+    },
+    "packing": {
+      "empty": "Seznam věcí je prázdný."
+    },
+    "documents": {
+      "empty": "Žádné dokumenty.",
+      "open": "Otevřít odkaz"
+    },
+    "notFound": {
+      "title": "Výlet nenalezen",
+      "desc": "Tento odkaz je neplatný nebo byl zrušen vlastníkem výletu.",
+      "cta": "Přejít na Journeo"
+    },
+    "header": {
+      "login": "Přihlásit se",
+      "signup": "Začít zdarma"
+    },
+    "cta": {
+      "title": "Plánuj výlety s Journeo",
+      "desc": "Itineráře, rozpočet a sdílení na jednom místě. Zdarma.",
+      "button": "Vytvořit účet zdarma"
+    },
+    "footer": "Výlet sdílený přes Journeo"
   },
   "tripDetail": {
     "backToDashboard": "Zpět na přehled",

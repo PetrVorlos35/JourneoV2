@@ -11,6 +11,7 @@ const DashboardHome = lazy(() => import('./components/dashboard/DashboardHome'))
 const AdminHome = lazy(() => import('./components/admin/AdminHome'));
 const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./components/TermsOfService'));
+const PublicTripView = lazy(() => import('./components/public/PublicTripView'));
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center">
@@ -75,6 +76,7 @@ function App() {
               </AdminProtectedRoute>
             }
           />
+          <Route path="/share/:token" element={<PublicTripView />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="*" element={<NotFound />} />

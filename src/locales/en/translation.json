@@ -344,6 +344,12 @@
   },
   "shareModal": {
     "title": "Share Trip",
+    "linkSection": "Share via link",
+    "linkEnable": "Create link",
+    "linkDisable": "Revoke link",
+    "linkCopy": "Copy link",
+    "linkCopied": "Link copied!",
+    "linkHint": "Anyone with the link will be able to view this trip.",
     "addSection": "Add collaborator",
     "searchPlaceholder": "Search a friend...",
     "onlyFriendsHint": "You can only share trips with accepted friends.",
@@ -359,6 +365,41 @@
       "editor": "Editor",
       "viewer": "Viewer"
     }
+  },
+  "publicTrip": {
+    "readOnly": "Read only",
+    "day": "Day",
+    "days": "days",
+    "prev": "Previous",
+    "next": "Next",
+    "noDayNotes": "No notes for this day.",
+    "tabs": {
+      "itinerary": "Itinerary",
+      "packing": "Packing",
+      "documents": "Documents"
+    },
+    "packing": {
+      "empty": "Packing list is empty."
+    },
+    "documents": {
+      "empty": "No documents.",
+      "open": "Open link"
+    },
+    "notFound": {
+      "title": "Trip not found",
+      "desc": "This link is invalid or has been revoked by the trip owner.",
+      "cta": "Go to Journeo"
+    },
+    "header": {
+      "login": "Log in",
+      "signup": "Get started free"
+    },
+    "cta": {
+      "title": "Plan trips with Journeo",
+      "desc": "Itineraries, budget and sharing in one place. Free.",
+      "button": "Create free account"
+    },
+    "footer": "Trip shared via Journeo"
   },
   "tripDetail": {
     "backToDashboard": "Back to overview",

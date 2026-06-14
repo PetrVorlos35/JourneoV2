@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { randomBytes } from 'crypto';
 import pool from '../config/db.js';
 
 const router = Router();
@@ -57,7 +58,8 @@ router.get('/', async (req, res) => {
          DATE_FORMAT(t.end_date, '%Y-%m-%d') AS endDate,
          t.created_at AS createdAt,
          'owner' AS role,
-         (SELECT COUNT(*) FROM votes v WHERE v.trip_id = t.id AND v.value = 1) AS likes
+         (SELECT COUNT(*) FROM votes v WHERE v.trip_id = t.id AND v.value = 1) AS likes,
+         t.share_token AS shareToken
        FROM trips t
        WHERE t.user_id = ?
        UNION
@@ -66,7 +68,8 @@ router.get('/', async (req, res) => {
          DATE_FORMAT(t.end_date, '%Y-%m-%d') AS endDate,
          t.created_at AS createdAt,
          tc.role,
-         NULL AS likes
+         NULL AS likes,
+         NULL AS shareToken
        FROM trips t
        JOIN trip_collaborators tc ON tc.trip_id = t.id AND tc.user_id = ?
        WHERE t.user_id != ?
@@ -448,6 +451,43 @@ router.delete('/:id/share/:targetUserId', async (req, res) => {
   } catch (err) {
     console.error('Remove share error:', err);
     res.status(500).json({ error: 'Chyba při odebírání přístupu.' });
+  }
+});
+
+// ── POST /api/trips/:id/share-link ─────────────────────────
+// Owner generates a public share token
+router.post('/:id/share-link', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const tripId = parseInt(req.params.id);
+    const role = await getTripRole(tripId, userId);
+    if (!role) return res.status(404).json({ error: 'Výlet nenalezen.' });
+    if (role !== 'owner') return res.status(403).json({ error: 'Pouze vlastník může generovat odkaz.' });
+
+    const token = randomBytes(32).toString('hex');
+    await pool.query('UPDATE trips SET share_token = ? WHERE id = ?', [token, tripId]);
+    res.json({ token });
+  } catch (err) {
+    console.error('Generate share link error:', err);
+    res.status(500).json({ error: 'Chyba při generování odkazu.' });
+  }
+});
+
+// ── DELETE /api/trips/:id/share-link ───────────────────────
+// Owner revokes the public share token
+router.delete('/:id/share-link', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const tripId = parseInt(req.params.id);
+    const role = await getTripRole(tripId, userId);
+    if (!role) return res.status(404).json({ error: 'Výlet nenalezen.' });
+    if (role !== 'owner') return res.status(403).json({ error: 'Pouze vlastník může zrušit odkaz.' });
+
+    await pool.query('UPDATE trips SET share_token = NULL WHERE id = ?', [tripId]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Revoke share link error:', err);
+    res.status(500).json({ error: 'Chyba při rušení odkazu.' });
   }
 });
 
