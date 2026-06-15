@@ -3,7 +3,7 @@ import { ArrowLeft, Eye, EyeOff, Check, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useGoogleLogin } from '@react-oauth/google';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import JourneoWhiteLogo from '../../assets/Journeo_whitelogo.png';
@@ -36,6 +36,7 @@ const AuthFlow = () => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const navigate = useNavigate();
   const { login, register, loginWithGoogle, verify, resendOtp, forgotPassword, resetPassword } = useAuth();
+  const shouldReduceMotion = useReducedMotion();
 
   const googleLoginFn = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -196,7 +197,7 @@ const AuthFlow = () => {
         <div className="mb-6 flex justify-center w-full">
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 font-semibold text-[13px] uppercase tracking-widest glass px-5 py-2.5 rounded-full cursor-pointer disabled:cursor-not-allowed"
+            className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 font-semibold text-[13px] glass px-5 py-2.5 rounded-full cursor-pointer"
           >
             <ArrowLeft size={16} strokeWidth={2.5} />
             <span>{t('auth.backHome')}</span>
@@ -263,10 +264,10 @@ const AuthFlow = () => {
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={mode}
-                initial={{ opacity: 0, x: mode === 'login' ? -15 : 15 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, x: mode === 'login' ? -15 : 15 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: mode === 'login' ? 15 : -15 }}
-                transition={{ duration: 0.25, ease: 'easeOut' }}
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: mode === 'login' ? 15 : -15 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.25, ease: 'easeOut' }}
               >
                 {mode === 'otp' ? (
                   <div className="py-2">
@@ -280,21 +281,28 @@ const AuthFlow = () => {
                       </p>
                     </div>
 
-                    {errorMsg && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
-                      >
-                        {errorMsg}
-                      </motion.div>
-                    )}
+                    <AnimatePresence>
+                      {errorMsg && (
+                        <motion.div
+                          initial={shouldReduceMotion ? false : { opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={shouldReduceMotion ? {} : { opacity: 0, y: -10 }}
+                          transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
+                          role="alert"
+                          className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
+                        >
+                          {errorMsg}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
                     <form onSubmit={handleVerify} className="space-y-4">
                       <input
                         type="text"
+                        id="otp-code"
                         name="otp"
                         required
+                        autoFocus
                         maxLength={6}
                         value={otpCode}
                         onChange={(e) => {
@@ -335,26 +343,36 @@ const AuthFlow = () => {
                   </div>
                 ) : mode === 'forgot' ? (
                   <div className="py-2">
-                    {errorMsg && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
-                      >
-                        {errorMsg}
-                      </motion.div>
-                    )}
+                    <AnimatePresence>
+                      {errorMsg && (
+                        <motion.div
+                          initial={shouldReduceMotion ? false : { opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={shouldReduceMotion ? {} : { opacity: 0, y: -10 }}
+                          transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
+                          role="alert"
+                          className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
+                        >
+                          {errorMsg}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                     <form onSubmit={handleForgotPassword} className="space-y-4">
-                      <input
-                        type="email"
-                        name="email"
-                        required
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        placeholder={t('auth.forgot.emailPlaceholder')}
-                        autoComplete="email"
-                        className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
-                      />
+                      <div>
+                        <label htmlFor="forgot-email" className="sr-only">{t('auth.forgot.emailPlaceholder')}</label>
+                        <input
+                          type="email"
+                          id="forgot-email"
+                          name="email"
+                          required
+                          autoFocus
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          placeholder={t('auth.forgot.emailPlaceholder')}
+                          autoComplete="email"
+                          className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+                        />
+                      </div>
                       <button
                         type="submit"
                         disabled={isLoading || !formData.email}
@@ -375,22 +393,29 @@ const AuthFlow = () => {
                   </div>
                 ) : mode === 'reset' ? (
                   <div className="py-2">
-                    {errorMsg && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
-                      >
-                        {errorMsg}
-                      </motion.div>
-                    )}
+                    <AnimatePresence>
+                      {errorMsg && (
+                        <motion.div
+                          initial={shouldReduceMotion ? false : { opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={shouldReduceMotion ? {} : { opacity: 0, y: -10 }}
+                          transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
+                          role="alert"
+                          className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
+                        >
+                          {errorMsg}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                     <form onSubmit={handleResetPassword} className="space-y-4">
                       <div>
-                        <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">{t('auth.reset.codeLabel')}</label>
+                        <label htmlFor="reset-otp" className="text-[12px] font-medium text-gray-500 dark:text-gray-400 mb-1.5 block">{t('auth.reset.codeLabel')}</label>
                         <input
                           type="text"
+                          id="reset-otp"
                           name="otp"
                           required
+                          autoFocus
                           maxLength={6}
                           value={otpCode}
                           onChange={(e) => {
@@ -404,10 +429,11 @@ const AuthFlow = () => {
                       </div>
 
                       <div>
-                        <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1.5 block">{t('auth.reset.newPasswordLabel')}</label>
+                        <label htmlFor="reset-password" className="text-[12px] font-medium text-gray-500 dark:text-gray-400 mb-1.5 block">{t('auth.reset.newPasswordLabel')}</label>
                         <div className="relative">
                           <input
                             type={showPassword ? 'text' : 'password'}
+                            id="reset-password"
                             name="password"
                             required
                             value={formData.password}
@@ -463,8 +489,10 @@ const AuthFlow = () => {
                       </div>
 
                       <div>
+                        <label htmlFor="reset-confirm" className="sr-only">{t('auth.reset.confirmPasswordPlaceholder')}</label>
                         <input
                           type={showPassword ? 'text' : 'password'}
+                          id="reset-confirm"
                           name="confirmPassword"
                           required
                           value={formData.confirmPassword}
@@ -494,56 +522,75 @@ const AuthFlow = () => {
                   </div>
                 ) : (
                   <>
-                    {errorMsg && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
-                  >
-                    {errorMsg}
-                  </motion.div>
-                )}
+                    <AnimatePresence>
+                      {errorMsg && (
+                        <motion.div
+                          initial={shouldReduceMotion ? false : { opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={shouldReduceMotion ? {} : { opacity: 0, y: -10 }}
+                          transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
+                          role="alert"
+                          className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
+                        >
+                          {errorMsg}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
 
                 <form onSubmit={mode === 'login' ? handleLogin : handleRegister} className="space-y-3">
 
                   {mode === 'register' && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <input
-                        type="text"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleInputChange}
-                        placeholder={t('auth.fields.firstName')}
-                        autoComplete="given-name"
-                        className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
-                      />
-                      <input
-                        type="text"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleInputChange}
-                        placeholder={t('auth.fields.lastName')}
-                        autoComplete="family-name"
-                        className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
-                      />
+                      <div>
+                        <label htmlFor="firstName" className="sr-only">{t('auth.fields.firstName')}</label>
+                        <input
+                          type="text"
+                          id="firstName"
+                          name="firstName"
+                          value={formData.firstName}
+                          onChange={handleInputChange}
+                          placeholder={t('auth.fields.firstName')}
+                          autoComplete="given-name"
+                          className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="lastName" className="sr-only">{t('auth.fields.lastName')}</label>
+                        <input
+                          type="text"
+                          id="lastName"
+                          name="lastName"
+                          value={formData.lastName}
+                          onChange={handleInputChange}
+                          placeholder={t('auth.fields.lastName')}
+                          autoComplete="family-name"
+                          className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+                        />
+                      </div>
                     </div>
                   )}
 
-                  <input
-                    type="email"
-                    name="email"
-                    required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder={t('auth.fields.email')}
-                    autoComplete="email"
-                    className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
-                  />
+                  <div>
+                    <label htmlFor="email" className="sr-only">{t('auth.fields.email')}</label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      required
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder={t('auth.fields.email')}
+                      autoComplete="email"
+                      className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+                    />
+                  </div>
 
                   <div>
+                    <label htmlFor="password" className="sr-only">{t('auth.fields.password')}</label>
                     <div className="relative">
                       <input
                         type={showPassword ? 'text' : 'password'}
+                        id="password"
                         name="password"
                         required
                         value={formData.password}
@@ -611,16 +658,20 @@ const AuthFlow = () => {
                   </div>
 
                   {mode === 'register' && (
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      name="confirmPassword"
-                      required
-                      value={formData.confirmPassword}
-                      onChange={handleInputChange}
-                      placeholder={t('auth.fields.confirmPassword')}
-                      autoComplete="new-password"
-                      className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
-                    />
+                    <div>
+                      <label htmlFor="confirmPassword" className="sr-only">{t('auth.fields.confirmPassword')}</label>
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        required
+                        value={formData.confirmPassword}
+                        onChange={handleInputChange}
+                        placeholder={t('auth.fields.confirmPassword')}
+                        autoComplete="new-password"
+                        className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+                      />
+                    </div>
                   )}
 
                   <button
@@ -638,7 +689,7 @@ const AuthFlow = () => {
 
                 <div className="relative flex items-center my-4">
                   <div className="flex-grow border-t border-gray-200 dark:border-white/10"></div>
-                  <span className="flex-shrink-0 mx-3 text-gray-400 text-[10px] font-bold uppercase tracking-widest">{t('auth.or')}</span>
+                  <span className="flex-shrink-0 mx-3 text-gray-400 text-[12px] font-medium">{t('auth.or')}</span>
                   <div className="flex-grow border-t border-gray-200 dark:border-white/10"></div>
                 </div>
 

@@ -283,6 +283,7 @@
     },
     "activities": "Aktivit:",
     "open": "Otevřít",
+    "continuePlanning": "Pokračovat v plánování",
     "empty": {
       "title": "Zatím prázdno",
       "description": "V této kategorii nemáte zatím žádné výlety. Zkuste si nějaký naplánovat."
@@ -502,7 +503,13 @@
       "past": "Minulé",
       "reset": "Resetovat"
     },
-    "activities": "Aktivit:",
+    "sort": {
+      "dateDesc": "Nejnovější",
+      "dateAsc": "Nejstarší",
+      "nameAz": "A – Z"
+    },
+    "shared": "Sdílený",
+    "days": "dní",
     "open": "Otevřít",
     "empty": {
       "title": "Žádné výlety",
@@ -535,7 +542,9 @@
     "summary": {
       "total": "Celkové výdaje",
       "transactions": "Počet transakcí",
-      "tripDates": "Termín výletu"
+      "tripDates": "Termín výletu",
+      "avgPerDay": "Průměr za den",
+      "overDays": "za {{count}} dní"
     },
     "breakdown": "Rozložení podle kategorií",
     "history": "Historie výdajů",
@@ -568,8 +577,27 @@
       "dateLabel": "Datum výdaje",
       "submit": "Přidat výdaj",
       "success": "Výdaj byl přidán!",
-      "error": "Vyplňte prosím popis a částku."
+      "editTitle": "Upravit výdaj",
+      "editSubmit": "Uložit změny",
+      "editSuccess": "Výdaj byl upraven!",
+      "error": "Vyplňte prosím popis a částku.",
+      "close": "Zavřít"
     },
+    "sort": {
+      "dateDesc": "Nejnovější",
+      "dateAsc": "Nejstarší",
+      "amountDesc": "Nejvyšší",
+      "amountAsc": "Nejnižší"
+    },
+    "target": {
+      "set": "Nastavit limit",
+      "edit": "Upravit limit",
+      "save": "Uložit",
+      "of": "z {{amount}}",
+      "over": "Přesáhnut limit!",
+      "placeholder": "Zadejte částku"
+    },
+    "expenseEdit": "Upravit",
     "expenseDelete": "Smazat"
   },
   "statistics": {
@@ -601,6 +629,11 @@
       "mostPopular": "Nejpopulárnější",
       "likes": "lajků",
       "empty": "—"
+    },
+    "error": {
+      "title": "Statistiky se nepodařilo načíst",
+      "subtitle": "Při načítání dat došlo k chybě.",
+      "retry": "Zkusit znovu"
     }
   },
   "settings": {

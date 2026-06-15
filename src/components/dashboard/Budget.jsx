@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Trash2, DollarSign, TrendingUp, Calendar, Car, Home, Utensils, Palmtree, MoreHorizontal, ChevronRight, Wallet, X, Search } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { format } from 'date-fns';
+import { Plus, Trash2, TrendingUp, Calendar, Car, Home, Utensils, Palmtree, MoreHorizontal, ChevronRight, Wallet, X, Search, Pencil, Check } from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { format, differenceInDays } from 'date-fns';
 import { cs } from 'date-fns/locale';
 import { enUS } from 'date-fns/locale';
 import { DayPicker } from 'react-day-picker';
@@ -13,10 +13,10 @@ import { useTranslation } from 'react-i18next';
 import { useDialog } from '../ui/DialogModal';
 import { useCurrency } from '../../contexts/CurrencyContext';
 
-const formatCurrency = (amount, currency) => {
+const formatCurrency = (amount, currency, locale = 'en') => {
   const symbols = { CZK: 'Kč', EUR: '€', USD: '$', GBP: '£' };
-  const symbol = symbols[currency] || 'Kč';
-  return `${amount.toLocaleString('cs-CZ')} ${symbol}`;
+  const symbol = symbols[currency] || currency;
+  return `${amount.toLocaleString(locale)} ${symbol}`;
 };
 
 const CATEGORIES = [
@@ -29,17 +29,35 @@ const CATEGORIES = [
 
 const catInfo = (id) => CATEGORIES.find(c => c.id === id) || CATEGORIES[4];
 
-const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
+const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialExpense = null }) => {
   const { t, i18n } = useTranslation();
+  const shouldReduceMotion = useReducedMotion();
   const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
+  const modalRef = useRef(null);
+  const isEditing = !!initialExpense;
 
   const [form, setForm] = useState({
     description: '',
     amount: '',
     category: 'transport',
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split('T')[0],
   });
   const [showCalendar, setShowCalendar] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setShowCalendar(false);
+    if (initialExpense) {
+      setForm({
+        description: initialExpense.description,
+        amount: String(initialExpense.amount),
+        category: initialExpense.category,
+        date: initialExpense.date,
+      });
+    } else {
+      setForm({ description: '', amount: '', category: 'transport', date: new Date().toISOString().split('T')[0] });
+    }
+  }, [isOpen, initialExpense]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -49,11 +67,32 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    if (!isOpen || !modalRef.current) return;
+    const modal = modalRef.current;
+    const focusable = modal.querySelectorAll(
+      'button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    first?.focus();
+    const trapFocus = (e) => {
+      if (e.key !== 'Tab') return;
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last?.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first?.focus(); }
+      }
+    };
+    modal.addEventListener('keydown', trapFocus);
+    return () => modal.removeEventListener('keydown', trapFocus);
+  }, [isOpen]);
+
   const tripStart = tripRange?.start ? new Date(tripRange.start) : null;
   const tripEnd = tripRange?.end ? new Date(tripRange.end) : null;
 
   const modifiers = {
-    trip: (date) => tripStart && tripEnd && date >= tripStart && date <= tripEnd
+    trip: (date) => tripStart && tripEnd && date >= tripStart && date <= tripEnd,
   };
 
   const handleSubmit = (e) => {
@@ -62,10 +101,9 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
       toast.error(t('budget.addModal.error'));
       return;
     }
-    onAdd({ ...form, amount: parseFloat(form.amount), id: Date.now().toString() });
-    setForm({ description: '', amount: '', category: 'transport', date: new Date().toISOString().split('T')[0] });
+    onAdd({ ...form, amount: parseFloat(form.amount), id: initialExpense?.id || Date.now().toString() });
     onClose();
-    toast.success(t('budget.addModal.success'));
+    toast.success(isEditing ? t('budget.addModal.editSuccess') : t('budget.addModal.success'));
   };
 
   return createPortal(
@@ -76,30 +114,38 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
             onClick={onClose}
             className="absolute inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm cursor-pointer"
           />
           <motion.div
-            initial={{ opacity: 0, y: "100%" }}
+            ref={modalRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="add-expense-title"
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: '100%' }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: '100%' }}
+            transition={shouldReduceMotion ? { duration: 0.2 } : { ease: [0.22, 1, 0.36, 1], duration: 0.35 }}
             className="relative w-full max-w-lg bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-t-[2rem] sm:rounded-[2rem] p-6 sm:p-10 shadow-2xl overflow-visible z-10"
           >
             <div className="flex justify-between items-center mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-gray-200 dark:border-white/10">
-              <h3 className="font-bold text-2xl sm:text-3xl tracking-tight text-gray-900 dark:text-white">{t('budget.addModal.title')}</h3>
+              <h3 id="add-expense-title" className="font-bold text-2xl sm:text-3xl tracking-tight text-gray-900 dark:text-white">
+                {isEditing ? t('budget.addModal.editTitle') : t('budget.addModal.title')}
+              </h3>
               <button
                 onClick={onClose}
+                aria-label={t('budget.addModal.close')}
                 className="w-10 h-10 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer disabled:cursor-not-allowed"
               >
-                <X size={20} strokeWidth={2.5} />
+                <X size={20} strokeWidth={2.5} aria-hidden="true" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="space-y-6">
                 <div>
-                  <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('budget.addModal.descriptionLabel')}</label>
+                  <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-2 block">{t('budget.addModal.descriptionLabel')}</label>
                   <input
                     type="text"
                     required
@@ -115,7 +161,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
                 </div>
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('budget.addModal.amountLabel')} ({currency})</label>
+                    <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-2 block">{t('budget.addModal.amountLabel')} ({currency})</label>
                     <input
                       type="number"
                       required
@@ -128,7 +174,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('budget.addModal.categoryLabel')}</label>
+                    <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-2 block">{t('budget.addModal.categoryLabel')}</label>
                     <div className="relative">
                       <select
                         value={form.category}
@@ -146,7 +192,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
                   </div>
                 </div>
                 <div className="relative">
-                  <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('budget.addModal.dateLabel')}</label>
+                  <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-2 block">{t('budget.addModal.dateLabel')}</label>
                   <button
                     type="button"
                     onClick={() => setShowCalendar(!showCalendar)}
@@ -168,7 +214,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
                         }}
                         locale={dateLocale}
                         modifiers={modifiers}
-                        modifiersClassNames={{ trip: "bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold border border-blue-500/20" }}
+                        modifiersClassNames={{ trip: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold border border-blue-500/20' }}
                         className="premium-calendar"
                       />
                     </div>
@@ -179,7 +225,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
                 type="submit"
                 className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors duration-300 mt-6 sm:mt-8 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer disabled:cursor-not-allowed"
               >
-                {t('budget.addModal.submit')}
+                {isEditing ? t('budget.addModal.editSubmit') : t('budget.addModal.submit')}
               </button>
             </form>
           </motion.div>
@@ -191,7 +237,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange }) => {
 };
 
 const CategoryBar = ({ expenses, currency }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const total = expenses.reduce((s, e) => s + e.amount, 0);
   if (total === 0) return null;
 
@@ -216,9 +262,9 @@ const CategoryBar = ({ expenses, currency }) => {
           <div key={c.id} className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 dark:border-white/10 pb-3 gap-2">
             <div className="flex items-center gap-3">
               <div className={`w-3 h-3 ${c.colorClass} rounded-full shadow-sm ${c.shadowClass}`} />
-              <span className="text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">{t('budget.categories.' + c.id)}</span>
+              <span className="text-[12px] text-gray-500 dark:text-gray-400 font-medium">{t('budget.categories.' + c.id)}</span>
             </div>
-            <span className="font-bold text-lg tracking-tight text-gray-900 dark:text-white">{formatCurrency(c.amount, currency)}</span>
+            <span className="font-bold text-lg tracking-tight text-gray-900 dark:text-white">{formatCurrency(c.amount, currency, i18n.language)}</span>
           </div>
         ))}
       </div>
@@ -227,9 +273,19 @@ const CategoryBar = ({ expenses, currency }) => {
 };
 
 const Budget = ({ trips, onUpdateTrip }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const shouldReduceMotion = useReducedMotion();
+  const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
+
   const [selectedTripId, setSelectedTripId] = useState(trips[0]?.id || null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState(null);
+  const [sortBy, setSortBy] = useState('date-desc');
+  const [editingTarget, setEditingTarget] = useState(false);
+  const [targetInput, setTargetInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+
   const trip = trips.find(tr => tr.id === selectedTripId);
   const expenses = trip?.expenses || [];
   const total = expenses.reduce((s, e) => s + e.amount, 0);
@@ -237,8 +293,12 @@ const Budget = ({ trips, onUpdateTrip }) => {
   const { confirmDialog, ModalPortal } = useDialog();
   const { currency } = useCurrency();
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const budgetTarget = trip?.budgetTarget || null;
+  const progress = budgetTarget ? Math.min((total / budgetTarget) * 100, 100) : 0;
+  const progressColor = progress >= 100 ? 'bg-red-500' : progress >= 75 ? 'bg-amber-500' : 'bg-blue-500';
+
+  const tripDays = trip ? Math.max(differenceInDays(new Date(trip.endDate), new Date(trip.startDate)) + 1, 1) : 1;
+  const avgPerDay = total > 0 ? total / tripDays : 0;
 
   const filteredExpenses = expenses.filter(expense => {
     if (searchQuery && !expense.description.toLowerCase().includes(searchQuery.toLowerCase())) return false;
@@ -246,8 +306,25 @@ const Budget = ({ trips, onUpdateTrip }) => {
     return true;
   });
 
+  const sortedExpenses = [...filteredExpenses].sort((a, b) => {
+    switch (sortBy) {
+      case 'date-asc':    return new Date(a.date) - new Date(b.date);
+      case 'amount-desc': return b.amount - a.amount;
+      case 'amount-asc':  return a.amount - b.amount;
+      default:            return new Date(b.date) - new Date(a.date);
+    }
+  });
+
   const handleAddExpense = (expense) => {
     onUpdateTrip({ ...trip, expenses: [...expenses, expense] });
+  };
+
+  const handleEditExpense = (updatedExpense) => {
+    onUpdateTrip({
+      ...trip,
+      expenses: expenses.map(e => e.id === editingExpense.id ? { ...updatedExpense, id: editingExpense.id } : e),
+    });
+    setEditingExpense(null);
   };
 
   const handleDeleteExpense = async (id) => {
@@ -255,12 +332,25 @@ const Budget = ({ trips, onUpdateTrip }) => {
       title: t('budget.delete.title'),
       message: t('budget.delete.message'),
       variant: 'danger',
-      confirmLabel: t('budget.delete.confirm')
+      confirmLabel: t('budget.delete.confirm'),
     });
     if (!ok) return;
     onUpdateTrip({ ...trip, expenses: expenses.filter(e => e.id !== id) });
     toast.success(t('budget.delete.success'));
   };
+
+  const handleSaveTarget = () => {
+    const value = parseFloat(targetInput);
+    if (targetInput === '') {
+      onUpdateTrip({ ...trip, budgetTarget: null });
+    } else if (!isNaN(value) && value > 0) {
+      onUpdateTrip({ ...trip, budgetTarget: value });
+    }
+    setEditingTarget(false);
+  };
+
+  const modalOpen = isAddModalOpen || !!editingExpense;
+  const closeModal = () => { setIsAddModalOpen(false); setEditingExpense(null); };
 
   return (
     <div className="space-y-12 w-full pb-10">
@@ -269,7 +359,7 @@ const Budget = ({ trips, onUpdateTrip }) => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 sm:gap-8 mb-8 sm:mb-12">
         <div className="space-y-1 sm:space-y-2">
-          <p className="text-[11px] sm:text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">{t('budget.subtitle')}</p>
+          <p className="text-[11px] sm:text-[12px] text-gray-500 dark:text-gray-400 font-medium">{t('budget.subtitle')}</p>
           <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('budget.title')}</h1>
         </div>
 
@@ -278,20 +368,20 @@ const Budget = ({ trips, onUpdateTrip }) => {
             <div className="hidden sm:flex items-center gap-2 pointer-events-none opacity-90 text-red-500 z-10">
               <div className="flex flex-col items-center">
                 <motion.span
-                  initial={{ clipPath: "inset(0 100% 0 0)" }}
-                  animate={{ clipPath: "inset(0 0 0 0)" }}
-                  transition={{ duration: 1.2, ease: "linear" }}
+                  initial={shouldReduceMotion ? false : { clipPath: 'inset(0 100% 0 0)' }}
+                  animate={{ clipPath: 'inset(0 0 0 0)' }}
+                  transition={shouldReduceMotion ? { duration: 0 } : { duration: 1.2, ease: 'linear' }}
                   className="font-['Caveat'] text-3xl font-bold whitespace-nowrap pt-1"
                 >
                   {t('budget.sketchHint')}
                 </motion.span>
                 <svg width="160" height="15" viewBox="0 0 160 15" fill="none" className="-mt-1">
-                  <motion.path d="M 5 8 Q 80 0 155 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ duration: 0.4, delay: 1.2, ease: "easeOut" }} />
+                  <motion.path d="M 5 8 Q 80 0 155 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 1.2, ease: 'easeOut' }} />
                 </svg>
               </div>
               <svg width="60" height="35" viewBox="0 0 100 50" fill="none" xmlns="http://www.w3.org/2000/svg" className="mt-1">
-                <motion.path d="M 10 40 Q 50 5 90 25" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ duration: 0.6, delay: 1.6, ease: "easeOut" }} />
-                <motion.path d="M 70 10 L 90 25 L 70 40" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ duration: 0.3, delay: 2.2, ease: "easeOut" }} />
+                <motion.path d="M 10 40 Q 50 5 90 25" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.6, delay: 1.6, ease: 'easeOut' }} />
+                <motion.path d="M 70 10 L 90 25 L 70 40" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3, delay: 2.2, ease: 'easeOut' }} />
               </svg>
             </div>
           )}
@@ -301,20 +391,20 @@ const Budget = ({ trips, onUpdateTrip }) => {
               <div className="sm:hidden absolute -top-14 left-4 flex flex-col items-center -rotate-[10deg] pointer-events-none opacity-90 text-red-500 z-10">
                 <div className="flex flex-col items-center">
                   <motion.span
-                    initial={{ clipPath: "inset(0 100% 0 0)" }}
-                    animate={{ clipPath: "inset(0 0 0 0)" }}
-                    transition={{ duration: 1.2, ease: "linear" }}
+                    initial={shouldReduceMotion ? false : { clipPath: 'inset(0 100% 0 0)' }}
+                    animate={{ clipPath: 'inset(0 0 0 0)' }}
+                    transition={shouldReduceMotion ? { duration: 0 } : { duration: 1.2, ease: 'linear' }}
                     className="font-['Caveat'] text-2xl font-bold whitespace-nowrap"
                   >
                     {t('budget.sketchHint')}
                   </motion.span>
                   <svg width="120" height="10" viewBox="0 0 120 10" fill="none" className="mt-0">
-                    <motion.path d="M 5 5 Q 60 0 115 8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ duration: 0.4, delay: 1.2, ease: "easeOut" }} />
+                    <motion.path d="M 5 5 Q 60 0 115 8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 1.2, ease: 'easeOut' }} />
                   </svg>
                 </div>
                 <svg width="50" height="30" viewBox="0 0 100 50" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-8 transform rotate-[40deg] mt-1">
-                  <motion.path d="M 10 40 Q 50 5 90 25" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ duration: 0.6, delay: 1.6, ease: "easeOut" }} />
-                  <motion.path d="M 70 10 L 90 25 L 70 40" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={{ duration: 0.3, delay: 2.2, ease: "easeOut" }} />
+                  <motion.path d="M 10 40 Q 50 5 90 25" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.6, delay: 1.6, ease: 'easeOut' }} />
+                  <motion.path d="M 70 10 L 90 25 L 70 40" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3, delay: 2.2, ease: 'easeOut' }} />
                 </svg>
               </div>
 
@@ -344,11 +434,12 @@ const Budget = ({ trips, onUpdateTrip }) => {
       </div>
 
       <AddExpenseModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onAdd={handleAddExpense}
+        isOpen={modalOpen}
+        onClose={closeModal}
+        onAdd={editingExpense ? handleEditExpense : handleAddExpense}
         currency={currency}
         tripRange={{ start: trip?.startDate, end: trip?.endDate }}
+        initialExpense={editingExpense}
       />
 
       {trips.length === 0 ? (
@@ -360,24 +451,83 @@ const Budget = ({ trips, onUpdateTrip }) => {
         <>
           {/* Summary Cards */}
           <div className="flex md:grid overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none no-scrollbar md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 -mx-4 px-4 md:mx-0 md:px-0 pb-2 md:pb-0">
+
+            {/* Total + budget target */}
             <div className="min-w-[85vw] sm:min-w-[350px] md:min-w-0 snap-center glass-card p-6 sm:p-10 md:col-span-2 lg:col-span-1 flex flex-col justify-center border-blue-500/30 dark:border-blue-500/20 shadow-blue-500/10 shrink-0">
-              <p className="text-[10px] sm:text-[11px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2 sm:mb-4">{t('budget.summary.total')}</p>
-              <p className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-gray-900 dark:text-white leading-none">{formatCurrency(total, currency)}</p>
+              <p className="text-[11px] font-medium text-blue-600 dark:text-blue-400 mb-2 sm:mb-4">{t('budget.summary.total')}</p>
+              <p className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-gray-900 dark:text-white leading-none">{formatCurrency(total, currency, i18n.language)}</p>
+
+              {budgetTarget && (
+                <div className="mt-4 space-y-2">
+                  <div className="h-1.5 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
+                    <motion.div
+                      className={`h-full ${progressColor} rounded-full`}
+                      initial={shouldReduceMotion ? false : { width: 0 }}
+                      animate={{ width: `${progress}%` }}
+                      transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: [0.22, 1, 0.36, 1] }}
+                    />
+                  </div>
+                  <p className="text-[11px] font-medium text-gray-400 dark:text-gray-500 flex items-center gap-2">
+                    <span>{t('budget.target.of', { amount: formatCurrency(budgetTarget, currency, i18n.language) })}</span>
+                    {progress >= 100 && <span className="text-red-500 font-semibold">{t('budget.target.over')}</span>}
+                  </p>
+                </div>
+              )}
+
+              {!isViewer && (
+                editingTarget ? (
+                  <div className="mt-4 flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={targetInput}
+                      onChange={e => setTargetInput(e.target.value)}
+                      placeholder={t('budget.target.placeholder')}
+                      onKeyDown={e => { if (e.key === 'Enter') handleSaveTarget(); if (e.key === 'Escape') setEditingTarget(false); }}
+                      className="flex-1 glass-input py-2 text-sm"
+                      autoFocus
+                    />
+                    <button
+                      onClick={handleSaveTarget}
+                      aria-label={t('budget.target.save')}
+                      className="w-9 h-9 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-500 transition-colors cursor-pointer shrink-0"
+                    >
+                      <Check size={15} strokeWidth={2.5} />
+                    </button>
+                    <button
+                      onClick={() => setEditingTarget(false)}
+                      aria-label={t('budget.addModal.close')}
+                      className="w-9 h-9 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 rounded-xl flex items-center justify-center hover:bg-gray-200 dark:hover:bg-white/20 transition-colors cursor-pointer shrink-0"
+                    >
+                      <X size={15} strokeWidth={2.5} />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => { setTargetInput(budgetTarget ? String(budgetTarget) : ''); setEditingTarget(true); }}
+                    className="mt-3 self-start text-[11px] font-medium text-gray-400 dark:text-gray-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer"
+                  >
+                    {budgetTarget ? t('budget.target.edit') : t('budget.target.set')}
+                  </button>
+                )
+              )}
             </div>
+
             <div className="min-w-[70vw] sm:min-w-[280px] md:min-w-0 snap-center glass-card p-6 sm:p-10 flex flex-col justify-center shrink-0">
-              <p className="text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 sm:mb-4">{t('budget.summary.transactions')}</p>
+              <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-2 sm:mb-4">{t('budget.summary.transactions')}</p>
               <p className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tighter text-gray-900 dark:text-white">{expenses.length}</p>
             </div>
+
+            {/* Daily average */}
             <div className="min-w-[75vw] sm:min-w-[300px] md:min-w-0 snap-center glass-card p-6 sm:p-10 flex flex-col justify-center shrink-0">
-              <p className="text-[10px] sm:text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 sm:mb-4">{t('budget.summary.tripDates')}</p>
-              <div className="space-y-1">
-                <p className="text-xl sm:text-2xl lg:text-4xl font-bold tracking-tighter text-gray-900 dark:text-white">
-                  {format(new Date(trip.startDate), 'd. M. yyyy')}
-                </p>
-                <p className="text-lg sm:text-xl lg:text-3xl font-bold tracking-tighter text-gray-400 dark:text-gray-500">
-                  — {format(new Date(trip.endDate), 'd. M. yyyy')}
-                </p>
-              </div>
+              <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-2 sm:mb-4">{t('budget.summary.avgPerDay')}</p>
+              <p className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tighter text-gray-900 dark:text-white">
+                {avgPerDay > 0 ? formatCurrency(Math.round(avgPerDay), currency, i18n.language) : '—'}
+              </p>
+              <p className="text-[11px] font-medium text-gray-400 dark:text-gray-500 mt-2">
+                {t('budget.summary.overDays', { count: tripDays })}
+              </p>
             </div>
           </div>
 
@@ -421,6 +571,19 @@ const Budget = ({ trips, onUpdateTrip }) => {
                     </select>
                     <ChevronRight size={16} strokeWidth={2.5} className="absolute right-4 top-1/2 -translate-y-1/2 rotate-90 text-gray-400 pointer-events-none" />
                   </div>
+                  <div className="relative">
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value)}
+                      className="pl-4 pr-10 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px] appearance-none cursor-pointer h-full w-full sm:w-auto"
+                    >
+                      <option value="date-desc">{t('budget.sort.dateDesc')}</option>
+                      <option value="date-asc">{t('budget.sort.dateAsc')}</option>
+                      <option value="amount-desc">{t('budget.sort.amountDesc')}</option>
+                      <option value="amount-asc">{t('budget.sort.amountAsc')}</option>
+                    </select>
+                    <ChevronRight size={16} strokeWidth={2.5} className="absolute right-4 top-1/2 -translate-y-1/2 rotate-90 text-gray-400 pointer-events-none" />
+                  </div>
                   {(searchQuery || categoryFilter !== 'all') && (
                     <button
                       onClick={() => { setSearchQuery(''); setCategoryFilter('all'); }}
@@ -434,19 +597,19 @@ const Budget = ({ trips, onUpdateTrip }) => {
             )}
 
             <div className="flex items-center justify-between border-b border-gray-200 dark:border-white/10 pb-4">
-              <h3 className="text-[13px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{t('budget.history')}</h3>
+              <h3 className="text-[13px] font-semibold text-gray-500 dark:text-gray-400">{t('budget.history')}</h3>
               <span className="px-3 py-1 bg-gray-100 dark:bg-white/10 rounded-full text-[11px] font-bold text-gray-500 dark:text-gray-400">{filteredExpenses.length} {t('budget.items')}</span>
             </div>
 
-            {filteredExpenses.length > 0 ? (
+            {sortedExpenses.length > 0 ? (
               <div className="grid grid-cols-1 gap-4">
-                {[...filteredExpenses].reverse().map(expense => {
+                {sortedExpenses.map(expense => {
                   const cat = catInfo(expense.category);
                   const Icon = cat.icon;
                   return (
                     <motion.div
                       key={expense.id}
-                      initial={{ opacity: 0, y: 10 }}
+                      initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       className="flex flex-col sm:flex-row sm:items-center justify-between p-5 sm:p-6 glass-card shadow-sm hover:shadow-md hover:-translate-y-0.5 group transition-all duration-300 gap-4 sm:gap-6"
                     >
@@ -455,25 +618,35 @@ const Budget = ({ trips, onUpdateTrip }) => {
                           <Icon size={20} strokeWidth={2} className="sm:w-6 sm:h-6" />
                         </div>
                         <div className="min-w-0">
-                          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 leading-none">{t('budget.categories.' + expense.category)}</p>
+                          <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-1.5 leading-none">{t('budget.categories.' + expense.category)}</p>
                           <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate tracking-tight leading-tight mb-1.5 sm:mb-2">{expense.description}</p>
                           {expense.date && (
                             <div className="flex items-center gap-1.5 text-[12px] font-medium text-gray-500 dark:text-gray-400">
                               <Calendar size={14} strokeWidth={2} />
-                              {format(new Date(expense.date), 'd. MMMM yyyy', { locale: cs })}
+                              {format(new Date(expense.date), 'd. MMMM yyyy', { locale: dateLocale })}
                             </div>
                           )}
                         </div>
                       </div>
                       <div className="flex items-center sm:items-end justify-between sm:flex-col shrink-0 gap-2 border-t sm:border-t-0 border-gray-100 dark:border-white/5 pt-4 sm:pt-0">
-                        <span className="font-bold text-2xl tracking-tight text-gray-900 dark:text-white">{formatCurrency(expense.amount, currency)}</span>
+                        <span className="font-bold text-2xl tracking-tight text-gray-900 dark:text-white">{formatCurrency(expense.amount, currency, i18n.language)}</span>
                         {!isViewer && (
-                          <button
-                            onClick={() => handleDeleteExpense(expense.id)}
-                            className="flex items-center gap-1.5 text-[11px] font-bold text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 uppercase tracking-widest opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all sm:bg-transparent px-3 py-1.5 sm:px-0 sm:py-0 rounded-full sm:rounded-none cursor-pointer disabled:cursor-not-allowed"
-                          >
-                            <Trash2 size={14} strokeWidth={2} /> {t('budget.expenseDelete')}
-                          </button>
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => setEditingExpense(expense)}
+                              aria-label={t('budget.expenseEdit')}
+                              className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all px-3 py-1.5 sm:px-0 sm:py-0 rounded-full sm:rounded-none cursor-pointer"
+                            >
+                              <Pencil size={13} strokeWidth={2} aria-hidden="true" />
+                              <span className="sm:hidden">{t('budget.expenseEdit')}</span>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteExpense(expense.id)}
+                              className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all sm:bg-transparent px-3 py-1.5 sm:px-0 sm:py-0 rounded-full sm:rounded-none cursor-pointer disabled:cursor-not-allowed"
+                            >
+                              <Trash2 size={13} strokeWidth={2} aria-hidden="true" /> {t('budget.expenseDelete')}
+                            </button>
+                          </div>
                         )}
                       </div>
                     </motion.div>

@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Home, PlusSquare, Plus, Settings, LogOut, BarChart2, Wallet, X, Sun, Moon, Monitor, Map, Menu, Users, Shield } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 // eslint-disable-next-line no-unused-vars
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -15,31 +15,39 @@ import JourneoLogoDark from '../../assets/Journeo_blacklogo.png';
 import UserAvatar from '../ui/UserAvatar';
 
 // eslint-disable-next-line no-unused-vars
-const SidebarItem = ({ icon: Icon, label, path, active, onClick, className, layoutId = "sidebar-active-pill" }) => (
-  <Link
-    to={path}
-    onClick={(e) => {
-      if (onClick) onClick(path, e);
-    }}
-    className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative group active:scale-[0.98] ${
-      active
-        ? 'text-white'
-        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10'
-    } ${className || ''}`}
-  >
-    {active && (
-      <motion.div
-        layoutId={layoutId}
-        className="absolute inset-0 bg-blue-600 rounded-2xl shadow-md shadow-blue-500/20"
-        transition={{ type: "spring", stiffness: 350, damping: 30 }}
-      />
-    )}
-    <div className="relative z-10 flex items-center gap-3">
-      <Icon size={20} strokeWidth={active ? 2.5 : 2} />
-      <span className="font-semibold">{label}</span>
-    </div>
-  </Link>
-);
+const SidebarItem = ({ icon: Icon, label, path, active, onClick, className, layoutId = "sidebar-active-pill", shortcut }) => {
+  const shouldReduceMotion = useReducedMotion();
+  return (
+    <Link
+      to={path}
+      onClick={(e) => {
+        if (onClick) onClick(path, e);
+      }}
+      className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative group active:scale-[0.98] ${
+        active
+          ? 'text-white'
+          : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10'
+      } ${className || ''}`}
+    >
+      {active && (
+        <motion.div
+          layoutId={shouldReduceMotion ? undefined : layoutId}
+          className="absolute inset-0 bg-blue-600 rounded-2xl shadow-md shadow-blue-500/20"
+          transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 350, damping: 30 }}
+        />
+      )}
+      <div className="relative z-10 flex items-center gap-3 w-full">
+        <Icon size={20} strokeWidth={active ? 2.5 : 2} />
+        <span className="font-semibold">{label}</span>
+        {shortcut && (
+          <kbd className={`ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded transition-opacity ${active ? 'bg-white/20 text-white/70' : 'bg-gray-200/60 dark:bg-white/[0.07] text-gray-400 dark:text-gray-500'} opacity-0 group-hover:opacity-100`}>
+            {shortcut}
+          </kbd>
+        )}
+      </div>
+    </Link>
+  );
+};
 
 const ThemeToggle = () => {
   const { theme, setTheme } = useTheme();
@@ -61,7 +69,7 @@ const ThemeToggle = () => {
               ? 'bg-white dark:bg-[#2c2c2e] text-blue-600 dark:text-blue-400 shadow-sm'
               : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
           } cursor-pointer disabled:cursor-not-allowed`}
-          title={label}
+          aria-label={label}
         >
           <Icon size={16} strokeWidth={2} />
         </button>
@@ -79,16 +87,17 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
   const { confirmDialog, ModalPortal } = useDialog();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
 
   const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   const isTripDetail = location.pathname.includes('/trip/');
 
   const navItems = [
-    { icon: Home, label: t('dashboardLayout.nav.overview'), path: '/dashboard' },
-    { icon: Map, label: t('dashboardLayout.nav.myTrips'), path: '/dashboard/all-trips' },
-    { icon: BarChart2, label: t('dashboardLayout.nav.statistics'), path: '/dashboard/statistics' },
-    { icon: Users, label: t('dashboardLayout.nav.friends'), path: '/dashboard/friends' },
-    { icon: Wallet, label: t('dashboardLayout.nav.budget'), path: '/dashboard/budget' },
+    { icon: Home,     label: t('dashboardLayout.nav.overview'),   path: '/dashboard',            shortcut: 'H' },
+    { icon: Map,      label: t('dashboardLayout.nav.myTrips'),    path: '/dashboard/all-trips',  shortcut: 'T' },
+    { icon: BarChart2,label: t('dashboardLayout.nav.statistics'), path: '/dashboard/statistics', shortcut: 'S' },
+    { icon: Users,    label: t('dashboardLayout.nav.friends'),    path: '/dashboard/friends',    shortcut: 'F' },
+    { icon: Wallet,   label: t('dashboardLayout.nav.budget'),     path: '/dashboard/budget',     shortcut: 'B' },
   ];
 
   const handleNavigation = async (path, e, onClickCallback) => {
@@ -156,6 +165,25 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
     onOpenCreateModal();
   };
 
+  const handleOpenCreateModalRef = useRef(null);
+  handleOpenCreateModalRef.current = handleOpenCreateModal;
+  const handleNavigationRef = useRef(null);
+  handleNavigationRef.current = (path) => handleNavigation(path);
+
+  useEffect(() => {
+    const NAV_SHORTCUTS = { h: '/dashboard', t: '/dashboard/all-trips', s: '/dashboard/statistics', f: '/dashboard/friends', b: '/dashboard/budget' };
+    const onKey = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+      if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+      const key = e.key.toLowerCase();
+      if (key === 'n') { e.preventDefault(); handleOpenCreateModalRef.current?.(); return; }
+      const path = NAV_SHORTCUTS[key];
+      if (path) { e.preventDefault(); handleNavigationRef.current?.(path); }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
   return (
     <div className="h-[100dvh] overflow-hidden bg-[#fbfbfd] dark:bg-black text-gray-900 dark:text-[#f5f5f7] flex selection:bg-blue-500/30 font-sans relative transition-colors duration-500">
       {ModalPortal}
@@ -174,31 +202,31 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
       />
 
       {/* Subtle Background Glow with animation */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none flex justify-center items-center">
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none flex justify-center items-center" aria-hidden="true">
         <motion.div
-          animate={{
+          animate={shouldReduceMotion ? { opacity: 0.3 } : {
             scale: [1, 1.1, 1],
             opacity: [0.3, 0.5, 0.3],
             rotate: [0, 5, -5, 0]
           }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          transition={shouldReduceMotion ? {} : { duration: 20, repeat: Infinity, ease: "linear" }}
           className="absolute w-[800px] h-[800px] rounded-[100%] bg-blue-500/10 dark:bg-blue-500/15 blur-[120px]"
         />
         <motion.div
-          animate={{
+          animate={shouldReduceMotion ? { opacity: 0.2 } : {
             scale: [1, 1.2, 1],
             opacity: [0.2, 0.4, 0.2],
             x: [0, 50, -50, 0],
             y: [0, -50, 50, 0]
           }}
-          transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          transition={shouldReduceMotion ? {} : { duration: 25, repeat: Infinity, ease: "easeInOut", delay: 2 }}
           className="absolute w-[600px] h-[600px] rounded-[100%] bg-purple-500/10 dark:bg-purple-500/15 blur-[100px] right-[-100px] top-[-100px]"
         />
       </div>
 
       {/* ── Desktop Sidebar (Floating Glass Panel) ── */}
       <div className="hidden md:flex flex-col p-6 z-20 shrink-0 w-[280px]">
-        <aside className="w-full h-full glass-card flex flex-col overflow-hidden">
+        <aside className="w-full h-full flex flex-col overflow-hidden bg-gray-50/60 dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/[0.06] rounded-[2rem] backdrop-blur-sm">
           <div className="px-8 py-8 flex items-center gap-3">
             <img
               src={isDark ? JourneoLogo : JourneoLogoDark}
@@ -211,20 +239,22 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
           <nav className="flex-1 px-4 py-2 space-y-2">
             {navItems.map(item => (
               <SidebarItem
-                 key={item.path}
-                 {...item}
-                 active={location.pathname === item.path}
-                 onClick={(path, e) => handleNavigation(path, e)}
-               className="cursor-pointer disabled:cursor-not-allowed"/>
+                key={item.path}
+                {...item}
+                active={location.pathname === item.path}
+                onClick={(path, e) => handleNavigation(path, e)}
+                className="cursor-pointer disabled:cursor-not-allowed"
+              />
             ))}
             <div className="pt-2">
               <button
                 onClick={handleOpenCreateModal}
                 className="flex w-full items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative group active:scale-[0.98] text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer"
               >
-                <div className="relative z-10 flex items-center gap-3">
+                <div className="relative z-10 flex items-center gap-3 w-full">
                   <PlusSquare size={20} strokeWidth={2} />
                   <span className="font-semibold">{t('dashboardLayout.nav.createTrip')}</span>
+                  <kbd className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-200/60 dark:bg-white/[0.07] text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">N</kbd>
                 </div>
               </button>
             </div>
@@ -235,20 +265,13 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
               <ThemeToggle />
             </div>
 
-            <SidebarItem
-              icon={Settings}
-              label={t('dashboardLayout.nav.settings')}
-              path="/dashboard/settings"
-              active={location.pathname === '/dashboard/settings'}
-              onClick={(path, e) => handleNavigation(path, e)}
-             className="cursor-pointer disabled:cursor-not-allowed"/>
-            <Link to="/dashboard/settings" onClick={(e) => handleNavigation('/dashboard/settings', e)} className="px-4 py-4 flex items-center gap-3 mt-1 rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-300 active:scale-95 cursor-pointer disabled:cursor-not-allowed">
+            <Link to="/dashboard/settings" onClick={(e) => handleNavigation('/dashboard/settings', e)} className={`px-4 py-4 flex items-center gap-3 rounded-2xl transition-all duration-300 active:scale-95 cursor-pointer disabled:cursor-not-allowed ${location.pathname === '/dashboard/settings' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'hover:bg-gray-100 dark:hover:bg-white/10'}`}>
               <UserAvatar user={user} size="md" />
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-bold truncate">
                   {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.email}
                 </p>
-                <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate mt-0.5 font-semibold">{user?.bio || t('dashboardLayout.traveler')}</p>
+                <p className={`text-[11px] truncate mt-0.5 font-semibold ${location.pathname === '/dashboard/settings' ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'}`}>{user?.bio || t('dashboardLayout.traveler')}</p>
               </div>
             </Link>
             <button
@@ -281,12 +304,12 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
                 key={path}
                 to={path}
                 onClick={(e) => handleNavigation(path, e)}
-                className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${
-                  location.pathname === path ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                className={`flex flex-col items-center gap-1 flex-1 transition-all duration-300 py-1 ${
+                  location.pathname === path ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                 } cursor-pointer disabled:cursor-not-allowed`}
               >
-                <Icon size={22} strokeWidth={location.pathname === path ? 2.5 : 2} />
-                {location.pathname === path && <span className="text-[9px] font-bold uppercase tracking-widest">{label.split(' ')[0]}</span>}
+                <Icon size={20} strokeWidth={location.pathname === path ? 2.5 : 2} aria-hidden="true" />
+                <span className={`text-[9px] font-semibold transition-colors ${location.pathname === path ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>{label.split(' ')[0]}</span>
               </Link>
             ))}
           </nav>
@@ -306,10 +329,10 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
               onClick={closeMobile}
             />
             <motion.aside
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+              initial={shouldReduceMotion ? { opacity: 0 } : { x: "100%" }}
+              animate={shouldReduceMotion ? { opacity: 1 } : { x: 0 }}
+              exit={shouldReduceMotion ? { opacity: 0 } : { x: "100%" }}
+              transition={shouldReduceMotion ? { duration: 0.15 } : { type: "spring", bounce: 0, duration: 0.4 }}
               className="absolute right-0 top-0 bottom-0 w-[85%] max-w-[320px] bg-white dark:bg-[#1C1C1E] flex flex-col h-full z-10 rounded-l-[2rem] shadow-2xl"
             >
               <div className="p-6 flex items-center justify-between">
@@ -341,12 +364,12 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
 
                 {/* Mobile Theme Toggle */}
                 <div className="px-4 space-y-3">
-                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">{t('dashboardLayout.mobile.appearance')}</p>
+                  <p className="text-[11px] font-medium text-gray-400">{t('dashboardLayout.mobile.appearance')}</p>
                   <ThemeToggle />
                 </div>
 
                 <div className="space-y-2">
-                  <p className="px-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">{t('dashboardLayout.mobile.options')}</p>
+                  <p className="px-4 text-[11px] font-medium text-gray-400 mb-3">{t('dashboardLayout.mobile.options')}</p>
                   <button
                     onClick={() => { closeMobile(); handleOpenCreateModal(); }}
                     className="flex w-full items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative group active:scale-[0.98] text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 mb-2 cursor-pointer"
@@ -432,6 +455,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
         {!isTripDetail && !location.pathname.includes('/budget') && (
           <button
             onClick={handleOpenCreateModal}
+            aria-label={t('dashboardLayout.nav.createTrip')}
             className="md:hidden fixed bottom-24 right-6 z-[100] w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(37,99,235,0.4)] active:scale-90 transition-transform cursor-pointer"
           >
             <Plus size={28} strokeWidth={2.5} />

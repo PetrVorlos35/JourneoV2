@@ -252,7 +252,7 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{t('createTripModal.step2.title')}</h2>
                             <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-medium">{t('createTripModal.step2.subtitle')}</p>
                           </div>
-                          <div className={`flex flex-row items-center justify-between sm:justify-center gap-4 px-5 py-3 sm:px-6 sm:py-4 border-l-4 ${range?.from ? 'border-blue-500' : 'border-gray-200 dark:border-white/10'} glass-card rounded-2xl w-full sm:w-fit max-w-full shrink-0`}>
+                          <div className={`flex flex-row items-center justify-between sm:justify-center gap-4 px-5 py-3 sm:px-6 sm:py-4 bg-white/70 dark:bg-[#1C1C1E]/70 backdrop-blur-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.15)] rounded-2xl w-full sm:w-fit max-w-full shrink-0 border-2 transition-colors ${range?.from ? 'border-blue-500/60 dark:border-blue-500/40' : 'border-white/50 dark:border-white/10'}`}>
                             <div className="flex flex-col min-w-0">
                               <span className="text-[10px] sm:text-[11px] uppercase text-gray-500 dark:text-gray-400 tracking-widest font-bold mb-1">{t('createTripModal.step2.departure')}</span>
                               <span className={`text-base sm:text-lg font-bold truncate ${range?.from ? 'text-gray-900 dark:text-white' : 'text-gray-400 italic'}`}>

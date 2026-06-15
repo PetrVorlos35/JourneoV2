@@ -283,6 +283,7 @@
     },
     "activities": "Activities:",
     "open": "Open",
+    "continuePlanning": "Continue planning",
     "empty": {
       "title": "Nothing here yet",
       "description": "You have no trips in this category yet. Try planning one."
@@ -502,7 +503,13 @@
       "past": "Past",
       "reset": "Reset"
     },
-    "activities": "Activities:",
+    "sort": {
+      "dateDesc": "Newest first",
+      "dateAsc": "Oldest first",
+      "nameAz": "A – Z"
+    },
+    "shared": "Shared",
+    "days": "days",
     "open": "Open",
     "empty": {
       "title": "No trips found",
@@ -535,7 +542,9 @@
     "summary": {
       "total": "Total expenses",
       "transactions": "Number of transactions",
-      "tripDates": "Trip dates"
+      "tripDates": "Trip dates",
+      "avgPerDay": "Daily average",
+      "overDays": "over {{count}} days"
     },
     "breakdown": "Breakdown by category",
     "history": "Expense history",
@@ -568,8 +577,27 @@
       "dateLabel": "Expense date",
       "submit": "Add expense",
       "success": "Expense added!",
-      "error": "Please fill in description and amount."
+      "editTitle": "Edit expense",
+      "editSubmit": "Save changes",
+      "editSuccess": "Expense updated!",
+      "error": "Please fill in description and amount.",
+      "close": "Close"
     },
+    "sort": {
+      "dateDesc": "Newest first",
+      "dateAsc": "Oldest first",
+      "amountDesc": "Highest first",
+      "amountAsc": "Lowest first"
+    },
+    "target": {
+      "set": "Set budget limit",
+      "edit": "Edit limit",
+      "save": "Save",
+      "of": "of {{amount}}",
+      "over": "Over budget!",
+      "placeholder": "Enter amount"
+    },
+    "expenseEdit": "Edit",
     "expenseDelete": "Delete"
   },
   "statistics": {
@@ -601,6 +629,11 @@
       "mostPopular": "Most popular",
       "likes": "likes",
       "empty": "—"
+    },
+    "error": {
+      "title": "Couldn't load statistics",
+      "subtitle": "There was a problem fetching your data.",
+      "retry": "Try again"
     }
   },
   "settings": {
