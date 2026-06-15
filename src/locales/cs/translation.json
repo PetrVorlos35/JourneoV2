@@ -715,7 +715,8 @@
     "defaultName": "tohoto uživatele",
     "search": {
       "label": "Hledat uživatele",
-      "placeholder": "Hledat podle jména nebo e-mailu..."
+      "placeholder": "Hledat podle jména nebo e-mailu...",
+      "clear": "Vymazat hledání"
     },
     "tabs": {
       "friends": "Přátelé",

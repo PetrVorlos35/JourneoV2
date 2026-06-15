@@ -197,28 +197,28 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
       <ShareTripModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} trip={trip} />
 
       {/* Mobile Bottom Nav */}
-      <div className="md:hidden fixed bottom-6 left-6 right-6 z-50 flex justify-center pointer-events-none">
+      <div className="lg:hidden fixed bottom-6 left-6 right-6 z-50 flex justify-center pointer-events-none">
         <div className="glass-panel w-full max-w-sm rounded-[2rem] flex justify-around items-center px-2 py-3 pointer-events-auto border border-gray-200 dark:border-white/10 shadow-2xl">
           <button
             onClick={() => setMobileTab('itinerary')}
             className={`flex flex-col items-center gap-1 flex-1 transition-all duration-300 py-1 ${mobileTab === 'itinerary' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'} cursor-pointer disabled:cursor-not-allowed`}
           >
             <Layout size={20} strokeWidth={mobileTab === 'itinerary' ? 2.5 : 2} aria-hidden="true" />
-            <span className="text-[9px] font-semibold">{t('tripDetail.tabs.itinerary')}</span>
+            <span className="text-[11px] font-semibold">{t('tripDetail.tabs.itinerary')}</span>
           </button>
           <button
             onClick={() => setMobileTab('tools')}
             className={`flex flex-col items-center gap-1 flex-1 transition-all duration-300 py-1 ${mobileTab === 'tools' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'} cursor-pointer disabled:cursor-not-allowed`}
           >
             <Briefcase size={20} strokeWidth={mobileTab === 'tools' ? 2.5 : 2} aria-hidden="true" />
-            <span className="text-[9px] font-semibold">{t('tripDetail.tabs.tools')}</span>
+            <span className="text-[11px] font-semibold">{t('tripDetail.tabs.tools')}</span>
           </button>
           <button
             onClick={() => setMobileTab('info')}
             className={`flex flex-col items-center gap-1 flex-1 transition-all duration-300 py-1 ${mobileTab === 'info' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'} cursor-pointer disabled:cursor-not-allowed`}
           >
             <Info size={20} strokeWidth={mobileTab === 'info' ? 2.5 : 2} aria-hidden="true" />
-            <span className="text-[9px] font-semibold">{t('tripDetail.tabs.details')}</span>
+            <span className="text-[11px] font-semibold">{t('tripDetail.tabs.details')}</span>
           </button>
           {!isViewer && (
             <button
@@ -227,7 +227,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
               className={`flex flex-col items-center gap-1 flex-1 transition-all duration-300 py-1 ${hasUnsavedChanges ? 'text-red-500 cursor-pointer' : 'text-gray-400 dark:text-gray-500 opacity-50 cursor-not-allowed'}`}
             >
               <Save size={20} strokeWidth={hasUnsavedChanges ? 2.5 : 2} aria-hidden="true" />
-              <span className="text-[9px] font-semibold">{t('tripDetail.tabs.save')}</span>
+              <span className="text-[11px] font-semibold">{t('tripDetail.tabs.save')}</span>
             </button>
           )}
         </div>
@@ -248,6 +248,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                     ref={titleInputRef}
                     value={tripTitle}
                     maxLength={255}
+                    aria-label={t('tripDetail.rename')}
                     onChange={e => {
                       setTripTitle(e.target.value);
                       setHasUnsavedChanges(true);
@@ -266,7 +267,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
               </div>
             ) : (
               <div className="flex items-center gap-4 group">
-                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight">{tripTitle}</h1>
+                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight" style={{ textWrap: 'balance' }}>{tripTitle}</h1>
                 {!isViewer && (
                   <button onClick={() => setEditingTitle(true)} className="text-gray-400 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity p-2 bg-gray-100 dark:bg-white/5 rounded-full hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 cursor-pointer disabled:cursor-not-allowed" title={t('tripDetail.rename')}>
                     <Pencil size={18} strokeWidth={2} />
@@ -410,17 +411,17 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
               </h2>
               <div className="space-y-6">
                 <div className="flex justify-between items-center pb-4 border-b border-gray-100 dark:border-white/10">
-                  <span className="text-gray-500 text-[11px] font-medium">{t('tripDetail.info.date')}</span>
+                  <span className="text-gray-600 dark:text-gray-400 text-[13px] font-medium">{t('tripDetail.info.date')}</span>
                   <span className="font-bold text-gray-900 dark:text-white text-[15px]">
                     {format(new Date(trip.startDate), 'd. M. yyyy')} — {format(new Date(trip.endDate), 'd. M. yyyy')}
                   </span>
                 </div>
                 <div className="flex justify-between items-center pb-4 border-b border-gray-100 dark:border-white/10">
-                  <span className="text-gray-500 text-[11px] font-medium">{t('tripDetail.info.days')}</span>
+                  <span className="text-gray-600 dark:text-gray-400 text-[13px] font-medium">{t('tripDetail.info.days')}</span>
                   <span className="font-bold text-gray-900 dark:text-white text-[15px]">{dailyPlans.length} {t('tripDetail.info.daysValue')}</span>
                 </div>
                 <div className="flex justify-between items-center pt-2">
-                  <span className="text-gray-500 text-[11px] font-medium">{t('tripDetail.info.status')}</span>
+                  <span className="text-gray-600 dark:text-gray-400 text-[13px] font-medium">{t('tripDetail.info.status')}</span>
                   <span className="px-3 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[11px] font-semibold rounded-full">{t('tripDetail.info.statusValue')}</span>
                 </div>
               </div>
@@ -495,10 +496,12 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                 {!isViewer && (
                   <>
                     <div className="relative">
+                      <label htmlFor="new-packing-item" className="sr-only">{t('tripDetail.packing.placeholder')}</label>
                       <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
                         <Plus size={20} className="text-blue-600 dark:text-blue-400" strokeWidth={2.5} />
                       </div>
                       <input
+                        id="new-packing-item"
                         type="text"
                         value={newPackingItem}
                         onChange={(e) => setNewPackingItem(e.target.value)}
@@ -523,12 +526,13 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                       <div key={item.id} className="group flex items-center gap-4 py-4 px-5 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
                         <input
                           type="checkbox"
+                          aria-labelledby={`packing-item-${item.id}`}
                           checked={item.checked}
                           onChange={isViewer ? () => {} : () => togglePackingItem(item.id)}
                           disabled={isViewer}
                           className={`w-6 h-6 shrink-0 rounded-md border-2 border-gray-300 dark:border-gray-600 text-blue-600 bg-transparent focus:ring-blue-500 ${isViewer ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
                         />
-                        <span className={`flex-1 min-w-0 break-words text-[15px] font-bold transition-colors ${item.checked ? 'text-gray-400 line-through' : 'text-gray-900 dark:text-white'}`}>
+                        <span id={`packing-item-${item.id}`} className={`flex-1 min-w-0 break-words text-[15px] font-bold transition-colors ${item.checked ? 'text-gray-400 line-through' : 'text-gray-900 dark:text-white'}`}>
                           {item.text}
                         </span>
                         {!isViewer && (
@@ -562,7 +566,9 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                 {!isViewer && (
                   <form onSubmit={addDocument} className="p-6 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl space-y-4 shrink-0">
                     <div>
+                      <label htmlFor="doc-title" className="sr-only">{t('tripDetail.documents.titlePlaceholder')}</label>
                       <input
+                        id="doc-title"
                         type="text"
                         required
                         maxLength={255}
@@ -576,7 +582,9 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                       </div>
                     </div>
                     <div>
+                      <label htmlFor="doc-content" className="sr-only">{t('tripDetail.documents.contentPlaceholder')}</label>
                       <textarea
+                        id="doc-content"
                         required
                         maxLength={2000}
                         placeholder={t('tripDetail.documents.contentPlaceholder')}

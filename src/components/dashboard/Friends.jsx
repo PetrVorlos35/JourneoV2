@@ -1,16 +1,35 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Search, UserPlus, UserCheck, UserX, Users, X, ArrowRight, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
-// eslint-disable-next-line no-unused-vars
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { useDialog } from '../ui/DialogModal';
 import UserAvatar from '../ui/UserAvatar';
 
+const FRIEND_COLORS = [
+  { ring: 'ring-blue-300 dark:ring-blue-500/40'    },
+  { ring: 'ring-violet-300 dark:ring-violet-500/40' },
+  { ring: 'ring-emerald-300 dark:ring-emerald-500/40' },
+  { ring: 'ring-amber-300 dark:ring-amber-500/40'  },
+  { ring: 'ring-rose-300 dark:ring-rose-500/40'    },
+  { ring: 'ring-cyan-300 dark:ring-cyan-500/40'    },
+  { ring: 'ring-orange-300 dark:ring-orange-500/40' },
+  { ring: 'ring-indigo-300 dark:ring-indigo-500/40' },
+];
+
+const getFriendColor = (name = '') => {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = ((hash << 5) - hash + name.charCodeAt(i)) | 0;
+  }
+  return FRIEND_COLORS[Math.abs(hash) % FRIEND_COLORS.length];
+};
+
 const Friends = () => {
   const { t } = useTranslation();
+  const shouldReduceMotion = useReducedMotion();
   const [activeTab, setActiveTab] = useState('friends');
   const [friends, setFriends] = useState([]);
   const [requests, setRequests] = useState([]);
@@ -18,7 +37,14 @@ const Friends = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [pendingActions, setPendingActions] = useState(new Set());
   const { confirmDialog, ModalPortal } = useDialog();
+
+  const setPending = (id, on) => setPendingActions(prev => {
+    const next = new Set(prev);
+    on ? next.add(id) : next.delete(id);
+    return next;
+  });
 
   const fetchData = useCallback(async () => {
     try {
@@ -69,21 +95,27 @@ const Friends = () => {
   };
 
   const handleAccept = async (friendshipId) => {
+    setPending(friendshipId, true);
     try {
       await api.friends.accept(friendshipId);
       toast.success(t('friends.toasts.accepted'));
       fetchData();
     } catch (err) {
       toast.error(err.message || t('friends.toasts.acceptError'));
+    } finally {
+      setPending(friendshipId, false);
     }
   };
 
   const handleDecline = async (friendshipId) => {
+    setPending(friendshipId, true);
     try {
       await api.friends.decline(friendshipId);
       setRequests(prev => prev.filter(r => r.friendshipId !== friendshipId));
     } catch (err) {
       toast.error(err.message || t('friends.toasts.declineError'));
+    } finally {
+      setPending(friendshipId, false);
     }
   };
 
@@ -96,6 +128,7 @@ const Friends = () => {
     });
     if (!ok) return;
 
+    setPending(friendId, true);
     try {
       const statusData = await api.friends.getStatus(friendId);
       if (statusData.friendshipId) {
@@ -105,6 +138,8 @@ const Friends = () => {
       }
     } catch (err) {
       toast.error(err.message || t('friends.toasts.removeError'));
+    } finally {
+      setPending(friendId, false);
     }
   };
 
@@ -126,13 +161,12 @@ const Friends = () => {
       {ModalPortal}
 
       <div className="space-y-2">
-        <p className="text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">{t('friends.subtitle')}</p>
+        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('friends.subtitle')}</p>
         <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('friends.title')}</h1>
       </div>
 
       {/* Search */}
       <div className="glass-card p-6 rounded-[2rem] space-y-4">
-        <h2 className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">{t('friends.search.label')}</h2>
         <div className="relative group/search">
           <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
             <Search size={20} className="text-gray-400 group-focus-within/search:text-blue-500 transition-colors duration-300" strokeWidth={2.5} />
@@ -147,6 +181,7 @@ const Friends = () => {
           {searchQuery && (
             <button
               onClick={() => { setSearchQuery(''); setSearchResults([]); }}
+              aria-label={t('friends.search.clear')}
               className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors cursor-pointer"
             >
               <X size={18} />
@@ -154,12 +189,13 @@ const Friends = () => {
           )}
         </div>
 
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           {(searchResults.length > 0 || isSearching) && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
+              initial={shouldReduceMotion ? false : { opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
+              exit={shouldReduceMotion ? {} : { opacity: 0, height: 0 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.3, ease: 'easeOut' }}
               className="overflow-hidden"
             >
               {isSearching ? (
@@ -221,14 +257,16 @@ const Friends = () => {
             }`}
           >
             {tab.label}
-            <span className="ml-2 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-[11px] font-bold text-gray-500 dark:text-gray-400">
-              {tab.count}
-            </span>
+            {tab.count > 0 && (
+              <span className="ml-2 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                {tab.count}
+              </span>
+            )}
             {activeTab === tab.id && (
               <motion.div
                 layoutId="friends-tab-indicator"
                 className="absolute bottom-[-1px] left-0 right-0 h-[3px] bg-blue-600 dark:bg-blue-400 rounded-t-full"
-                transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 350, damping: 30 }}
               />
             )}
           </button>
@@ -240,50 +278,60 @@ const Friends = () => {
         <motion.div
           initial="hidden"
           animate="visible"
-          variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } }}
+          variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: shouldReduceMotion ? 0 : 0.05 } } }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           {friends.length > 0 ? (
-            friends.map(friend => (
-              <motion.div
-                key={friend.id}
-                variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-                className="glass-card p-6 sm:p-8 flex flex-col hover:-translate-y-2 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)] transition-all duration-300 group"
-              >
-                <div className="flex items-start gap-4 mb-6">
-                  <UserAvatar user={friend} size="md" />
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate tracking-tight">
-                      {friend.first_name || friend.last_name
-                        ? `${friend.first_name || ''} ${friend.last_name || ''}`.trim()
-                        : friend.email}
-                    </h3>
-                    <p className="text-[13px] text-gray-500 dark:text-gray-400 truncate font-medium">
-                      {friend.bio || friend.email}
-                    </p>
+            friends.map(friend => {
+              const color = getFriendColor(friend.first_name || friend.email || '');
+              const displayName = friend.first_name || friend.last_name
+                ? `${friend.first_name || ''} ${friend.last_name || ''}`.trim()
+                : friend.email;
+              return (
+                <motion.div
+                  key={friend.id}
+                  variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
+                  className="glass-card p-6 sm:p-8 flex flex-col hover:-translate-y-2 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)] transition-all duration-300 group"
+                >
+                  <div className="flex items-start gap-4 mb-5">
+                    <div className={`rounded-full ring-2 ${color.ring} shrink-0`}>
+                      <UserAvatar user={friend} size="md" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate tracking-tight">
+                        {displayName}
+                      </h3>
+                      <p className="text-[13px] text-gray-500 dark:text-gray-400 truncate font-medium">
+                        {friend.bio || friend.email}
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-2 text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-6">
-                  <UserCheck size={14} strokeWidth={2.5} /> {t('friends.status.friends')}
-                </div>
+                  <div className="flex items-center gap-1.5 text-[12px] font-medium text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-500/10 px-2.5 py-1 rounded-full w-fit mb-5">
+                    <UserCheck size={13} strokeWidth={2.5} aria-hidden="true" /> {t('friends.status.friends')}
+                  </div>
 
-                <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/10">
-                  <button
-                    onClick={() => handleRemoveFriend(friend.id, friend.first_name || t('friends.defaultName'))}
-                    className="text-[11px] font-bold text-red-500 hover:text-red-400 transition-colors uppercase tracking-widest opacity-100 lg:opacity-0 lg:group-hover:opacity-100 cursor-pointer"
-                  >
-                    {t('friends.status.remove')}
-                  </button>
-                  <Link
-                    to={`/dashboard/profile/${friend.id}`}
-                    className="inline-flex items-center gap-1.5 text-[12px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors uppercase tracking-widest"
-                  >
-                    {t('friends.status.profile')} <ArrowRight size={16} strokeWidth={2.5} />
-                  </Link>
-                </div>
-              </motion.div>
-            ))
+                  <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/10">
+                    <button
+                      onClick={() => handleRemoveFriend(friend.id, friend.first_name || t('friends.defaultName'))}
+                      disabled={pendingActions.has(friend.id)}
+                      className="inline-flex items-center gap-1.5 text-[12px] font-medium text-gray-400 hover:text-red-500 transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      {pendingActions.has(friend.id) ? (
+                        <div className="w-3.5 h-3.5 border border-current border-t-transparent rounded-full animate-spin" />
+                      ) : null}
+                      {t('friends.status.remove')}
+                    </button>
+                    <Link
+                      to={`/dashboard/profile/${friend.id}`}
+                      className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors"
+                    >
+                      {t('friends.status.profile')} <ArrowRight size={15} strokeWidth={2.5} aria-hidden="true" />
+                    </Link>
+                  </div>
+                </motion.div>
+              );
+            })
           ) : (
             <div className="col-span-full py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none">
               <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-2xl flex items-center justify-center text-gray-400 mb-2">
@@ -301,7 +349,7 @@ const Friends = () => {
         <motion.div
           initial="hidden"
           animate="visible"
-          variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } }}
+          variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: shouldReduceMotion ? 0 : 0.05 } } }}
           className="space-y-4"
         >
           {requests.length > 0 ? (
@@ -309,10 +357,12 @@ const Friends = () => {
               <motion.div
                 key={req.friendshipId}
                 variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-                exit={{ opacity: 0, x: -50 }}
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -50 }}
                 className="glass-card p-6 flex items-center gap-4 hover:-translate-y-1 transition-transform duration-300"
               >
-                <UserAvatar user={req} size="md" />
+                <div className={`rounded-full ring-2 ${getFriendColor(req.first_name || req.email || '').ring} shrink-0`}>
+                  <UserAvatar user={req} size="md" />
+                </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-[15px] text-gray-900 dark:text-white truncate">
                     {req.first_name || req.last_name
@@ -320,21 +370,31 @@ const Friends = () => {
                       : req.email}
                   </h3>
                   <p className="text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5 font-medium mt-0.5">
-                    <Clock size={12} /> {t('friends.status.waitingConfirm')}
+                    <Clock size={12} aria-hidden="true" /> {t('friends.status.waitingConfirm')}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={() => handleAccept(req.friendshipId)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-[12px] font-bold rounded-xl hover:bg-blue-500 transition-colors cursor-pointer"
+                    disabled={pendingActions.has(req.friendshipId)}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-[12px] font-bold rounded-xl hover:bg-blue-500 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed min-w-[100px] justify-center"
                   >
-                    <UserCheck size={16} strokeWidth={2.5} /> {t('friends.status.accept')}
+                    {pendingActions.has(req.friendshipId) ? (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <><UserCheck size={16} strokeWidth={2.5} /> {t('friends.status.accept')}</>
+                    )}
                   </button>
                   <button
                     onClick={() => handleDecline(req.friendshipId)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 text-[12px] font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/15 transition-colors cursor-pointer"
+                    disabled={pendingActions.has(req.friendshipId)}
+                    className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 text-[12px] font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/15 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed min-w-[100px] justify-center"
                   >
-                    <UserX size={16} strokeWidth={2.5} /> {t('friends.status.decline')}
+                    {pendingActions.has(req.friendshipId) ? (
+                      <div className="w-4 h-4 border-2 border-gray-400/30 border-t-gray-600 dark:border-white/30 dark:border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <><UserX size={16} strokeWidth={2.5} /> {t('friends.status.decline')}</>
+                    )}
                   </button>
                 </div>
               </motion.div>

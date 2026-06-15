@@ -31,21 +31,18 @@ const AnimatedValue = ({ value, suffix = '', prefix = '', className = '' }) => {
     }
 
     const duration = 700;
-    const steps = 28;
-    let step = 0;
+    const startTime = performance.now();
+    let rafId;
 
-    const timer = setInterval(() => {
-      step++;
-      if (step >= steps) {
-        setDisplayed(finalValue);
-        clearInterval(timer);
-      } else {
-        const eased = 1 - Math.pow(1 - step / steps, 3);
-        setDisplayed(Math.round(eased * finalValue));
-      }
-    }, duration / steps);
+    const animate = (now) => {
+      const progress = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayed(Math.round(eased * finalValue));
+      if (progress < 1) rafId = requestAnimationFrame(animate);
+    };
 
-    return () => clearInterval(timer);
+    rafId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId);
   }, [finalValue, shouldReduceMotion]);
 
   return (

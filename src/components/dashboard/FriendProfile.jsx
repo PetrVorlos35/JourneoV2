@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Calendar, MapPin, Lock, UserPlus, UserCheck, UserX, Clock, Users } from 'lucide-react';
 import { format } from 'date-fns';
-// eslint-disable-next-line no-unused-vars
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
@@ -11,7 +10,24 @@ import { useAuth } from '../../contexts/AuthContext';
 import LikeButton from '../ui/LikeButton';
 import UserAvatar from '../ui/UserAvatar';
 
+const TRIP_CARD_COLORS = [
+  { accent: 'bg-blue-500/10 dark:bg-blue-500/15', icon: 'text-blue-600 dark:text-blue-400' },
+  { accent: 'bg-violet-500/10 dark:bg-violet-500/15', icon: 'text-violet-600 dark:text-violet-400' },
+  { accent: 'bg-emerald-500/10 dark:bg-emerald-500/15', icon: 'text-emerald-600 dark:text-emerald-400' },
+  { accent: 'bg-amber-500/10 dark:bg-amber-500/15', icon: 'text-amber-600 dark:text-amber-400' },
+  { accent: 'bg-rose-500/10 dark:bg-rose-500/15', icon: 'text-rose-600 dark:text-rose-400' },
+  { accent: 'bg-cyan-500/10 dark:bg-cyan-500/15', icon: 'text-cyan-600 dark:text-cyan-400' },
+  { accent: 'bg-orange-500/10 dark:bg-orange-500/15', icon: 'text-orange-600 dark:text-orange-400' },
+  { accent: 'bg-indigo-500/10 dark:bg-indigo-500/15', icon: 'text-indigo-600 dark:text-indigo-400' },
+];
 
+const getTripColor = (title = '') => {
+  let hash = 0;
+  for (let i = 0; i < title.length; i++) {
+    hash = ((hash << 5) - hash + title.charCodeAt(i)) | 0;
+  }
+  return TRIP_CARD_COLORS[Math.abs(hash) % TRIP_CARD_COLORS.length];
+};
 
 const FriendProfile = () => {
   const { userId } = useParams();
@@ -23,7 +39,8 @@ const FriendProfile = () => {
   const [friendshipStatus, setFriendshipStatus] = useState(null); // NONE, PENDING_SENT, PENDING_RECEIVED, ACCEPTED, SELF
   const [friendshipId, setFriendshipId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
+  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -65,7 +82,7 @@ const FriendProfile = () => {
   }, [userId]);
 
   const handleSendRequest = async () => {
-    setActionLoading(true);
+    setPendingAction('send');
     try {
       const data = await api.friends.sendRequest(parseInt(userId));
       setFriendshipStatus('PENDING_SENT');
@@ -74,29 +91,28 @@ const FriendProfile = () => {
     } catch (err) {
       toast.error(err.message || t('friends.toasts.requestError'));
     } finally {
-      setActionLoading(false);
+      setPendingAction(null);
     }
   };
 
   const handleAcceptRequest = async () => {
-    setActionLoading(true);
+    setPendingAction('accept');
     try {
       await api.friends.accept(friendshipId);
       setFriendshipStatus('ACCEPTED');
       toast.success(t('friendProfile.toasts.accepted'));
-      // Reload profile data
       const profileData = await api.profile.get(userId);
       setProfile(profileData.user);
       setTrips(profileData.trips);
     } catch (err) {
       toast.error(err.message || t('friends.toasts.acceptError'));
     } finally {
-      setActionLoading(false);
+      setPendingAction(null);
     }
   };
 
   const handleDeclineRequest = async () => {
-    setActionLoading(true);
+    setPendingAction('decline');
     try {
       await api.friends.decline(friendshipId);
       setFriendshipStatus('DECLINED');
@@ -104,7 +120,7 @@ const FriendProfile = () => {
     } catch (err) {
       toast.error(err.message || t('friends.toasts.declineError'));
     } finally {
-      setActionLoading(false);
+      setPendingAction(null);
     }
   };
 
@@ -125,15 +141,16 @@ const FriendProfile = () => {
       {/* Back */}
       <Link
         to="/dashboard/friends"
-        className="inline-flex items-center text-[12px] uppercase tracking-widest font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-300"
+        className="inline-flex items-center text-[13px] font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-300"
       >
         <ArrowLeft size={16} className="mr-2" strokeWidth={2.5} /> {t('friendProfile.backToFriends')}
       </Link>
 
       {/* Profile Header */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         className="glass-card p-8 sm:p-10 rounded-[2rem] relative overflow-hidden"
       >
         {/* Decorative gradient */}
@@ -143,7 +160,7 @@ const FriendProfile = () => {
           <UserAvatar user={profile} size="xl" />
 
           <div className="flex-1 min-w-0">
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-1">
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-1" style={{ textWrap: 'balance' }}>
               {profile
                 ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email
                 : t('friendProfile.privateProfile.title')}
@@ -153,11 +170,11 @@ const FriendProfile = () => {
             )}
             {canView && (
               <div className="flex items-center gap-4 mt-3">
-                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+                <span className="text-[12px] font-medium text-gray-400 flex items-center gap-1.5">
                   <MapPin size={14} strokeWidth={2.5} /> {trips.length} {t('friendProfile.tripsTitle')}
                 </span>
                 {profile?.created_at && (
-                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                  <span className="text-[12px] font-medium text-gray-400">
                     {t('friendProfile.memberSince')} {format(new Date(profile.created_at), 'MM/yyyy')}
                   </span>
                 )}
@@ -170,10 +187,13 @@ const FriendProfile = () => {
             {friendshipStatus === 'NONE' || friendshipStatus === 'DECLINED' ? (
               <button
                 onClick={handleSendRequest}
-                disabled={actionLoading}
+                disabled={pendingAction !== null}
                 className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-500 transition-all duration-300 shadow-md shadow-blue-500/20 active:scale-95 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
               >
-                <UserPlus size={18} strokeWidth={2.5} /> {t('friendProfile.addFriend')}
+                {pendingAction === 'send'
+                  ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  : <UserPlus size={18} strokeWidth={2.5} />}
+                {t('friendProfile.addFriend')}
               </button>
             ) : friendshipStatus === 'PENDING_SENT' ? (
               <span className="flex items-center gap-2 px-6 py-3 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 font-bold rounded-2xl text-[13px]">
@@ -183,17 +203,23 @@ const FriendProfile = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleAcceptRequest}
-                  disabled={actionLoading}
+                  disabled={pendingAction !== null}
                   className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-500 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                 >
-                  <UserCheck size={16} strokeWidth={2.5} /> {t('friendProfile.acceptRequest')}
+                  {pendingAction === 'accept'
+                    ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    : <UserCheck size={16} strokeWidth={2.5} />}
+                  {t('friendProfile.acceptRequest')}
                 </button>
                 <button
                   onClick={handleDeclineRequest}
-                  disabled={actionLoading}
+                  disabled={pendingAction !== null}
                   className="flex items-center gap-2 px-5 py-3 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 font-bold rounded-2xl hover:bg-gray-200 dark:hover:bg-white/15 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                 >
-                  <UserX size={16} strokeWidth={2.5} /> {t('friendProfile.declineRequest')}
+                  {pendingAction === 'decline'
+                    ? <div className="w-4 h-4 border-2 border-gray-400/30 border-t-gray-400 rounded-full animate-spin" />
+                    : <UserX size={16} strokeWidth={2.5} />}
+                  {t('friendProfile.declineRequest')}
                 </button>
               </div>
             ) : isFriend ? (
@@ -208,8 +234,9 @@ const FriendProfile = () => {
       {/* Private Profile Overlay */}
       {!canView && (
         <motion.div
-          initial={{ opacity: 0 }}
+          initial={shouldReduceMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3 }}
           className="glass-card p-12 sm:p-16 rounded-[2rem] text-center relative overflow-hidden"
         >
           <div className="absolute inset-0 backdrop-blur-sm bg-white/30 dark:bg-black/30 pointer-events-none" />
@@ -234,23 +261,25 @@ const FriendProfile = () => {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
               {isSelf ? t('friendProfile.yourTrips') : t('friendProfile.tripsTitle')}
             </h2>
-            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+            <span className="text-[12px] font-medium text-gray-400">
               {t('friendProfile.tripsTotal', { count: trips.length })}
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {trips.length > 0 ? (
-              trips.map((trip, index) => (
+              trips.map((trip, index) => {
+                const tripColor = getTripColor(trip.title || String(trip.id));
+                return (
                 <motion.div
                   key={trip.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
+                  transition={shouldReduceMotion ? { duration: 0 } : { delay: index * 0.05, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                   className="glass-card p-6 sm:p-8 hover:-translate-y-1 transition-transform duration-300 flex flex-col min-h-[220px] group relative"
                 >
                   <div className="flex justify-between items-start mb-6">
-                    <div className="w-12 h-12 rounded-[1rem] bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                    <div className={`w-12 h-12 rounded-[1rem] ${tripColor.accent} ${tripColor.icon} flex items-center justify-center`}>
                       <MapPin size={24} strokeWidth={2} />
                     </div>
                     {!isSelf && (
@@ -281,7 +310,7 @@ const FriendProfile = () => {
                   {trip.locations && trip.locations.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mb-6">
                       {trip.locations.slice(0, 3).map((loc, i) => (
-                        <span key={i} className="px-2.5 py-1 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest rounded-full">
+                        <span key={i} className="px-2.5 py-1 bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400 text-[11px] font-medium rounded-full">
                           {loc}
                         </span>
                       ))}
@@ -294,18 +323,19 @@ const FriendProfile = () => {
                   )}
 
                   <div className="mt-auto flex items-center justify-between pt-6 border-t border-gray-100 dark:border-white/10">
-                    <div className="flex items-center gap-2 text-gray-400 text-[11px] uppercase tracking-widest font-bold">
+                    <div className="flex items-center gap-2 text-gray-400 text-[12px] font-medium">
                       <span>{t('friendProfile.activities', { count: trip.activityCount || 0 })}</span>
                     </div>
                     <Link
                       to={`/dashboard/profile/${userId}/trip/${trip.id}`}
-                      className="inline-flex items-center gap-1.5 text-[12px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors uppercase tracking-widest"
+                      className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors"
                     >
                       {t('friendProfile.viewTrip')} <ArrowRight size={16} strokeWidth={2.5} />
                     </Link>
                   </div>
                 </motion.div>
-              ))
+              );
+              })
             ) : (
               <div className="col-span-full py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none">
                 <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-2xl flex items-center justify-center text-gray-400 mb-2">

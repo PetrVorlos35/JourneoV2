@@ -71,7 +71,7 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
       {ModalPortal}
       <div className="flex justify-between items-end">
         <div className="space-y-1 sm:space-y-2">
-          <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('tripsOverview.title')}</h1>
+          <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold" style={{ textWrap: 'balance' }}>{t('tripsOverview.title')}</h1>
         </div>
       </div>
 
@@ -98,7 +98,7 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
           {nextTrip ? (
             <div className="flex flex-row sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-4 sm:gap-0 h-full relative">
               <div className="flex items-baseline gap-2 sm:gap-3">
-                <span className="text-5xl sm:text-7xl font-bold tracking-tighter text-gray-900 dark:text-white leading-none">{daysUntilNextTrip > 0 ? daysUntilNextTrip : t('tripsOverview.countdown.today')}</span>
+                <span className="text-5xl sm:text-6xl font-bold tracking-tighter text-gray-900 dark:text-white leading-none">{daysUntilNextTrip > 0 ? daysUntilNextTrip : t('tripsOverview.countdown.today')}</span>
                 {daysUntilNextTrip > 0 && <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('tripsOverview.countdown.days')}</span>}
               </div>
               <div className="text-right sm:text-left pt-2 sm:pt-4 sm:mt-auto">
@@ -216,7 +216,7 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
         animate="visible"
         variants={{
           hidden: { opacity: 0 },
-          visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+          visible: { opacity: 1, transition: { staggerChildren: shouldReduceMotion ? 0 : 0.05 } }
         }}
         className="flex md:grid overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none no-scrollbar pb-6 md:pb-0 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 -mx-4 px-4 md:mx-0 md:px-0"
       >
@@ -243,6 +243,7 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
                   <button
                     onClick={(e) => handleDelete(trip.id, e)}
                     className="w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer disabled:cursor-not-allowed"
+                    aria-label={t('tripsOverview.delete.title')}
                     title={t('tripsOverview.delete.title')}
                   >
                     <Trash2 size={18} strokeWidth={2} />

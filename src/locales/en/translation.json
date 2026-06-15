@@ -715,7 +715,8 @@
     "defaultName": "this user",
     "search": {
       "label": "Search users",
-      "placeholder": "Search by name or email..."
+      "placeholder": "Search by name or email...",
+      "clear": "Clear search"
     },
     "tabs": {
       "friends": "Friends",

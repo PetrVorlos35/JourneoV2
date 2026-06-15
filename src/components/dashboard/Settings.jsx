@@ -157,8 +157,8 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
     <div className="w-full space-y-12 pb-10">
       {ModalPortal}
       <div className="space-y-2">
-        <p className="text-[12px] text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">{t('settings.subtitle')}</p>
-        <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('settings.title')}</h1>
+        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('settings.subtitle')}</p>
+        <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold" style={{ textWrap: 'balance' }}>{t('settings.title')}</h1>
       </div>
 
       <div className="space-y-8">
@@ -173,7 +173,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
           </h2>
           <form onSubmit={handleProfileSave} className="space-y-8">
             <div>
-              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-4 block">{t('settings.profile.avatarLabel')}</label>
+              <label className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-4 block">{t('settings.profile.avatarLabel')}</label>
               <div className="flex flex-wrap gap-4">
                 <button
                   type="button"
@@ -206,8 +206,9 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div>
-                <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('settings.profile.firstName')}</label>
+                <label htmlFor="settings-first-name" className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 block">{t('settings.profile.firstName')}</label>
                 <input
+                  id="settings-first-name"
                   type="text"
                   maxLength={100}
                   placeholder={t('settings.profile.firstNamePlaceholder')}
@@ -220,8 +221,9 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                 </div>
               </div>
               <div>
-                <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('settings.profile.lastName')}</label>
+                <label htmlFor="settings-last-name" className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 block">{t('settings.profile.lastName')}</label>
                 <input
+                  id="settings-last-name"
                   type="text"
                   maxLength={100}
                   placeholder={t('settings.profile.lastNamePlaceholder')}
@@ -235,8 +237,9 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
               </div>
             </div>
             <div>
-              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('settings.profile.bio')}</label>
+              <label htmlFor="settings-bio" className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 block">{t('settings.profile.bio')}</label>
               <textarea
+                id="settings-bio"
                 placeholder={t('settings.profile.bioPlaceholder')}
                 rows="3"
                 maxLength={300}
@@ -249,8 +252,9 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
               </div>
             </div>
             <div>
-              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('settings.profile.emailLabel')}</label>
+              <label htmlFor="settings-email" className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 block">{t('settings.profile.emailLabel')}</label>
               <input
+                id="settings-email"
                 type="email"
                 disabled
                 value={user?.email || ''}
@@ -294,7 +298,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
               <button
                 key={id}
                 onClick={() => handleCurrencyChange(id)}
-                className={`flex items-center justify-center py-3 sm:py-4 px-2 rounded-2xl border-2 font-bold transition-colors duration-300 uppercase tracking-widest text-[11px] sm:text-[12px] ${
+                className={`flex items-center justify-center py-3 sm:py-4 px-2 rounded-2xl border-2 font-bold transition-colors duration-300 text-[13px] ${
                   currency === id
                     ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
                     : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10'
@@ -330,7 +334,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                 } cursor-pointer disabled:cursor-not-allowed`}
               >
                 <Icon size={24} strokeWidth={2} className="mr-4 sm:mr-0 sm:mb-2" />
-                <span className="font-bold text-[12px] uppercase tracking-widest">{label}</span>
+                <span className="font-bold text-[13px]">{label}</span>
               </button>
             ))}
           </div>
@@ -363,16 +367,17 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
           </p>
 
           {pwdError && (
-            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold">
+            <div role="alert" className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold">
               {pwdError}
             </div>
           )}
 
           <form onSubmit={handlePwdSave} className="space-y-6 max-w-md">
             <div>
-              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('settings.password.current')}</label>
+              <label htmlFor="settings-old-password" className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 block">{t('settings.password.current')}</label>
               <div className="relative">
                 <input
+                  id="settings-old-password"
                   type={showPwd.old ? 'text' : 'password'}
                   required
                   value={pwdForm.oldPassword}
@@ -390,9 +395,10 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
             </div>
 
             <div>
-              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('settings.password.new')}</label>
+              <label htmlFor="settings-new-password" className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 block">{t('settings.password.new')}</label>
               <div className="relative">
                 <input
+                  id="settings-new-password"
                   type={showPwd.new ? 'text' : 'password'}
                   required
                   value={pwdForm.newPassword}
@@ -446,9 +452,10 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
             </div>
 
             <div>
-              <label className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 block">{t('settings.password.confirm')}</label>
+              <label htmlFor="settings-confirm-password" className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 block">{t('settings.password.confirm')}</label>
               <div className="relative">
                 <input
+                  id="settings-confirm-password"
                   type={showPwd.confirm ? 'text' : 'password'}
                   required
                   value={pwdForm.confirmPassword}
