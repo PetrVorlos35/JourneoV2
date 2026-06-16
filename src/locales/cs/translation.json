@@ -29,11 +29,36 @@
         "today": "dnes"
       },
       "rows": [
-        { "dest": "Japonsko",  "date": "12.10.2026", "expense": "#REF!",      "status": "❌ Chyba" },
-        { "dest": "Itálie",    "date": "03.07.2025", "expense": "28 000 Kč", "status": "✓" },
-        { "dest": "Španělsko", "date": "???",         "expense": "32 000 Kč", "status": "⚠️" },
-        { "dest": "Thajsko",   "date": "20.12.2025", "expense": "=SUM(???)", "status": "❌" },
-        { "dest": "Francie",   "date": "14.02.2026", "expense": "nevím...",  "status": "🤔" }
+        {
+          "dest": "Japonsko",
+          "date": "12.10.2026",
+          "expense": "#REF!",
+          "status": "❌ Chyba"
+        },
+        {
+          "dest": "Itálie",
+          "date": "03.07.2025",
+          "expense": "28 000 Kč",
+          "status": "✓"
+        },
+        {
+          "dest": "Španělsko",
+          "date": "???",
+          "expense": "32 000 Kč",
+          "status": "⚠️"
+        },
+        {
+          "dest": "Thajsko",
+          "date": "20.12.2025",
+          "expense": "=SUM(???)",
+          "status": "❌"
+        },
+        {
+          "dest": "Francie",
+          "date": "14.02.2026",
+          "expense": "nevím...",
+          "status": "🤔"
+        }
       ]
     },
     "solution": {
@@ -46,11 +71,22 @@
       "activities2": "5 aktivit"
     },
     "mobile": {
-      "phase1": { "title": "Svět čeká\nna objevení." },
-      "phase2": { "title": "Zážitky ale\nrychlé pominou." },
-      "phase3": { "title": "Proto si je\nmusíte uchovat." },
-      "phase4": { "title": "Vaše Journeo." },
-      "countdown": { "label": "Další cesta za", "days": "dní" },
+      "phase1": {
+        "title": "Svět čeká\nna objevení."
+      },
+      "phase2": {
+        "title": "Zážitky ale\nrychlé pominou."
+      },
+      "phase3": {
+        "title": "Proto si je\nmusíte uchovat."
+      },
+      "phase4": {
+        "title": "Vaše Journeo."
+      },
+      "countdown": {
+        "label": "Další cesta za",
+        "days": "dní"
+      },
       "yourData": "Vaše data",
       "countries": "Zemí",
       "days": "Dní",
@@ -426,7 +462,8 @@
     "tools": {
       "packing": "Balící seznam",
       "documents": "Odkazy a poznámky",
-      "diary": "Deník a Galerie"
+      "diary": "Deník a Galerie",
+      "budget": "Rozpočet"
     },
     "info": {
       "title": "Přehled výletu",
@@ -441,7 +478,9 @@
       "packing": "Batoh",
       "items": "položek",
       "links": "Odkazy",
-      "records": "záznamů"
+      "records": "záznamů",
+      "budget": "Rozpočet",
+      "budgetEmpty": "Zatím žádné výdaje"
     },
     "packing": {
       "title": "Balící seznam",
@@ -544,7 +583,11 @@
       "transactions": "Počet transakcí",
       "tripDates": "Termín výletu",
       "avgPerDay": "Průměr za den",
-      "overDays": "za {{count}} dní"
+      "overDays": "za {{count}} dní",
+      "used": "použito",
+      "daysLeft": "Dní zbývá",
+      "projected": "Odhadovaný výdaj",
+      "remainingAmount": "{{amount}} zbývá"
     },
     "breakdown": "Rozložení podle kategorií",
     "history": "Historie výdajů",
@@ -560,7 +603,8 @@
       "noTripsDesc": "Nejprve si vytvořte výlet v plánovači a pak sem můžete přidat první výdaje.",
       "noExpenses": "Zatím žádné výdaje. Přidejte první!",
       "noResults": "Žádné výsledky",
-      "noResultsDesc": "Vašemu vyhledávání neodpovídají žádné výdaje. Zkuste změnit filtry."
+      "noResultsDesc": "Vašemu vyhledávání neodpovídají žádné výdaje. Zkuste změnit filtry.",
+      "noExpensesDesc": "Sledujte výdaje za pochodu — přidejte první výdaj a začněte."
     },
     "delete": {
       "title": "Smazat výdaj?",
@@ -598,7 +642,15 @@
       "placeholder": "Zadejte částku"
     },
     "expenseEdit": "Upravit",
-    "expenseDelete": "Smazat"
+    "expenseDelete": "Smazat",
+    "pacing": {
+      "onTrack": "V tempu",
+      "overPace": "Nad tempem"
+    },
+    "groupDate": {
+      "today": "Dnes",
+      "yesterday": "Včera"
+    }
   },
   "statistics": {
     "subtitle": "Přehled",
@@ -722,6 +774,18 @@
       "friends": "Přátelé",
       "requests": "Žádosti"
     },
+    "invite": {
+      "title": "Váš zvací odkaz",
+      "description": "Pošlete tento odkaz někomu, koho znáte — kdokoliv, kdo ho po přihlášení otevře, vás může jedním klikem přidat jako přítele.",
+      "copy": "Zkopírovat odkaz",
+      "regenerate": "Nový odkaz",
+      "regenerateTitle": "Vygenerovat nový odkaz?",
+      "regenerateMessage": "Stávající zvací odkaz přestane fungovat. Kdokoliv, kdo ho má, vás přes něj už nepřidá.",
+      "regenerateConfirm": "Vygenerovat nový odkaz",
+      "regenerateSuccess": "Nový zvací odkaz byl vygenerován.",
+      "regenerateError": "Chyba při generování nového odkazu.",
+      "linkCopied": "Odkaz zkopírován do schránky!"
+    },
     "status": {
       "friends": "Přátelé",
       "alreadyFriends": "Přátelé",
@@ -790,8 +854,8 @@
     "backToFriends": "Zpět na přátele",
     "addFriend": "Přidat přítele",
     "requestSent": "Žádost odeslána",
-    "acceptRequest": "Přijmout žádost",
-    "declineRequest": "Odmítnout žádost",
+    "acceptRequest": "Přijmout",
+    "declineRequest": "Odmítnout",
     "removeFriend": "Odebrat přítele",
     "noTrips": "Žádné sdílené výlety",
     "privateProfile": {
@@ -809,14 +873,36 @@
     "noTripsSelf": "Zatím nemáte žádné výlety.",
     "noTripsOther": "Tento uživatel zatím nemá žádné výlety.",
     "waitingConfirm": "Čeká na potvrzení",
-    "acceptRequest": "Přijmout",
-    "declineRequest": "Odmítnout",
     "memberSince": "Od",
     "toasts": {
       "requestSent": "Žádost o přátelství odeslána!",
       "accepted": "Přátelství přijato!",
       "declined": "Žádost odmítnuta.",
       "removed": "Přítel odebrán."
+    }
+  },
+  "addFriendInvite": {
+    "loading": "Načítám pozvánku...",
+    "backToFriends": "Zpět na přátele",
+    "invalid": {
+      "title": "Zvací odkaz není platný",
+      "description": "Tento zvací odkaz už neexistuje, nebo jej jeho majitel obnovil novým."
+    },
+    "self": {
+      "title": "Toto je váš vlastní zvací odkaz",
+      "description": "Sdílejte ho s někým jiným, aby vás mohl přidat jako přítele. Správa odkazu je na stránce Přátelé."
+    },
+    "subtitle": "Chce být vaším přítelem",
+    "addButton": "Přidat jako přítele",
+    "alreadyFriends": "Už jste přátelé",
+    "requestSent": "Žádost o přátelství odeslána",
+    "pendingReceived": "Tento uživatel vám už poslal žádost",
+    "pendingReceivedAction": "Zobrazit žádost",
+    "viewProfile": "Zobrazit profil",
+    "goToFriends": "Přejít na přátele",
+    "toasts": {
+      "requestSent": "Žádost o přátelství odeslána!",
+      "requestError": "Chyba při odesílání žádosti o přátelství."
     }
   },
   "readOnlyTrip": {

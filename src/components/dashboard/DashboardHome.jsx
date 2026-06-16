@@ -17,6 +17,7 @@ const Budget = lazy(() => import('./Budget'));
 const AllTrips = lazy(() => import('./AllTrips'));
 const Friends = lazy(() => import('./Friends'));
 const FriendProfile = lazy(() => import('./FriendProfile'));
+const AddFriendInvite = lazy(() => import('./AddFriendInvite'));
 const ReadOnlyTripView = lazy(() => import('./ReadOnlyTripView'));
 
 const EXCHANGE_RATES = {
@@ -183,9 +184,13 @@ const DashboardHome = () => {
               path="/friends" 
               element={<Friends />} 
             />
-            <Route 
-              path="/profile/:userId" 
-              element={<FriendProfile />} 
+            <Route
+              path="/add-friend/:token"
+              element={<AddFriendInvite />}
+            />
+            <Route
+              path="/profile/:userId"
+              element={<FriendProfile />}
             />
             <Route 
               path="/profile/:userId/trip/:tripId" 

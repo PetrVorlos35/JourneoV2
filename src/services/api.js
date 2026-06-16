@@ -183,6 +183,16 @@ export const api = {
     search: (query) => request(`/friends/search?q=${encodeURIComponent(query)}`),
 
     getStatus: (userId) => request(`/friends/status/${userId}`),
+
+    getInviteLink: () => request('/friends/invite/me'),
+
+    regenerateInviteLink: () =>
+      request('/friends/invite/regenerate', { method: 'POST' }),
+
+    getInvitePreview: (token) => request(`/friends/invite/${token}`),
+
+    acceptInvite: (token) =>
+      request(`/friends/invite/${token}/accept`, { method: 'POST' }),
   },
 
   // ── Profile (guarded) ─────────────────────────────────────

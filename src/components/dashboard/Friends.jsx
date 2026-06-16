@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, UserPlus, UserCheck, UserX, Users, X, ArrowRight, Clock } from 'lucide-react';
+import { Search, UserPlus, UserCheck, UserX, Users, X, ArrowRight, Clock, Link as LinkIcon, Copy, Check, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -38,6 +38,9 @@ const Friends = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [loading, setLoading] = useState(true);
   const [pendingActions, setPendingActions] = useState(new Set());
+  const [inviteToken, setInviteToken] = useState(null);
+  const [isRegeneratingLink, setIsRegeneratingLink] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
   const { confirmDialog, ModalPortal } = useDialog();
 
   const setPending = (id, on) => setPendingActions(prev => {
@@ -64,6 +67,12 @@ const Friends = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    api.friends.getInviteLink()
+      .then(data => setInviteToken(data.token))
+      .catch(err => console.error('Failed to load invite link:', err));
+  }, []);
 
   useEffect(() => {
     if (searchQuery.trim().length < 2) {
@@ -143,6 +152,37 @@ const Friends = () => {
     }
   };
 
+  const inviteUrl = inviteToken ? `${window.location.origin}/dashboard/add-friend/${inviteToken}` : null;
+
+  const handleRegenerateInvite = async () => {
+    const ok = await confirmDialog({
+      title: t('friends.invite.regenerateTitle'),
+      message: t('friends.invite.regenerateMessage'),
+      confirmLabel: t('friends.invite.regenerateConfirm'),
+      variant: 'danger',
+    });
+    if (!ok) return;
+
+    setIsRegeneratingLink(true);
+    try {
+      const { token } = await api.friends.regenerateInviteLink();
+      setInviteToken(token);
+      toast.success(t('friends.invite.regenerateSuccess'));
+    } catch (err) {
+      toast.error(err.message || t('friends.invite.regenerateError'));
+    } finally {
+      setIsRegeneratingLink(false);
+    }
+  };
+
+  const handleCopyInvite = async () => {
+    if (!inviteUrl) return;
+    await navigator.clipboard.writeText(inviteUrl);
+    setLinkCopied(true);
+    toast.success(t('friends.invite.linkCopied'));
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
+
   if (loading) {
     return (
       <div className="w-full h-[60vh] flex items-center justify-center">
@@ -163,6 +203,42 @@ const Friends = () => {
       <div className="space-y-2">
         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('friends.subtitle')}</p>
         <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('friends.title')}</h1>
+      </div>
+
+      {/* Invite link */}
+      <div className="glass-card p-6 rounded-[2rem] space-y-3">
+        <div className="flex items-center gap-2">
+          <LinkIcon size={14} className="text-gray-400 dark:text-white/50" strokeWidth={2.5} />
+          <p className="text-gray-500 dark:text-white/50 text-[11px] font-bold uppercase tracking-widest">
+            {t('friends.invite.title')}
+          </p>
+        </div>
+        <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium">
+          {t('friends.invite.description')}
+        </p>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          <div className="flex-1 flex items-center gap-2 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl px-4 py-2.5 min-w-0">
+            <span className="flex-1 text-[12px] text-gray-600 dark:text-white/60 font-mono truncate select-all">
+              {inviteUrl || '…'}
+            </span>
+            <button
+              onClick={handleCopyInvite}
+              disabled={!inviteUrl}
+              aria-label={t('friends.invite.copy')}
+              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-500 dark:text-white/70 hover:text-gray-900 dark:hover:text-white transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {linkCopied ? <Check size={14} strokeWidth={2.5} className="text-green-500 dark:text-green-400" /> : <Copy size={14} strokeWidth={2} />}
+            </button>
+          </div>
+          <button
+            onClick={handleRegenerateInvite}
+            disabled={isRegeneratingLink || !inviteUrl}
+            className="shrink-0 flex items-center justify-center gap-2 px-4 py-2.5 text-[12px] font-bold text-gray-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isRegeneratingLink ? <RefreshCw size={13} className="animate-spin" /> : <RefreshCw size={13} strokeWidth={2.5} />}
+            {t('friends.invite.regenerate')}
+          </button>
+        </div>
       </div>
 
       {/* Search */}

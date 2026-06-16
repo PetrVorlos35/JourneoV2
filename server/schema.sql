@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     last_name VARCHAR(100) DEFAULT NULL,
     avatar_url TEXT DEFAULT NULL,
     bio TEXT DEFAULT NULL,
+    invite_token VARCHAR(64) UNIQUE NULL DEFAULT NULL,
     role ENUM('user', 'admin') DEFAULT 'user',
     is_verified TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

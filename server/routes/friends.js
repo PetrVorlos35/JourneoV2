@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { randomBytes } from 'crypto';
 import pool from '../config/db.js';
 
 const router = Router();
@@ -311,6 +312,134 @@ router.get('/status/:userId', async (req, res) => {
   } catch (err) {
     console.error('Get friendship status error:', err);
     res.status(500).json({ error: 'Chyba při zjišťování stavu přátelství.' });
+  }
+});
+
+// ── GET /api/friends/invite/me ──────────────────────────────
+// Vrátí (a při první žádosti vygeneruje) vlastní pozvánkový token
+router.get('/invite/me', async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const [[existing]] = await pool.query('SELECT invite_token FROM users WHERE id = ?', [userId]);
+
+    if (existing.invite_token) {
+      return res.json({ token: existing.invite_token });
+    }
+
+    const token = randomBytes(16).toString('hex');
+    await pool.query('UPDATE users SET invite_token = ? WHERE id = ?', [token, userId]);
+    res.json({ token });
+  } catch (err) {
+    console.error('Get invite link error:', err);
+    res.status(500).json({ error: 'Chyba při načítání zvacího odkazu.' });
+  }
+});
+
+// ── POST /api/friends/invite/regenerate ─────────────────────
+// Zneplatní starý odkaz a vygeneruje nový
+router.post('/invite/regenerate', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const token = randomBytes(16).toString('hex');
+    await pool.query('UPDATE users SET invite_token = ? WHERE id = ?', [token, userId]);
+    res.json({ token });
+  } catch (err) {
+    console.error('Regenerate invite link error:', err);
+    res.status(500).json({ error: 'Chyba při obnovení zvacího odkazu.' });
+  }
+});
+
+// ── GET /api/friends/invite/:token ──────────────────────────
+// Náhled odesílatele pozvánky pro přihlášeného uživatele
+router.get('/invite/:token', async (req, res) => {
+  try {
+    const currentUserId = req.userId;
+    const { token } = req.params;
+
+    const [[inviter]] = await pool.query(
+      'SELECT id, first_name, last_name, avatar_url, bio FROM users WHERE invite_token = ?',
+      [token]
+    );
+
+    if (!inviter) {
+      return res.status(404).json({ error: 'Zvací odkaz není platný.' });
+    }
+
+    if (inviter.id === currentUserId) {
+      return res.json({ inviter, status: 'SELF', friendshipId: null });
+    }
+
+    const [rows] = await pool.query(
+      `SELECT id, requester_id, status FROM friendships
+       WHERE (requester_id = ? AND addressee_id = ?)
+          OR (requester_id = ? AND addressee_id = ?)`,
+      [currentUserId, inviter.id, inviter.id, currentUserId]
+    );
+
+    let status = 'NONE';
+    let friendshipId = null;
+    if (rows.length > 0) {
+      const f = rows[0];
+      friendshipId = f.id;
+      if (f.status === 'ACCEPTED') status = 'ACCEPTED';
+      else if (f.status === 'PENDING') {
+        status = f.requester_id === currentUserId ? 'PENDING_SENT' : 'PENDING_RECEIVED';
+      }
+    }
+
+    res.json({ inviter, status, friendshipId });
+  } catch (err) {
+    console.error('Get invite preview error:', err);
+    res.status(500).json({ error: 'Chyba při načítání pozvánky.' });
+  }
+});
+
+// ── POST /api/friends/invite/:token/accept ──────────────────
+// Odeslat žádost o přátelství na základě zvacího odkazu
+router.post('/invite/:token/accept', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { token } = req.params;
+
+    const [[inviter]] = await pool.query('SELECT id, first_name, last_name FROM users WHERE invite_token = ?', [token]);
+    if (!inviter) {
+      return res.status(404).json({ error: 'Zvací odkaz není platný.' });
+    }
+    if (inviter.id === userId) {
+      return res.status(400).json({ error: 'Nemůžete si poslat žádost sami sobě.' });
+    }
+
+    const [existing] = await pool.query(
+      `SELECT id, status FROM friendships
+       WHERE (requester_id = ? AND addressee_id = ?)
+          OR (requester_id = ? AND addressee_id = ?)`,
+      [userId, inviter.id, inviter.id, userId]
+    );
+
+    if (existing.length > 0) {
+      const f = existing[0];
+      if (f.status === 'ACCEPTED') return res.status(409).json({ error: 'Už jste přátelé.' });
+      if (f.status === 'PENDING') return res.status(409).json({ error: 'Žádost již byla odeslána.' });
+    }
+
+    const [result] = await pool.query(
+      `INSERT INTO friendships (requester_id, addressee_id, status) VALUES (?, ?, 'PENDING')`,
+      [userId, inviter.id]
+    );
+    const friendshipId = result.insertId;
+
+    const [requester] = await pool.query('SELECT first_name, last_name FROM users WHERE id = ?', [userId]);
+    const name = `${requester[0].first_name || ''} ${requester[0].last_name || ''}`.trim() || 'Někdo';
+    await pool.query(
+      `INSERT INTO notifications (user_id, type, reference_id, message) VALUES (?, 'FRIEND_REQUEST', ?, ?)`,
+      [inviter.id, friendshipId, `${name} vám poslal/a žádost o přátelství.`]
+    );
+
+    res.status(201).json({ message: 'Žádost odeslána.', friendshipId });
+  } catch (err) {
+    console.error('Accept invite error:', err);
+    res.status(500).json({ error: 'Chyba při odesílání žádosti.' });
   }
 });
 

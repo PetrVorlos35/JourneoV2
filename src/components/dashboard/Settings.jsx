@@ -1,5 +1,6 @@
-import { Trash2, DollarSign, User, Save, Camera, Mountain, Palmtree, Compass, Map, Plane, Monitor, Sun, Moon, X, KeyRound, Eye, EyeOff, Check, Globe } from 'lucide-react';
-import { useState } from 'react';
+import { Trash2, DollarSign, User, Save, Camera, Mountain, Palmtree, Compass, Map, Plane, Monitor, Sun, Moon, X, KeyRound, Eye, EyeOff, Check, Globe, Link as LinkIcon, Copy, ArrowRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '../../contexts/CurrencyContext';
@@ -8,6 +9,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { useDialog } from '../ui/DialogModal';
 import DashboardLanguageSwitcher from './DashboardLanguageSwitcher';
 import CharCount from '../ui/CharCount';
+import api from '../../services/api';
 
 const Settings = ({ onClearData, onConvertCurrency }) => {
   const { currency, setCurrency } = useCurrency();
@@ -32,6 +34,25 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
   });
   const [saving, setSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  const [inviteToken, setInviteToken] = useState(null);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  useEffect(() => {
+    api.friends.getInviteLink()
+      .then(data => setInviteToken(data.token))
+      .catch(err => console.error('Failed to load invite link:', err));
+  }, []);
+
+  const inviteUrl = inviteToken ? `${window.location.origin}/dashboard/add-friend/${inviteToken}` : null;
+
+  const handleCopyInvite = async () => {
+    if (!inviteUrl) return;
+    await navigator.clipboard.writeText(inviteUrl);
+    setLinkCopied(true);
+    toast.success(t('friends.invite.linkCopied'));
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
 
   const [pwdForm, setPwdForm] = useState({
     oldPassword: '',
@@ -249,6 +270,32 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
               />
               <div className="flex justify-end mt-1.5 pr-1">
                 <CharCount value={profileForm.bio} max={300} />
+              </div>
+            </div>
+            <div>
+              <label className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 block">{t('friends.invite.title')}</label>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                <div className="flex-1 flex items-center gap-2 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl px-4 py-2.5 min-w-0">
+                  <LinkIcon size={14} className="text-gray-400 shrink-0" strokeWidth={2.5} />
+                  <span className="flex-1 text-[12px] text-gray-600 dark:text-white/60 font-mono truncate select-all">
+                    {inviteUrl || '…'}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleCopyInvite}
+                    disabled={!inviteUrl}
+                    aria-label={t('friends.invite.copy')}
+                    className="shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-500 dark:text-white/70 hover:text-gray-900 dark:hover:text-white transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {linkCopied ? <Check size={14} strokeWidth={2.5} className="text-green-500 dark:text-green-400" /> : <Copy size={14} strokeWidth={2} />}
+                  </button>
+                </div>
+                <Link
+                  to="/dashboard/friends"
+                  className="shrink-0 inline-flex items-center gap-1.5 text-[12px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors px-1"
+                >
+                  {t('addFriendInvite.goToFriends')} <ArrowRight size={14} strokeWidth={2.5} />
+                </Link>
               </div>
             </div>
             <div>

@@ -45,7 +45,7 @@ const AuthFlow = () => {
       try {
         await loginWithGoogle(tokenResponse.access_token);
         toast.success(mode === 'login' ? t('auth.toasts.loginSuccess') : t('auth.toasts.googleRegisterSuccess'));
-        navigate('/dashboard');
+        navigate(location.state?.from || '/dashboard');
       } catch (err) {
         setErrorMsg(err.message || t('auth.errors.googleError'));
       } finally {
@@ -69,7 +69,7 @@ const AuthFlow = () => {
     try {
       await login(formData.email, formData.password);
       toast.success(t('auth.toasts.loginSuccess'));
-      navigate('/dashboard');
+      navigate(location.state?.from || '/dashboard');
     } catch (err) {
       setErrorMsg(err.message || t('auth.errors.loginError'));
     } finally {

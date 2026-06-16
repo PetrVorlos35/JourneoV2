@@ -29,11 +29,36 @@
         "today": "today"
       },
       "rows": [
-        { "dest": "Japan",    "date": "10/12/2026", "expense": "#REF!",      "status": "❌ Error" },
-        { "dest": "Italy",    "date": "07/03/2025", "expense": "$1,100",     "status": "✓" },
-        { "dest": "Spain",    "date": "???",         "expense": "$1,300",     "status": "⚠️" },
-        { "dest": "Thailand", "date": "12/20/2025", "expense": "=SUM(???)", "status": "❌" },
-        { "dest": "France",   "date": "02/14/2026", "expense": "no idea...", "status": "🤔" }
+        {
+          "dest": "Japan",
+          "date": "10/12/2026",
+          "expense": "#REF!",
+          "status": "❌ Error"
+        },
+        {
+          "dest": "Italy",
+          "date": "07/03/2025",
+          "expense": "$1,100",
+          "status": "✓"
+        },
+        {
+          "dest": "Spain",
+          "date": "???",
+          "expense": "$1,300",
+          "status": "⚠️"
+        },
+        {
+          "dest": "Thailand",
+          "date": "12/20/2025",
+          "expense": "=SUM(???)",
+          "status": "❌"
+        },
+        {
+          "dest": "France",
+          "date": "02/14/2026",
+          "expense": "no idea...",
+          "status": "🤔"
+        }
       ]
     },
     "solution": {
@@ -46,11 +71,22 @@
       "activities2": "5 activities"
     },
     "mobile": {
-      "phase1": { "title": "The world waits\nto be explored." },
-      "phase2": { "title": "But experiences\nfade quickly." },
-      "phase3": { "title": "So you need\nto capture them." },
-      "phase4": { "title": "Your Journeo." },
-      "countdown": { "label": "Next trip in", "days": "days" },
+      "phase1": {
+        "title": "The world waits\nto be explored."
+      },
+      "phase2": {
+        "title": "But experiences\nfade quickly."
+      },
+      "phase3": {
+        "title": "So you need\nto capture them."
+      },
+      "phase4": {
+        "title": "Your Journeo."
+      },
+      "countdown": {
+        "label": "Next trip in",
+        "days": "days"
+      },
       "yourData": "Your data",
       "countries": "Countries",
       "days": "Days",
@@ -426,7 +462,8 @@
     "tools": {
       "packing": "Packing list",
       "documents": "Links & notes",
-      "diary": "Diary & Gallery"
+      "diary": "Diary & Gallery",
+      "budget": "Budget"
     },
     "info": {
       "title": "Trip overview",
@@ -441,7 +478,9 @@
       "packing": "Pack",
       "items": "items",
       "links": "Links",
-      "records": "records"
+      "records": "records",
+      "budget": "Budget",
+      "budgetEmpty": "No expenses yet"
     },
     "packing": {
       "title": "Packing list",
@@ -544,7 +583,11 @@
       "transactions": "Number of transactions",
       "tripDates": "Trip dates",
       "avgPerDay": "Daily average",
-      "overDays": "over {{count}} days"
+      "overDays": "over {{count}} days",
+      "used": "used",
+      "daysLeft": "Days left",
+      "projected": "Projected",
+      "remainingAmount": "{{amount}} remaining"
     },
     "breakdown": "Breakdown by category",
     "history": "Expense history",
@@ -560,7 +603,8 @@
       "noTripsDesc": "Create a trip in the planner first, then you can add your first expenses here.",
       "noExpenses": "No expenses yet. Add the first one!",
       "noResults": "No results",
-      "noResultsDesc": "No expenses match your search. Try changing the filters."
+      "noResultsDesc": "No expenses match your search. Try changing the filters.",
+      "noExpensesDesc": "Track your spending as you go — add your first expense to get started."
     },
     "delete": {
       "title": "Delete expense?",
@@ -598,7 +642,15 @@
       "placeholder": "Enter amount"
     },
     "expenseEdit": "Edit",
-    "expenseDelete": "Delete"
+    "expenseDelete": "Delete",
+    "pacing": {
+      "onTrack": "On track",
+      "overPace": "Over pace"
+    },
+    "groupDate": {
+      "today": "Today",
+      "yesterday": "Yesterday"
+    }
   },
   "statistics": {
     "subtitle": "Overview",
@@ -722,6 +774,18 @@
       "friends": "Friends",
       "requests": "Requests"
     },
+    "invite": {
+      "title": "Your invite link",
+      "description": "Share this link with someone you know — anyone who opens it while signed in can add you as a friend in one click.",
+      "copy": "Copy link",
+      "regenerate": "New link",
+      "regenerateTitle": "Generate a new link?",
+      "regenerateMessage": "The current invite link will stop working. Anyone who still has it won't be able to use it to add you.",
+      "regenerateConfirm": "Generate new link",
+      "regenerateSuccess": "New invite link generated.",
+      "regenerateError": "Error generating a new link.",
+      "linkCopied": "Link copied to clipboard!"
+    },
     "status": {
       "friends": "Friends",
       "alreadyFriends": "Friends",
@@ -790,8 +854,8 @@
     "backToFriends": "Back to friends",
     "addFriend": "Add friend",
     "requestSent": "Request sent",
-    "acceptRequest": "Accept request",
-    "declineRequest": "Decline request",
+    "acceptRequest": "Accept",
+    "declineRequest": "Decline",
     "removeFriend": "Remove friend",
     "noTrips": "No shared trips",
     "privateProfile": {
@@ -809,14 +873,36 @@
     "noTripsSelf": "You don't have any trips yet.",
     "noTripsOther": "This user doesn't have any trips yet.",
     "waitingConfirm": "Awaiting confirmation",
-    "acceptRequest": "Accept",
-    "declineRequest": "Decline",
     "memberSince": "Since",
     "toasts": {
       "requestSent": "Friend request sent!",
       "accepted": "Friendship accepted!",
       "declined": "Request declined.",
       "removed": "Friend removed."
+    }
+  },
+  "addFriendInvite": {
+    "loading": "Loading invite...",
+    "backToFriends": "Back to friends",
+    "invalid": {
+      "title": "Invite link not valid",
+      "description": "This invite link doesn't exist anymore, or it was regenerated by its owner."
+    },
+    "self": {
+      "title": "This is your own invite link",
+      "description": "Share it with someone else so they can add you as a friend. Manage it from the Friends page."
+    },
+    "subtitle": "Wants to be your friend",
+    "addButton": "Add as friend",
+    "alreadyFriends": "You're already friends",
+    "requestSent": "Friend request sent",
+    "pendingReceived": "They already sent you a request",
+    "pendingReceivedAction": "Review request",
+    "viewProfile": "View profile",
+    "goToFriends": "Go to friends",
+    "toasts": {
+      "requestSent": "Friend request sent!",
+      "requestError": "Error sending the friend request."
     }
   },
   "readOnlyTrip": {
