@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Trash2, TrendingUp, Calendar, Car, Home, Utensils, Palmtree, MoreHorizontal, ChevronRight, Wallet, X, Search, Pencil, Check } from 'lucide-react';
+import {
+  Plus, Trash2, TrendingUp, TrendingDown, Calendar, Car, Home, Utensils,
+  Palmtree, MoreHorizontal, ChevronRight, Wallet, X, Search, Pencil, Check, Target,
+} from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { format, differenceInDays } from 'date-fns';
+import { format, differenceInDays, isToday, isYesterday, parseISO } from 'date-fns';
 import { cs } from 'date-fns/locale';
 import { enUS } from 'date-fns/locale';
 import { DayPicker } from 'react-day-picker';
@@ -20,15 +23,172 @@ const formatCurrency = (amount, currency, locale = 'en') => {
 };
 
 const CATEGORIES = [
-  { id: 'transport', icon: Car, colorClass: 'bg-blue-500', shadowClass: 'shadow-blue-500/30', lightBgClass: 'bg-blue-50 dark:bg-blue-500/10', textClass: 'text-blue-600 dark:text-blue-400' },
-  { id: 'accommodation', icon: Home, colorClass: 'bg-purple-500', shadowClass: 'shadow-purple-500/30', lightBgClass: 'bg-purple-50 dark:bg-purple-500/10', textClass: 'text-purple-600 dark:text-purple-400' },
-  { id: 'food', icon: Utensils, colorClass: 'bg-orange-500', shadowClass: 'shadow-orange-500/30', lightBgClass: 'bg-orange-50 dark:bg-orange-500/10', textClass: 'text-orange-600 dark:text-orange-400' },
-  { id: 'activities', icon: Palmtree, colorClass: 'bg-emerald-500', shadowClass: 'shadow-emerald-500/30', lightBgClass: 'bg-emerald-50 dark:bg-emerald-500/10', textClass: 'text-emerald-600 dark:text-emerald-400' },
-  { id: 'other', icon: MoreHorizontal, colorClass: 'bg-gray-500', shadowClass: 'shadow-gray-500/30', lightBgClass: 'bg-gray-100 dark:bg-gray-500/10', textClass: 'text-gray-600 dark:text-gray-400' },
+  { id: 'transport',      icon: Car,          colorClass: 'bg-blue-500',    lightBgClass: 'bg-blue-50 dark:bg-blue-500/10',     textClass: 'text-blue-600 dark:text-blue-400' },
+  { id: 'accommodation',  icon: Home,         colorClass: 'bg-purple-500',  lightBgClass: 'bg-purple-50 dark:bg-purple-500/10', textClass: 'text-purple-600 dark:text-purple-400' },
+  { id: 'food',           icon: Utensils,     colorClass: 'bg-orange-500',  lightBgClass: 'bg-orange-50 dark:bg-orange-500/10', textClass: 'text-orange-600 dark:text-orange-400' },
+  { id: 'activities',     icon: Palmtree,     colorClass: 'bg-emerald-500', lightBgClass: 'bg-emerald-50 dark:bg-emerald-500/10', textClass: 'text-emerald-600 dark:text-emerald-400' },
+  { id: 'other',          icon: MoreHorizontal, colorClass: 'bg-gray-500', lightBgClass: 'bg-gray-100 dark:bg-gray-500/10',    textClass: 'text-gray-600 dark:text-gray-400' },
 ];
 
 const catInfo = (id) => CATEGORIES.find(c => c.id === id) || CATEGORIES[4];
 
+/* ─── Expense Row ─── */
+const ExpenseRow = ({ expense, compact = false, currency, locale, isViewer, shouldReduceMotion, t, dateLocale, onEdit, onDelete }) => {
+  const cat = catInfo(expense.category);
+  const Icon = cat.icon;
+
+  if (compact) {
+    return (
+      <motion.div
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3.5 border-b border-gray-100/70 dark:border-white/[0.05] last:border-0 hover:bg-gray-50/60 dark:hover:bg-white/[0.02] transition-colors group"
+      >
+        <div className={`w-8 h-8 sm:w-9 sm:h-9 ${cat.lightBgClass} ${cat.textClass} rounded-[0.65rem] flex items-center justify-center shrink-0`}>
+          <Icon size={14} strokeWidth={2.5} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-0.5 leading-none">{t('budget.categories.' + expense.category)}</p>
+          <p className="text-[14px] font-semibold text-gray-900 dark:text-white truncate leading-tight">{expense.description}</p>
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <p className="font-bold text-[15px] tracking-tight text-gray-900 dark:text-white">
+            {formatCurrency(expense.amount, currency, locale)}
+          </p>
+          {!isViewer && (
+            <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={() => onEdit(expense)}
+                aria-label={t('budget.expenseEdit')}
+                className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-blue-500/10 cursor-pointer"
+              >
+                <Pencil size={12} strokeWidth={2.5} />
+              </button>
+              <button
+                onClick={() => onDelete(expense.id)}
+                aria-label={t('budget.expenseDelete')}
+                className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 cursor-pointer"
+              >
+                <Trash2 size={12} strokeWidth={2.5} />
+              </button>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col sm:flex-row sm:items-center justify-between p-5 sm:p-6 glass-card shadow-sm hover:shadow-md hover:-translate-y-0.5 group transition-all duration-300 gap-4 sm:gap-6"
+    >
+      <div className="flex items-center gap-4 sm:gap-5 min-w-0">
+        <div className={`w-10 h-10 sm:w-12 sm:h-12 ${cat.lightBgClass} ${cat.textClass} rounded-[1rem] flex items-center justify-center shrink-0`}>
+          <Icon size={20} strokeWidth={2} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1.5 leading-none">{t('budget.categories.' + expense.category)}</p>
+          <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate tracking-tight leading-tight mb-1.5">{expense.description}</p>
+          {expense.date && (
+            <div className="flex items-center gap-1.5 text-[12px] font-medium text-gray-500 dark:text-gray-400">
+              <Calendar size={13} strokeWidth={2} />
+              {format(parseISO(expense.date), 'd. MMMM yyyy', { locale: dateLocale })}
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="flex items-center sm:items-end justify-between sm:flex-col shrink-0 gap-2 border-t sm:border-t-0 border-gray-100 dark:border-white/5 pt-4 sm:pt-0">
+        <span className="font-bold text-2xl tracking-tight text-gray-900 dark:text-white">{formatCurrency(expense.amount, currency, locale)}</span>
+        {!isViewer && (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => onEdit(expense)}
+              aria-label={t('budget.expenseEdit')}
+              className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all px-3 py-1.5 sm:px-0 sm:py-0 rounded-full sm:rounded-none cursor-pointer"
+            >
+              <Pencil size={13} strokeWidth={2} aria-hidden="true" />
+              <span className="sm:hidden">{t('budget.expenseEdit')}</span>
+            </button>
+            <button
+              onClick={() => onDelete(expense.id)}
+              className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all px-3 py-1.5 sm:px-0 sm:py-0 rounded-full sm:rounded-none cursor-pointer"
+            >
+              <Trash2 size={13} strokeWidth={2} aria-hidden="true" /> {t('budget.expenseDelete')}
+            </button>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
+/* ─── Category Bar ─── */
+const CategoryBar = ({ expenses, currency, locale, onCategoryClick, activeCategory }) => {
+  const { t } = useTranslation();
+  const total = expenses.reduce((s, e) => s + e.amount, 0);
+  if (total === 0) return null;
+
+  const byCategory = CATEGORIES
+    .map(cat => ({
+      ...cat,
+      amount: expenses.filter(e => e.category === cat.id).reduce((s, e) => s + e.amount, 0),
+    }))
+    .map(c => ({ ...c, percent: total > 0 ? (c.amount / total) * 100 : 0 }))
+    .filter(c => c.amount > 0);
+
+  return (
+    <div className="space-y-5 sm:space-y-6">
+      <div className="flex h-3 w-full gap-0.5 rounded-full overflow-hidden">
+        {byCategory.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            className={`${c.colorClass} transition-opacity hover:opacity-80 cursor-pointer ${
+              activeCategory !== 'all' && activeCategory !== c.id ? 'opacity-30' : 'opacity-100'
+            }`}
+            style={{ width: `${c.percent}%` }}
+            onClick={() => onCategoryClick(c.id === activeCategory ? 'all' : c.id)}
+            title={t('budget.categories.' + c.id)}
+          />
+        ))}
+      </div>
+      <div className="grid grid-cols-2 xl:grid-cols-3 gap-2">
+        {byCategory.map((c) => {
+          const isActive = activeCategory === c.id;
+          return (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => onCategoryClick(c.id === activeCategory ? 'all' : c.id)}
+              className={`flex items-center justify-between p-3 rounded-xl text-left transition-all cursor-pointer ${
+                isActive
+                  ? `${c.lightBgClass} ring-1 ring-current ${c.textClass}`
+                  : 'hover:bg-gray-50 dark:hover:bg-white/5'
+              }`}
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className={`w-2.5 h-2.5 ${c.colorClass} rounded-full shrink-0`} />
+                <span className="text-[12px] text-gray-500 dark:text-gray-400 font-medium truncate">
+                  {t('budget.categories.' + c.id)}
+                </span>
+              </div>
+              <div className="text-right shrink-0 ml-2">
+                <p className="font-bold text-[13px] tracking-tight text-gray-900 dark:text-white">
+                  {formatCurrency(c.amount, currency, locale)}
+                </p>
+                <p className="text-[10px] text-gray-400 dark:text-gray-500">{c.percent.toFixed(0)}%</p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+/* ─── Add / Edit Expense Modal ─── */
 const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialExpense = null }) => {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
@@ -90,7 +250,6 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
 
   const tripStart = tripRange?.start ? new Date(tripRange.start) : null;
   const tripEnd = tripRange?.end ? new Date(tripRange.end) : null;
-
   const modifiers = {
     trip: (date) => tripStart && tripEnd && date >= tripStart && date <= tripEnd,
   };
@@ -136,7 +295,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
               <button
                 onClick={onClose}
                 aria-label={t('budget.addModal.close')}
-                className="w-10 h-10 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer disabled:cursor-not-allowed"
+                className="w-10 h-10 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
               >
                 <X size={20} strokeWidth={2.5} aria-hidden="true" />
               </button>
@@ -198,14 +357,14 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
                     onClick={() => setShowCalendar(!showCalendar)}
                     className="glass-input flex items-center justify-between text-left cursor-pointer"
                   >
-                    <span>{format(new Date(form.date), 'dd. MM. yyyy', { locale: dateLocale })}</span>
+                    <span>{format(parseISO(form.date), 'dd. MM. yyyy', { locale: dateLocale })}</span>
                     <Calendar className="text-blue-500 shrink-0" size={20} strokeWidth={2} />
                   </button>
                   {showCalendar && (
                     <div className="absolute bottom-full left-0 mb-4 z-[200] glass-card p-6 shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-200">
                       <DayPicker
                         mode="single"
-                        selected={new Date(form.date)}
+                        selected={parseISO(form.date)}
                         onSelect={(date) => {
                           if (date) {
                             setForm({ ...form, date: format(date, 'yyyy-MM-dd') });
@@ -223,7 +382,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
               </div>
               <button
                 type="submit"
-                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors duration-300 mt-6 sm:mt-8 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer disabled:cursor-not-allowed"
+                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors duration-300 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer"
               >
                 {isEditing ? t('budget.addModal.editSubmit') : t('budget.addModal.submit')}
               </button>
@@ -236,43 +395,8 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
   );
 };
 
-const CategoryBar = ({ expenses, currency }) => {
-  const { t, i18n } = useTranslation();
-  const total = expenses.reduce((s, e) => s + e.amount, 0);
-  if (total === 0) return null;
-
-  const byCategory = CATEGORIES.map(cat => ({
-    ...cat,
-    amount: expenses.filter(e => e.category === cat.id).reduce((s, e) => s + e.amount, 0),
-  })).filter(c => c.amount > 0);
-
-  return (
-    <div className="space-y-6 sm:space-y-8">
-      <div className="flex h-5 sm:h-3 w-full gap-1 rounded-full overflow-hidden bg-gray-100 dark:bg-white/5">
-        {byCategory.map((c) => (
-          <div
-            key={c.id}
-            className={`${c.colorClass} transition-all`}
-            style={{ width: `${(c.amount / total) * 100}%` }}
-          />
-        ))}
-      </div>
-      <div className="grid grid-cols-2 xl:grid-cols-3 gap-y-6 gap-x-8">
-        {byCategory.map((c) => (
-          <div key={c.id} className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-gray-200 dark:border-white/10 pb-3 gap-2">
-            <div className="flex items-center gap-3">
-              <div className={`w-3 h-3 ${c.colorClass} rounded-full shadow-sm ${c.shadowClass}`} />
-              <span className="text-[12px] text-gray-500 dark:text-gray-400 font-medium">{t('budget.categories.' + c.id)}</span>
-            </div>
-            <span className="font-bold text-lg tracking-tight text-gray-900 dark:text-white">{formatCurrency(c.amount, currency, i18n.language)}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-const Budget = ({ trips, onUpdateTrip }) => {
+/* ─── Budget ─── */
+const Budget = ({ trips, onUpdateTrip, hideHeader = false }) => {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
@@ -294,17 +418,38 @@ const Budget = ({ trips, onUpdateTrip }) => {
   const { currency } = useCurrency();
 
   const budgetTarget = trip?.budgetTarget || null;
+  const remaining = budgetTarget !== null ? budgetTarget - total : null;
   const progress = budgetTarget ? Math.min((total / budgetTarget) * 100, 100) : 0;
   const progressColor = progress >= 100 ? 'bg-red-500' : progress >= 75 ? 'bg-amber-500' : 'bg-blue-500';
 
-  const tripDays = trip ? Math.max(differenceInDays(new Date(trip.endDate), new Date(trip.startDate)) + 1, 1) : 1;
+  const tripDays = trip
+    ? Math.max(differenceInDays(parseISO(trip.endDate), parseISO(trip.startDate)) + 1, 1)
+    : 1;
   const avgPerDay = total > 0 ? total / tripDays : 0;
 
+  // Pacing
+  const today = new Date();
+  const tripEndDate = trip?.endDate ? parseISO(trip.endDate) : null;
+  const tripStartDate = trip?.startDate ? parseISO(trip.startDate) : null;
+  const elapsedDays = tripStartDate ? Math.max(differenceInDays(today, tripStartDate) + 1, 0) : 0;
+  const clampedElapsed = Math.min(elapsedDays, tripDays);
+  const daysRemaining = Math.max(tripDays - clampedElapsed, 0);
+  const isTripComplete = tripEndDate ? today > tripEndDate : false;
+  const projectedTotal = clampedElapsed > 0 && total > 0
+    ? Math.round((total / clampedElapsed) * tripDays)
+    : null;
+  const paceStatus = budgetTarget && !isTripComplete && clampedElapsed > 0 && projectedTotal !== null
+    ? (projectedTotal <= budgetTarget ? 'on-track' : 'over-pace')
+    : null;
+
+  // Filtering & sorting
   const filteredExpenses = expenses.filter(expense => {
     if (searchQuery && !expense.description.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     if (categoryFilter !== 'all' && expense.category !== categoryFilter) return false;
     return true;
   });
+
+  const isDateSort = sortBy === 'date-desc' || sortBy === 'date-asc';
 
   const sortedExpenses = [...filteredExpenses].sort((a, b) => {
     switch (sortBy) {
@@ -315,6 +460,27 @@ const Budget = ({ trips, onUpdateTrip }) => {
     }
   });
 
+  const dateGroupData = isDateSort ? (() => {
+    const groups = {};
+    sortedExpenses.forEach(expense => {
+      const d = expense.date;
+      if (!groups[d]) groups[d] = [];
+      groups[d].push(expense);
+    });
+    const keys = Object.keys(groups).sort((a, b) =>
+      sortBy === 'date-asc' ? a.localeCompare(b) : b.localeCompare(a)
+    );
+    return { groups, keys };
+  })() : null;
+
+  const formatGroupDate = (dateStr) => {
+    const date = parseISO(dateStr);
+    if (isToday(date)) return t('budget.groupDate.today');
+    if (isYesterday(date)) return t('budget.groupDate.yesterday');
+    return format(date, 'EEEE, d MMMM', { locale: dateLocale });
+  };
+
+  // Handlers
   const handleAddExpense = (expense) => {
     onUpdateTrip({ ...trip, expenses: [...expenses, expense] });
   };
@@ -352,86 +518,20 @@ const Budget = ({ trips, onUpdateTrip }) => {
   const modalOpen = isAddModalOpen || !!editingExpense;
   const closeModal = () => { setIsAddModalOpen(false); setEditingExpense(null); };
 
+  const rowProps = {
+    currency,
+    locale: i18n.language,
+    isViewer,
+    shouldReduceMotion,
+    t,
+    dateLocale,
+    onEdit: setEditingExpense,
+    onDelete: handleDeleteExpense,
+  };
+
   return (
-    <div className="space-y-12 w-full pb-10">
+    <div className={`space-y-5 sm:space-y-6 w-full ${hideHeader ? '' : 'pb-10'}`}>
       {ModalPortal}
-
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 sm:gap-8 mb-8 sm:mb-12">
-        <div className="space-y-1 sm:space-y-2">
-          <p className="text-[11px] sm:text-[12px] text-gray-500 dark:text-gray-400 font-medium">{t('budget.subtitle')}</p>
-          <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('budget.title')}</h1>
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mt-8 sm:mt-0">
-          {trips.length > 0 && (
-            <div className="hidden sm:flex items-center gap-2 pointer-events-none opacity-90 text-red-500 z-10">
-              <div className="flex flex-col items-center">
-                <motion.span
-                  initial={shouldReduceMotion ? false : { clipPath: 'inset(0 100% 0 0)' }}
-                  animate={{ clipPath: 'inset(0 0 0 0)' }}
-                  transition={shouldReduceMotion ? { duration: 0 } : { duration: 1.2, ease: 'linear' }}
-                  className="font-['Caveat'] text-3xl font-bold whitespace-nowrap pt-1"
-                >
-                  {t('budget.sketchHint')}
-                </motion.span>
-                <svg width="160" height="15" viewBox="0 0 160 15" fill="none" className="-mt-1">
-                  <motion.path d="M 5 8 Q 80 0 155 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 1.2, ease: 'easeOut' }} />
-                </svg>
-              </div>
-              <svg width="60" height="35" viewBox="0 0 100 50" fill="none" xmlns="http://www.w3.org/2000/svg" className="mt-1">
-                <motion.path d="M 10 40 Q 50 5 90 25" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.6, delay: 1.6, ease: 'easeOut' }} />
-                <motion.path d="M 70 10 L 90 25 L 70 40" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3, delay: 2.2, ease: 'easeOut' }} />
-              </svg>
-            </div>
-          )}
-
-          {trips.length > 0 && (
-            <div className="relative group w-full sm:w-64">
-              <div className="sm:hidden absolute -top-14 left-4 flex flex-col items-center -rotate-[10deg] pointer-events-none opacity-90 text-red-500 z-10">
-                <div className="flex flex-col items-center">
-                  <motion.span
-                    initial={shouldReduceMotion ? false : { clipPath: 'inset(0 100% 0 0)' }}
-                    animate={{ clipPath: 'inset(0 0 0 0)' }}
-                    transition={shouldReduceMotion ? { duration: 0 } : { duration: 1.2, ease: 'linear' }}
-                    className="font-['Caveat'] text-2xl font-bold whitespace-nowrap"
-                  >
-                    {t('budget.sketchHint')}
-                  </motion.span>
-                  <svg width="120" height="10" viewBox="0 0 120 10" fill="none" className="mt-0">
-                    <motion.path d="M 5 5 Q 60 0 115 8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.4, delay: 1.2, ease: 'easeOut' }} />
-                  </svg>
-                </div>
-                <svg width="50" height="30" viewBox="0 0 100 50" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-8 transform rotate-[40deg] mt-1">
-                  <motion.path d="M 10 40 Q 50 5 90 25" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.6, delay: 1.6, ease: 'easeOut' }} />
-                  <motion.path d="M 70 10 L 90 25 L 70 40" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" initial={shouldReduceMotion ? false : { pathLength: 0, opacity: 0 }} animate={{ pathLength: 1, opacity: 1 }} transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3, delay: 2.2, ease: 'easeOut' }} />
-                </svg>
-              </div>
-
-              <select
-                value={selectedTripId || ''}
-                onChange={e => setSelectedTripId(e.target.value)}
-                className="glass-input cursor-pointer appearance-none pr-12"
-              >
-                {trips.map(tr => <option key={tr.id} value={tr.id} className="text-gray-900 dark:bg-[#1C1C1E] dark:text-white">{tr.title}</option>)}
-              </select>
-              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-blue-500 transition-colors">
-                <ChevronRight size={18} strokeWidth={2.5} className="rotate-90" />
-              </div>
-            </div>
-          )}
-
-          {trip && !isViewer && (
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="hidden sm:flex w-full sm:w-auto items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3.5 sm:py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors duration-300 shrink-0 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer disabled:cursor-not-allowed text-[14px] sm:text-[16px]"
-            >
-              <Plus size={20} strokeWidth={2.5} className="w-5 h-5 sm:w-5 sm:h-5" />
-              {t('budget.addExpense')}
-            </button>
-          )}
-        </div>
-      </div>
 
       <AddExpenseModal
         isOpen={modalOpen}
@@ -442,6 +542,42 @@ const Budget = ({ trips, onUpdateTrip }) => {
         initialExpense={editingExpense}
       />
 
+      {/* Standalone page header */}
+      {!hideHeader && (
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-8 mb-2">
+          <div className="space-y-1">
+            <p className="text-[11px] sm:text-[12px] text-gray-500 dark:text-gray-400 font-medium">{t('budget.subtitle')}</p>
+            <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('budget.title')}</h1>
+          </div>
+          <div className="flex items-center gap-3">
+            {trips.length > 1 && (
+              <div className="relative">
+                <select
+                  value={selectedTripId || ''}
+                  onChange={e => setSelectedTripId(e.target.value)}
+                  className="glass-input cursor-pointer appearance-none pr-12"
+                >
+                  {trips.map(tr => (
+                    <option key={tr.id} value={tr.id} className="text-gray-900 dark:bg-[#1C1C1E] dark:text-white">
+                      {tr.title}
+                    </option>
+                  ))}
+                </select>
+                <ChevronRight size={18} strokeWidth={2.5} className="absolute right-4 top-1/2 -translate-y-1/2 rotate-90 text-gray-400 pointer-events-none" />
+              </div>
+            )}
+            {trip && !isViewer && (
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="hidden sm:flex items-center gap-2 px-6 py-3.5 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors shrink-0 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer text-[14px]"
+              >
+                <Plus size={18} strokeWidth={2.5} /> {t('budget.addExpense')}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {trips.length === 0 ? (
         <div className="text-center py-20 glass-card flex flex-col items-center justify-center space-y-4">
           <p className="font-bold text-2xl text-gray-900 dark:text-white tracking-tight">{t('budget.empty.noTrips')}</p>
@@ -449,226 +585,306 @@ const Budget = ({ trips, onUpdateTrip }) => {
         </div>
       ) : trip ? (
         <>
-          {/* Summary Cards */}
-          <div className="flex md:grid overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none no-scrollbar md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 -mx-4 px-4 md:mx-0 md:px-0 pb-2 md:pb-0">
+          {/* ── Budget Hero Card ── */}
+          <div className="glass-card p-6 sm:p-8 lg:p-10">
+            <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
 
-            {/* Total + budget target */}
-            <div className="min-w-[85vw] sm:min-w-[350px] md:min-w-0 snap-center glass-card p-6 sm:p-10 md:col-span-2 lg:col-span-1 flex flex-col justify-center border-blue-500/30 dark:border-blue-500/20 shadow-blue-500/10 shrink-0">
-              <p className="text-[11px] font-medium text-blue-600 dark:text-blue-400 mb-2 sm:mb-4">{t('budget.summary.total')}</p>
-              <p className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-gray-900 dark:text-white leading-none">{formatCurrency(total, currency, i18n.language)}</p>
-
-              {budgetTarget && (
-                <div className="mt-4 space-y-2">
-                  <div className="h-1.5 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
-                    <motion.div
-                      className={`h-full ${progressColor} rounded-full`}
-                      initial={shouldReduceMotion ? false : { width: 0 }}
-                      animate={{ width: `${progress}%` }}
-                      transition={{ duration: shouldReduceMotion ? 0 : 0.8, ease: [0.22, 1, 0.36, 1] }}
-                    />
+              {/* Left: total + progress + target */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between mb-3 sm:mb-4 gap-3">
+                  <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">
+                    {t('budget.summary.total')}
+                  </p>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <AnimatePresence>
+                      {paceStatus === 'on-track' && (
+                        <motion.span
+                          key="on-track"
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-full shrink-0"
+                        >
+                          <TrendingUp size={11} strokeWidth={2.5} /> {t('budget.pacing.onTrack')}
+                        </motion.span>
+                      )}
+                      {paceStatus === 'over-pace' && (
+                        <motion.span
+                          key="over-pace"
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="flex items-center gap-1.5 text-[11px] font-bold text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-3 py-1.5 rounded-full shrink-0"
+                        >
+                          <TrendingDown size={11} strokeWidth={2.5} /> {t('budget.pacing.overPace')}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                    {hideHeader && trip && !isViewer && (
+                      <button
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-500 transition-colors shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer text-[12px] shrink-0"
+                      >
+                        <Plus size={14} strokeWidth={2.5} /> {t('budget.addExpense')}
+                      </button>
+                    )}
                   </div>
-                  <p className="text-[11px] font-medium text-gray-400 dark:text-gray-500 flex items-center gap-2">
-                    <span>{t('budget.target.of', { amount: formatCurrency(budgetTarget, currency, i18n.language) })}</span>
-                    {progress >= 100 && <span className="text-red-500 font-semibold">{t('budget.target.over')}</span>}
+                </div>
+
+                <div className="flex items-baseline gap-3 mb-4 sm:mb-5 flex-wrap">
+                  <p className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-gray-900 dark:text-white leading-none">
+                    {formatCurrency(total, currency, i18n.language)}
+                  </p>
+                  {budgetTarget && (
+                    <p className="text-lg sm:text-xl font-semibold text-gray-400 dark:text-gray-500">
+                      / {formatCurrency(budgetTarget, currency, i18n.language)}
+                    </p>
+                  )}
+                </div>
+
+                {budgetTarget && (
+                  <div className="space-y-2 mb-4 sm:mb-5">
+                    <div className="h-2 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
+                      <motion.div
+                        className={`h-full rounded-full ${progressColor}`}
+                        initial={shouldReduceMotion ? false : { width: 0 }}
+                        animate={{ width: `${progress}%` }}
+                        transition={{ duration: shouldReduceMotion ? 0 : 0.9, ease: [0.22, 1, 0.36, 1] }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-[12px] font-medium">
+                      <span className="text-gray-400 dark:text-gray-500">
+                        {Math.round(progress)}% {t('budget.summary.used')}
+                      </span>
+                      <span className={remaining !== null && remaining < 0 ? 'text-red-500 font-bold' : 'text-gray-500 dark:text-gray-400'}>
+                        {remaining !== null && remaining >= 0
+                          ? t('budget.summary.remainingAmount', { amount: formatCurrency(remaining, currency, i18n.language) })
+                          : t('budget.target.over')
+                        }
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                {!isViewer && (
+                  editingTarget ? (
+                    <div className="flex items-center gap-2 mt-3">
+                      <input
+                        type="number"
+                        min="0.01"
+                        step="0.01"
+                        value={targetInput}
+                        onChange={e => setTargetInput(e.target.value)}
+                        placeholder={t('budget.target.placeholder')}
+                        onKeyDown={e => { if (e.key === 'Enter') handleSaveTarget(); if (e.key === 'Escape') setEditingTarget(false); }}
+                        className="flex-1 glass-input py-2.5 text-sm"
+                        autoFocus
+                      />
+                      <button
+                        onClick={handleSaveTarget}
+                        aria-label={t('budget.target.save')}
+                        className="w-9 h-9 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-500 transition-colors cursor-pointer shrink-0"
+                      >
+                        <Check size={15} strokeWidth={2.5} />
+                      </button>
+                      <button
+                        onClick={() => setEditingTarget(false)}
+                        aria-label={t('budget.addModal.close')}
+                        className="w-9 h-9 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 rounded-xl flex items-center justify-center hover:bg-gray-200 dark:hover:bg-white/20 transition-colors cursor-pointer shrink-0"
+                      >
+                        <X size={15} strokeWidth={2.5} />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => { setTargetInput(budgetTarget ? String(budgetTarget) : ''); setEditingTarget(true); }}
+                      className="flex items-center gap-1.5 text-[12px] font-semibold text-gray-400 dark:text-gray-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer mt-2"
+                    >
+                      <Target size={13} strokeWidth={2} />
+                      {budgetTarget ? t('budget.target.edit') : t('budget.target.set')}
+                    </button>
+                  )
+                )}
+              </div>
+
+              {/* Right: stats */}
+              <div className="flex flex-row lg:flex-col gap-6 sm:gap-8 border-t lg:border-t-0 lg:border-l border-gray-100 dark:border-white/10 pt-5 lg:pt-0 lg:pl-10 flex-wrap sm:flex-nowrap lg:shrink-0">
+                <div>
+                  <p className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold mb-1 uppercase tracking-wide">
+                    {t('budget.summary.avgPerDay')}
+                  </p>
+                  <p className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                    {avgPerDay > 0 ? formatCurrency(Math.round(avgPerDay), currency, i18n.language) : '—'}
+                  </p>
+                  <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
+                    {t('budget.summary.overDays', { count: tripDays })}
                   </p>
                 </div>
-              )}
 
-              {!isViewer && (
-                editingTarget ? (
-                  <div className="mt-4 flex items-center gap-2">
-                    <input
-                      type="number"
-                      min="0.01"
-                      step="0.01"
-                      value={targetInput}
-                      onChange={e => setTargetInput(e.target.value)}
-                      placeholder={t('budget.target.placeholder')}
-                      onKeyDown={e => { if (e.key === 'Enter') handleSaveTarget(); if (e.key === 'Escape') setEditingTarget(false); }}
-                      className="flex-1 glass-input py-2 text-sm"
-                      autoFocus
-                    />
-                    <button
-                      onClick={handleSaveTarget}
-                      aria-label={t('budget.target.save')}
-                      className="w-9 h-9 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-500 transition-colors cursor-pointer shrink-0"
-                    >
-                      <Check size={15} strokeWidth={2.5} />
-                    </button>
-                    <button
-                      onClick={() => setEditingTarget(false)}
-                      aria-label={t('budget.addModal.close')}
-                      className="w-9 h-9 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 rounded-xl flex items-center justify-center hover:bg-gray-200 dark:hover:bg-white/20 transition-colors cursor-pointer shrink-0"
-                    >
-                      <X size={15} strokeWidth={2.5} />
-                    </button>
+                <div>
+                  <p className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold mb-1 uppercase tracking-wide">
+                    {t('budget.summary.daysLeft')}
+                  </p>
+                  <p className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                    {daysRemaining}
+                  </p>
+                </div>
+
+                {projectedTotal !== null && budgetTarget && (
+                  <div>
+                    <p className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold mb-1 uppercase tracking-wide">
+                      {t('budget.summary.projected')}
+                    </p>
+                    <p className={`text-xl sm:text-2xl font-bold tracking-tight ${projectedTotal > budgetTarget ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                      {formatCurrency(projectedTotal, currency, i18n.language)}
+                    </p>
                   </div>
-                ) : (
-                  <button
-                    onClick={() => { setTargetInput(budgetTarget ? String(budgetTarget) : ''); setEditingTarget(true); }}
-                    className="mt-3 self-start text-[11px] font-medium text-gray-400 dark:text-gray-500 hover:text-blue-500 dark:hover:text-blue-400 transition-colors cursor-pointer"
-                  >
-                    {budgetTarget ? t('budget.target.edit') : t('budget.target.set')}
-                  </button>
-                )
-              )}
-            </div>
-
-            <div className="min-w-[70vw] sm:min-w-[280px] md:min-w-0 snap-center glass-card p-6 sm:p-10 flex flex-col justify-center shrink-0">
-              <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-2 sm:mb-4">{t('budget.summary.transactions')}</p>
-              <p className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tighter text-gray-900 dark:text-white">{expenses.length}</p>
-            </div>
-
-            {/* Daily average */}
-            <div className="min-w-[75vw] sm:min-w-[300px] md:min-w-0 snap-center glass-card p-6 sm:p-10 flex flex-col justify-center shrink-0">
-              <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-2 sm:mb-4">{t('budget.summary.avgPerDay')}</p>
-              <p className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tighter text-gray-900 dark:text-white">
-                {avgPerDay > 0 ? formatCurrency(Math.round(avgPerDay), currency, i18n.language) : '—'}
-              </p>
-              <p className="text-[11px] font-medium text-gray-400 dark:text-gray-500 mt-2">
-                {t('budget.summary.overDays', { count: tripDays })}
-              </p>
+                )}
+              </div>
             </div>
           </div>
 
+          {/* ── Category Breakdown ── */}
           {expenses.length > 0 && (
-            <div className="glass-card p-6 sm:p-10 pt-8 sm:pt-12 mt-6 sm:mt-0">
-              <h3 className="font-bold text-gray-900 dark:text-white text-lg sm:text-xl mb-6 sm:mb-8 flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center shrink-0">
-                  <TrendingUp size={20} strokeWidth={2} />
+            <div className="glass-card p-6 sm:p-8">
+              <h3 className="font-bold text-gray-900 dark:text-white text-[15px] sm:text-lg mb-5 sm:mb-6 flex items-center gap-3">
+                <div className="w-9 h-9 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center shrink-0">
+                  <TrendingUp size={16} strokeWidth={2} />
                 </div>
                 {t('budget.breakdown')}
               </h3>
-              <CategoryBar expenses={expenses} currency={currency} />
+              <CategoryBar
+                expenses={expenses}
+                currency={currency}
+                locale={i18n.language}
+                onCategoryClick={setCategoryFilter}
+                activeCategory={categoryFilter}
+              />
             </div>
           )}
 
-          {/* Expense List */}
-          <div className="space-y-6 pt-6">
+          {/* ── Expense List ── */}
+          <div className="space-y-3 sm:space-y-4">
             {expenses.length > 0 && (
-              <div className="glass-card p-3 sm:p-4 rounded-2xl flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div className="glass-card p-3 sm:p-4 flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
                   <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                    <Search size={18} className="text-gray-400" />
+                    <Search size={16} className="text-gray-400" />
                   </div>
                   <input
                     type="text"
                     placeholder={t('budget.search.placeholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px]"
+                    className="w-full pl-9 pr-4 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px] text-gray-900 dark:text-white"
                   />
                 </div>
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
-                  <div className="relative">
+                <div className="flex gap-3 w-full sm:w-auto">
+                  <div className="relative flex-1 sm:flex-none">
                     <select
                       value={categoryFilter}
                       onChange={(e) => setCategoryFilter(e.target.value)}
-                      className="pl-4 pr-10 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px] appearance-none cursor-pointer h-full w-full sm:w-auto"
+                      className="w-full sm:w-auto pl-3 pr-9 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px] appearance-none cursor-pointer text-gray-900 dark:text-white dark:bg-[#1C1C1E]"
                     >
                       <option value="all">{t('budget.categories.all')}</option>
                       {CATEGORIES.map(c => <option key={c.id} value={c.id}>{t('budget.categories.' + c.id)}</option>)}
                     </select>
-                    <ChevronRight size={16} strokeWidth={2.5} className="absolute right-4 top-1/2 -translate-y-1/2 rotate-90 text-gray-400 pointer-events-none" />
+                    <ChevronRight size={14} strokeWidth={2.5} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-gray-400 pointer-events-none" />
                   </div>
-                  <div className="relative">
+                  <div className="relative flex-1 sm:flex-none">
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="pl-4 pr-10 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px] appearance-none cursor-pointer h-full w-full sm:w-auto"
+                      className="w-full sm:w-auto pl-3 pr-9 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px] appearance-none cursor-pointer text-gray-900 dark:text-white dark:bg-[#1C1C1E]"
                     >
                       <option value="date-desc">{t('budget.sort.dateDesc')}</option>
                       <option value="date-asc">{t('budget.sort.dateAsc')}</option>
                       <option value="amount-desc">{t('budget.sort.amountDesc')}</option>
                       <option value="amount-asc">{t('budget.sort.amountAsc')}</option>
                     </select>
-                    <ChevronRight size={16} strokeWidth={2.5} className="absolute right-4 top-1/2 -translate-y-1/2 rotate-90 text-gray-400 pointer-events-none" />
+                    <ChevronRight size={14} strokeWidth={2.5} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-gray-400 pointer-events-none" />
                   </div>
                   {(searchQuery || categoryFilter !== 'all') && (
                     <button
                       onClick={() => { setSearchQuery(''); setCategoryFilter('all'); }}
-                      className="flex items-center justify-center gap-1.5 text-sm font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-4 py-2.5 transition-all shrink-0 cursor-pointer disabled:cursor-not-allowed"
+                      className="flex items-center gap-1 text-[13px] font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-3 py-2.5 transition-all shrink-0 cursor-pointer"
                     >
-                      <X size={16} strokeWidth={2.5} /> {t('budget.filter.reset')}
+                      <X size={14} strokeWidth={2.5} />
                     </button>
                   )}
                 </div>
               </div>
             )}
 
-            <div className="flex items-center justify-between border-b border-gray-200 dark:border-white/10 pb-4">
-              <h3 className="text-[13px] font-semibold text-gray-500 dark:text-gray-400">{t('budget.history')}</h3>
-              <span className="px-3 py-1 bg-gray-100 dark:bg-white/10 rounded-full text-[11px] font-bold text-gray-500 dark:text-gray-400">{filteredExpenses.length} {t('budget.items')}</span>
+            <div className="flex items-center justify-between pb-1">
+              <h3 className="text-[12px] font-semibold text-gray-500 dark:text-gray-400">{t('budget.history')}</h3>
+              {filteredExpenses.length > 0 && (
+                <span className="px-2.5 py-1 bg-gray-100 dark:bg-white/10 rounded-full text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                  {filteredExpenses.length} {t('budget.items')}
+                </span>
+              )}
             </div>
 
             {sortedExpenses.length > 0 ? (
-              <div className="grid grid-cols-1 gap-4">
-                {sortedExpenses.map(expense => {
-                  const cat = catInfo(expense.category);
-                  const Icon = cat.icon;
-                  return (
-                    <motion.div
-                      key={expense.id}
-                      initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex flex-col sm:flex-row sm:items-center justify-between p-5 sm:p-6 glass-card shadow-sm hover:shadow-md hover:-translate-y-0.5 group transition-all duration-300 gap-4 sm:gap-6"
-                    >
-                      <div className="flex items-center gap-4 sm:gap-6 min-w-0">
-                        <div className={`w-10 h-10 sm:w-12 sm:h-12 ${cat.lightBgClass} ${cat.textClass} rounded-[1rem] flex items-center justify-center shrink-0`}>
-                          <Icon size={20} strokeWidth={2} className="sm:w-6 sm:h-6" />
+              isDateSort && dateGroupData ? (
+                /* Date-grouped view */
+                <div className="space-y-3">
+                  {dateGroupData.keys.map(dateKey => {
+                    const dayExpenses = dateGroupData.groups[dateKey];
+                    const dayTotal = dayExpenses.reduce((s, e) => s + e.amount, 0);
+                    return (
+                      <div key={dateKey} className="glass-card overflow-hidden">
+                        <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-gray-100/70 dark:border-white/[0.06]">
+                          <span className="text-[13px] font-bold text-gray-900 dark:text-white">{formatGroupDate(dateKey)}</span>
+                          <span className="text-[13px] font-semibold text-gray-600 dark:text-gray-300">
+                            {formatCurrency(dayTotal, currency, i18n.language)}
+                          </span>
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-[10px] font-medium text-gray-400 dark:text-gray-500 mb-1.5 leading-none">{t('budget.categories.' + expense.category)}</p>
-                          <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate tracking-tight leading-tight mb-1.5 sm:mb-2">{expense.description}</p>
-                          {expense.date && (
-                            <div className="flex items-center gap-1.5 text-[12px] font-medium text-gray-500 dark:text-gray-400">
-                              <Calendar size={14} strokeWidth={2} />
-                              {format(new Date(expense.date), 'd. MMMM yyyy', { locale: dateLocale })}
-                            </div>
-                          )}
+                        <div>
+                          {dayExpenses.map(expense => (
+                            <ExpenseRow key={expense.id} expense={expense} compact {...rowProps} />
+                          ))}
                         </div>
                       </div>
-                      <div className="flex items-center sm:items-end justify-between sm:flex-col shrink-0 gap-2 border-t sm:border-t-0 border-gray-100 dark:border-white/5 pt-4 sm:pt-0">
-                        <span className="font-bold text-2xl tracking-tight text-gray-900 dark:text-white">{formatCurrency(expense.amount, currency, i18n.language)}</span>
-                        {!isViewer && (
-                          <div className="flex items-center gap-3">
-                            <button
-                              onClick={() => setEditingExpense(expense)}
-                              aria-label={t('budget.expenseEdit')}
-                              className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all px-3 py-1.5 sm:px-0 sm:py-0 rounded-full sm:rounded-none cursor-pointer"
-                            >
-                              <Pencil size={13} strokeWidth={2} aria-hidden="true" />
-                              <span className="sm:hidden">{t('budget.expenseEdit')}</span>
-                            </button>
-                            <button
-                              onClick={() => handleDeleteExpense(expense.id)}
-                              className="flex items-center gap-1.5 text-[11px] font-medium text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all sm:bg-transparent px-3 py-1.5 sm:px-0 sm:py-0 rounded-full sm:rounded-none cursor-pointer disabled:cursor-not-allowed"
-                            >
-                              <Trash2 size={13} strokeWidth={2} aria-hidden="true" /> {t('budget.expenseDelete')}
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                /* Flat list (amount sort) */
+                <div className="grid grid-cols-1 gap-3 sm:gap-4">
+                  {sortedExpenses.map(expense => (
+                    <ExpenseRow key={expense.id} expense={expense} {...rowProps} />
+                  ))}
+                </div>
+              )
             ) : expenses.length > 0 ? (
               <div className="text-center py-10 glass-card">
                 <p className="font-bold text-xl text-gray-900 dark:text-white tracking-tight mb-2">{t('budget.empty.noResults')}</p>
                 <p className="text-[14px] text-gray-500 dark:text-gray-400">{t('budget.empty.noResultsDesc')}</p>
               </div>
             ) : (
-              <div className="text-center py-20 glass-card">
-                <Wallet className="mx-auto text-gray-300 dark:text-gray-600 mb-6" size={48} strokeWidth={1.5} />
-                <p className="text-gray-500 dark:text-gray-400 font-medium text-[15px]">{t('budget.empty.noExpenses')}</p>
+              <div className="glass-card p-10 sm:p-14 flex flex-col items-center justify-center text-center">
+                <div className="w-14 h-14 bg-blue-50 dark:bg-blue-500/10 rounded-2xl flex items-center justify-center mb-4">
+                  <Wallet className="text-blue-500 dark:text-blue-400" size={26} strokeWidth={1.5} />
+                </div>
+                <p className="font-bold text-xl text-gray-900 dark:text-white tracking-tight mb-2">{t('budget.empty.noExpenses')}</p>
+                <p className="text-[14px] text-gray-500 dark:text-gray-400 max-w-xs mb-6">{t('budget.empty.noExpensesDesc')}</p>
+                {!isViewer && (
+                  <button
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer text-[14px]"
+                  >
+                    <Plus size={18} strokeWidth={2.5} /> {t('budget.addExpense')}
+                  </button>
+                )}
               </div>
             )}
           </div>
         </>
       ) : null}
 
-      {trip && !isViewer && (
+      {/* Standalone mobile FAB */}
+      {!hideHeader && trip && !isViewer && (
         <button
           onClick={() => setIsAddModalOpen(true)}
           className="sm:hidden fixed bottom-24 right-6 z-[100] w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(37,99,235,0.4)] active:scale-90 transition-transform cursor-pointer"

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Save, MapPin, Calendar, Pencil, Check, PackageOpen, Link as LinkIcon, Plus, Trash2, ExternalLink, Image as ImageIcon, Layout, Briefcase, Info, Users, Eye, Heart } from 'lucide-react';
+import { ArrowLeft, Save, MapPin, Calendar, Pencil, Check, PackageOpen, Link as LinkIcon, Plus, Trash2, ExternalLink, Layout, Briefcase, Info, Users, Eye, Heart, Wallet } from 'lucide-react';
 import { format, eachDayOfInterval } from 'date-fns';
 import { cs } from 'date-fns/locale';
 import { enUS } from 'date-fns/locale';
@@ -12,6 +12,8 @@ import CharCount from '../ui/CharCount';
 import { useUnsavedChanges } from '../../contexts/UnsavedChangesContext';
 import LikeButton from '../ui/LikeButton';
 import ShareTripModal from './ShareTripModal';
+import Budget from './Budget';
+import { useCurrency } from '../../contexts/CurrencyContext';
 
 const TripDetail = ({ trips, onUpdateTrip }) => {
   const { id } = useParams();
@@ -39,6 +41,9 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const titleInputRef = useRef(null);
   const [showShareModal, setShowShareModal] = useState(false);
+  const { currency } = useCurrency();
+  const currSymbols = { CZK: 'Kč', EUR: '€', USD: '$', GBP: '£' };
+  const currSymbol = currSymbols[currency] || currency;
 
   useEffect(() => {
     return () => {
@@ -75,8 +80,17 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
         };
       });
       setDailyPlans(initialPlans);
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayIndex = initialPlans.findIndex(day => {
+        const d = new Date(day.date);
+        d.setHours(0, 0, 0, 0);
+        return d.getTime() === today.getTime();
+      });
+      if (todayIndex !== -1) setActiveView(todayIndex);
     }
-  }, [trip]);
+  }, [trip?.id]);
 
   if (!trip) {
     return (
@@ -280,6 +294,18 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           <p className="text-gray-500 flex items-center flex-wrap gap-2 text-[13px] font-medium">
             <Calendar size={16} strokeWidth={2.5} />
             {format(new Date(trip.startDate), 'dd.MM.yyyy')} — {format(new Date(trip.endDate), 'dd.MM.yyyy')}
+            {(trip.expenses?.length > 0 || trip.budgetTarget) && (
+              <button
+                onClick={() => { setMobileTab('tools'); setActiveView('budget'); }}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors cursor-pointer"
+              >
+                <Wallet size={10} strokeWidth={2.5} />
+                {trip.expenses?.length > 0
+                  ? `${(trip.expenses.reduce((s, e) => s + e.amount, 0)).toLocaleString(i18n.language)} ${currSymbol}${trip.budgetTarget ? ` / ${trip.budgetTarget.toLocaleString(i18n.language)} ${currSymbol}` : ''}`
+                  : t('tripDetail.tools.budget')
+                }
+              </button>
+            )}
             {trip.role && trip.role !== 'owner' && (
               <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ${
                 isViewer
@@ -349,51 +375,62 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1 min-h-0">
 
         {/* Desktop Sidebar */}
-        <div className="hidden lg:flex lg:col-span-3 flex-col space-y-6 h-full min-h-0">
-          <div className="glass-card p-6 space-y-2">
-            <h3 className="font-semibold text-gray-400 text-[11px] mb-4 ml-2">{t('tripDetail.tabs.tools')}</h3>
-            <button
-              onClick={() => setActiveView('packing')}
-              className={`w-full flex items-center gap-3 text-left px-4 py-3.5 rounded-xl transition-all duration-300 font-bold ${activeView === 'packing' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'} cursor-pointer disabled:cursor-not-allowed`}
-            >
-              <PackageOpen size={18} strokeWidth={2.5} /> {t('tripDetail.tools.packing')}
-            </button>
-            <button
-              onClick={() => setActiveView('documents')}
-              className={`w-full flex items-center gap-3 text-left px-4 py-3.5 rounded-xl transition-all duration-300 font-bold ${activeView === 'documents' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'} cursor-pointer disabled:cursor-not-allowed`}
-            >
-              <LinkIcon size={18} strokeWidth={2.5} /> {t('tripDetail.tools.documents')}
-            </button>
-            <button
-              onClick={() => setActiveView('diary')}
-              className={`w-full flex items-center gap-3 text-left px-4 py-3.5 rounded-xl transition-all duration-300 font-bold ${activeView === 'diary' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'} cursor-pointer disabled:cursor-not-allowed`}
-            >
-              <ImageIcon size={18} strokeWidth={2.5} /> {t('tripDetail.tools.diary')}
-            </button>
-          </div>
+        <div className="hidden lg:flex lg:col-span-3 flex-col h-full min-h-0">
+          <div className="glass-card p-5 flex flex-col h-full min-h-0">
 
-          <div className="glass-card p-6 space-y-2 flex-1 flex flex-col min-h-0">
-            <h3 className="font-semibold text-gray-400 text-[11px] mb-4 ml-2">{t('tripDetail.itinerary.label')}</h3>
-            <div className="space-y-2 overflow-y-auto pr-2 custom-scrollbar flex-1">
+            {/* Tool strip */}
+            <div className="flex gap-2 mb-5 shrink-0">
+              {[
+                { id: 'packing', Icon: PackageOpen, label: t('tripDetail.tools.packing') },
+                { id: 'documents', Icon: LinkIcon, label: t('tripDetail.tools.documents') },
+                { id: 'budget', Icon: Wallet, label: t('tripDetail.tools.budget'), badge: trip.expenses?.length || null },
+              ].map(({ id, Icon, label, badge }) => (
+                <button
+                  key={id}
+                  onClick={() => setActiveView(id)}
+                  className={`relative flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl text-[10px] font-semibold transition-all duration-200 cursor-pointer ${
+                    activeView === id
+                      ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white'
+                  }`}
+                >
+                  <Icon size={18} strokeWidth={2.5} />
+                  {label}
+                  {badge > 0 && (
+                    <span className="absolute top-1.5 right-1.5 w-4 h-4 flex items-center justify-center text-[9px] font-bold rounded-full bg-blue-600 text-white">
+                      {badge > 9 ? '9+' : badge}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Divider */}
+            <div className="h-px bg-gray-100 dark:bg-white/10 -mx-5 mb-5 shrink-0" />
+
+            {/* Itinerary days */}
+            <p className="text-[11px] font-semibold text-gray-400 mb-3 shrink-0">{t('tripDetail.itinerary.label')}</p>
+            <div className="space-y-1.5 overflow-y-auto flex-1 custom-scrollbar pr-1">
               {dailyPlans.map((day, index) => (
                 <button
                   key={index}
                   onClick={() => setActiveView(index)}
-                  className={`w-full flex items-center justify-between text-left px-4 py-4 rounded-xl transition-all duration-300 ${
+                  className={`w-full flex items-center justify-between text-left px-4 py-3.5 rounded-xl transition-all duration-200 ${
                     activeView === index
-                      ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                      : 'text-gray-900 dark:text-white bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10'
-                  } cursor-pointer disabled:cursor-not-allowed`}
+                      ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+                      : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-white/5'
+                  } cursor-pointer`}
                 >
                   <div className="min-w-0">
-                    <div className="font-bold truncate text-[15px]">{day.title}</div>
-                    <div className={`text-[11px] mt-1 font-medium ${activeView === index ? 'text-blue-200' : 'text-gray-400'}`}>
+                    <div className="font-bold truncate text-[14px]">{day.title}</div>
+                    <div className={`text-[11px] mt-0.5 font-medium ${activeView === index ? 'text-blue-200' : 'text-gray-400'}`}>
                       {format(new Date(day.date), 'EEE, dd.MM.', { locale: dateLocale })}
                     </div>
                   </div>
                 </button>
               ))}
             </div>
+
           </div>
         </div>
 
@@ -426,12 +463,6 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                 </div>
               </div>
             </div>
-            <button
-              onClick={() => setActiveView('diary')}
-              className="w-full glass-card p-6 font-bold flex items-center justify-center gap-3 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors duration-300 text-gray-900 dark:text-white cursor-pointer disabled:cursor-not-allowed"
-            >
-              <ImageIcon size={20} strokeWidth={2.5} /> {t('tripDetail.info.openDiary')}
-            </button>
           </div>
 
           {/* Mobile Tools Selection */}
@@ -456,6 +487,21 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                 <span className="text-[11px] font-medium">
                   {documents.length} {t('tripDetail.mobile.records')}
                 </span>
+              </button>
+              <button
+                onClick={() => setActiveView('budget')}
+                className={`col-span-2 flex items-center gap-5 p-5 rounded-3xl border-2 transition-all duration-300 text-left ${activeView === 'budget' ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'border-transparent glass-card text-gray-500 hover:text-gray-900'} cursor-pointer disabled:cursor-not-allowed`}
+              >
+                <Wallet size={26} strokeWidth={2} className="shrink-0" />
+                <div>
+                  <span className="font-bold text-[15px] block mb-0.5 text-gray-900 dark:text-white leading-tight">{t('tripDetail.mobile.budget')}</span>
+                  <span className="text-[11px] font-medium">
+                    {trip.expenses?.length > 0
+                      ? `${(trip.expenses.reduce((s, e) => s + e.amount, 0)).toLocaleString(i18n.language)} ${currSymbol}`
+                      : t('tripDetail.mobile.budgetEmpty')
+                    }
+                  </span>
+                </div>
               </button>
             </div>
           </div>
@@ -637,20 +683,9 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
             </div>
           </div>
 
-          {/* Diary */}
-          <div className={`${activeView === 'diary' ? 'flex' : 'hidden'} ${mobileTab === 'info' || mobileTab === 'itinerary' ? '' : 'max-md:hidden'} flex-col flex-1 lg:h-full lg:min-h-0`}>
-            <div className="glass-card flex-1 flex flex-col items-center justify-center p-5 sm:p-8 text-center min-h-[400px] mb-6 lg:mb-0">
-              <div className="w-20 h-20 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-[2rem] flex items-center justify-center mb-8">
-                <ImageIcon size={32} strokeWidth={2} />
-              </div>
-              <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">{t('tripDetail.diary.title')}</h2>
-              <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-8 font-medium">
-                {t('tripDetail.diary.description')}
-              </p>
-              <span className="inline-flex px-4 py-2 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 font-semibold rounded-xl text-[11px]">
-                {t('tripDetail.diary.comingSoon')}
-              </span>
-            </div>
+          {/* Budget */}
+          <div className={`${activeView === 'budget' ? 'block' : 'hidden'} ${mobileTab === 'tools' ? '' : 'max-md:hidden'} mb-6 lg:mb-0`}>
+            <Budget trips={[trip]} onUpdateTrip={onUpdateTrip} hideHeader />
           </div>
 
           {/* Itinerary Editor */}

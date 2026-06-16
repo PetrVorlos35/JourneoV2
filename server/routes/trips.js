@@ -59,7 +59,8 @@ router.get('/', async (req, res) => {
          t.created_at AS createdAt,
          'owner' AS role,
          (SELECT COUNT(*) FROM votes v WHERE v.trip_id = t.id AND v.value = 1) AS likes,
-         t.share_token AS shareToken
+         t.share_token AS shareToken,
+         t.budget_target AS budgetTarget
        FROM trips t
        WHERE t.user_id = ?
        UNION
@@ -69,7 +70,8 @@ router.get('/', async (req, res) => {
          t.created_at AS createdAt,
          tc.role,
          NULL AS likes,
-         NULL AS shareToken
+         NULL AS shareToken,
+         t.budget_target AS budgetTarget
        FROM trips t
        JOIN trip_collaborators tc ON tc.trip_id = t.id AND tc.user_id = ?
        WHERE t.user_id != ?
@@ -111,6 +113,7 @@ router.get('/', async (req, res) => {
       return {
         ...trip,
         id: trip.id.toString(),
+        budgetTarget: trip.budgetTarget != null ? parseFloat(trip.budgetTarget) : null,
         activities: activities.map(a => ({ ...a, id: a.id.toString() })),
         expenses: expenses.map(e => ({ ...e, id: e.id.toString(), amount: parseFloat(e.amount) })),
         packingList: packingItems.map(p => ({ id: p.id.toString(), text: p.text, checked: !!p.checked })),
@@ -177,7 +180,7 @@ router.put('/:id', async (req, res) => {
 
     const userId = req.userId;
     const tripId = parseInt(req.params.id);
-    const { title, startDate, endDate, activities, expenses, packingList, documents } = req.body;
+    const { title, startDate, endDate, activities, expenses, packingList, documents, budgetTarget } = req.body;
 
     const role = await getTripRole(tripId, userId);
     if (!role) {
@@ -199,10 +202,12 @@ router.put('/:id', async (req, res) => {
       }
     }
 
-    if (title || startDate || endDate) {
+    if (title || startDate || endDate || budgetTarget !== undefined) {
+      const budgetClause = budgetTarget !== undefined ? ', budget_target = ?' : '';
+      const budgetParams = budgetTarget !== undefined ? [budgetTarget] : [];
       await connection.query(
-        'UPDATE trips SET title = COALESCE(?, title), start_date = COALESCE(?, start_date), end_date = COALESCE(?, end_date) WHERE id = ?',
-        [title, formatDateForDb(startDate), formatDateForDb(endDate), tripId]
+        `UPDATE trips SET title = COALESCE(?, title), start_date = COALESCE(?, start_date), end_date = COALESCE(?, end_date)${budgetClause} WHERE id = ?`,
+        [title, formatDateForDb(startDate), formatDateForDb(endDate), ...budgetParams, tripId]
       );
     }
 
@@ -250,7 +255,7 @@ router.put('/:id', async (req, res) => {
     await connection.commit();
 
     const [updatedTrips] = await pool.query(
-      "SELECT id, title, DATE_FORMAT(start_date, '%Y-%m-%d') AS startDate, DATE_FORMAT(end_date, '%Y-%m-%d') AS endDate FROM trips WHERE id = ?",
+      "SELECT id, title, DATE_FORMAT(start_date, '%Y-%m-%d') AS startDate, DATE_FORMAT(end_date, '%Y-%m-%d') AS endDate, budget_target AS budgetTarget FROM trips WHERE id = ?",
       [tripId]
     );
     const [updatedActivities] = await pool.query(
@@ -282,6 +287,7 @@ router.put('/:id', async (req, res) => {
       trip: {
         ...updatedTrips[0],
         id: updatedTrips[0].id.toString(),
+        budgetTarget: updatedTrips[0].budgetTarget != null ? parseFloat(updatedTrips[0].budgetTarget) : null,
         role,
         activities: updatedActivities.map(a => ({ ...a, id: a.id.toString() })),
         expenses: updatedExpenses.map(e => ({ ...e, id: e.id.toString(), amount: parseFloat(e.amount) })),
