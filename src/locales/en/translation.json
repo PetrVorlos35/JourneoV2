@@ -119,6 +119,12 @@
       "subtitle": "Join and start building your personal world map. No commitments, no clutter.",
       "button": "Start for free"
     },
+    "feedback": {
+      "label": "Feedback",
+      "title": "Help Journeo grow",
+      "subtitle": "Journeo is still growing. If you run into a bug, something doesn't work, or there's a feature you'd love to see — drop me a line. I read every message.",
+      "button": "Send an email"
+    },
     "footer": {
       "madeWith": "Made with attention to detail.",
       "privacy": "Privacy Policy",
@@ -778,6 +784,10 @@
       "title": "Your invite link",
       "description": "Share this link with someone you know — anyone who opens it while signed in can add you as a friend in one click.",
       "copy": "Copy link",
+      "copyShort": "Copy",
+      "copied": "Copied",
+      "copyError": "Couldn't copy the link.",
+      "hint": "Share it with anyone — one tap adds you after they sign in.",
       "regenerate": "New link",
       "regenerateTitle": "Generate a new link?",
       "regenerateMessage": "The current invite link will stop working. Anyone who still has it won't be able to use it to add you.",
@@ -1061,7 +1071,8 @@
         "friends": "Friends",
         "totalCzk": "total",
         "noTrips": "This user has no trips",
-        "noFriends": "This user has no friends"
+        "noFriends": "This user has no friends",
+        "dialogLabel": "User detail"
       }
     },
     "trips": {
@@ -1104,9 +1115,11 @@
         "packingLabel": "Packing",
         "notesLabel": "Notes",
         "deleteButton": "Delete this trip",
-        "empty": "This trip has no content yet."
+        "empty": "This trip has no content yet.",
+        "dialogLabel": "Trip detail"
       }
-    }
+    },
+    "close": "Close"
   },
   "dashboardSplash": {
     "tagline": "Your travel diary"

@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import UserAvatar from '../ui/UserAvatar';
 import { useDialog } from '../ui/DialogModal';
 import { useAuth } from '../../contexts/AuthContext';
+import useSlideOverA11y from '../../hooks/useSlideOverA11y';
 
 const AdminUsers = () => {
   const { user: currentUser } = useAuth();
@@ -20,6 +21,7 @@ const AdminUsers = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const { confirmDialog, ModalPortal } = useDialog();
+  const detailPanelRef = useSlideOverA11y(!!selectedUser, () => setSelectedUser(null));
 
   const fetchUsers = useCallback(async (page = 1, searchQuery = search) => {
     setLoading(true);
@@ -113,26 +115,27 @@ const AdminUsers = () => {
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
         <div>
-          <h1 className="text-3xl md:text-4xl font-black tracking-tight">
-            <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">{t('admin.users.title')}</span>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
+            {t('admin.users.title')}
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1 font-medium">{t('admin.users.total', { count: pagination.total })}</p>
         </div>
         
         <form onSubmit={handleSearch} className="flex gap-2">
-          <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+          <div className="relative flex-1 sm:flex-none">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('admin.users.searchPlaceholder')}
-              className="pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08] text-sm font-medium focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all w-64 placeholder:text-gray-600"
+              aria-label={t('admin.users.searchPlaceholder')}
+              className="pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08] text-sm font-medium focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all w-full sm:w-64 placeholder:text-gray-500 dark:placeholder:text-gray-500"
             />
           </div>
           <button
             type="submit"
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 text-gray-900 dark:text-white text-sm font-bold hover:shadow-lg hover:shadow-orange-500/20 transition-all active:scale-95 cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-sm font-bold hover:shadow-lg hover:shadow-orange-500/20 transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60"
           >
             {t('admin.users.searchButton')}
           </button>
@@ -190,33 +193,27 @@ const AdminUsers = () => {
                       </div>
                     </div>
                     
-                    {/* Action Buttons on Mobile */}
-                    <div className="flex flex-col gap-2 shrink-0">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleViewUser(u.id); }}
-                        className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center cursor-pointer"
-                      >
-                        <Eye size={14} />
-                      </button>
-                      {!isSelf(u.id) && (
+                    {/* Action buttons on mobile (tapping the card opens detail) */}
+                    {!isSelf(u.id) && (
+                      <div className="flex flex-col gap-2 shrink-0">
                         <button
                           onClick={(e) => { e.stopPropagation(); handleChangeRole(u.id, u.role); }}
-                          className={`w-8 h-8 rounded-full flex items-center justify-center cursor-pointer ${
+                          aria-label={u.role === 'admin' ? t('admin.users.tooltips.revokeAdmin') : t('admin.users.tooltips.grantAdmin')}
+                          className={`w-11 h-11 rounded-full flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60 ${
                             u.role === 'admin' ? 'bg-red-500/10 text-red-400' : 'bg-orange-500/10 text-orange-400'
                           }`}
                         >
-                          <Shield size={14} />
+                          <Shield size={16} />
                         </button>
-                      )}
-                      {!isSelf(u.id) && (
                         <button
                           onClick={(e) => { e.stopPropagation(); handleDeleteUser(u.id, u.email); }}
-                          className="w-8 h-8 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center cursor-pointer"
+                          aria-label={t('admin.users.tooltips.deleteUser')}
+                          className="w-11 h-11 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={16} />
                         </button>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               ))}
@@ -227,13 +224,13 @@ const AdminUsers = () => {
               <table className="w-full">
                 <thead>
                   <tr className="text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest border-b border-gray-200 dark:border-white/[0.06]">
-                    <th className="px-6 py-4">{t('admin.users.table.user')}</th>
-                    <th className="px-4 py-4">{t('admin.users.table.email')}</th>
-                    <th className="px-4 py-4">{t('admin.users.table.role')}</th>
-                    <th className="px-4 py-4">{t('admin.users.table.trips')}</th>
-                    <th className="px-4 py-4 hidden lg:table-cell">{t('admin.users.table.friends')}</th>
-                    <th className="px-4 py-4 hidden xl:table-cell">{t('admin.users.table.registration')}</th>
-                    <th className="px-4 py-4 text-right">{t('admin.users.table.actions')}</th>
+                    <th scope="col" className="px-6 py-4">{t('admin.users.table.user')}</th>
+                    <th scope="col" className="px-4 py-4">{t('admin.users.table.email')}</th>
+                    <th scope="col" className="px-4 py-4">{t('admin.users.table.role')}</th>
+                    <th scope="col" className="px-4 py-4">{t('admin.users.table.trips')}</th>
+                    <th scope="col" className="px-4 py-4 hidden lg:table-cell">{t('admin.users.table.friends')}</th>
+                    <th scope="col" className="px-4 py-4 hidden xl:table-cell">{t('admin.users.table.registration')}</th>
+                    <th scope="col" className="px-4 py-4 text-right">{t('admin.users.table.actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/[0.04]">
@@ -279,11 +276,12 @@ const AdminUsers = () => {
                         <span className="text-[12px] text-gray-500">{new Date(u.createdAt).toLocaleDateString(i18n.language)}</span>
                       </td>
                       <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 transition-opacity">
                           <button
                             onClick={() => handleViewUser(u.id)}
-                            className="p-2 rounded-lg hover:bg-blue-500/10 text-gray-500 dark:text-gray-400 hover:text-blue-400 transition-colors cursor-pointer"
+                            className="p-2 rounded-lg hover:bg-blue-500/10 text-gray-500 dark:text-gray-400 hover:text-blue-400 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
                             title={t('admin.users.tooltips.viewUser')}
+                            aria-label={t('admin.users.tooltips.viewUser')}
                           >
                             <Eye size={16} />
                           </button>
@@ -291,12 +289,13 @@ const AdminUsers = () => {
                           {!isSelf(u.id) && (
                             <button
                               onClick={() => handleChangeRole(u.id, u.role)}
-                              className={`p-2 rounded-lg transition-colors cursor-pointer ${
+                              className={`p-2 rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60 ${
                                 u.role === 'admin'
                                   ? 'hover:bg-red-500/10 text-gray-500 hover:text-red-400'
                                   : 'hover:bg-orange-500/10 text-gray-500 hover:text-orange-400'
                               }`}
                               title={u.role === 'admin' ? t('admin.users.tooltips.revokeAdmin') : t('admin.users.tooltips.grantAdmin')}
+                              aria-label={u.role === 'admin' ? t('admin.users.tooltips.revokeAdmin') : t('admin.users.tooltips.grantAdmin')}
                             >
                               <Shield size={16} />
                             </button>
@@ -304,8 +303,9 @@ const AdminUsers = () => {
                           {!isSelf(u.id) && (
                             <button
                               onClick={() => handleDeleteUser(u.id, u.email)}
-                              className="p-2 rounded-lg hover:bg-red-500/10 text-gray-500 hover:text-red-500 transition-colors cursor-pointer"
+                              className="p-2 rounded-lg hover:bg-red-500/10 text-gray-500 hover:text-red-500 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60"
                               title={t('admin.users.tooltips.deleteUser')}
+                              aria-label={t('admin.users.tooltips.deleteUser')}
                             >
                               <Trash2 size={16} />
                             </button>
@@ -330,14 +330,14 @@ const AdminUsers = () => {
               <button
                 onClick={() => fetchUsers(pagination.page - 1, search)}
                 disabled={pagination.page <= 1}
-                className="px-3 py-1.5 rounded-lg text-[12px] font-bold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                className="inline-flex items-center min-h-[44px] px-4 rounded-lg text-[12px] font-bold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60"
               >
                 {t('admin.users.prevPage')}
               </button>
               <button
                 onClick={() => fetchUsers(pagination.page + 1, search)}
                 disabled={pagination.page >= pagination.totalPages}
-                className="px-3 py-1.5 rounded-lg text-[12px] font-bold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                className="inline-flex items-center min-h-[44px] px-4 rounded-lg text-[12px] font-bold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60"
               >
                 {t('admin.users.nextPage')}
               </button>
@@ -360,11 +360,16 @@ const AdminUsers = () => {
                 onClick={() => setSelectedUser(null)}
               />
               <motion.div
+                ref={detailPanelRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label={t('admin.users.detail.dialogLabel')}
+                tabIndex={-1}
                 initial={{ x: '100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '100%' }}
                 transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
-                className="relative w-full max-w-lg bg-white dark:bg-[#111113] border-l border-gray-200 dark:border-white/[0.08] h-full overflow-y-auto z-10 custom-scrollbar shadow-2xl shadow-black/50"
+                className="relative w-full max-w-lg bg-white dark:bg-[#111113] border-l border-gray-200 dark:border-white/[0.08] h-full overflow-y-auto z-10 custom-scrollbar shadow-2xl shadow-black/50 focus:outline-none"
               >
                 {detailLoading || selectedUser?.loading ? (
                   <div className="flex items-center justify-center h-full">
@@ -375,9 +380,10 @@ const AdminUsers = () => {
                     {/* Close button */}
                     <button
                       onClick={() => setSelectedUser(null)}
-                      className="absolute top-6 right-6 p-2.5 rounded-full bg-gray-100 dark:bg-white/[0.06] hover:bg-gray-200 dark:bg-white/[0.12] transition-colors cursor-pointer group"
+                      aria-label={t('admin.close')}
+                      className="absolute top-6 right-6 p-2.5 rounded-full bg-gray-100 dark:bg-white/[0.06] hover:bg-gray-200 dark:hover:bg-white/[0.12] transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60"
                     >
-                      <X size={16} className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:text-white transition-colors" />
+                      <X size={16} className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
                     </button>
 
                     {/* User Profile Header */}
@@ -385,7 +391,7 @@ const AdminUsers = () => {
                       <div className="relative">
                         <UserAvatar user={{ first_name: selectedUser.firstName, last_name: selectedUser.lastName, avatar_url: selectedUser.avatarUrl }} size="lg" />
                         {selectedUser.role === 'admin' && (
-                          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center border-2 border-[#111113]">
+                          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center border-2 border-[#111113]">
                             <Shield size={10} className="text-white" />
                           </div>
                         )}
@@ -453,7 +459,7 @@ const AdminUsers = () => {
                             </div>
                           </div>
                         )) : (
-                          <div className="text-center py-6 text-gray-600 text-[13px]">
+                          <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-[13px]">
                             {t('admin.users.detail.noTrips')}
                           </div>
                         )}
@@ -475,7 +481,7 @@ const AdminUsers = () => {
                             </div>
                           </div>
                         )) : (
-                          <div className="text-center py-6 text-gray-600 text-[13px]">
+                          <div className="text-center py-6 text-gray-500 dark:text-gray-400 text-[13px]">
                             {t('admin.users.detail.noFriends')}
                           </div>
                         )}

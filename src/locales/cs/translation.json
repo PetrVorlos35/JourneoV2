@@ -119,6 +119,12 @@
       "subtitle": "Připojte se a začněte tvořit svou osobní mapu světa. Bez závazků, bez zbytečností.",
       "button": "Začít zdarma"
     },
+    "feedback": {
+      "label": "Zpětná vazba",
+      "title": "Pomozte Journeo růst",
+      "subtitle": "Journeo se pořád vyvíjí. Pokud narazíte na chybu, něco vám nefunguje, nebo vám chybí funkce, kterou byste uvítali — napište mi. Každý podnět si přečtu.",
+      "button": "Napsat e-mail"
+    },
     "footer": {
       "madeWith": "Vytvořeno s důrazem na detail.",
       "privacy": "Ochrana soukromí",
@@ -778,6 +784,10 @@
       "title": "Váš zvací odkaz",
       "description": "Pošlete tento odkaz někomu, koho znáte — kdokoliv, kdo ho po přihlášení otevře, vás může jedním klikem přidat jako přítele.",
       "copy": "Zkopírovat odkaz",
+      "copyShort": "Kopírovat",
+      "copied": "Zkopírováno",
+      "copyError": "Odkaz se nepodařilo zkopírovat.",
+      "hint": "Pošlete ho komukoliv — po přihlášení vás přidá jedním klikem.",
       "regenerate": "Nový odkaz",
       "regenerateTitle": "Vygenerovat nový odkaz?",
       "regenerateMessage": "Stávající zvací odkaz přestane fungovat. Kdokoliv, kdo ho má, vás přes něj už nepřidá.",
@@ -1061,7 +1071,8 @@
         "friends": "Přátelé",
         "totalCzk": "Kč celkem",
         "noTrips": "Tento uživatel nemá žádné výlety",
-        "noFriends": "Tento uživatel nemá žádné přátele"
+        "noFriends": "Tento uživatel nemá žádné přátele",
+        "dialogLabel": "Detail uživatele"
       }
     },
     "trips": {
@@ -1104,9 +1115,11 @@
         "packingLabel": "Balení",
         "notesLabel": "Poznámky",
         "deleteButton": "Smazat tento výlet",
-        "empty": "Tento výlet zatím nemá žádný obsah."
+        "empty": "Tento výlet zatím nemá žádný obsah.",
+        "dialogLabel": "Detail výletu"
       }
-    }
+    },
+    "close": "Zavřít"
   },
   "dashboardSplash": {
     "tagline": "Váš cestovatelský deník"

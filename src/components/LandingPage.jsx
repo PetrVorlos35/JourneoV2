@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Home, Plane, Wallet, Users, LineChart, BarChart2 } from 'lucide-react';
+import { ArrowRight, Home, Plane, Wallet, Users, LineChart, BarChart2, Mail } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import Navbar from './Navbar';
@@ -494,6 +494,45 @@ const LandingPage = () => {
 
         </div>
       </div>
+
+      {/* Feedback / contact */}
+      <section className="relative bg-neutral-950 border-t border-white/5 px-6 py-20 sm:py-28 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
+          <div
+            className="w-[420px] h-[420px] sm:w-[620px] sm:h-[620px] rounded-full"
+            style={{
+              background:
+                'radial-gradient(circle, rgba(99,102,241,0.10) 0%, rgba(139,92,246,0.04) 45%, transparent 70%)',
+              filter: 'blur(60px)',
+            }}
+          />
+        </div>
+
+        <div className="relative max-w-2xl mx-auto text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/15 text-indigo-300 mb-6">
+            <Mail size={22} />
+          </div>
+          <p className="text-white/22 text-[10px] font-semibold tracking-[0.4em] uppercase mb-4">
+            {t('landing.feedback.label')}
+          </p>
+          <h2
+            className="font-black tracking-tight text-white leading-[0.95] mb-4"
+            style={{ fontSize: 'clamp(1.8rem, 4.5vw, 3.25rem)' }}
+          >
+            {t('landing.feedback.title')}
+          </h2>
+          <p className="text-white/35 leading-relaxed max-w-md mx-auto text-sm sm:text-base mb-8">
+            {t('landing.feedback.subtitle')}
+          </p>
+          <a
+            href="mailto:petr@vorlos.eu"
+            className="inline-flex items-center gap-2.5 bg-white text-neutral-950 font-bold rounded-full text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 hover:scale-[1.04] hover:shadow-[0_0_50px_rgba(255,255,255,0.14)] transition-all duration-300 shadow-lg"
+          >
+            <Mail size={16} />
+            petr@vorlos.eu
+          </a>
+        </div>
+      </section>
 
       {/* Footer */}
       <footer className="py-6 sm:py-8 px-6 text-center text-sm font-medium text-white/28 bg-neutral-950 border-t border-white/5">

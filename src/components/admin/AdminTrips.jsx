@@ -8,6 +8,7 @@ import api from '../../services/api';
 import toast from 'react-hot-toast';
 import UserAvatar from '../ui/UserAvatar';
 import { useDialog } from '../ui/DialogModal';
+import useSlideOverA11y from '../../hooks/useSlideOverA11y';
 
 const CATEGORY_EMOJIS = {
   transport: '🚗',
@@ -26,6 +27,7 @@ const AdminTrips = () => {
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const { confirmDialog, ModalPortal } = useDialog();
+  const detailPanelRef = useSlideOverA11y(!!selectedTrip, () => setSelectedTrip(null));
 
   const fetchTrips = useCallback(async (page = 1, searchQuery = search) => {
     setLoading(true);
@@ -98,26 +100,27 @@ const AdminTrips = () => {
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
         <div>
-          <h1 className="text-3xl md:text-4xl font-black tracking-tight">
-            <span className="bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">{t('admin.trips.title')}</span>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
+            {t('admin.trips.title')}
           </h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1 font-medium">{t('admin.trips.total', { count: pagination.total })}</p>
         </div>
         
         <form onSubmit={handleSearch} className="flex gap-2">
-          <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+          <div className="relative flex-1 sm:flex-none">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none" />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('admin.trips.searchPlaceholder')}
-              className="pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08] text-sm font-medium focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all w-64 placeholder:text-gray-600"
+              aria-label={t('admin.trips.searchPlaceholder')}
+              className="pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08] text-sm font-medium focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all w-full sm:w-64 placeholder:text-gray-500 dark:placeholder:text-gray-500"
             />
           </div>
           <button
             type="submit"
-            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-orange-600 to-red-600 text-gray-900 dark:text-white text-sm font-bold hover:shadow-lg hover:shadow-orange-500/20 transition-all active:scale-95 cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-sm font-bold hover:shadow-lg hover:shadow-orange-500/20 transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60"
           >
             {t('admin.trips.searchButton')}
           </button>
@@ -165,18 +168,14 @@ const AdminTrips = () => {
                         <span className="flex items-center gap-1"><Heart size={12} /> {trip.likes}</span>
                       </div>
                     </div>
+                    {/* Tapping the card opens detail */}
                     <div className="flex flex-col gap-2 shrink-0">
                       <button
-                        onClick={(e) => { e.stopPropagation(); handleViewTrip(trip.id); }}
-                        className="w-8 h-8 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center cursor-pointer"
-                      >
-                        <Eye size={14} />
-                      </button>
-                      <button
                         onClick={(e) => { e.stopPropagation(); handleDeleteTrip(trip.id, trip.title); }}
-                        className="w-8 h-8 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center cursor-pointer"
+                        aria-label={t('admin.trips.tooltips.deleteTrip')}
+                        className="w-11 h-11 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60"
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </div>
@@ -189,14 +188,14 @@ const AdminTrips = () => {
               <table className="w-full">
                 <thead>
                   <tr className="text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest border-b border-gray-200 dark:border-white/[0.06]">
-                    <th className="px-6 py-4">{t('admin.trips.table.trip')}</th>
-                    <th className="px-4 py-4">{t('admin.trips.table.user')}</th>
-                    <th className="px-4 py-4">{t('admin.trips.table.period')}</th>
-                    <th className="px-4 py-4">{t('admin.trips.table.days')}</th>
-                    <th className="px-4 py-4 hidden lg:table-cell">{t('admin.trips.table.activities')}</th>
-                    <th className="px-4 py-4">{t('admin.trips.table.expenses')}</th>
-                    <th className="px-4 py-4 hidden lg:table-cell">{t('admin.trips.table.likes')}</th>
-                    <th className="px-4 py-4 text-right">{t('admin.trips.table.actions')}</th>
+                    <th scope="col" className="px-6 py-4">{t('admin.trips.table.trip')}</th>
+                    <th scope="col" className="px-4 py-4">{t('admin.trips.table.user')}</th>
+                    <th scope="col" className="px-4 py-4">{t('admin.trips.table.period')}</th>
+                    <th scope="col" className="px-4 py-4">{t('admin.trips.table.days')}</th>
+                    <th scope="col" className="px-4 py-4 hidden lg:table-cell">{t('admin.trips.table.activities')}</th>
+                    <th scope="col" className="px-4 py-4">{t('admin.trips.table.expenses')}</th>
+                    <th scope="col" className="px-4 py-4 hidden lg:table-cell">{t('admin.trips.table.likes')}</th>
+                    <th scope="col" className="px-4 py-4 text-right">{t('admin.trips.table.actions')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/[0.04]">
@@ -239,18 +238,20 @@ const AdminTrips = () => {
                         <span className="text-[13px] font-bold flex items-center gap-1"><Heart size={12} className="text-red-400" /> {trip.likes}</span>
                       </td>
                       <td className="px-4 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 transition-opacity">
                           <button
                             onClick={() => handleViewTrip(trip.id)}
-                            className="p-2 rounded-lg hover:bg-blue-500/10 text-gray-500 dark:text-gray-400 hover:text-blue-400 transition-colors cursor-pointer"
+                            className="p-2 rounded-lg hover:bg-blue-500/10 text-gray-500 dark:text-gray-400 hover:text-blue-400 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
                             title={t('admin.trips.tooltips.viewTrip')}
+                            aria-label={t('admin.trips.tooltips.viewTrip')}
                           >
                             <Eye size={16} />
                           </button>
                           <button
                             onClick={() => handleDeleteTrip(trip.id, trip.title)}
-                            className="p-2 rounded-lg hover:bg-red-500/10 text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
+                            className="p-2 rounded-lg hover:bg-red-500/10 text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60"
                             title={t('admin.trips.tooltips.deleteTrip')}
+                            aria-label={t('admin.trips.tooltips.deleteTrip')}
                           >
                             <Trash2 size={16} />
                           </button>
@@ -274,14 +275,14 @@ const AdminTrips = () => {
               <button
                 onClick={() => fetchTrips(pagination.page - 1, search)}
                 disabled={pagination.page <= 1}
-                className="px-3 py-1.5 rounded-lg text-[12px] font-bold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                className="inline-flex items-center min-h-[44px] px-4 rounded-lg text-[12px] font-bold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60"
               >
                 {t('admin.trips.prevPage')}
               </button>
               <button
                 onClick={() => fetchTrips(pagination.page + 1, search)}
                 disabled={pagination.page >= pagination.totalPages}
-                className="px-3 py-1.5 rounded-lg text-[12px] font-bold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                className="inline-flex items-center min-h-[44px] px-4 rounded-lg text-[12px] font-bold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60"
               >
                 {t('admin.trips.nextPage')}
               </button>
@@ -304,11 +305,16 @@ const AdminTrips = () => {
                 onClick={() => setSelectedTrip(null)}
               />
               <motion.div
+                ref={detailPanelRef}
+                role="dialog"
+                aria-modal="true"
+                aria-label={t('admin.trips.detail.dialogLabel')}
+                tabIndex={-1}
                 initial={{ x: '100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '100%' }}
                 transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
-                className="relative w-full max-w-xl bg-white dark:bg-[#111113] border-l border-gray-200 dark:border-white/[0.08] h-full overflow-y-auto z-10 custom-scrollbar shadow-2xl shadow-black/50"
+                className="relative w-full max-w-xl bg-white dark:bg-[#111113] border-l border-gray-200 dark:border-white/[0.08] h-full overflow-y-auto z-10 custom-scrollbar shadow-2xl shadow-black/50 focus:outline-none"
               >
                 {detailLoading || selectedTrip?.loading ? (
                   <div className="flex items-center justify-center h-full">
@@ -319,9 +325,10 @@ const AdminTrips = () => {
                     {/* Close button */}
                     <button
                       onClick={() => setSelectedTrip(null)}
-                      className="absolute top-6 right-6 p-2.5 rounded-full bg-gray-100 dark:bg-white/[0.06] hover:bg-gray-200 dark:bg-white/[0.12] transition-colors cursor-pointer group"
+                      aria-label={t('admin.close')}
+                      className="absolute top-6 right-6 p-2.5 rounded-full bg-gray-100 dark:bg-white/[0.06] hover:bg-gray-200 dark:hover:bg-white/[0.12] transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60"
                     >
-                      <X size={16} className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:text-white transition-colors" />
+                      <X size={16} className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
                     </button>
 
                     {/* Trip Header */}
@@ -380,8 +387,8 @@ const AdminTrips = () => {
                           {selectedTrip.activities.map((a, i) => (
                             <div key={a.id} className="p-4 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                               <div className="flex items-start gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center shrink-0 mt-0.5">
-                                  <span className="text-[11px] font-black text-blue-400">{i + 1}</span>
+                                <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                  <span className="text-[11px] font-black text-orange-500 dark:text-orange-400">{i + 1}</span>
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-center justify-between gap-2">
@@ -467,7 +474,7 @@ const AdminTrips = () => {
 
                     {/* Empty state if nothing */}
                     {!selectedTrip.activities?.length && !selectedTrip.expenses?.length && !selectedTrip.packingList?.length && !selectedTrip.documents?.length && (
-                      <div className="text-center py-12 text-gray-600">
+                      <div className="text-center py-12 text-gray-500 dark:text-gray-400">
                         <MapPin size={32} className="mx-auto mb-3 opacity-50" />
                         <p className="text-[13px]">{t('admin.trips.detail.empty')}</p>
                       </div>

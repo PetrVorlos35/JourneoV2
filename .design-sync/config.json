@@ -1,0 +1,34 @@
+{
+  "projectId": "e15e6100-f78f-41f9-b765-a568d9dc4860",
+  "shape": "package",
+  "pkg": "journeov2",
+  "globalName": "Journeo",
+  "entry": "./.design-sync/ds-entry.jsx",
+  "buildCmd": "npm run build",
+  "cssEntry": "dist/assets/index-COp1xLlH.css",
+  "provider": { "component": "DSProvider" },
+  "readmeHeader": ".design-sync/conventions.md",
+  "runtimeFontPrefixes": ["Inter"],
+  "overrides": {
+    "DialogModal": { "cardMode": "single", "primaryStory": "Danger", "viewport": "460x600" },
+    "HorizontalScrollCarousel": { "cardMode": "single", "viewport": "1000x620" },
+    "NotFound": { "cardMode": "single", "viewport": "900x680" },
+    "Navbar": { "cardMode": "single", "viewport": "920x220" },
+    "LocationAutocomplete": { "cardMode": "column" },
+    "UserAvatar": { "cardMode": "column" }
+  },
+  "componentSrcMap": {
+    "AuroraBackground": "src/components/ui/AuroraBackground.jsx",
+    "CharCount": "src/components/ui/CharCount.jsx",
+    "DialogModal": "src/components/ui/DialogModal.jsx",
+    "HorizontalScrollCarousel": "src/components/ui/HorizontalScrollCarousel.jsx",
+    "LocationAutocomplete": "src/components/ui/LocationAutocomplete.jsx",
+    "ScrollTextReveal": "src/components/ui/ScrollTextReveal.jsx",
+    "SpotlightCard": "src/components/ui/SpotlightCard.jsx",
+    "UserAvatar": "src/components/ui/UserAvatar.jsx",
+    "LoadingScreen": "src/components/LoadingScreen.jsx",
+    "NotFound": "src/components/NotFound.jsx",
+    "Navbar": "src/components/Navbar.jsx",
+    "LandingLanguageSwitcher": "src/components/LandingLanguageSwitcher.jsx"
+  }
+}

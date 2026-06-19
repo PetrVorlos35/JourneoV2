@@ -20,10 +20,11 @@ const SidebarItem = ({ icon: Icon, label, path, active, onClick, className, layo
   return (
     <Link
       to={path}
+      aria-current={active ? 'page' : undefined}
       onClick={(e) => {
         if (onClick) onClick(path, e);
       }}
-      className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative group active:scale-[0.98] ${
+      className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative group active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent ${
         active
           ? 'text-white'
           : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10'
@@ -236,27 +237,26 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
             <span className="font-bold text-xl tracking-tight mt-0.5">Journeo</span>
           </div>
 
-          <nav className="flex-1 px-4 py-2 space-y-2">
-            {navItems.map(item => (
-              <SidebarItem
-                key={item.path}
-                {...item}
-                active={location.pathname === item.path}
-                onClick={(path, e) => handleNavigation(path, e)}
-                className="cursor-pointer disabled:cursor-not-allowed"
-              />
-            ))}
-            <div className="pt-2">
-              <button
-                onClick={handleOpenCreateModal}
-                className="flex w-full items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 relative group active:scale-[0.98] text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 cursor-pointer"
-              >
-                <div className="relative z-10 flex items-center gap-3 w-full">
-                  <PlusSquare size={20} strokeWidth={2} />
-                  <span className="font-semibold">{t('dashboardLayout.nav.createTrip')}</span>
-                  <kbd className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-200/60 dark:bg-white/[0.07] text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">N</kbd>
-                </div>
-              </button>
+          <nav className="flex-1 px-4 py-2 flex flex-col">
+            <button
+              onClick={handleOpenCreateModal}
+              className="flex w-full items-center gap-3 px-4 py-3 rounded-2xl bg-blue-600 text-white font-semibold shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all duration-300 relative group active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
+            >
+              <Plus size={20} strokeWidth={2.5} />
+              <span>{t('dashboardLayout.nav.createTrip')}</span>
+              <kbd className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/20 text-white/70 opacity-0 group-hover:opacity-100 transition-opacity">N</kbd>
+            </button>
+
+            <div className="space-y-2 mt-4">
+              {navItems.map(item => (
+                <SidebarItem
+                  key={item.path}
+                  {...item}
+                  active={location.pathname === item.path}
+                  onClick={(path, e) => handleNavigation(path, e)}
+                  className="cursor-pointer disabled:cursor-not-allowed"
+                />
+              ))}
             </div>
           </nav>
 
@@ -265,18 +265,29 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
               <ThemeToggle />
             </div>
 
-            <Link to="/dashboard/settings" onClick={(e) => handleNavigation('/dashboard/settings', e)} className={`px-4 py-4 flex items-center gap-3 rounded-2xl transition-all duration-300 active:scale-95 cursor-pointer disabled:cursor-not-allowed ${location.pathname === '/dashboard/settings' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'hover:bg-gray-100 dark:hover:bg-white/10'}`}>
+            <Link
+              to="/dashboard/settings"
+              onClick={(e) => handleNavigation('/dashboard/settings', e)}
+              aria-current={location.pathname === '/dashboard/settings' ? 'page' : undefined}
+              aria-label={t('dashboardLayout.nav.settings')}
+              className={`px-4 py-4 flex items-center gap-3 rounded-2xl transition-all duration-300 active:scale-95 cursor-pointer disabled:cursor-not-allowed group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent ${location.pathname === '/dashboard/settings' ? 'bg-gray-100 dark:bg-white/[0.07]' : 'hover:bg-gray-100 dark:hover:bg-white/10'}`}
+            >
               <UserAvatar user={user} size="md" />
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-bold truncate">
                   {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.email}
                 </p>
-                <p className={`text-[11px] truncate mt-0.5 font-semibold ${location.pathname === '/dashboard/settings' ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'}`}>{user?.bio || t('dashboardLayout.traveler')}</p>
+                <p className="text-[11px] truncate mt-0.5 font-semibold text-gray-500 dark:text-gray-400">{user?.bio || t('dashboardLayout.traveler')}</p>
               </div>
+              <Settings
+                size={18}
+                strokeWidth={2}
+                className={`shrink-0 transition-colors ${location.pathname === '/dashboard/settings' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300'}`}
+              />
             </Link>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-300 active:scale-95 font-semibold cursor-pointer disabled:cursor-not-allowed"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-500 dark:text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-300 active:scale-95 font-semibold cursor-pointer disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
             >
               <LogOut size={20} strokeWidth={2} />
               <span>{t('dashboardLayout.dialogs.logout.confirm')}</span>
@@ -285,9 +296,9 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
             {isAdmin && (
               <Link
                 to="/admin"
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 text-orange-500 dark:text-orange-400 hover:from-orange-500/20 hover:to-red-500/20 transition-all duration-300 active:scale-95 font-semibold cursor-pointer"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-300 active:scale-95 font-semibold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
               >
-                <Shield size={20} strokeWidth={2} />
+                <Shield size={20} strokeWidth={2} className="text-amber-500/80" />
                 <span>{t('dashboardLayout.nav.admin')}</span>
               </Link>
             )}
@@ -304,6 +315,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
                 key={path}
                 to={path}
                 onClick={(e) => handleNavigation(path, e)}
+                aria-current={location.pathname === path ? 'page' : undefined}
                 className={`flex flex-col items-center gap-1 flex-1 transition-all duration-300 py-1 ${
                   location.pathname === path ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                 } cursor-pointer disabled:cursor-not-allowed`}
@@ -410,9 +422,9 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
                   <Link
                     to="/admin"
                     onClick={closeMobile}
-                    className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-gradient-to-r from-orange-500/10 to-red-500/10 border border-orange-500/20 text-orange-500 hover:from-orange-500/20 hover:to-red-500/20 transition-all font-bold mt-3"
+                    className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-white/15 transition-all font-bold mt-3"
                   >
-                    <Shield size={20} strokeWidth={2.5} />
+                    <Shield size={20} strokeWidth={2.5} className="text-amber-500/80" />
                     <span>{t('dashboardLayout.nav.admin')}</span>
                   </Link>
                 )}

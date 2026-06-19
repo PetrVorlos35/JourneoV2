@@ -153,6 +153,7 @@ const Friends = () => {
   };
 
   const inviteUrl = inviteToken ? `${window.location.origin}/dashboard/add-friend/${inviteToken}` : null;
+  const inviteUrlDisplay = inviteUrl ? inviteUrl.replace(/^https?:\/\//, '') : null;
 
   const handleRegenerateInvite = async () => {
     const ok = await confirmDialog({
@@ -177,10 +178,14 @@ const Friends = () => {
 
   const handleCopyInvite = async () => {
     if (!inviteUrl) return;
-    await navigator.clipboard.writeText(inviteUrl);
-    setLinkCopied(true);
-    toast.success(t('friends.invite.linkCopied'));
-    setTimeout(() => setLinkCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setLinkCopied(true);
+      toast.success(t('friends.invite.linkCopied'));
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      toast.error(t('friends.invite.copyError'));
+    }
   };
 
   if (loading) {
@@ -205,38 +210,41 @@ const Friends = () => {
         <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('friends.title')}</h1>
       </div>
 
-      {/* Invite link */}
-      <div className="glass-card p-6 rounded-[2rem] space-y-3">
-        <div className="flex items-center gap-2">
-          <LinkIcon size={14} className="text-gray-400 dark:text-white/50" strokeWidth={2.5} />
-          <p className="text-gray-500 dark:text-white/50 text-[11px] font-bold uppercase tracking-widest">
+      {/* Invite link — compact */}
+      <div className="rounded-2xl border border-gray-100 dark:border-white/10 bg-gray-50/70 dark:bg-white/[0.03] p-3 sm:p-3.5">
+        <div className="flex items-center gap-2 mb-2.5">
+          <LinkIcon size={13} className="shrink-0 text-gray-400 dark:text-white/40" strokeWidth={2.5} />
+          <span className="text-[12px] font-semibold text-gray-600 dark:text-white/60">
             {t('friends.invite.title')}
-          </p>
+          </span>
+          <span className="text-[12px] text-gray-400 dark:text-white/35 truncate hidden sm:inline">
+            · {t('friends.invite.hint')}
+          </span>
         </div>
-        <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium">
-          {t('friends.invite.description')}
-        </p>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-          <div className="flex-1 flex items-center gap-2 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl px-4 py-2.5 min-w-0">
-            <span className="flex-1 text-[12px] text-gray-600 dark:text-white/60 font-mono truncate select-all">
-              {inviteUrl || '…'}
+        <div className="flex items-center gap-2">
+          <div className="flex-1 flex items-center bg-white dark:bg-white/[0.04] border border-gray-100 dark:border-white/10 rounded-xl px-3 h-11 min-w-0">
+            <span className="flex-1 text-[13px] text-gray-600 dark:text-white/60 truncate select-all">
+              {inviteUrlDisplay || '…'}
             </span>
-            <button
-              onClick={handleCopyInvite}
-              disabled={!inviteUrl}
-              aria-label={t('friends.invite.copy')}
-              className="shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-500 dark:text-white/70 hover:text-gray-900 dark:hover:text-white transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {linkCopied ? <Check size={14} strokeWidth={2.5} className="text-green-500 dark:text-green-400" /> : <Copy size={14} strokeWidth={2} />}
-            </button>
           </div>
+          <button
+            onClick={handleCopyInvite}
+            disabled={!inviteUrl}
+            aria-label={t('friends.invite.copy')}
+            className="shrink-0 flex items-center gap-1.5 h-11 px-3.5 rounded-xl text-[13px] font-semibold bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-700 dark:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {linkCopied
+              ? <><Check size={14} strokeWidth={2.5} className="text-green-500 dark:text-green-400" /><span className="text-green-500 dark:text-green-400 hidden sm:inline">{t('friends.invite.copied')}</span></>
+              : <><Copy size={14} strokeWidth={2} /><span className="hidden sm:inline">{t('friends.invite.copyShort')}</span></>}
+          </button>
           <button
             onClick={handleRegenerateInvite}
             disabled={isRegeneratingLink || !inviteUrl}
-            className="shrink-0 flex items-center justify-center gap-2 px-4 py-2.5 text-[12px] font-bold text-gray-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            title={t('friends.invite.regenerate')}
+            aria-label={t('friends.invite.regenerate')}
+            className="shrink-0 w-11 h-11 flex items-center justify-center rounded-xl text-gray-400 dark:text-white/40 hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isRegeneratingLink ? <RefreshCw size={13} className="animate-spin" /> : <RefreshCw size={13} strokeWidth={2.5} />}
-            {t('friends.invite.regenerate')}
+            <RefreshCw size={15} strokeWidth={2.5} className={isRegeneratingLink ? 'animate-spin' : ''} />
           </button>
         </div>
       </div>
