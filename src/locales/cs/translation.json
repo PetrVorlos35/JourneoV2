@@ -2,6 +2,26 @@
   "nav": {
     "login": "Přihlásit se"
   },
+  "changelog": {
+    "open": "Zobrazit novinky",
+    "title": "Novinky",
+    "subtitle": "Co je nového v Journeo",
+    "current": "Aktuální verze",
+    "empty": "Zatím tu nejsou žádné novinky.",
+    "releases": {
+      "v1_0": {
+        "title": "První veřejná verze",
+        "summary": "Journeo je venku. Tahle verze přináší kompletní základ pro plánování cest — od prvního nápadu až po sdílení hotového itineráře s přáteli.",
+        "highlights": [
+          "Plánování výletů s přehledným itinerářem den po dni",
+          "Rozpočet s cílovou částkou a sledováním výdajů",
+          "Přátelé a sdílení výletů přes osobní odkaz s rolemi",
+          "Statistiky vašeho cestování na jednom místě",
+          "Světlý i tmavý režim a čeština s angličtinou"
+        ]
+      }
+    }
+  },
   "landing": {
     "hero": {
       "title": "Všechny vaše cesty na jednom místě.",

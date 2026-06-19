@@ -2,6 +2,26 @@
   "nav": {
     "login": "Log in"
   },
+  "changelog": {
+    "open": "What's new",
+    "title": "What's new",
+    "subtitle": "What's new in Journeo",
+    "current": "Current version",
+    "empty": "There are no release notes yet.",
+    "releases": {
+      "v1_0": {
+        "title": "First public release",
+        "summary": "Journeo is live. This release brings the complete foundation for planning your trips — from the first idea all the way to sharing a finished itinerary with friends.",
+        "highlights": [
+          "Trip planning with a clear day-by-day itinerary",
+          "Budget with a target amount and expense tracking",
+          "Friends and trip sharing via a personal link with roles",
+          "Travel statistics gathered in one place",
+          "Light and dark mode, available in English and Czech"
+        ]
+      }
+    }
+  },
   "landing": {
     "hero": {
       "title": "All your journeys in one place.",

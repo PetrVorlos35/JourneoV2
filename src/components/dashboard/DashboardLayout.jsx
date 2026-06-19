@@ -13,6 +13,7 @@ import NotificationBell from '../ui/NotificationBell';
 import JourneoLogo from '../../assets/Journeo_whitelogo.png';
 import JourneoLogoDark from '../../assets/Journeo_blacklogo.png';
 import UserAvatar from '../ui/UserAvatar';
+import VersionBadge from '../ui/VersionBadge';
 
 // eslint-disable-next-line no-unused-vars
 const SidebarItem = ({ icon: Icon, label, path, active, onClick, className, layoutId = "sidebar-active-pill", shortcut }) => {
@@ -235,6 +236,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
               className="h-8 w-auto object-contain"
             />
             <span className="font-bold text-xl tracking-tight mt-0.5">Journeo</span>
+            <VersionBadge className="mt-0.5 text-[10px] font-bold tracking-wide px-1.5 py-0.5 rounded-md bg-gray-200/70 dark:bg-white/10 text-gray-500 dark:text-gray-400 hover:bg-gray-300/70 dark:hover:bg-white/20 hover:text-gray-700 dark:hover:text-gray-200 transition-colors" />
           </div>
 
           <nav className="flex-1 px-4 py-2 flex flex-col">

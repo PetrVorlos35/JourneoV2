@@ -6,6 +6,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import Navbar from './Navbar';
 import JourneoLogo from '../assets/Journeo_whitelogo.png';
+import VersionBadge from './ui/VersionBadge';
 
 const LandingPage = () => {
   const { t } = useTranslation();
@@ -550,6 +551,7 @@ const LandingPage = () => {
             . {t('landing.footer.madeWith')}
           </p>
           <div className="flex items-center gap-6">
+            <VersionBadge className="text-[11px] font-bold tracking-wide px-2 py-0.5 rounded-md bg-white/[0.06] border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-colors" />
             <Link to="/privacy" className="hover:text-white transition-colors">
               {t('landing.footer.privacy')}
             </Link>
