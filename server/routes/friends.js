@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { randomBytes } from 'crypto';
 import pool from '../config/db.js';
+import { sendFriendRequestEmail } from '../lib/mailer.js';
 
 const router = Router();
 
@@ -101,6 +102,14 @@ router.post('/request', async (req, res) => {
           [addresseeId, f.id, `${name} vám poslal/a žádost o přátelství.`]
         );
 
+        // Notify the addressee by email (fire-and-forget)
+        const [[addressee]] = await pool.query('SELECT email FROM users WHERE id = ?', [addresseeId]);
+        if (addressee?.email) {
+          sendFriendRequestEmail(addressee.email, name).catch(err =>
+            console.error('Friend request email error:', err)
+          );
+        }
+
         return res.json({ message: 'Žádost byla znovu odeslána.', friendshipId: f.id });
       }
     }
@@ -120,6 +129,14 @@ router.post('/request', async (req, res) => {
       `INSERT INTO notifications (user_id, type, reference_id, message) VALUES (?, 'FRIEND_REQUEST', ?, ?)`,
       [addresseeId, friendshipId, `${name} vám poslal/a žádost o přátelství.`]
     );
+
+    // Notify the addressee by email (fire-and-forget)
+    const [[addressee]] = await pool.query('SELECT email FROM users WHERE id = ?', [addresseeId]);
+    if (addressee?.email) {
+      sendFriendRequestEmail(addressee.email, name).catch(err =>
+        console.error('Friend request email error:', err)
+      );
+    }
 
     res.status(201).json({ message: 'Žádost odeslána.', friendshipId });
   } catch (err) {
@@ -402,7 +419,7 @@ router.post('/invite/:token/accept', async (req, res) => {
     const userId = req.userId;
     const { token } = req.params;
 
-    const [[inviter]] = await pool.query('SELECT id, first_name, last_name FROM users WHERE invite_token = ?', [token]);
+    const [[inviter]] = await pool.query('SELECT id, first_name, last_name, email FROM users WHERE invite_token = ?', [token]);
     if (!inviter) {
       return res.status(404).json({ error: 'Zvací odkaz není platný.' });
     }
@@ -435,6 +452,13 @@ router.post('/invite/:token/accept', async (req, res) => {
       `INSERT INTO notifications (user_id, type, reference_id, message) VALUES (?, 'FRIEND_REQUEST', ?, ?)`,
       [inviter.id, friendshipId, `${name} vám poslal/a žádost o přátelství.`]
     );
+
+    // Notify the inviter by email (fire-and-forget)
+    if (inviter.email) {
+      sendFriendRequestEmail(inviter.email, name).catch(err =>
+        console.error('Friend request email error:', err)
+      );
+    }
 
     res.status(201).json({ message: 'Žádost odeslána.', friendshipId });
   } catch (err) {
