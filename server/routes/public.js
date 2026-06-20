@@ -73,7 +73,8 @@ router.get('/trips/:token', async (req, res) => {
 router.get('/profile/:token', async (req, res) => {
   try {
     const { token } = req.params;
-    if (!token || token.length !== 64) {
+    // Invite tokens are 32 hex chars (randomBytes(16)); allow a range to be safe.
+    if (!token || !/^[a-f0-9]{16,64}$/i.test(token)) {
       return res.status(404).json({ error: 'Odkaz není platný.' });
     }
 

@@ -47,7 +47,33 @@ function getInitials(firstName, lastName) {
   return (a + b).toUpperCase() || '??';
 }
 
-function shell(children) {
+function cta(text) {
+  return h(
+    'div',
+    {
+      style: {
+        position: 'absolute',
+        bottom: '64px',
+        right: '80px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
+        padding: '14px 28px',
+        borderRadius: '999px',
+        background: ACCENT,
+        color: '#FFFFFF',
+        fontSize: 28,
+        fontWeight: 700,
+      },
+    },
+    text,
+    h('div', { style: { fontSize: 28, fontWeight: 700 } }, '→')
+  );
+}
+
+function shell(children, ctaText) {
+  const items = Array.isArray(children) ? [...children] : [children];
+  if (ctaText) items.push(cta(ctaText));
   return h(
     'div',
     {
@@ -63,7 +89,7 @@ function shell(children) {
         fontFamily: 'Inter',
       },
     },
-    children
+    items
   );
 }
 
@@ -115,7 +141,7 @@ export default async function handler(request) {
               ? h('div', { style: { fontSize: 34, color: MUTED } }, range)
               : null
           ),
-        ]);
+        ], lang.startsWith('en') ? 'View trip' : 'Zobrazit výlet');
       }
     } else if (type === 'profile' && token) {
       const user = await (await fetch(`${origin}/api/public/profile/${token}`)).json();
@@ -159,7 +185,7 @@ export default async function handler(request) {
               )
             )
           ),
-        ]);
+        ], lang.startsWith('en') ? 'Add friend' : 'Přidat mezi přátele');
       }
     }
   } catch {
@@ -181,10 +207,12 @@ export default async function handler(request) {
         h('div', { style: { fontSize: 96, fontWeight: 700, color: FG, letterSpacing: '-0.04em' } }, 'Journeo'),
         h('div', { style: { fontSize: 34, color: MUTED } }, subtitle)
       ),
-    ]);
+    ], lang.startsWith('en') ? 'Start planning' : 'Začít plánovat');
   }
 
-  const glyphText = `Journeo Výlet Trip na on ${titleText} ${subtitle} 0123456789–`;
+  const glyphText =
+    `Journeo Výlet Trip na on ${titleText} ${subtitle} 0123456789–→ ` +
+    `Zobrazit výlet Přidat mezi přátele Začít plánovat View trip Add friend Start planning`;
   const [regular, bold] = await Promise.all([
     loadFont('Inter', 400, glyphText),
     loadFont('Inter', 700, glyphText),

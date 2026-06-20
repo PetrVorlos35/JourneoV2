@@ -33,9 +33,15 @@ async function resolveMeta(pathname, origin, lang) {
       const trip = data?.trip;
       if (trip?.title) {
         const range = formatDateRange(trip.startDate, trip.endDate, lang);
+        const title = range
+          ? `${trip.title} · ${range} — Journeo`
+          : `${trip.title} — cestovní plán na Journeo`;
+        const description = en
+          ? `See the trip plan for “${trip.title}”${range ? ` (${range})` : ''} on Journeo — itinerary, packing list and documents, all in one place.`
+          : `Prohlédněte si cestovní plán „${trip.title}"${range ? ` (${range})` : ''} na Journeo — itinerář, seznam věcí na sbalení i dokumenty na jednom místě.`;
         return {
-          title: `${trip.title} — Journeo`,
-          description: range || (en ? 'A trip on Journeo' : 'Výlet na Journeo'),
+          title,
+          description,
           image: `${origin}/api/og/trip?token=${token}&lang=${lang}`,
         };
       }
@@ -43,7 +49,7 @@ async function resolveMeta(pathname, origin, lang) {
     return null;
   }
 
-  const inviteMatch = pathname.match(/\/add-friend\/([a-f0-9]{64})/i);
+  const inviteMatch = pathname.match(/\/add-friend\/([a-f0-9]{16,64})/i);
   if (inviteMatch) {
     const token = inviteMatch[1];
     try {
@@ -51,10 +57,10 @@ async function resolveMeta(pathname, origin, lang) {
       const name = `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
       if (name) {
         return {
-          title: `${name} — Journeo`,
+          title: `${name} vás zve na Journeo — cestovatelský deník`,
           description: en
-            ? `Connect with ${name} on Journeo`
-            : `Přidejte si ${name} mezi přátele na Journeo`,
+            ? `${name} invited you to connect on Journeo — plan trips together, share itineraries and keep all your travel plans in one place.`
+            : `${name} vás zve mezi přátele na Journeo — plánujte výlety společně, sdílejte itineráře a mějte cestovní plány na jednom místě.`,
           image: `${origin}/api/og/profile?token=${token}&lang=${lang}`,
         };
       }
