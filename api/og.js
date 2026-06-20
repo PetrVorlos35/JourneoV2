@@ -47,14 +47,14 @@ function getInitials(firstName, lastName) {
   return (a + b).toUpperCase() || '??';
 }
 
-function cta(text) {
+function cta(text, { inline = false } = {}) {
   return h(
     'div',
     {
       style: {
-        position: 'absolute',
-        bottom: '64px',
-        right: '80px',
+        ...(inline
+          ? { marginTop: '8px' }
+          : { position: 'absolute', bottom: '64px', right: '80px' }),
         display: 'flex',
         alignItems: 'center',
         gap: '10px',
@@ -205,9 +205,10 @@ export default async function handler(request) {
         },
         h('img', { src: `${origin}/og-mark.png`, width: 140, height: 140, style: { objectFit: 'contain' } }),
         h('div', { style: { fontSize: 96, fontWeight: 700, color: FG, letterSpacing: '-0.04em' } }, 'Journeo'),
-        h('div', { style: { fontSize: 34, color: MUTED } }, subtitle)
+        h('div', { style: { fontSize: 34, color: MUTED } }, subtitle),
+        cta(lang.startsWith('en') ? 'Start planning' : 'Začít plánovat', { inline: true })
       ),
-    ], lang.startsWith('en') ? 'Start planning' : 'Začít plánovat');
+    ]);
   }
 
   const glyphText =
