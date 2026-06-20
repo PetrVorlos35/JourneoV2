@@ -192,28 +192,51 @@ export default async function handler(request) {
     // fall through to the default/main card on any data error
   }
 
-  // Default ("main") card — logo mark + wordmark + tagline
+  // Default ("main") card — editorial left-aligned hero
   if (!body) {
+    const en = lang.startsWith('en');
+    const headline = subtitle; // "Váš osobní cestovatelský deník" / "Your personal travel journal"
+    const secondary = en
+      ? 'Plan, journal and share your adventures.'
+      : 'Plánujte, zaznamenávejte a sdílejte svá dobrodružství.';
     body = shell([
+      // Subtle oversized logo watermark for depth (painted first → behind)
+      h('img', {
+        src: `${origin}/og-mark.png`,
+        width: 560,
+        height: 560,
+        style: { position: 'absolute', right: '-90px', bottom: '-110px', opacity: 0.07, objectFit: 'contain' },
+      }),
+      // Brand row, top-left
+      brandRow(origin, 56),
+      // Hero block anchored bottom-left
       h(
         'div',
         {
           style: {
-            display: 'flex', flexDirection: 'column', alignItems: 'center',
-            justifyContent: 'center', gap: '32px', margin: 'auto',
+            display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+            marginTop: 'auto', gap: '24px',
           },
         },
-        h('img', { src: `${origin}/og-mark.png`, width: 140, height: 140, style: { objectFit: 'contain' } }),
-        h('div', { style: { fontSize: 96, fontWeight: 700, color: FG, letterSpacing: '-0.04em' } }, 'Journeo'),
-        h('div', { style: { fontSize: 34, color: MUTED } }, subtitle),
-        cta(lang.startsWith('en') ? 'Start planning' : 'Začít plánovat', { inline: true })
+        h(
+          'div',
+          { style: { fontSize: 82, fontWeight: 700, color: FG, lineHeight: 1.08, letterSpacing: '-0.03em', maxWidth: '860px' } },
+          headline
+        ),
+        h(
+          'div',
+          { style: { fontSize: 32, color: MUTED, maxWidth: '760px' } },
+          secondary
+        ),
+        cta(en ? 'Start planning' : 'Začít plánovat', { inline: true })
       ),
     ]);
   }
 
   const glyphText =
     `Journeo Výlet Trip na on ${titleText} ${subtitle} 0123456789–→ ` +
-    `Zobrazit výlet Přidat mezi přátele Začít plánovat View trip Add friend Start planning`;
+    `Zobrazit výlet Přidat mezi přátele Začít plánovat View trip Add friend Start planning ` +
+    `Plánujte, zaznamenávejte a sdílejte svá dobrodružství. Plan, journal and share your adventures.`;
   const [regular, bold] = await Promise.all([
     loadFont('Inter', 400, glyphText),
     loadFont('Inter', 700, glyphText),
