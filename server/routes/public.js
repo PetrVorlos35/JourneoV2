@@ -68,4 +68,32 @@ router.get('/trips/:token', async (req, res) => {
   }
 });
 
+// ── GET /api/public/profile/:token ──────────────────────────
+// Minimal public profile data for share/OG previews — no auth required
+router.get('/profile/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+    if (!token || token.length !== 64) {
+      return res.status(404).json({ error: 'Odkaz není platný.' });
+    }
+
+    const [[user]] = await pool.query(
+      'SELECT first_name, last_name, avatar_url, bio FROM users WHERE invite_token = ?',
+      [token]
+    );
+
+    if (!user) return res.status(404).json({ error: 'Profil nenalezen nebo odkaz byl zrušen.' });
+
+    res.json({
+      firstName: user.first_name,
+      lastName: user.last_name,
+      avatarUrl: user.avatar_url,
+      bio: user.bio || null,
+    });
+  } catch (err) {
+    console.error('Public profile error:', err);
+    res.status(500).json({ error: 'Chyba serveru.' });
+  }
+});
+
 export default router;
