@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import UserAvatar from '../ui/UserAvatar';
 import { useDialog } from '../ui/DialogModal';
 import useSlideOverA11y from '../../hooks/useSlideOverA11y';
+import Skeleton, { AdminTableSkeleton } from '../ui/Skeletons';
 
 const CATEGORY_EMOJIS = {
   transport: '🚗',
@@ -135,8 +136,8 @@ const AdminTrips = () => {
         className="rounded-2xl border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none backdrop-blur-xl overflow-hidden"
       >
         {loading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="w-6 h-6 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
+          <div className="p-4">
+            <AdminTableSkeleton rows={8} />
           </div>
         ) : trips.length === 0 ? (
           <div className="flex items-center justify-center h-64 text-gray-500">
@@ -317,8 +318,18 @@ const AdminTrips = () => {
                 className="relative w-full max-w-xl bg-white dark:bg-[#111113] border-l border-gray-200 dark:border-white/[0.08] h-full overflow-y-auto z-10 custom-scrollbar shadow-2xl shadow-black/50 focus:outline-none"
               >
                 {detailLoading || selectedTrip?.loading ? (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="w-6 h-6 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
+                  <div className="p-8 space-y-6">
+                    <Skeleton className="h-8 w-2/3" />
+                    <Skeleton className="h-4 w-1/2" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <Skeleton className="h-20 rounded-2xl" />
+                      <Skeleton className="h-20 rounded-2xl" />
+                    </div>
+                    <div className="space-y-3">
+                      <Skeleton className="h-16 rounded-2xl" />
+                      <Skeleton className="h-16 rounded-2xl" />
+                      <Skeleton className="h-16 rounded-2xl" />
+                    </div>
                   </div>
                 ) : (
                   <div className="p-8 space-y-6">

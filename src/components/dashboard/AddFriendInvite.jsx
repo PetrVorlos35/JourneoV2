@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import UserAvatar from '../ui/UserAvatar';
+import Skeleton from '../ui/Skeleton';
 
 const AddFriendInvite = () => {
   const { token } = useParams();
@@ -49,8 +50,16 @@ const AddFriendInvite = () => {
 
   if (loading) {
     return (
-      <div className="w-full h-[60vh] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+      <div className="space-y-10 w-full pb-10">
+        <Skeleton className="h-4 w-32" />
+        <div className="glass-card p-8 sm:p-10 rounded-[2rem] flex flex-col items-center text-center gap-6 max-w-md mx-auto">
+          <Skeleton className="w-20 h-20" rounded="rounded-full" />
+          <div className="w-full flex flex-col items-center gap-3">
+            <Skeleton className="h-6 w-48" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <Skeleton className="h-12 w-40 rounded-2xl" />
+        </div>
       </div>
     );
   }

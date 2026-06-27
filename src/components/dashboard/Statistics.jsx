@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { AlertCircle, Globe, CalendarDays, MapPin, Heart, Wallet, Backpack, Calendar, Crown, TrendingUp, Loader2 } from 'lucide-react';
+import { AlertCircle, Globe, CalendarDays, MapPin, Heart, Wallet, Backpack, Calendar, Crown, TrendingUp } from 'lucide-react';
 import { eachDayOfInterval } from 'date-fns';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import api from '../../services/api';
+import { StatisticsSkeleton } from '../ui/Skeletons';
 
 const CATEGORY_CONFIG = {
   accommodation: { color: '#818cf8' },
@@ -200,17 +201,7 @@ const Statistics = ({ trips }) => {
   const currencySymbol = CURRENCY_SYMBOLS[currency] || currency;
 
   if (loading) {
-    return (
-      <div className="w-full space-y-8 pb-24 sm:pb-10">
-        <h1 className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold" style={{ textWrap: 'balance' }}>{t('statistics.title')}</h1>
-        <div className="flex items-center justify-center h-[50vh]">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 size={32} strokeWidth={2} className="animate-spin text-blue-500" />
-            <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium">{t('statistics.loading')}</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <StatisticsSkeleton />;
   }
 
   if (error) {

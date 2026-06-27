@@ -7,6 +7,18 @@ import DashboardNotFound from './DashboardNotFound';
 import CreateTripModal from './CreateTripModal';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import {
+  TripsOverviewSkeleton,
+  AllTripsSkeleton,
+  TripDetailSkeleton,
+  StatisticsSkeleton,
+  SettingsSkeleton,
+  BudgetSkeleton,
+  FriendsSkeleton,
+  FriendProfileSkeleton,
+  TripViewSkeleton,
+  ContentSkeleton,
+} from '../ui/Skeletons';
 
 // Lazy load dashboard sub-components
 const TripsOverview = lazy(() => import('./TripsOverview'));
@@ -27,10 +39,12 @@ const EXCHANGE_RATES = {
   GBP: { CZK: 29, EUR: 1.18, USD: 1.27, GBP: 1 }
 };
 
-const DashboardLoading = () => (
-  <div className="w-full h-[60vh] flex items-center justify-center">
-    <div className="w-6 h-6 border-2 border-journeo-accent/20 border-t-journeo-accent rounded-full animate-spin" />
-  </div>
+// Wrap a lazy route element in its own Suspense boundary with a matching
+// skeleton fallback. Because each matched route mounts a *new* boundary,
+// React shows the fallback immediately on navigation (instead of preserving
+// the previous page during the transition while the chunk loads).
+const withSuspense = (element, fallback) => (
+  <Suspense fallback={fallback}>{element}</Suspense>
 );
 
 const DashboardHome = () => {
@@ -140,7 +154,7 @@ const DashboardHome = () => {
     return (
       <DashboardSplash>
         <DashboardLayout>
-          <DashboardLoading />
+          <TripsOverviewSkeleton />
         </DashboardLayout>
       </DashboardSplash>
     );
@@ -154,51 +168,52 @@ const DashboardHome = () => {
           onClose={() => setIsCreateModalOpen(false)} 
           onAddTrip={handleAddTrip} 
         />
-        <Suspense fallback={<DashboardLoading />}>
-          <Routes>
-            <Route 
-              path="/" 
-              element={<TripsOverview trips={trips} onDeleteTrip={handleDeleteTrip} onOpenCreateModal={() => setIsCreateModalOpen(true)} />} 
-            />
-            <Route 
-              path="/all-trips" 
-              element={<AllTrips trips={trips} onDeleteTrip={handleDeleteTrip} />} 
-            />
-            <Route 
-              path="/trip/:id" 
-              element={<TripDetail trips={trips} onUpdateTrip={handleUpdateTrip} />} 
-            />
-            <Route 
-              path="/statistics" 
-              element={<Statistics trips={trips} />} 
-            />
-            <Route 
-              path="/settings" 
-              element={<Settings onClearData={handleClearData} onConvertCurrency={handleConvertCurrency} />} 
-            />
-            <Route 
-              path="/budget" 
-              element={<Budget trips={trips} onUpdateTrip={handleUpdateTrip} />} 
-            />
-            <Route 
-              path="/friends" 
-              element={<Friends />} 
-            />
-            <Route
-              path="/add-friend/:token"
-              element={<AddFriendInvite />}
-            />
-            <Route
-              path="/profile/:userId"
-              element={<FriendProfile />}
-            />
-            <Route 
-              path="/profile/:userId/trip/:tripId" 
-              element={<ReadOnlyTripView />} 
-            />
-            <Route path="*" element={<DashboardNotFound />} />
-          </Routes>
-        </Suspense>
+        {/* Per-route Suspense boundaries: navigating mounts a fresh boundary,
+            so the matching skeleton shows instantly instead of the page freezing
+            on the previous view while the lazy chunk downloads. */}
+        <Routes>
+          <Route
+            path="/"
+            element={withSuspense(<TripsOverview trips={trips} onDeleteTrip={handleDeleteTrip} onOpenCreateModal={() => setIsCreateModalOpen(true)} />, <TripsOverviewSkeleton />)}
+          />
+          <Route
+            path="/all-trips"
+            element={withSuspense(<AllTrips trips={trips} onDeleteTrip={handleDeleteTrip} />, <AllTripsSkeleton />)}
+          />
+          <Route
+            path="/trip/:id"
+            element={withSuspense(<TripDetail trips={trips} onUpdateTrip={handleUpdateTrip} />, <TripDetailSkeleton />)}
+          />
+          <Route
+            path="/statistics"
+            element={withSuspense(<Statistics trips={trips} />, <StatisticsSkeleton />)}
+          />
+          <Route
+            path="/settings"
+            element={withSuspense(<Settings onClearData={handleClearData} onConvertCurrency={handleConvertCurrency} />, <SettingsSkeleton />)}
+          />
+          <Route
+            path="/budget"
+            element={withSuspense(<Budget trips={trips} onUpdateTrip={handleUpdateTrip} />, <BudgetSkeleton />)}
+          />
+          <Route
+            path="/friends"
+            element={withSuspense(<Friends />, <FriendsSkeleton />)}
+          />
+          <Route
+            path="/add-friend/:token"
+            element={withSuspense(<AddFriendInvite />, <ContentSkeleton />)}
+          />
+          <Route
+            path="/profile/:userId"
+            element={withSuspense(<FriendProfile />, <FriendProfileSkeleton />)}
+          />
+          <Route
+            path="/profile/:userId/trip/:tripId"
+            element={withSuspense(<ReadOnlyTripView />, <TripViewSkeleton />)}
+          />
+          <Route path="*" element={withSuspense(<DashboardNotFound />, <ContentSkeleton />)} />
+        </Routes>
       </DashboardLayout>
     </DashboardSplash>
   );

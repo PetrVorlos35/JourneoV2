@@ -13,6 +13,7 @@ import JourneoLogoWhite from '../../assets/Journeo_whitelogo.png';
 import JourneoLogoBlack from '../../assets/Journeo_blacklogo.png';
 import LandingLanguageSwitcher from '../LandingLanguageSwitcher';
 import UserAvatar from '../ui/UserAvatar';
+import Skeleton from '../ui/Skeleton';
 
 const PublicTripView = () => {
   const { token } = useParams();
@@ -65,8 +66,28 @@ const PublicTripView = () => {
   if (loading) {
     return (
       <div className={isDark ? 'dark' : ''}>
-        <div className="min-h-screen bg-[#fbfbfd] dark:bg-neutral-950 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+        <div className="min-h-screen bg-[#fbfbfd] dark:bg-neutral-950">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 lg:pt-32 pb-28 lg:pb-16 w-full">
+            <div className="mb-6 lg:mb-12 space-y-4">
+              <div className="flex items-center gap-2.5">
+                <Skeleton className="w-9 h-9" rounded="rounded-full" />
+                <Skeleton className="h-4 w-32" />
+              </div>
+              <Skeleton className="h-12 w-2/3" />
+              <Skeleton className="h-5 w-48" />
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-24 rounded-[1.5rem]" />
+                ))}
+              </div>
+              <div className="space-y-4">
+                <Skeleton className="h-44 rounded-[2rem]" />
+                <Skeleton className="h-32 rounded-[2rem]" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );

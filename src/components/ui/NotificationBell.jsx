@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import { NotificationListSkeleton } from './Skeletons';
 
 const notifIcons = {
   FRIEND_REQUEST: UserPlus,
@@ -155,9 +156,7 @@ const NotificationBell = () => {
 
             <div className="overflow-y-auto max-h-[340px] custom-scrollbar">
               {loading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="w-5 h-5 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
-                </div>
+                <NotificationListSkeleton />
               ) : notifications.length === 0 ? (
                 <div className="py-12 text-center">
                   <Bell size={28} className="mx-auto text-gray-300 dark:text-gray-600 mb-3" />

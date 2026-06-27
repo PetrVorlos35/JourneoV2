@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from '../../contexts/AuthContext';
 import LikeButton from '../ui/LikeButton';
 import UserAvatar from '../ui/UserAvatar';
+import { FriendProfileSkeleton } from '../ui/Skeletons';
 
 const TRIP_CARD_COLORS = [
   { accent: 'bg-blue-500/10 dark:bg-blue-500/15', icon: 'text-blue-600 dark:text-blue-400' },
@@ -125,11 +126,7 @@ const FriendProfile = () => {
   };
 
   if (loading) {
-    return (
-      <div className="w-full h-[60vh] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
-      </div>
-    );
+    return <FriendProfileSkeleton />;
   }
 
   const isFriend = friendshipStatus === 'ACCEPTED';

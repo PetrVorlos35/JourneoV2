@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import UserAvatar from '../ui/UserAvatar';
+import { AdminDashboardSkeleton } from '../ui/Skeletons';
 
 const AdminDashboard = () => {
   const { t, i18n } = useTranslation();
@@ -32,11 +33,7 @@ const AdminDashboard = () => {
       : { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.4, delay } };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <div className="w-6 h-6 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
-      </div>
-    );
+    return <AdminDashboardSkeleton />;
   }
 
   if (!data) {

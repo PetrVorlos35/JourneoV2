@@ -2,14 +2,24 @@ import React, { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import AdminLayout from './AdminLayout';
 import { Toaster } from 'react-hot-toast';
+import { AdminDashboardSkeleton, AdminTableSkeleton } from '../ui/Skeletons';
 
 const AdminDashboard = lazy(() => import('./AdminDashboard'));
 const AdminUsers = lazy(() => import('./AdminUsers'));
 const AdminTrips = lazy(() => import('./AdminTrips'));
 
-const AdminLoading = () => (
-  <div className="w-full h-[60vh] flex items-center justify-center">
-    <div className="w-6 h-6 border-2 border-orange-500/20 border-t-orange-500 rounded-full animate-spin" />
+// Per-route Suspense so the matching skeleton appears instantly on navigation
+// instead of freezing on the previous page while the lazy chunk downloads.
+const withSuspense = (element, fallback) => (
+  <Suspense fallback={fallback}>{element}</Suspense>
+);
+
+const AdminTableLoading = () => (
+  <div className="space-y-8">
+    <div className="h-9 w-48 skeleton rounded-xl" aria-hidden="true" />
+    <div className="rounded-2xl border border-gray-200 dark:border-white/[0.06] p-4">
+      <AdminTableSkeleton rows={8} />
+    </div>
   </div>
 );
 
@@ -29,13 +39,11 @@ const AdminHome = () => {
           },
         }}
       />
-      <Suspense fallback={<AdminLoading />}>
-        <Routes>
-          <Route path="/" element={<AdminDashboard />} />
-          <Route path="/users" element={<AdminUsers />} />
-          <Route path="/trips" element={<AdminTrips />} />
-        </Routes>
-      </Suspense>
+      <Routes>
+        <Route path="/" element={withSuspense(<AdminDashboard />, <AdminDashboardSkeleton />)} />
+        <Route path="/users" element={withSuspense(<AdminUsers />, <AdminTableLoading />)} />
+        <Route path="/trips" element={withSuspense(<AdminTrips />, <AdminTableLoading />)} />
+      </Routes>
     </AdminLayout>
   );
 };

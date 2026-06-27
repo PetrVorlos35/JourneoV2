@@ -39,6 +39,10 @@ const AuthFlow = () => {
   const shouldReduceMotion = useReducedMotion();
 
   const googleLoginFn = useGoogleLogin({
+    // Empty prompt = let Google decide: if the user is signed into a single
+    // (already-consented) account, sign in directly with no chooser; if there
+    // are two or more accounts, the account picker is shown.
+    prompt: '',
     onSuccess: async (tokenResponse) => {
       setIsGoogleLoading(true);
       setErrorMsg('');

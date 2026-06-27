@@ -7,6 +7,7 @@ import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { useDialog } from '../ui/DialogModal';
 import UserAvatar from '../ui/UserAvatar';
+import { FriendsSkeleton } from '../ui/Skeletons';
 
 const FRIEND_COLORS = [
   { ring: 'ring-blue-300 dark:ring-blue-500/40'    },
@@ -189,11 +190,7 @@ const Friends = () => {
   };
 
   if (loading) {
-    return (
-      <div className="w-full h-[60vh] flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
-      </div>
-    );
+    return <FriendsSkeleton />;
   }
 
   const tabs = [
