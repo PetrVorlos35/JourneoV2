@@ -208,6 +208,7 @@
       "verify": "Ověřit účet",
       "verifying": "Ověřuji...",
       "resend": "Znovu odeslat kód",
+      "resendWait": "Odeslat znovu lze za {{seconds}} s",
       "backToLogin": "Vrátit se na přihlášení",
       "codeMustBe6": "Kód musí mít 6 číslic."
     },

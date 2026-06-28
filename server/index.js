@@ -23,9 +23,14 @@ import statsRoutes from './routes/stats.js';
 import adminRoutes from './routes/admin.js';
 import adminAuth from './middleware/adminAuth.js';
 import publicRoutes from './routes/public.js';
+import { globalLimiter, authLimiter } from './middleware/rateLimit.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Za reverzní proxy (Vercel / lokální dev proxy) je potřeba věřit
+// prvnímu hopu, jinak rate-limiter vidí všechny klienty pod jednou IP.
+app.set('trust proxy', 1);
 
 app.use(cors({
   origin: process.env.FRONTEND_URL ? [process.env.FRONTEND_URL, 'http://localhost:5173'] : '*',
@@ -33,8 +38,12 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '10mb' }));
 
+// Globální rate limit na všechny API cally.
+app.use('/api', globalLimiter);
+
 app.use('/api/public', publicRoutes);
-app.use('/api/auth', authRoutes);
+// Přísnější limit na citlivé auth endpointy (login, register, reset…).
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/trips', auth, tripRoutes);
 app.use('/api/settings', auth, settingsRoutes);
 app.use('/api/friends', auth, friendRoutes);

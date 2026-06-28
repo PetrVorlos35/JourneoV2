@@ -208,6 +208,7 @@
       "verify": "Verify account",
       "verifying": "Verifying...",
       "resend": "Resend code",
+      "resendWait": "Resend available in {{seconds}}s",
       "backToLogin": "Back to login",
       "codeMustBe6": "Code must be 6 digits."
     },

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Eye, EyeOff, Check, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -6,6 +6,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
+import OtpInput from './OtpInput';
 import JourneoWhiteLogo from '../../assets/Journeo_whitelogo.png';
 import JourneoBlackLogo from '../../assets/Journeo_blacklogo.png';
 import GoogleIcon from '../../assets/google.png';
@@ -33,10 +34,20 @@ const AuthFlow = () => {
   const [otpCode, setOtpCode] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const navigate = useNavigate();
   const { login, register, loginWithGoogle, verify, resendOtp, forgotPassword, resetPassword } = useAuth();
   const shouldReduceMotion = useReducedMotion();
+
+  // Odpočet cooldownu pro opětovné odeslání ověřovacího kódu.
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((s) => (s > 1 ? s - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
 
   const googleLoginFn = useGoogleLogin({
     // Empty prompt = let Google decide: if the user is signed into a single
@@ -127,12 +138,18 @@ const AuthFlow = () => {
   };
 
   const handleResendOtp = async () => {
+    if (resendCooldown > 0) return;
     setIsLoading(true);
     setErrorMsg('');
     try {
       await resendOtp(formData.email);
       toast.success(t('auth.toasts.resendSuccess'));
+      setResendCooldown(30); // odeslat lze nejvýš jednou za 30 s
     } catch (err) {
+      // 429 = příliš brzy; nastav odpočet podle serveru
+      if (err.status === 429) {
+        setResendCooldown(err.retryAfter || 30);
+      }
       setErrorMsg(err.message || t('auth.errors.resendError'));
     } finally {
       setIsLoading(false);
@@ -301,21 +318,14 @@ const AuthFlow = () => {
                     </AnimatePresence>
 
                     <form onSubmit={handleVerify} className="space-y-4">
-                      <input
-                        type="text"
-                        id="otp-code"
-                        name="otp"
-                        required
-                        autoFocus
-                        maxLength={6}
+                      <OtpInput
                         value={otpCode}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '');
+                        autoFocus
+                        disabled={isLoading}
+                        onChange={(val) => {
                           setOtpCode(val);
                           if (errorMsg) setErrorMsg('');
                         }}
-                        placeholder="123456"
-                        className="w-full text-center tracking-[1em] text-2xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-4 text-gray-900 dark:text-white placeholder-gray-400/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-bold"
                       />
 
                       <button
@@ -331,10 +341,12 @@ const AuthFlow = () => {
                       <button
                         type="button"
                         onClick={handleResendOtp}
-                        disabled={isLoading}
+                        disabled={isLoading || resendCooldown > 0}
                         className="text-sm font-semibold text-blue-500 hover:text-blue-600 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                       >
-                        {t('auth.otp.resend')}
+                        {resendCooldown > 0
+                          ? t('auth.otp.resendWait', { seconds: resendCooldown })
+                          : t('auth.otp.resend')}
                       </button>
                       <button
                         type="button"
@@ -413,22 +425,15 @@ const AuthFlow = () => {
                     </AnimatePresence>
                     <form onSubmit={handleResetPassword} className="space-y-4">
                       <div>
-                        <label htmlFor="reset-otp" className="text-[12px] font-medium text-gray-500 dark:text-gray-400 mb-1.5 block">{t('auth.reset.codeLabel')}</label>
-                        <input
-                          type="text"
-                          id="reset-otp"
-                          name="otp"
-                          required
-                          autoFocus
-                          maxLength={6}
+                        <label htmlFor="reset-otp" className="text-[12px] font-medium text-gray-500 dark:text-gray-400 mb-1.5 block text-center">{t('auth.reset.codeLabel')}</label>
+                        <OtpInput
                           value={otpCode}
-                          onChange={(e) => {
-                            const val = e.target.value.replace(/\D/g, '');
+                          autoFocus
+                          disabled={isLoading}
+                          onChange={(val) => {
                             setOtpCode(val);
                             if (errorMsg) setErrorMsg('');
                           }}
-                          placeholder="123456"
-                          className="w-full text-center tracking-[1em] text-xl bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-gray-900 dark:text-white placeholder-gray-400/50 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-bold"
                         />
                       </div>
 

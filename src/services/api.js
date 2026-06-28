@@ -28,7 +28,12 @@ async function request(endpoint, options = {}) {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.error || 'Něco se pokazilo.');
+    const error = new Error(data.error || 'Něco se pokazilo.');
+    error.status = response.status;
+    // 429 = rate limit; preferuj retryAfter z těla, jinak hlavičku Retry-After
+    const headerRetry = Number(response.headers.get('Retry-After')) || null;
+    error.retryAfter = data.retryAfter ?? headerRetry;
+    throw error;
   }
 
   return data;

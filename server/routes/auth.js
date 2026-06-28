@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
 import auth from '../middleware/auth.js';
 import { sendVerificationCode } from '../lib/mailer.js';
+import { getCodeCooldownRemaining } from '../lib/otpThrottle.js';
 import { waitUntil } from '@vercel/functions';
 
 const router = Router();
@@ -127,6 +128,16 @@ router.post('/resend-otp', async (req, res) => {
     }
     if (users[0].is_verified) {
       return res.status(400).json({ error: 'Tento účet je již ověřen.' });
+    }
+
+    // Cooldown – kód lze poslat nejvýš jednou za 30 vteřin
+    const cooldown = await getCodeCooldownRemaining(email, 'REGISTER');
+    if (cooldown > 0) {
+      res.set('Retry-After', String(cooldown));
+      return res.status(429).json({
+        error: `Nový kód můžete poslat až za ${cooldown} s.`,
+        retryAfter: cooldown,
+      });
     }
 
     // Invalidate old tokens
@@ -348,6 +359,18 @@ router.post('/forgot-password', async (req, res) => {
     if (users.length === 0) {
       // Vracíme stejnou hlášku z bezpečnostních důvodů (aby nešlo zjistit, jaké maily existují)
       return res.json({ message: 'Pokud existuje účet s tímto e-mailem, byl na něj odeslán odkaz pro obnovu.' });
+    }
+
+    // Cooldown – kód lze poslat nejvýš jednou za 30 vteřin.
+    // Kontrolujeme až tady (až po ověření existence účtu), aby
+    // 429 neprozrazovala, které e-maily v databázi existují.
+    const cooldown = await getCodeCooldownRemaining(email, 'RESET');
+    if (cooldown > 0) {
+      res.set('Retry-After', String(cooldown));
+      return res.status(429).json({
+        error: `Nový kód můžete poslat až za ${cooldown} s.`,
+        retryAfter: cooldown,
+      });
     }
 
     // Invalidate old RESET tokens
