@@ -23,6 +23,7 @@
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.5.2",
     "framer-motion": "^12.16.0",
     "gsap": "^3.13.0",
     "i18next": "^26.3.1",
