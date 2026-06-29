@@ -1,8 +1,63 @@
 import { Router } from 'express';
 import { randomBytes } from 'crypto';
+import { waitUntil } from '@vercel/functions';
 import pool from '../config/db.js';
+import { calculateBalances } from '../lib/balances.js';
+import { sendSettlementEmail } from '../lib/mailer.js';
 
 const router = Router();
+
+const CURRENCY_SYMBOLS = { CZK: 'Kč', EUR: '€', USD: '$', GBP: '£' };
+const formatAmountLabel = (amount, currency = 'CZK', locale = 'cs') => {
+  const symbol = CURRENCY_SYMBOLS[currency] || currency;
+  return `${Number(amount).toLocaleString(locale)} ${symbol}`;
+};
+
+// Loads a trip's expenses together with their splits, shaped for the API.
+// `db` may be the pool or an active transaction connection.
+const fetchExpensesWithSplits = async (tripId, db = pool) => {
+  const [expenses] = await db.query(
+    "SELECT id, description, amount, category, DATE_FORMAT(date, '%Y-%m-%d') AS date, paid_by AS paidBy FROM trip_expenses WHERE trip_id = ? ORDER BY created_at DESC",
+    [tripId]
+  );
+
+  const [splits] = await db.query(
+    `SELECT es.expense_id AS expenseId, es.user_id AS userId, es.amount
+     FROM expense_splits es
+     JOIN trip_expenses te ON te.id = es.expense_id
+     WHERE te.trip_id = ?`,
+    [tripId]
+  );
+
+  const splitsByExpense = new Map();
+  for (const s of splits) {
+    if (!splitsByExpense.has(s.expenseId)) splitsByExpense.set(s.expenseId, []);
+    splitsByExpense.get(s.expenseId).push({ userId: s.userId, amount: parseFloat(s.amount) });
+  }
+
+  return expenses.map((e) => ({
+    id: e.id.toString(),
+    description: e.description,
+    amount: parseFloat(e.amount),
+    category: e.category,
+    date: e.date,
+    paidBy: e.paidBy != null ? e.paidBy : null,
+    splits: splitsByExpense.get(e.id) || [],
+  }));
+};
+
+// Loads recorded settle-up payments for a trip (compensating transactions).
+const fetchSettlements = async (tripId, db = pool) => {
+  const [rows] = await db.query(
+    'SELECT from_user_id AS fromUserId, to_user_id AS toUserId, amount FROM trip_settlements WHERE trip_id = ?',
+    [tripId]
+  );
+  return rows.map((r) => ({
+    fromUserId: r.fromUserId,
+    toUserId: r.toUserId,
+    amount: parseFloat(r.amount),
+  }));
+};
 
 const formatDateForDb = (date) => {
   if (!date) return null;
@@ -85,10 +140,7 @@ router.get('/', async (req, res) => {
         [trip.id]
       );
 
-      const [expenses] = await pool.query(
-        "SELECT id, description, amount, category, DATE_FORMAT(date, '%Y-%m-%d') AS date FROM trip_expenses WHERE trip_id = ? ORDER BY created_at DESC",
-        [trip.id]
-      );
+      const expenses = await fetchExpensesWithSplits(trip.id);
 
       const [packingItems] = await pool.query(
         'SELECT id, text, checked FROM trip_packing_items WHERE trip_id = ? ORDER BY created_at ASC',
@@ -115,7 +167,7 @@ router.get('/', async (req, res) => {
         id: trip.id.toString(),
         budgetTarget: trip.budgetTarget != null ? parseFloat(trip.budgetTarget) : null,
         activities: activities.map(a => ({ ...a, id: a.id.toString() })),
-        expenses: expenses.map(e => ({ ...e, id: e.id.toString(), amount: parseFloat(e.amount) })),
+        expenses,
         packingList: packingItems.map(p => ({ id: p.id.toString(), text: p.text, checked: !!p.checked })),
         documents: documents.map(d => ({ id: d.id.toString(), title: d.title, content: d.content })),
         likes: parseInt(voteScore[0].likes),
@@ -223,12 +275,28 @@ router.put('/:id', async (req, res) => {
     }
 
     if (expenses !== undefined) {
+      // Splits cascade-delete with their expense, so removing the expenses
+      // here also clears the old expense_splits rows.
       await connection.query('DELETE FROM trip_expenses WHERE trip_id = ?', [tripId]);
       for (const e of expenses) {
-        await connection.query(
-          'INSERT INTO trip_expenses (trip_id, description, amount, category, date) VALUES (?, ?, ?, ?, ?)',
-          [tripId, e.description, e.amount, e.category || 'other', formatDateForDb(e.date)]
+        const paidBy = e.paidBy != null && e.paidBy !== '' ? parseInt(e.paidBy) : null;
+        const [insertResult] = await connection.query(
+          'INSERT INTO trip_expenses (trip_id, description, amount, category, date, paid_by) VALUES (?, ?, ?, ?, ?, ?)',
+          [tripId, e.description, e.amount, e.category || 'other', formatDateForDb(e.date), paidBy]
         );
+
+        const expenseId = insertResult.insertId;
+        const splits = Array.isArray(e.splits) ? e.splits : [];
+        for (const s of splits) {
+          if (s == null || s.userId == null || s.userId === '') continue;
+          const splitAmount = Number(s.amount);
+          if (!Number.isFinite(splitAmount) || splitAmount <= 0) continue;
+          await connection.query(
+            `INSERT INTO expense_splits (expense_id, user_id, amount) VALUES (?, ?, ?)
+             ON DUPLICATE KEY UPDATE amount = VALUES(amount)`,
+            [expenseId, parseInt(s.userId), splitAmount]
+          );
+        }
       }
     }
 
@@ -262,10 +330,7 @@ router.put('/:id', async (req, res) => {
       "SELECT id, day_index AS dayIndex, DATE_FORMAT(date, '%Y-%m-%d') AS date, title, plan, location FROM trip_activities WHERE trip_id = ? ORDER BY day_index ASC",
       [tripId]
     );
-    const [updatedExpenses] = await pool.query(
-      "SELECT id, description, amount, category, DATE_FORMAT(date, '%Y-%m-%d') AS date FROM trip_expenses WHERE trip_id = ? ORDER BY created_at DESC",
-      [tripId]
-    );
+    const updatedExpenses = await fetchExpensesWithSplits(tripId);
     const [updatedPacking] = await pool.query(
       'SELECT id, text, checked FROM trip_packing_items WHERE trip_id = ? ORDER BY created_at ASC',
       [tripId]
@@ -290,7 +355,7 @@ router.put('/:id', async (req, res) => {
         budgetTarget: updatedTrips[0].budgetTarget != null ? parseFloat(updatedTrips[0].budgetTarget) : null,
         role,
         activities: updatedActivities.map(a => ({ ...a, id: a.id.toString() })),
-        expenses: updatedExpenses.map(e => ({ ...e, id: e.id.toString(), amount: parseFloat(e.amount) })),
+        expenses: updatedExpenses,
         packingList: updatedPacking.map(p => ({ id: p.id.toString(), text: p.text, checked: !!p.checked })),
         documents: updatedDocs.map(d => ({ id: d.id.toString(), title: d.title, content: d.content })),
         likes: parseInt(voteScore[0].likes),
@@ -351,6 +416,119 @@ router.get('/:id/collaborators', async (req, res) => {
   } catch (err) {
     console.error('Get collaborators error:', err);
     res.status(500).json({ error: 'Chyba při načítání spolupracovníků.' });
+  }
+});
+
+// ── GET /api/trips/:id/balances ─────────────────────────────
+// Computes the simplified "who owes whom" ledger for a trip from its
+// expenses + splits. Returns trip members, each member's net balance,
+// and the minimal set of settlement transactions.
+router.get('/:id/balances', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const tripId = parseInt(req.params.id);
+
+    const role = await getTripRole(tripId, userId);
+    if (!role) return res.status(404).json({ error: 'Výlet nenalezen.' });
+
+    // Trip members = owner + collaborators. bankAccount is included so the
+    // Settle Up modal can show where to send money.
+    const [members] = await pool.query(
+      `SELECT u.id, u.first_name AS firstName, u.last_name AS lastName,
+              u.email, u.avatar_url AS avatarUrl, u.bank_account AS bankAccount, 'owner' AS role
+       FROM trips t JOIN users u ON u.id = t.user_id
+       WHERE t.id = ?
+       UNION
+       SELECT u.id, u.first_name AS firstName, u.last_name AS lastName,
+              u.email, u.avatar_url AS avatarUrl, u.bank_account AS bankAccount, tc.role
+       FROM trip_collaborators tc JOIN users u ON u.id = tc.user_id
+       WHERE tc.trip_id = ?`,
+      [tripId, tripId]
+    );
+
+    const expenses = await fetchExpensesWithSplits(tripId);
+    const recordedSettlements = await fetchSettlements(tripId);
+    const { balances, settlements } = calculateBalances(expenses, recordedSettlements);
+
+    // Index net balances by user for a stable, member-ordered response.
+    const netByUser = new Map(balances.map((b) => [Number(b.userId), b.net]));
+
+    res.json({
+      members,
+      balances: members.map((m) => ({ userId: m.id, net: netByUser.get(Number(m.id)) || 0 })),
+      settlements,
+    });
+  } catch (err) {
+    console.error('Get balances error:', err);
+    res.status(500).json({ error: 'Chyba při výpočtu zůstatků.' });
+  }
+});
+
+// ── POST /api/trips/:id/settle ──────────────────────────────
+// Records a compensating payment from the caller (debtor) to `toUserId`
+// (creditor), zeroing out that debt. Returns the receiver's bank account.
+router.post('/:id/settle', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const tripId = parseInt(req.params.id);
+    const { toUserId, amount, currency, locale } = req.body;
+
+    const role = await getTripRole(tripId, userId);
+    if (!role) return res.status(404).json({ error: 'Výlet nenalezen.' });
+
+    const toId = parseInt(toUserId);
+    const amt = Number(amount);
+    if (!toId || !Number.isFinite(amt) || amt <= 0) {
+      return res.status(400).json({ error: 'Neplatný příjemce nebo částka.' });
+    }
+    if (toId === userId) {
+      return res.status(400).json({ error: 'Nemůžete vyrovnat dluh sám se sebou.' });
+    }
+
+    // The receiver must also be a member of this trip.
+    const receiverRole = await getTripRole(tripId, toId);
+    if (!receiverRole) {
+      return res.status(400).json({ error: 'Příjemce není účastníkem výletu.' });
+    }
+
+    // Record the compensating payment: caller (payer) → receiver.
+    await pool.query(
+      'INSERT INTO trip_settlements (trip_id, from_user_id, to_user_id, amount) VALUES (?, ?, ?, ?)',
+      [tripId, userId, toId, amt]
+    );
+
+    // Fetch the receiver's contact + bank account, the payer's name, and the
+    // trip name — for the response and the notification email.
+    const [[receiver]] = await pool.query(
+      'SELECT email, first_name AS firstName, last_name AS lastName, bank_account AS bankAccount FROM users WHERE id = ?',
+      [toId]
+    );
+    const [[payer]] = await pool.query(
+      'SELECT first_name AS firstName, last_name AS lastName FROM users WHERE id = ?',
+      [userId]
+    );
+    const [[trip]] = await pool.query('SELECT title FROM trips WHERE id = ?', [tripId]);
+
+    // Notify the person who was owed money (non-blocking, fire-and-forget).
+    if (receiver?.email) {
+      const payerName = [payer?.firstName, payer?.lastName].filter(Boolean).join(' ').trim() || 'Někdo';
+      waitUntil(
+        sendSettlementEmail(receiver.email, {
+          payerName,
+          amountLabel: formatAmountLabel(amt, currency, locale),
+          tripName: trip?.title || '',
+          locale,
+        }).catch((err) => console.error('Settlement email error:', err))
+      );
+    }
+
+    res.json({
+      success: true,
+      receiverBankAccount: receiver?.bankAccount || null,
+    });
+  } catch (err) {
+    console.error('Settle error:', err);
+    res.status(500).json({ error: 'Chyba při vyrovnání dluhu.' });
   }
 });
 

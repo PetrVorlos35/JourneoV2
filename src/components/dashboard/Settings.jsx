@@ -1,4 +1,4 @@
-import { Trash2, DollarSign, User, Save, Camera, Mountain, Palmtree, Compass, Map, Plane, Monitor, Sun, Moon, X, KeyRound, Eye, EyeOff, Check, Globe, Link as LinkIcon, Copy, ArrowRight } from 'lucide-react';
+import { Trash2, DollarSign, User, Save, Camera, Mountain, Palmtree, Compass, Map, Plane, Monitor, Sun, Moon, X, KeyRound, Eye, EyeOff, Check, Globe, Link as LinkIcon, Copy, ArrowRight, Landmark } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -31,6 +31,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
     last_name: user?.last_name || '',
     avatar_url: user?.avatar_url || '',
     bio: user?.bio || '',
+    bank_account: user?.bank_account || '',
   });
   const [saving, setSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -271,6 +272,23 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
               <div className="flex justify-end mt-1.5 pr-1">
                 <CharCount value={profileForm.bio} max={300} />
               </div>
+            </div>
+            <div>
+              <label htmlFor="settings-bank-account" className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+                <Landmark size={15} className="text-gray-400" strokeWidth={2} />
+                {t('settings.profile.bankAccount')}
+              </label>
+              <input
+                id="settings-bank-account"
+                type="text"
+                inputMode="text"
+                maxLength={64}
+                placeholder={t('settings.profile.bankAccountPlaceholder')}
+                value={profileForm.bank_account}
+                onChange={e => handleProfileChange('bank_account', e.target.value)}
+                className="glass-input font-mono"
+              />
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1.5 pl-1">{t('settings.profile.bankAccountHint')}</p>
             </div>
             <div>
               <label className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 block">{t('friends.invite.title')}</label>

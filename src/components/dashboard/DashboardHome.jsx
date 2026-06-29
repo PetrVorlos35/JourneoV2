@@ -132,7 +132,10 @@ const DashboardHome = () => {
         ...trip,
         expenses: trip.expenses.map(exp => ({
           ...exp,
-          amount: parseFloat((exp.amount * rate).toFixed(2))
+          amount: parseFloat((exp.amount * rate).toFixed(2)),
+          splits: Array.isArray(exp.splits)
+            ? exp.splits.map(s => ({ ...s, amount: parseFloat((s.amount * rate).toFixed(2)) }))
+            : exp.splits,
         }))
       };
     });

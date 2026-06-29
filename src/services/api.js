@@ -121,6 +121,14 @@ export const api = {
 
     getCollaborators: (id) => request(`/trips/${id}/collaborators`),
 
+    getBalances: (id) => request(`/trips/${id}/balances`),
+
+    settle: (id, payload) =>
+      request(`/trips/${id}/settle`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
+
     share: (id, userId, role) =>
       request(`/trips/${id}/share`, {
         method: 'POST',

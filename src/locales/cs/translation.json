@@ -9,6 +9,19 @@
     "current": "Aktuální verze",
     "empty": "Zatím tu nejsou žádné novinky.",
     "releases": {
+      "v1_1": {
+        "title": "Sdílené rozpočty, dělení a vyrovnání dluhů",
+        "summary": "Cestování ve skupině je teď jednodušší. Rozdělte výdaje mezi lidi, se kterými výlet sdílíte, na první pohled vidíte, kdo komu dluží, a dluhy snadno vyrovnáte — žádné tabulky ani složité počítání.",
+        "highlights": [
+          "Zaznamenejte, kdo každý výdaj zaplatil",
+          "Rozdělte částku rovným dílem nebo vlastními částkami mezi spolupracovníky",
+          "Označte výdaj jako osobní, aby se do dělení nezapočítal",
+          "Přehledné Vyrovnání ukazuje čistý zůstatek každého účastníka",
+          "Vyrovnejte dluhy a označte je jako zaplacené, s potvrzením o vyrovnání",
+          "Uložte si číslo účtu / IBAN, aby vám spolucestující mohli poslat peníze",
+          "Dostanete e-mail, když někdo vyrovná svůj dluh u vás"
+        ]
+      },
       "v1_0": {
         "title": "První veřejná verze",
         "summary": "Journeo je venku. Tahle verze přináší kompletní základ pro plánování cest — od prvního nápadu až po sdílení hotového itineráře s přáteli.",
@@ -652,7 +665,47 @@
       "editSubmit": "Uložit změny",
       "editSuccess": "Výdaj byl upraven!",
       "error": "Vyplňte prosím popis a částku.",
+      "paidByLabel": "Kdo zaplatil",
+      "splitLabel": "Rozdělit mezi",
+      "splitTypeLabel": "Způsob rozdělení",
+      "splitEqually": "Rovným dílem",
+      "splitCustom": "Vlastní částky",
+      "personalExpense": "Osobní (bez rozdělení)",
+      "eachOwes": "{{amount}} / osoba",
+      "splitError": "Vyberte alespoň jednu osobu pro rozdělení.",
+      "splitSumError": "Součet částek musí odpovídat celkové částce ({{amount}}).",
+      "selectAll": "Vybrat všechny",
+      "you": "Vy",
       "close": "Zavřít"
+    },
+    "balances": {
+      "title": "Vyrovnání",
+      "subtitle": "Kdo komu dluží",
+      "you": "Vy",
+      "owes": "dluží",
+      "owesYou": "dluží vám",
+      "youOwe": "dlužíte",
+      "getsBack": "dostane zpět",
+      "youGetBack": "dostanete zpět",
+      "net": "Čistý zůstatek",
+      "toSettle": "Navrhované vyrovnání",
+      "settledUp": "Vyrovnáno",
+      "allSettled": "Všichni jsou vyrovnaní 🎉",
+      "empty": "Zatím žádné sdílené výdaje. Přidejte výdaj rozdělený mezi spolupracovníky a uvidíte vyrovnání.",
+      "loadError": "Vyrovnání se nepodařilo načíst."
+    },
+    "settle": {
+      "settleUp": "Vyrovnat",
+      "title": "Vyrovnání dluhu",
+      "youOweAmount": "Dlužíte {{amount}} uživateli {{name}}.",
+      "sendMoneyTo": "Pošlete peníze na",
+      "noBankAccount": "{{name}} zatím nezadal/a číslo účtu.",
+      "copyAccount": "Kopírovat číslo účtu",
+      "accountCopied": "Číslo účtu zkopírováno",
+      "markAsPaid": "Označit jako zaplaceno",
+      "settling": "Vyrovnávám…",
+      "settleSuccess": "Dluh vyrovnán — díky!",
+      "settleError": "Dluh se nepodařilo vyrovnat. Zkuste to znovu."
     },
     "sort": {
       "dateDesc": "Nejnovější",
@@ -728,6 +781,9 @@
       "lastNamePlaceholder": "např. Novák",
       "bio": "Napište něco o sobě (Bio)",
       "bioPlaceholder": "např. Milovník hor a dobrodružství...",
+      "bankAccount": "Číslo účtu / IBAN",
+      "bankAccountPlaceholder": "např. 123456789/0100 nebo IBAN",
+      "bankAccountHint": "Slouží k tomu, aby vám spolucestující mohli poslat peníze při vyrovnání dluhů.",
       "emailLabel": "E-mail (nelze změnit)",
       "saveUnsaved": "Uložit změny",
       "save": "Uložit profil",

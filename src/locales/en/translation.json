@@ -9,6 +9,19 @@
     "current": "Current version",
     "empty": "There are no release notes yet.",
     "releases": {
+      "v1_1": {
+        "title": "Shared budgets, splitting & settling up",
+        "summary": "Travelling together just got easier. Split expenses with the people you share a trip with, see at a glance who owes whom, and settle up — no more spreadsheets or awkward math.",
+        "highlights": [
+          "Record who paid for each expense",
+          "Split a cost equally or with custom amounts among collaborators",
+          "Mark an expense as personal to keep it out of the split",
+          "A clean Balances overview showing every member's net balance",
+          "Settle up debts and mark them as paid, with an all-settled confirmation",
+          "Save your bank account / IBAN so trip mates can pay you back",
+          "Get an email when someone settles their debt with you"
+        ]
+      },
       "v1_0": {
         "title": "First public release",
         "summary": "Journeo is live. This release brings the complete foundation for planning your trips — from the first idea all the way to sharing a finished itinerary with friends.",
@@ -652,7 +665,47 @@
       "editSubmit": "Save changes",
       "editSuccess": "Expense updated!",
       "error": "Please fill in description and amount.",
+      "paidByLabel": "Who paid",
+      "splitLabel": "Split among",
+      "splitTypeLabel": "Split type",
+      "splitEqually": "Split equally",
+      "splitCustom": "Custom amounts",
+      "personalExpense": "Personal (not split)",
+      "eachOwes": "{{amount}} each",
+      "splitError": "Select at least one person to split among.",
+      "splitSumError": "Split amounts must add up to the total ({{amount}}).",
+      "selectAll": "Select all",
+      "you": "You",
       "close": "Close"
+    },
+    "balances": {
+      "title": "Balances",
+      "subtitle": "Who owes whom",
+      "you": "You",
+      "owes": "owes",
+      "owesYou": "owes you",
+      "youOwe": "you owe",
+      "getsBack": "gets back",
+      "youGetBack": "you get back",
+      "net": "Net balance",
+      "toSettle": "Suggested settlements",
+      "settledUp": "Settled up",
+      "allSettled": "Everyone's settled up 🎉",
+      "empty": "No shared expenses yet. Add an expense split among collaborators to see balances.",
+      "loadError": "Failed to load balances."
+    },
+    "settle": {
+      "settleUp": "Settle up",
+      "title": "Settle up",
+      "youOweAmount": "You owe {{amount}} to {{name}}.",
+      "sendMoneyTo": "Send money to",
+      "noBankAccount": "{{name}} hasn't added a bank account yet.",
+      "copyAccount": "Copy account number",
+      "accountCopied": "Account number copied",
+      "markAsPaid": "Mark as paid",
+      "settling": "Settling…",
+      "settleSuccess": "Debt settled — thanks!",
+      "settleError": "Could not settle the debt. Please try again."
     },
     "sort": {
       "dateDesc": "Newest first",
@@ -728,6 +781,9 @@
       "lastNamePlaceholder": "e.g. Smith",
       "bio": "Write something about yourself (Bio)",
       "bioPlaceholder": "e.g. Mountain lover and adventurer...",
+      "bankAccount": "Bank account / IBAN",
+      "bankAccountPlaceholder": "e.g. 123456789/0100 or IBAN",
+      "bankAccountHint": "Used so trip mates can pay you back when settling up.",
       "emailLabel": "Email (cannot be changed)",
       "saveUnsaved": "Save changes",
       "save": "Save profile",

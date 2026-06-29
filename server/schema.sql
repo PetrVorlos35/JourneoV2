@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     last_name VARCHAR(100) DEFAULT NULL,
     avatar_url TEXT DEFAULT NULL,
     bio TEXT DEFAULT NULL,
+    bank_account VARCHAR(64) DEFAULT NULL COMMENT 'Číslo účtu / IBAN pro vyrovnání dluhů',
     invite_token VARCHAR(64) UNIQUE NULL DEFAULT NULL,
     role ENUM('user', 'admin') DEFAULT 'user',
     is_verified TINYINT(1) DEFAULT 0,
@@ -78,10 +79,50 @@ CREATE TABLE IF NOT EXISTS trip_expenses (
     amount DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
     category ENUM('transport', 'accommodation', 'food', 'activities', 'other') DEFAULT 'other',
     date DATE DEFAULT NULL,
+    paid_by INT UNSIGNED DEFAULT NULL COMMENT 'Uživatel, který výdaj zaplatil (NULL = osobní výdaj bez rozdělení)',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     INDEX idx_expenses_trip (trip_id),
-    FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
+    INDEX idx_expenses_paid_by (paid_by),
+    FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE,
+    FOREIGN KEY (paid_by) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ── Rozdělení výdajů (kdo komu kolik dluží) ──────────────────
+-- Junction table: jeden řádek = podíl jednoho účastníka na jednom výdaji.
+CREATE TABLE IF NOT EXISTS expense_splits (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    expense_id INT UNSIGNED NOT NULL,
+    user_id INT UNSIGNED NOT NULL,
+    amount DECIMAL(12, 2) NOT NULL DEFAULT 0.00 COMMENT 'Částka, kterou tento účastník dluží za daný výdaj',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE KEY uq_expense_user (expense_id, user_id),
+    INDEX idx_splits_expense (expense_id),
+    INDEX idx_splits_user (user_id),
+    FOREIGN KEY (expense_id) REFERENCES trip_expenses(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ── Vyrovnání dluhů (settle up) ──────────────────────────────
+-- Each row is a compensating payment: from_user paid to_user `amount`,
+-- which the balance engine folds in to zero out their debt.
+CREATE TABLE IF NOT EXISTS trip_settlements (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    trip_id INT UNSIGNED NOT NULL,
+    from_user_id INT UNSIGNED NOT NULL COMMENT 'Plátce (dlužník)',
+    to_user_id INT UNSIGNED NOT NULL COMMENT 'Příjemce (věřitel)',
+    amount DECIMAL(12, 2) NOT NULL DEFAULT 0.00,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    INDEX idx_settlements_trip (trip_id),
+    INDEX idx_settlements_from (from_user_id),
+    INDEX idx_settlements_to (to_user_id),
+    FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE,
+    FOREIGN KEY (from_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (to_user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 

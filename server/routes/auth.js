@@ -178,7 +178,7 @@ router.post('/login', async (req, res) => {
 
     // Find user
     const [users] = await pool.query(
-      'SELECT id, email, password_hash, first_name, last_name, avatar_url, bio, role, is_verified FROM users WHERE email = ?', 
+      'SELECT id, email, password_hash, first_name, last_name, avatar_url, bio, bank_account, role, is_verified FROM users WHERE email = ?',
       [email]
     );
     if (users.length === 0) {
@@ -209,6 +209,7 @@ router.post('/login', async (req, res) => {
         last_name: user.last_name,
         avatar_url: user.avatar_url,
         bio: user.bio,
+        bank_account: user.bank_account,
         role: user.role || 'user'
       }
     });
@@ -313,7 +314,7 @@ router.post('/google', async (req, res) => {
 router.get('/me', auth, async (req, res) => {
   try {
     const [users] = await pool.query(
-      'SELECT id, email, first_name, last_name, avatar_url, bio, role, created_at FROM users WHERE id = ?', 
+      'SELECT id, email, first_name, last_name, avatar_url, bio, bank_account, role, created_at FROM users WHERE id = ?',
       [req.userId]
     );
     if (users.length === 0) {
@@ -330,15 +331,17 @@ router.get('/me', auth, async (req, res) => {
 // ── PUT /api/auth/profile ────────────────────────────────────
 router.put('/profile', auth, async (req, res) => {
   try {
-    const { first_name, last_name, avatar_url, bio } = req.body;
+    const { first_name, last_name, avatar_url, bio, bank_account } = req.body;
 
+    // bank_account is updated only when provided (COALESCE keeps the existing
+    // value when undefined; pass '' to clear it).
     await pool.query(
-      'UPDATE users SET first_name = ?, last_name = ?, avatar_url = ?, bio = ? WHERE id = ?',
-      [first_name, last_name, avatar_url, bio, req.userId]
+      'UPDATE users SET first_name = ?, last_name = ?, avatar_url = ?, bio = ?, bank_account = COALESCE(?, bank_account) WHERE id = ?',
+      [first_name, last_name, avatar_url, bio, bank_account ?? null, req.userId]
     );
 
     const [users] = await pool.query(
-      'SELECT id, email, first_name, last_name, avatar_url, bio, role, created_at FROM users WHERE id = ?',
+      'SELECT id, email, first_name, last_name, avatar_url, bio, bank_account, role, created_at FROM users WHERE id = ?',
       [req.userId]
     );
 

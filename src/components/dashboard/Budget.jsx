@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import {
   Plus, Trash2, TrendingUp, TrendingDown, Calendar, Car, Home, Utensils,
   Palmtree, MoreHorizontal, ChevronRight, Wallet, X, Search, Pencil, Check, Target,
+  Scale, ArrowRight, Split, HandCoins, Copy, CheckCircle2,
 } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { format, differenceInDays, isToday, isYesterday, parseISO } from 'date-fns';
@@ -15,6 +16,9 @@ import CharCount from '../ui/CharCount';
 import { useTranslation } from 'react-i18next';
 import { useDialog } from '../ui/DialogModal';
 import { useCurrency } from '../../contexts/CurrencyContext';
+import { useAuth } from '../../contexts/AuthContext';
+import api from '../../services/api';
+import UserAvatar from '../ui/UserAvatar';
 
 const formatCurrency = (amount, currency, locale = 'en') => {
   const symbols = { CZK: 'Kč', EUR: '€', USD: '$', GBP: '£' };
@@ -31,6 +35,315 @@ const CATEGORIES = [
 ];
 
 const catInfo = (id) => CATEGORIES.find(c => c.id === id) || CATEGORIES[4];
+
+/* ─── Member helpers (expense splitting) ─── */
+const getMemberName = (m) => {
+  if (!m) return '—';
+  const name = [m.firstName, m.lastName].filter(Boolean).join(' ').trim();
+  return name || m.email || '—';
+};
+
+// Map a balances-endpoint member (camelCase) to the shape UserAvatar expects,
+// so trip members render the real avatar each user picked.
+const toAvatarUser = (m) => ({
+  first_name: m?.firstName,
+  last_name: m?.lastName,
+  email: m?.email,
+  avatar_url: m?.avatarUrl,
+});
+
+// Display label: "You" for the current user, otherwise the member's name.
+const memberLabel = (m, currentUserId, t) =>
+  Number(m?.id) === Number(currentUserId) ? t('budget.balances.you') : getMemberName(m);
+
+// Splits an amount equally across participants, distributing rounding
+// remainder by the cent so the shares always sum back to the total.
+const computeEqualSplits = (participantIds, totalAmount) => {
+  const n = participantIds.length;
+  if (n === 0) return [];
+  const totalCents = Math.round((Number(totalAmount) || 0) * 100);
+  const base = Math.floor(totalCents / n);
+  const remainder = totalCents - base * n;
+  return participantIds.map((userId, i) => ({
+    userId,
+    amount: (base + (i < remainder ? 1 : 0)) / 100,
+  }));
+};
+
+/* ─── Settle Up Modal ─── */
+const SettleUpModal = ({ isOpen, onClose, creditor, amount, currency, locale, tripId, onSettled, t }) => {
+  const shouldReduceMotion = useReducedMotion();
+  const [submitting, setSubmitting] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const bankAccount = creditor?.bankAccount || null;
+  const name = getMemberName(creditor);
+  const amountLabel = formatCurrency(amount, currency, locale);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setCopied(false);
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
+
+  const handleCopy = async () => {
+    if (!bankAccount) return;
+    try {
+      await navigator.clipboard.writeText(bankAccount);
+      setCopied(true);
+      toast.success(t('budget.settle.accountCopied'));
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* clipboard unavailable */ }
+  };
+
+  const handleMarkPaid = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      await api.trips.settle(tripId, { toUserId: creditor.id, amount, currency, locale });
+      toast.success(t('budget.settle.settleSuccess'));
+      onClose();
+      onSettled?.();
+    } catch (err) {
+      toast.error(err?.message || t('budget.settle.settleError'));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[160] flex items-end sm:items-center justify-center p-0 sm:p-6 overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm cursor-pointer"
+          />
+          <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="settle-title"
+            initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: '100%' }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: '100%' }}
+            transition={shouldReduceMotion ? { duration: 0.2 } : { ease: [0.22, 1, 0.36, 1], duration: 0.35 }}
+            className="relative w-full max-w-md bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-t-[2rem] sm:rounded-[2rem] p-6 sm:p-8 shadow-2xl z-10"
+          >
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200 dark:border-white/10">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center shrink-0">
+                  <HandCoins size={17} strokeWidth={2} />
+                </div>
+                <h3 id="settle-title" className="font-bold text-xl sm:text-2xl tracking-tight text-gray-900 dark:text-white truncate">
+                  {t('budget.settle.title')}
+                </h3>
+              </div>
+              <button
+                onClick={onClose}
+                aria-label={t('budget.addModal.close')}
+                className="w-9 h-9 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer shrink-0"
+              >
+                <X size={18} strokeWidth={2.5} aria-hidden="true" />
+              </button>
+            </div>
+
+            {/* You owe X to Y */}
+            <div className="flex items-center gap-3 mb-5">
+              <UserAvatar user={toAvatarUser(creditor)} size="md" />
+              <p className="text-[15px] text-gray-700 dark:text-gray-200 leading-snug">
+                {t('budget.settle.youOweAmount', { amount: amountLabel, name })}
+              </p>
+            </div>
+
+            {/* Send money to */}
+            {bankAccount ? (
+              <div className="rounded-2xl bg-gray-50 dark:bg-white/[0.04] border border-gray-100 dark:border-white/10 p-4 mb-7">
+                <p className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">{t('budget.settle.sendMoneyTo')}</p>
+                <div className="flex items-center gap-3">
+                  <span className="flex-1 font-mono text-[15px] sm:text-[16px] font-semibold text-gray-900 dark:text-white tracking-tight break-all select-all">
+                    {bankAccount}
+                  </span>
+                  <button
+                    onClick={handleCopy}
+                    aria-label={t('budget.settle.copyAccount')}
+                    className="shrink-0 w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-500 dark:text-white/70 hover:text-gray-900 dark:hover:text-white transition-all cursor-pointer"
+                  >
+                    {copied ? <Check size={15} strokeWidth={2.5} className="text-emerald-500 dark:text-emerald-400" /> : <Copy size={15} strokeWidth={2} />}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200/60 dark:border-amber-500/20 p-4 mb-7">
+                <p className="text-[13px] font-medium text-amber-700 dark:text-amber-400">
+                  {t('budget.settle.noBankAccount', { name })}
+                </p>
+              </div>
+            )}
+
+            <button
+              onClick={handleMarkPaid}
+              disabled={submitting}
+              className="w-full py-3.5 bg-emerald-600 text-white rounded-2xl font-bold hover:bg-emerald-500 transition-colors duration-300 shadow-md shadow-emerald-500/20 active:scale-95 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {submitting ? (
+                t('budget.settle.settling')
+              ) : (
+                <>
+                  <Check size={18} strokeWidth={2.5} /> {t('budget.settle.markAsPaid')}
+                </>
+              )}
+            </button>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>,
+    document.body
+  );
+};
+
+/* ─── Balances Overview ─── */
+const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSharedExpenses, onSettled, t }) => {
+  const [settleTarget, setSettleTarget] = useState(null);
+  const members = balanceData?.members || [];
+  if (members.length <= 1) return null;
+
+  const memberById = (id) => members.find((m) => Number(m.id) === Number(id));
+  const balances = balanceData?.balances || [];
+  const settlements = balanceData?.settlements || [];
+
+  return (
+    <div className="glass-card p-6 sm:p-8">
+      <div className="flex items-center gap-3 mb-1.5">
+        <div className="w-9 h-9 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center shrink-0">
+          <Scale size={16} strokeWidth={2} />
+        </div>
+        <div>
+          <h3 className="font-bold text-gray-900 dark:text-white text-[15px] sm:text-lg leading-tight">{t('budget.balances.title')}</h3>
+          <p className="text-[11px] sm:text-[12px] text-gray-500 dark:text-gray-400 font-medium">{t('budget.balances.subtitle')}</p>
+        </div>
+      </div>
+
+      {!hasSharedExpenses ? (
+        <div className="mt-5 flex flex-col items-center justify-center text-center py-6">
+          <p className="text-[14px] font-semibold text-gray-500 dark:text-gray-400">{t('budget.balances.empty')}</p>
+        </div>
+      ) : (
+        <>
+          {/* Per-member net chips */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-5">
+            {balances.map((b) => {
+              const m = memberById(b.userId);
+              const isMe = Number(b.userId) === Number(currentUserId);
+              const net = b.net;
+              const settled = Math.round(net * 100) === 0;
+              const positive = net > 0;
+              const label = settled
+                ? t('budget.balances.settledUp')
+                : positive
+                  ? (isMe ? t('budget.balances.youGetBack') : t('budget.balances.getsBack'))
+                  : (isMe ? t('budget.balances.youOwe') : t('budget.balances.owes'));
+              const amountClass = settled
+                ? 'text-gray-400 dark:text-gray-500'
+                : positive
+                  ? 'text-emerald-600 dark:text-emerald-400'
+                  : 'text-red-500 dark:text-red-400';
+              return (
+                <div
+                  key={b.userId}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-gray-50/70 dark:bg-white/[0.03] border border-gray-100 dark:border-white/[0.06]"
+                >
+                  <UserAvatar user={toAvatarUser(m)} size="sm" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-bold text-gray-900 dark:text-white truncate leading-tight">
+                      {isMe ? t('budget.balances.you') : getMemberName(m)}
+                    </p>
+                    <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide leading-tight mt-0.5">{label}</p>
+                  </div>
+                  <span className={`font-bold text-[14px] tracking-tight shrink-0 ${amountClass}`}>
+                    {settled ? '—' : formatCurrency(Math.abs(net), currency, locale)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Suggested settlements — or an "all settled" confirmation */}
+          {settlements.length === 0 ? (
+            <div className="mt-5 flex items-center justify-center gap-2.5 py-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/60 dark:border-emerald-500/20">
+              <CheckCircle2 size={18} strokeWidth={2.5} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <span className="text-[14px] font-bold text-emerald-700 dark:text-emerald-300">{t('budget.balances.allSettled')}</span>
+            </div>
+          ) : (
+            <div className="mt-6">
+              <p className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">{t('budget.balances.toSettle')}</p>
+              <div className="space-y-2">
+                {settlements.map((s, i) => {
+                  const from = memberById(s.from);
+                  const to = memberById(s.to);
+                  const fromMe = Number(s.from) === Number(currentUserId);
+                  const toMe = Number(s.to) === Number(currentUserId);
+                  return (
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-white/60 dark:bg-white/[0.04] border border-gray-100 dark:border-white/[0.06]"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <UserAvatar user={toAvatarUser(from)} size="sm" />
+                        <span className={`text-[13px] font-semibold truncate ${fromMe ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'}`}>
+                          {fromMe ? t('budget.balances.you') : getMemberName(from)}
+                        </span>
+                      </div>
+                      <ArrowRight size={15} strokeWidth={2.5} className="text-gray-300 dark:text-gray-600 shrink-0" />
+                      <div className="flex items-center gap-2 min-w-0">
+                        <UserAvatar user={toAvatarUser(to)} size="sm" />
+                        <span className={`text-[13px] font-semibold truncate ${toMe ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'}`}>
+                          {toMe ? t('budget.balances.you') : getMemberName(to)}
+                        </span>
+                      </div>
+                      <div className="ml-auto flex items-center gap-2 shrink-0">
+                        <span className="font-bold text-[14px] tracking-tight text-gray-900 dark:text-white">
+                          {formatCurrency(s.amount, currency, locale)}
+                        </span>
+                        {fromMe && (
+                          <button
+                            type="button"
+                            onClick={() => setSettleTarget({ creditor: to, amount: s.amount })}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[12px] font-bold hover:bg-emerald-500 transition-colors active:scale-95 cursor-pointer shadow-sm shadow-emerald-500/20"
+                          >
+                            <HandCoins size={13} strokeWidth={2.5} />
+                            <span className="hidden sm:inline">{t('budget.settle.settleUp')}</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      <SettleUpModal
+        isOpen={!!settleTarget}
+        onClose={() => setSettleTarget(null)}
+        creditor={settleTarget?.creditor}
+        amount={settleTarget?.amount || 0}
+        currency={currency}
+        locale={locale}
+        tripId={tripId}
+        onSettled={onSettled}
+        t={t}
+      />
+    </div>
+  );
+};
 
 /* ─── Expense Row ─── */
 const ExpenseRow = ({ expense, compact = false, currency, locale, isViewer, shouldReduceMotion, t, dateLocale, onEdit, onDelete }) => {
@@ -189,35 +502,75 @@ const CategoryBar = ({ expenses, currency, locale, onCategoryClick, activeCatego
 };
 
 /* ─── Add / Edit Expense Modal ─── */
-const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialExpense = null }) => {
+const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialExpense = null, members = [], currentUserId = null }) => {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
   const modalRef = useRef(null);
   const isEditing = !!initialExpense;
+  const canSplit = members.length > 1;
 
   const [form, setForm] = useState({
     description: '',
     amount: '',
     category: 'transport',
     date: new Date().toISOString().split('T')[0],
+    paidBy: currentUserId,
+    isPersonal: false,
+    splitMode: 'equal',
+    participants: {},
+    customAmounts: {},
   });
   const [showCalendar, setShowCalendar] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
     setShowCalendar(false);
+
+    const allParticipants = {};
+    members.forEach((m) => { allParticipants[m.id] = true; });
+
     if (initialExpense) {
+      const hasSplit = initialExpense.paidBy != null && (initialExpense.splits?.length > 0);
+      const participants = {};
+      const customAmounts = {};
+      members.forEach((m) => { participants[m.id] = false; customAmounts[m.id] = ''; });
+      (initialExpense.splits || []).forEach((s) => {
+        participants[s.userId] = true;
+        customAmounts[s.userId] = String(s.amount);
+      });
+      // Detect whether the saved split was an even share or custom amounts.
+      const partIds = (initialExpense.splits || []).map((s) => s.userId);
+      const even = computeEqualSplits(partIds, parseFloat(initialExpense.amount));
+      const isEqual = partIds.length > 0 && even.every((e) => {
+        const match = (initialExpense.splits || []).find((s) => Number(s.userId) === Number(e.userId));
+        return match && Math.abs(match.amount - e.amount) < 0.01;
+      });
       setForm({
         description: initialExpense.description,
         amount: String(initialExpense.amount),
         category: initialExpense.category,
         date: initialExpense.date,
+        paidBy: initialExpense.paidBy ?? currentUserId,
+        isPersonal: !hasSplit,
+        splitMode: isEqual ? 'equal' : 'custom',
+        participants: hasSplit ? participants : allParticipants,
+        customAmounts,
       });
     } else {
-      setForm({ description: '', amount: '', category: 'transport', date: new Date().toISOString().split('T')[0] });
+      setForm({
+        description: '',
+        amount: '',
+        category: 'transport',
+        date: new Date().toISOString().split('T')[0],
+        paidBy: currentUserId,
+        isPersonal: false,
+        splitMode: 'equal',
+        participants: allParticipants,
+        customAmounts: {},
+      });
     }
-  }, [isOpen, initialExpense]);
+  }, [isOpen, initialExpense, members, currentUserId]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -254,13 +607,55 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
     trip: (date) => tripStart && tripEnd && date >= tripStart && date <= tripEnd,
   };
 
+  // Live preview of equal shares for the currently selected participants.
+  const selectedIds = members.filter((m) => form.participants[m.id]).map((m) => m.id);
+  const amountNum = parseFloat(form.amount) || 0;
+  const equalSplits = computeEqualSplits(selectedIds, amountNum);
+  const equalShareFor = (id) => equalSplits.find((s) => Number(s.userId) === Number(id))?.amount ?? 0;
+  const customSum = selectedIds.reduce((sum, id) => sum + (parseFloat(form.customAmounts[id]) || 0), 0);
+
+  const toggleParticipant = (id) =>
+    setForm((f) => ({ ...f, participants: { ...f.participants, [id]: !f.participants[id] } }));
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.description || !form.amount || parseFloat(form.amount) <= 0) {
       toast.error(t('budget.addModal.error'));
       return;
     }
-    onAdd({ ...form, amount: parseFloat(form.amount), id: initialExpense?.id || Date.now().toString() });
+
+    const amount = parseFloat(form.amount);
+    let paidBy = null;
+    let splits = [];
+
+    if (canSplit && !form.isPersonal) {
+      const participantIds = members.filter((m) => form.participants[m.id]).map((m) => m.id);
+      if (participantIds.length === 0) {
+        toast.error(t('budget.addModal.splitError'));
+        return;
+      }
+      if (form.splitMode === 'equal') {
+        splits = computeEqualSplits(participantIds, amount);
+      } else {
+        splits = participantIds.map((id) => ({ userId: id, amount: parseFloat(form.customAmounts[id]) || 0 }));
+        const sum = splits.reduce((s, x) => s + x.amount, 0);
+        if (Math.abs(sum - amount) > 0.01) {
+          toast.error(t('budget.addModal.splitSumError', { amount: formatCurrency(amount, currency, i18n.language) }));
+          return;
+        }
+      }
+      paidBy = form.paidBy != null ? parseInt(form.paidBy) : currentUserId;
+    }
+
+    onAdd({
+      id: initialExpense?.id || Date.now().toString(),
+      description: form.description,
+      amount,
+      category: form.category,
+      date: form.date,
+      paidBy,
+      splits,
+    });
     onClose();
     toast.success(isEditing ? t('budget.addModal.editSuccess') : t('budget.addModal.success'));
   };
@@ -286,9 +681,9 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
             animate={{ opacity: 1, y: 0 }}
             exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: '100%' }}
             transition={shouldReduceMotion ? { duration: 0.2 } : { ease: [0.22, 1, 0.36, 1], duration: 0.35 }}
-            className="relative w-full max-w-lg bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-t-[2rem] sm:rounded-[2rem] p-6 sm:p-10 shadow-2xl overflow-visible z-10"
+            className="relative w-full max-w-lg bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-t-[2rem] sm:rounded-[2rem] p-6 sm:p-8 shadow-2xl overflow-visible z-10"
           >
-            <div className="flex justify-between items-center mb-6 sm:mb-8 pb-4 sm:pb-6 border-b border-gray-200 dark:border-white/10">
+            <div className="flex justify-between items-center mb-5 sm:mb-6 pb-4 sm:pb-5 border-b border-gray-200 dark:border-white/10">
               <h3 id="add-expense-title" className="font-bold text-2xl sm:text-3xl tracking-tight text-gray-900 dark:text-white">
                 {isEditing ? t('budget.addModal.editTitle') : t('budget.addModal.title')}
               </h3>
@@ -301,8 +696,8 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-4">
                 <div>
                   <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-2 block">{t('budget.addModal.descriptionLabel')}</label>
                   <input
@@ -380,6 +775,140 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
                   )}
                 </div>
               </div>
+
+              {/* ── Splitting section (shared trips only) ── */}
+              {canSplit && (
+                <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-white/10">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg flex items-center justify-center shrink-0">
+                        <Split size={14} strokeWidth={2} />
+                      </div>
+                      <span className="text-[14px] font-bold text-gray-900 dark:text-white">{t('budget.addModal.splitLabel')}</span>
+                    </div>
+                    {/* Toggle: ON = split among members · OFF = personal expense */}
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={!form.isPersonal}
+                      aria-label={t('budget.addModal.splitLabel')}
+                      onClick={() => setForm((f) => ({ ...f, isPersonal: !f.isPersonal }))}
+                      className="shrink-0 cursor-pointer"
+                    >
+                      <span className={`relative block w-11 h-6 rounded-full transition-colors ${form.isPersonal ? 'bg-gray-300 dark:bg-white/15' : 'bg-blue-600'}`}>
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${form.isPersonal ? '' : 'translate-x-5'}`} />
+                      </span>
+                    </button>
+                  </div>
+
+                  {form.isPersonal ? (
+                    <p className="text-[12px] text-gray-400 dark:text-gray-500 font-medium pl-[2.375rem]">
+                      {t('budget.addModal.personalExpense')}
+                    </p>
+                  ) : (
+                    <>
+                      {/* Who paid — inline label + select */}
+                      <div className="flex items-center gap-3">
+                        <label className="text-[12px] font-medium text-gray-500 dark:text-gray-400 shrink-0">{t('budget.addModal.paidByLabel')}</label>
+                        <div className="relative flex-1 min-w-0">
+                          <select
+                            value={form.paidBy ?? ''}
+                            onChange={(e) => setForm({ ...form, paidBy: parseInt(e.target.value) })}
+                            className="w-full appearance-none cursor-pointer pl-3 pr-9 py-2.5 bg-gray-100/60 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-[13px] font-semibold text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:bg-[#1C1C1E]"
+                          >
+                            {members.map((m) => (
+                              <option key={m.id} value={m.id} className="text-gray-900 dark:bg-[#1C1C1E] dark:text-white">
+                                {memberLabel(m, currentUserId, t)}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronRight size={15} strokeWidth={2.5} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-gray-400 pointer-events-none" />
+                        </div>
+                      </div>
+
+                      {/* Split mode segmented control (thin) */}
+                      <div className="flex p-0.5 bg-gray-100 dark:bg-white/5 rounded-lg">
+                        {[
+                          { id: 'equal', label: t('budget.addModal.splitEqually') },
+                          { id: 'custom', label: t('budget.addModal.splitCustom') },
+                        ].map((opt) => (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => setForm({ ...form, splitMode: opt.id })}
+                            className={`flex-1 py-1.5 rounded-md text-[12px] font-bold transition-all cursor-pointer ${
+                              form.splitMode === opt.id
+                                ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm'
+                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Participants — compact rows */}
+                      <div className="space-y-0.5">
+                        {members.map((m) => {
+                          const checked = !!form.participants[m.id];
+                          return (
+                            <div
+                              key={m.id}
+                              className={`flex items-center gap-2.5 py-1.5 px-1.5 rounded-lg transition-colors ${
+                                checked ? '' : 'opacity-45'
+                              }`}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => toggleParticipant(m.id)}
+                                aria-pressed={checked}
+                                aria-label={getMemberName(m)}
+                                className={`w-[18px] h-[18px] rounded-md flex items-center justify-center shrink-0 transition-colors cursor-pointer ${
+                                  checked ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-white/10'
+                                }`}
+                              >
+                                {checked && <Check size={12} strokeWidth={3} />}
+                              </button>
+                              <UserAvatar user={toAvatarUser(m)} size="sm" />
+                              <span className="text-[13px] font-semibold text-gray-900 dark:text-white truncate flex-1 min-w-0">
+                                {memberLabel(m, currentUserId, t)}
+                              </span>
+                              {checked && (
+                                form.splitMode === 'equal' ? (
+                                  <span className="text-[13px] font-bold text-gray-500 dark:text-gray-400 tabular-nums shrink-0">
+                                    {formatCurrency(equalShareFor(m.id), currency, i18n.language)}
+                                  </span>
+                                ) : (
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                    value={form.customAmounts[m.id] ?? ''}
+                                    onChange={(e) => setForm((f) => ({ ...f, customAmounts: { ...f.customAmounts, [m.id]: e.target.value } }))}
+                                    className="w-24 px-3 py-1.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-[13px] font-semibold text-right text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 tabular-nums shrink-0"
+                                  />
+                                )
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Custom-mode running total vs target */}
+                      {form.splitMode === 'custom' && amountNum > 0 && (
+                        <div className={`flex items-center justify-between text-[12px] font-semibold px-1 ${
+                          Math.abs(customSum - amountNum) > 0.01 ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'
+                        }`}>
+                          <span>{formatCurrency(customSum, currency, i18n.language)} / {formatCurrency(amountNum, currency, i18n.language)}</span>
+                          {Math.abs(customSum - amountNum) <= 0.01 && <Check size={14} strokeWidth={2.5} />}
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+
               <button
                 type="submit"
                 className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors duration-300 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer"
@@ -416,6 +945,33 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false }) => {
   const isViewer = trip?.role === 'viewer';
   const { confirmDialog, ModalPortal } = useDialog();
   const { currency } = useCurrency();
+  const { user } = useAuth();
+  const currentUserId = user?.id ?? null;
+
+  // Trip members + simplified balances come from the backend balances endpoint.
+  // Re-fetched whenever the selected trip or its expenses/splits change.
+  const [balanceData, setBalanceData] = useState(null);
+  // Bumped after a settlement to force a balances re-fetch (settling doesn't
+  // change expenses, so the expenses signature alone wouldn't trigger it).
+  const [settleVersion, setSettleVersion] = useState(0);
+  const expensesSignature = JSON.stringify(
+    expenses.map((e) => ({ a: e.amount, p: e.paidBy, s: e.splits }))
+  );
+
+  useEffect(() => {
+    if (!selectedTripId) { setBalanceData(null); return; }
+    let cancelled = false;
+    api.trips.getBalances(selectedTripId)
+      .then((data) => { if (!cancelled) setBalanceData(data); })
+      .catch(() => { /* keep previous data on transient errors */ });
+    return () => { cancelled = true; };
+  }, [selectedTripId, expensesSignature, settleVersion]);
+
+  const refreshBalances = () => setSettleVersion((v) => v + 1);
+  const members = balanceData?.members || [];
+  // True once any expense is actually split among members — used to tell a
+  // freshly settled trip ("all settled 🎉") apart from one with no shared spend.
+  const hasSharedExpenses = expenses.some((e) => e.paidBy != null && (e.splits?.length > 0));
 
   const budgetTarget = trip?.budgetTarget || null;
   const remaining = budgetTarget !== null ? budgetTarget - total : null;
@@ -540,6 +1096,8 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false }) => {
         currency={currency}
         tripRange={{ start: trip?.startDate, end: trip?.endDate }}
         initialExpense={editingExpense}
+        members={members}
+        currentUserId={currentUserId}
       />
 
       {/* Standalone page header */}
@@ -743,6 +1301,18 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false }) => {
               </div>
             </div>
           </div>
+
+          {/* ── Balances (shared expense splitting) ── */}
+          <Balances
+            balanceData={balanceData}
+            currency={currency}
+            locale={i18n.language}
+            currentUserId={currentUserId}
+            tripId={selectedTripId}
+            hasSharedExpenses={hasSharedExpenses}
+            onSettled={refreshBalances}
+            t={t}
+          />
 
           {/* ── Category Breakdown ── */}
           {expenses.length > 0 && (
