@@ -55,7 +55,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   const changePassword = async (oldPassword, newPassword) => {
-    return await api.auth.changePassword(oldPassword, newPassword);
+    const data = await api.auth.changePassword(oldPassword, newPassword);
+    // Změna hesla zneplatní všechny starší tokeny (odhlásí ostatní zařízení);
+    // server vrací čerstvý token, kterým udržíme aktuální session přihlášenou.
+    if (data.token) {
+      localStorage.setItem('journeo_token', data.token);
+    }
+    return data;
   };
 
   const loginWithGoogle = async (accessToken) => {

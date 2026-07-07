@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import 'dotenv/config';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -31,6 +32,20 @@ const PORT = process.env.PORT || 3001;
 // Za reverzní proxy (Vercel / lokální dev proxy) je potřeba věřit
 // prvnímu hopu, jinak rate-limiter vidí všechny klienty pod jednou IP.
 app.set('trust proxy', 1);
+
+// Security headers. Tohle je čistě JSON API (frontend se servíruje staticky
+// přes Vercel — jeho hlavičky řeší vercel.json), takže CSP může být maximálně
+// přísná: nic se odsud nesmí spouštět ani embedovat.
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'none'"],
+      frameAncestors: ["'none'"],
+    },
+  },
+  crossOriginResourcePolicy: { policy: 'same-site' },
+  frameguard: { action: 'deny' },
+}));
 
 // Explicit origin allowlist. Never fall back to '*' — a wildcard combined with
 // `credentials: true` is invalid and unsafe. Unknown origins are rejected.

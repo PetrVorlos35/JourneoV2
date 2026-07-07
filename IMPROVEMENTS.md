@@ -5,6 +5,22 @@ work still outstanding, so future sessions have context. Last updated: **2026-07
 
 ---
 
+## ⚠️ Deploy note — migration 003 must run BEFORE deploying (2026-07-07)
+
+The security fixes below require `server/migrations/003_security.sql` (adds
+`users.token_version` + `rate_limits` table). **The new code breaks login with
+"Unknown column 'token_version'" until the migration runs.** Apply with:
+
+```sh
+mysql -h db.dejny.eu -u vorel -p voreldb < server/migrations/003_security.sql
+```
+
+Idempotent — safe to run repeatedly. (Automated run was blocked by permissions;
+must be run manually.) Existing JWTs keep working (missing `tv` claim counts as
+version 0); they die on the user's next password change/reset.
+
+---
+
 ## ✅ Deploy note (resolved 2026-07-07)
 
 The Google login fix **fails closed**: it rejects Google sign-in unless the server can see
@@ -39,22 +55,24 @@ the Vercel environment for the target deployment. Email/password login is unaffe
 
 ---
 
-## 🔴 Remaining — Security
+## ✅ Security — fixed 2026-07-07 (requires migration 003, see deploy note)
 
-- **Add security headers / CSP.** No `helmet`, no Content-Security-Policy, no `X-Frame-Options`
-  (clickjackable, no XSS defense-in-depth). Add `helmet` to the Express app in `server/index.js`
-  and a CSP. Requires `npm i helmet` in `server/`.
-- **JWT lifecycle.** Tokens are 30-day, non-revocable, stored in `localStorage`. Changing a
-  password does not invalidate existing tokens. Add a `token_version` column on `users`
-  (bump on password change / logout-all) and include it in the JWT, or move to short-lived
-  access + refresh tokens.
-- **Unify password policy.** Registration requires only 6 chars (`auth.js` register), while
-  reset/change require 8 + uppercase + digit. A weak password set at registration can't be
-  reset to itself. Apply the stronger rule everywhere.
-- **Rate limiting is per-instance.** `express-rate-limit` uses in-memory counters; on Vercel
-  each warm lambda has its own, so limits are effectively multiplied by instance count. Move
-  to a shared store (Redis / Upstash) for real enforcement. (OTP cooldown is already DB-backed
-  and fine.)
+1. **Security headers / CSP.** `helmet` added to the Express API (`server/index.js`) with a
+   strict API CSP (`default-src 'none'`, `frame-ancestors 'none'`, XFO deny). The static
+   frontend gets its headers from `vercel.json` → CSP allowing only self + Google
+   fonts/OAuth + Nominatim (+ any https for avatar images), `frame-ancestors 'none'`,
+   HSTS, nosniff, Referrer-Policy, Permissions-Policy.
+2. **JWT revocation via `token_version`.** JWTs now carry a `tv` claim checked against
+   `users.token_version` in `middleware/auth.js` / `adminAuth.js` (one PK lookup per
+   request). Password change/reset bumps the version → all older tokens die.
+   Change-password returns a fresh token so the current session stays logged in
+   (`AuthContext.jsx` stores it). Pre-existing tokens (no `tv`) count as version 0.
+3. **Password policy unified.** Registration now enforces the same 8 + uppercase + digit
+   rule as reset/change (frontend already did).
+4. **Auth rate limiting is now cross-instance.** `authLimiter` uses a MariaDB-backed store
+   (`server/lib/dbRateStore.js`, `rate_limits` table) so login/register limits hold across
+   warm lambdas; fails open on DB errors. The global 300/min limiter stays in-memory by
+   design (coarse flood guard, not worth a DB query per request).
 
 ## 🟠 Remaining — Design / Correctness
 

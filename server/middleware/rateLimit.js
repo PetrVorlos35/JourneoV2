@@ -1,14 +1,17 @@
 import rateLimit from 'express-rate-limit';
+import DbRateStore from '../lib/dbRateStore.js';
 
 // ============================================================
 // Rate limiting
 //
-// Pozn.: Na Vercel serverless běží každá instance (warm lambda)
-// s vlastní pamětí, takže in-memory počítadla nejsou sdílená
-// napříč instancemi. Pro běžnou ochranu proti hrubému bušení
-// requesty to ale plně stačí. Kritické omezení (cooldown na
-// odesílání ověřovacích kódů) je řešené přes databázi v
-// `lib/otpThrottle.js`, takže funguje spolehlivě i serverless.
+// Globální limiter běží in-memory: na Vercel serverless má každá
+// warm lambda vlastní počítadlo, ale jako hrubá ochrana proti
+// zaplavení to stačí a nestojí to DB query na každý request.
+//
+// Auth limiter (hádání hesel, enumerace e-mailů) je naopak
+// bezpečnostní kontrola — ten počítá přes DB (`lib/dbRateStore.js`),
+// takže limit platí globálně napříč instancemi, stejně jako
+// DB cooldown na OTP kódy v `lib/otpThrottle.js`.
 // ============================================================
 
 const isProd = process.env.NODE_ENV === 'production';
@@ -38,6 +41,7 @@ export const authLimiter = rateLimit({
   ...common,
   windowMs: 15 * 60 * 1000, // 15 minut
   max: 40, // max 40 pokusů / 15 min / IP
+  store: new DbRateStore('auth'),
   message: { error: 'Příliš mnoho pokusů o přihlášení. Zkuste to prosím později.' },
   // Úspěšné GETy (např. /auth/me) nezapočítáváme, ať legitimní
   // používání nenarazí na strop.

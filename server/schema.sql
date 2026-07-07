@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
     invite_token VARCHAR(64) UNIQUE NULL DEFAULT NULL,
     role ENUM('user', 'admin') DEFAULT 'user',
     is_verified TINYINT(1) DEFAULT 0,
+    token_version INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Bump zneplatní všechny dříve vydané JWT',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
@@ -225,4 +226,16 @@ CREATE TABLE IF NOT EXISTS verification_tokens (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     INDEX idx_tokens_email (email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- ── Sdílené počítadlo rate limitů ────────────────────────────
+-- In-memory počítadla express-rate-limit nejsou na serverless sdílená
+-- mezi instancemi; tahle tabulka ano (viz lib/dbRateStore.js).
+CREATE TABLE IF NOT EXISTS rate_limits (
+    rl_key VARCHAR(191) PRIMARY KEY,
+    hits INT UNSIGNED NOT NULL DEFAULT 1,
+    reset_at DATETIME NOT NULL,
+
+    INDEX idx_rate_limits_reset (reset_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

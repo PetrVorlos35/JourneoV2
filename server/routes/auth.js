@@ -18,8 +18,10 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'E-mail a heslo jsou povinné.' });
     }
 
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Heslo musí mít alespoň 6 znaků.' });
+    // Stejná pravidla jako reset-password / change-password, aby slabé heslo
+    // z registrace nemohlo obejít přísnější politiku jinde.
+    if (password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+      return res.status(400).json({ error: 'Heslo musí mít alespoň 8 znaků, velké písmeno a číslici.' });
     }
 
     // Check if user already exists
@@ -178,7 +180,7 @@ router.post('/login', async (req, res) => {
 
     // Find user
     const [users] = await pool.query(
-      'SELECT id, email, password_hash, first_name, last_name, avatar_url, bio, bank_account, role, is_verified FROM users WHERE email = ?',
+      'SELECT id, email, password_hash, first_name, last_name, avatar_url, bio, bank_account, role, is_verified, token_version FROM users WHERE email = ?',
       [email]
     );
     if (users.length === 0) {
@@ -197,8 +199,8 @@ router.post('/login', async (req, res) => {
       return res.status(403).json({ error: 'E-mail ještě nebyl ověřen.', needsVerification: true });
     }
 
-    // Generate JWT
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    // Generate JWT. `tv` (token version) umožňuje revokaci — viz middleware/auth.js.
+    const token = jwt.sign({ userId: user.id, tv: user.token_version }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
     res.json({
       token,
@@ -275,10 +277,11 @@ router.post('/google', async (req, res) => {
 
     let userId;
     let finalUser;
+    let tokenVersion = 0;
 
     // Check if user already exists
     const [users] = await pool.query(
-      'SELECT id, email, first_name, last_name, avatar_url, bio, role FROM users WHERE email = ?', 
+      'SELECT id, email, first_name, last_name, avatar_url, bio, role, token_version FROM users WHERE email = ?',
       [email]
     );
 
@@ -286,6 +289,8 @@ router.post('/google', async (req, res) => {
       // User exists, log them in
       const user = users[0];
       userId = user.id;
+      tokenVersion = user.token_version;
+      delete user.token_version;
       finalUser = user;
       
       // Optionally update their avatar if they didn't have one
@@ -323,8 +328,8 @@ router.post('/google', async (req, res) => {
       };
     }
 
-    // Generate JWT
-    const token = jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    // Generate JWT. `tv` (token version) umožňuje revokaci — viz middleware/auth.js.
+    const token = jwt.sign({ userId, tv: tokenVersion }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
     res.json({
       token,
@@ -457,7 +462,11 @@ router.post('/reset-password', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(new_password, salt);
 
-    await pool.query('UPDATE users SET password_hash = ? WHERE email = ?', [passwordHash, email]);
+    // Bump token_version → všechny dosud vydané JWT tohoto uživatele přestanou platit.
+    await pool.query(
+      'UPDATE users SET password_hash = ?, token_version = token_version + 1 WHERE email = ?',
+      [passwordHash, email]
+    );
     await pool.query('DELETE FROM verification_tokens WHERE id = ?', [tokenRecord.id]);
 
     res.json({ message: 'Vaše heslo bylo úspěšně změněno. Můžete se přihlásit.' });
@@ -493,9 +502,21 @@ router.post('/change-password', auth, async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(new_password, salt);
 
-    await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [passwordHash, req.userId]);
+    // Bump token_version → všechny dosud vydané JWT přestanou platit (odhlásí
+    // ostatní zařízení). Aktuální session dostane čerstvý token s novou verzí.
+    await pool.query(
+      'UPDATE users SET password_hash = ?, token_version = token_version + 1 WHERE id = ?',
+      [passwordHash, req.userId]
+    );
 
-    res.json({ message: 'Heslo bylo úspěšně změněno.' });
+    const [updated] = await pool.query('SELECT token_version FROM users WHERE id = ?', [req.userId]);
+    const token = jwt.sign(
+      { userId: req.userId, tv: updated[0].token_version },
+      process.env.JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+
+    res.json({ message: 'Heslo bylo úspěšně změněno.', token });
   } catch (err) {
     console.error('Change password error:', err);
     res.status(500).json({ error: 'Chyba serveru při změně hesla.' });
