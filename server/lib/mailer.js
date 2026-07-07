@@ -3,6 +3,18 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Escape user-controlled strings before interpolating them into email HTML.
+// Names, trip titles, etc. are attacker-controllable and would otherwise be
+// rendered as markup in the recipient's mail client.
+function escapeHtml(str = '') {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 const transporter = nodemailer.createTransport({
   host: 'smtp.seznam.cz',
   port: 465,
@@ -233,7 +245,7 @@ export const sendFriendRequestEmail = async (email, requesterName) => {
         </div>
         <div class="content">
           <h2>Nová žádost o přátelství</h2>
-          <p><strong>${requesterName}</strong> vám poslal/a žádost o přátelství na Journeo.</p>
+          <p><strong>${escapeHtml(requesterName)}</strong> vám poslal/a žádost o přátelství na Journeo.</p>
           <a href="${friendsUrl}" class="button" style="display:inline-block;background-color:#09090b;color:#ffffff !important;text-decoration:none;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;">
             <span style="color:#ffffff;">Zobrazit žádost</span>
           </a>
@@ -281,9 +293,11 @@ export const sendSettlementEmail = async (email, { payerName, amountLabel, tripN
 
   const subject = isCs ? 'Dluh byl vyrovnán – Journeo' : 'Debt settled – Journeo';
   const heading = isCs ? 'Dluh byl vyrovnán' : 'Debt settled';
+  const safePayer = escapeHtml(payerName);
+  const safeTrip = escapeHtml(tripName);
   const message = isCs
-    ? `Dobrá zpráva! <strong>${payerName}</strong> vyrovnal/a svůj dluh <strong>${amountLabel}</strong> za výlet <strong>${tripName}</strong>.`
-    : `Good news! <strong>${payerName}</strong> has settled their debt of <strong>${amountLabel}</strong> for the trip <strong>${tripName}</strong>.`;
+    ? `Dobrá zpráva! <strong>${safePayer}</strong> vyrovnal/a svůj dluh <strong>${amountLabel}</strong> za výlet <strong>${safeTrip}</strong>.`
+    : `Good news! <strong>${safePayer}</strong> has settled their debt of <strong>${amountLabel}</strong> for the trip <strong>${safeTrip}</strong>.`;
   const buttonText = isCs ? 'Zobrazit rozpočet' : 'View budget';
 
   const html = `

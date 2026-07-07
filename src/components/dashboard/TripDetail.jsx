@@ -104,29 +104,6 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
     );
   }
 
-  if (trip.isGenerating) {
-    return (
-      <div className="w-full h-full min-h-[60vh] flex flex-col items-center justify-center p-6 animate-in fade-in duration-500">
-        <div className="glass-card p-10 sm:p-14 rounded-[3rem] flex flex-col items-center justify-center max-w-md w-full space-y-8 shadow-2xl relative overflow-hidden border border-white/10 dark:border-white/5">
-          <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/5 via-transparent to-purple-500/5 animate-pulse"></div>
-          <div className="relative">
-            <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
-            <div className="w-24 h-24 border-4 border-gray-100 dark:border-white/5 border-t-blue-600 dark:border-t-blue-500 rounded-full animate-spin relative z-10 shadow-lg"></div>
-            <div className="absolute inset-0 flex items-center justify-center z-20">
-              <MapPin className="text-blue-600 dark:text-blue-400" size={28} strokeWidth={2.5} />
-            </div>
-          </div>
-          <div className="text-center space-y-3 relative z-10">
-            <h3 className="font-bold text-2xl tracking-tight text-gray-900 dark:text-white">{t('tripDetail.generating.title')}</h3>
-            <p className="text-[15px] font-medium text-gray-500 dark:text-gray-400 leading-relaxed">
-              {t('tripDetail.generating.description')}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const isViewer = trip.role === 'viewer';
 
   const handleSave = () => {

@@ -220,12 +220,38 @@ router.post('/login', async (req, res) => {
 });
 
 // ── POST /api/auth/google ───────────────────────────────────
+// The client ID this app's Google tokens must be issued for. Set GOOGLE_CLIENT_ID
+// on the server (falls back to the build-time VITE_GOOGLE_CLIENT_ID for local dev).
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID;
+
 router.post('/google', async (req, res) => {
   try {
     const { access_token } = req.body;
-    
+
     if (!access_token) {
       return res.status(400).json({ error: 'Chybí access_token.' });
+    }
+
+    if (!GOOGLE_CLIENT_ID) {
+      // Fail closed: without the expected client ID we cannot safely verify tokens.
+      console.error('Google auth misconfigured: GOOGLE_CLIENT_ID / VITE_GOOGLE_CLIENT_ID not set.');
+      return res.status(500).json({ error: 'Přihlášení přes Google není správně nakonfigurováno.' });
+    }
+
+    // SECURITY: verify the access token was actually issued for THIS app before
+    // trusting the email behind it. A bare access token is a bearer credential —
+    // Google's userinfo endpoint accepts a token minted for *any* OAuth client, so
+    // without this check an attacker could replay a token obtained from an unrelated
+    // app to sign in as an arbitrary Journeo user (token substitution / confused deputy).
+    const tokenInfoRes = await fetch(
+      `https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(access_token)}`
+    );
+    if (!tokenInfoRes.ok) {
+      return res.status(401).json({ error: 'Neplatný token z Google.' });
+    }
+    const tokenInfo = await tokenInfoRes.json();
+    if (tokenInfo.aud !== GOOGLE_CLIENT_ID && tokenInfo.azp !== GOOGLE_CLIENT_ID) {
+      return res.status(401).json({ error: 'Token nebyl vydán pro tuto aplikaci.' });
     }
 
     // Fetch user info from Google

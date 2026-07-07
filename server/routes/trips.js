@@ -134,45 +134,111 @@ router.get('/', async (req, res) => {
       [userId, userId, userId]
     );
 
-    const fullTrips = await Promise.all(trips.map(async (trip) => {
-      const [activities] = await pool.query(
-        "SELECT id, day_index AS dayIndex, DATE_FORMAT(date, '%Y-%m-%d') AS date, title, plan, location FROM trip_activities WHERE trip_id = ? ORDER BY day_index ASC",
-        [trip.id]
-      );
+    if (trips.length === 0) {
+      return res.json({ trips: [] });
+    }
 
-      const expenses = await fetchExpensesWithSplits(trip.id);
+    const tripIds = trips.map((t) => t.id);
 
-      const [packingItems] = await pool.query(
-        'SELECT id, text, checked FROM trip_packing_items WHERE trip_id = ? ORDER BY created_at ASC',
-        [trip.id]
-      );
+    // Batch-load every trip's sub-resources in one query each. This replaces the
+    // previous per-trip fan-out (~7 queries × N trips), which saturated the small
+    // connection pool as soon as a few users loaded their dashboards at once.
+    const [
+      [activities],
+      [expenses],
+      [splits],
+      [packingItems],
+      [documents],
+      [voteCounts],
+      [userVotes],
+    ] = await Promise.all([
+      pool.query(
+        "SELECT id, trip_id AS tripId, day_index AS dayIndex, DATE_FORMAT(date, '%Y-%m-%d') AS date, title, plan, location FROM trip_activities WHERE trip_id IN (?) ORDER BY day_index ASC",
+        [tripIds]
+      ),
+      pool.query(
+        "SELECT id, trip_id AS tripId, description, amount, category, DATE_FORMAT(date, '%Y-%m-%d') AS date, paid_by AS paidBy FROM trip_expenses WHERE trip_id IN (?) ORDER BY created_at DESC",
+        [tripIds]
+      ),
+      pool.query(
+        `SELECT te.trip_id AS tripId, es.expense_id AS expenseId, es.user_id AS userId, es.amount
+         FROM expense_splits es
+         JOIN trip_expenses te ON te.id = es.expense_id
+         WHERE te.trip_id IN (?)`,
+        [tripIds]
+      ),
+      pool.query(
+        'SELECT id, trip_id AS tripId, text, checked FROM trip_packing_items WHERE trip_id IN (?) ORDER BY created_at ASC',
+        [tripIds]
+      ),
+      pool.query(
+        'SELECT id, trip_id AS tripId, title, content FROM trip_documents WHERE trip_id IN (?) ORDER BY created_at ASC',
+        [tripIds]
+      ),
+      pool.query(
+        'SELECT trip_id AS tripId, COUNT(*) AS likes FROM votes WHERE trip_id IN (?) AND value = 1 GROUP BY trip_id',
+        [tripIds]
+      ),
+      pool.query(
+        'SELECT trip_id AS tripId, value FROM votes WHERE user_id = ? AND trip_id IN (?)',
+        [userId, tripIds]
+      ),
+    ]);
 
-      const [documents] = await pool.query(
-        'SELECT id, title, content FROM trip_documents WHERE trip_id = ? ORDER BY created_at ASC',
-        [trip.id]
-      );
+    const groupBy = (rows) => {
+      const m = new Map();
+      for (const r of rows) {
+        if (!m.has(r.tripId)) m.set(r.tripId, []);
+        m.get(r.tripId).push(r);
+      }
+      return m;
+    };
 
-      const [voteScore] = await pool.query(
-        'SELECT COUNT(*) AS likes FROM votes WHERE trip_id = ? AND value = 1',
-        [trip.id]
-      );
+    const activitiesByTrip = groupBy(activities);
+    const packingByTrip = groupBy(packingItems);
+    const documentsByTrip = groupBy(documents);
 
-      const [userVote] = await pool.query(
-        'SELECT value FROM votes WHERE user_id = ? AND trip_id = ?',
-        [userId, trip.id]
-      );
+    // Splits are grouped by expense, then expenses shaped and grouped by trip —
+    // mirroring the single-trip fetchExpensesWithSplits() output exactly.
+    const splitsByExpense = new Map();
+    for (const s of splits) {
+      if (!splitsByExpense.has(s.expenseId)) splitsByExpense.set(s.expenseId, []);
+      splitsByExpense.get(s.expenseId).push({ userId: s.userId, amount: parseFloat(s.amount) });
+    }
+    const expensesByTrip = new Map();
+    for (const e of expenses) {
+      if (!expensesByTrip.has(e.tripId)) expensesByTrip.set(e.tripId, []);
+      expensesByTrip.get(e.tripId).push({
+        id: e.id.toString(),
+        description: e.description,
+        amount: parseFloat(e.amount),
+        category: e.category,
+        date: e.date,
+        paidBy: e.paidBy != null ? e.paidBy : null,
+        splits: splitsByExpense.get(e.id) || [],
+      });
+    }
 
-      return {
-        ...trip,
-        id: trip.id.toString(),
-        budgetTarget: trip.budgetTarget != null ? parseFloat(trip.budgetTarget) : null,
-        activities: activities.map(a => ({ ...a, id: a.id.toString() })),
-        expenses,
-        packingList: packingItems.map(p => ({ id: p.id.toString(), text: p.text, checked: !!p.checked })),
-        documents: documents.map(d => ({ id: d.id.toString(), title: d.title, content: d.content })),
-        likes: parseInt(voteScore[0].likes),
-        isLiked: userVote.length > 0 && userVote[0].value === 1,
-      };
+    const likesByTrip = new Map(voteCounts.map((v) => [v.tripId, parseInt(v.likes)]));
+    const likedTrips = new Set(userVotes.filter((v) => v.value === 1).map((v) => v.tripId));
+
+    const fullTrips = trips.map((trip) => ({
+      ...trip,
+      id: trip.id.toString(),
+      budgetTarget: trip.budgetTarget != null ? parseFloat(trip.budgetTarget) : null,
+      activities: (activitiesByTrip.get(trip.id) || []).map((a) => ({
+        id: a.id.toString(),
+        dayIndex: a.dayIndex,
+        date: a.date,
+        title: a.title,
+        plan: a.plan,
+        location: a.location,
+      })),
+      expenses: expensesByTrip.get(trip.id) || [],
+      packingList: (packingByTrip.get(trip.id) || []).map((p) => ({ id: p.id.toString(), text: p.text, checked: !!p.checked })),
+      documents: (documentsByTrip.get(trip.id) || []).map((d) => ({ id: d.id.toString(), title: d.title, content: d.content })),
+      likes: likesByTrip.get(trip.id) || 0,
+      isLiked: likedTrips.has(trip.id),
     }));
 
     res.json({ trips: fullTrips });

@@ -78,14 +78,9 @@ const DashboardHome = () => {
         endDate: newTrip.endDate,
       });
       
-      const createdTrip = { ...data.trip, isGenerating: true };
+      const createdTrip = data.trip;
       setTrips(prev => [...prev, createdTrip]);
-      
-      // Simulate heavy processing (AI generation, database inserts) in the background
-      setTimeout(() => {
-        setTrips(prev => prev.map(trip => trip.id === createdTrip.id ? { ...trip, isGenerating: false } : trip));
-        toast.success(t('dashboardHome.tripReady'));
-      }, 4000);
+      toast.success(t('dashboardHome.tripReady'));
 
       return createdTrip;
     } catch (err) {

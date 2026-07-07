@@ -32,8 +32,21 @@ const PORT = process.env.PORT || 3001;
 // prvnímu hopu, jinak rate-limiter vidí všechny klienty pod jednou IP.
 app.set('trust proxy', 1);
 
+// Explicit origin allowlist. Never fall back to '*' — a wildcard combined with
+// `credentials: true` is invalid and unsafe. Unknown origins are rejected.
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'https://journeo.vorlos.eu',
+  'http://localhost:5173',
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL ? [process.env.FRONTEND_URL, 'http://localhost:5173'] : '*',
+  origin(origin, cb) {
+    // Allow same-origin / server-to-server requests (no Origin header) and any
+    // allowlisted browser origin.
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    return cb(new Error('Not allowed by CORS'));
+  },
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
