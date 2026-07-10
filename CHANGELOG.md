@@ -3,6 +3,41 @@
 All notable changes to Journeo are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [1.2.0] – 2026-07-10
+
+### Added — PDF Trip Export
+
+Every trip can now be exported as a polished, print-ready PDF document that
+mirrors everything the user sees on the trip screen — designed to feel
+unmistakably like Journeo (Inter typography, the signature blue accent,
+soft rounded cards, and a handwritten "Bon voyage!" sign-off).
+
+- **Export PDF button** — in the trip header on both desktop and mobile,
+  available to owners, editors, and viewers alike.
+- **Section picker** — clicking Export PDF opens a selection sheet so the user
+  can choose exactly which sections (itinerary, packing list, links & notes,
+  budget) go into the document, instead of always getting everything.
+- **Complete trip snapshot** — the document includes the trip title and dates,
+  quick-stat chips (days, stops, budget), the full day-by-day itinerary with
+  locations and plans, the packing list with its checked-off state, and all
+  saved links & notes.
+- **Budget section** — total spent vs. planned target with a progress bar,
+  a per-category breakdown, and a full expense table including the date,
+  category, and who paid for each expense.
+- **Balances for shared trips** — each member's net balance and the suggested
+  settlements are folded into the budget section when the trip has shared
+  expenses (fetched from `GET /api/trips/:id/balances`).
+- **Fully localized** — the PDF renders in the user's language (cs / en),
+  including dates and number formatting.
+- **Zero new dependencies** — implemented as a print-optimized stylesheet
+  (`TripPdfExport.jsx` plus a dedicated `@media print` layer) rendered through
+  the browser's native PDF engine, so the output is crisp vector text, not a
+  screenshot.
+
+### Changed
+
+- The trip detail header gained a dedicated export action next to Share.
+
 ## [1.1.0] – 2026-06-29
 
 ### Added — Advanced Expense Splitting / Shared Budgets
@@ -74,5 +109,6 @@ notification to close the loop.
 - Travel statistics gathered in one place.
 - Light and dark mode, available in English and Czech.
 
+[1.2.0]: https://github.com/
 [1.1.0]: https://github.com/
 [1.0.0]: https://github.com/

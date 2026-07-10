@@ -9,6 +9,20 @@
     "current": "Aktuální verze",
     "empty": "Zatím tu nejsou žádné novinky.",
     "releases": {
+      "v1_2": {
+        "title": "Export výletu do PDF",
+        "summary": "Vezměte si své plány s sebou i offline. Každý výlet teď můžete exportovat do elegantního PDF dokumentu v nezaměnitelném stylu Journeo — ideální k vytištění, sdílení se spolucestovateli nebo do kapsy na cesty.",
+        "highlights": [
+          "Tlačítko Exportovat PDF přímo v hlavičce výletu",
+          "Vyberte přesně, které části (itinerář, balení, odkazy, rozpočet) chcete zahrnout",
+          "PDF zachytí vše, co vidíte na obrazovce výletu: itinerář, balící seznam, odkazy a poznámky i rozpočet",
+          "Itinerář den po dni včetně lokací a vašich plánů",
+          "Balící seznam se zachovaným stavem odškrtnutí",
+          "Kompletní přehled rozpočtu — součty, kategorie, tabulka výdajů a kdo co platil",
+          "U sdílených výletů také vyrovnání a navrhované platby",
+          "Ostrý vektorový výstup ve vašem jazyce (čeština i angličtina)"
+        ]
+      },
       "v1_1": {
         "title": "Sdílené rozpočty, dělení a vyrovnání dluhů",
         "summary": "Cestování ve skupině je teď jednodušší. Rozdělte výdaje mezi lidi, se kterými výlet sdílíte, na první pohled vidíte, kdo komu dluží, a dluhy snadno vyrovnáte — žádné tabulky ani složité počítání.",
@@ -564,7 +578,35 @@
     "roles": {
       "viewer": "Prohlížeč",
       "editor": "Editor"
-    }
+    },
+    "exportPdf": "Exportovat PDF"
+  },
+  "pdf": {
+    "travelPlan": "Cestovní plán",
+    "selectTitle": "Vyberte, co exportovat",
+    "selectSubtitle": "Vyberte části, které chcete mít ve svém PDF.",
+    "generate": "Vygenerovat PDF",
+    "days": "dní",
+    "stops": "zastávek",
+    "itinerary": "Itinerář",
+    "emptyDay": "Zatím nic v plánu — užijte si volno.",
+    "packing": "Balící seznam",
+    "packed": "Sbaleno {{done}} z {{total}}",
+    "documents": "Odkazy a poznámky",
+    "budget": "Rozpočet",
+    "spent": "Utraceno",
+    "target": "z plánovaných {{amount}}",
+    "colDate": "Datum",
+    "colDescription": "Popis",
+    "colCategory": "Kategorie",
+    "colPaidBy": "Zaplatil(a)",
+    "colAmount": "Částka",
+    "total": "Celkem",
+    "balances": "Vyrovnání",
+    "toSettle": "Navrhované platby",
+    "generatedWith": "Vytvořeno v aplikaci Journeo",
+    "generatedOn": "Exportováno {{date}}",
+    "signOff": "Šťastnou cestu!"
   },
   "allTrips": {
     "subtitle": "Vše na jednom místě",

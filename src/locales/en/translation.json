@@ -9,6 +9,20 @@
     "current": "Current version",
     "empty": "There are no release notes yet.",
     "releases": {
+      "v1_2": {
+        "title": "Export your trip as a PDF",
+        "summary": "Take your plans offline. Any trip can now be exported as a polished PDF document in Journeo's signature look — perfect for printing, sharing with fellow travellers, or keeping in your pocket on the road.",
+        "highlights": [
+          "One-tap Export PDF button right in the trip header",
+          "Pick exactly which sections (itinerary, packing, links, budget) to include",
+          "The PDF captures everything you see on the trip screen: itinerary, packing list, links & notes, and the budget",
+          "Day-by-day itinerary with locations and your plans",
+          "Packing list with the checked-off state preserved",
+          "Full budget breakdown — totals, categories, expense table, and who paid what",
+          "Balances and suggested settlements included for shared trips",
+          "Crisp vector output in your language (English & Czech)"
+        ]
+      },
       "v1_1": {
         "title": "Shared budgets, splitting & settling up",
         "summary": "Travelling together just got easier. Split expenses with the people you share a trip with, see at a glance who owes whom, and settle up — no more spreadsheets or awkward math.",
@@ -564,7 +578,35 @@
     "roles": {
       "viewer": "Viewer",
       "editor": "Editor"
-    }
+    },
+    "exportPdf": "Export PDF"
+  },
+  "pdf": {
+    "travelPlan": "Travel plan",
+    "selectTitle": "Choose what to include",
+    "selectSubtitle": "Pick the sections you'd like in your PDF.",
+    "generate": "Generate PDF",
+    "days": "days",
+    "stops": "stops",
+    "itinerary": "Itinerary",
+    "emptyDay": "Nothing planned yet — enjoy the freedom.",
+    "packing": "Packing list",
+    "packed": "{{done}} of {{total}} packed",
+    "documents": "Links & notes",
+    "budget": "Budget",
+    "spent": "Spent",
+    "target": "of {{amount}} planned",
+    "colDate": "Date",
+    "colDescription": "Description",
+    "colCategory": "Category",
+    "colPaidBy": "Paid by",
+    "colAmount": "Amount",
+    "total": "Total",
+    "balances": "Balances",
+    "toSettle": "Suggested settlements",
+    "generatedWith": "Created with Journeo",
+    "generatedOn": "Exported {{date}}",
+    "signOff": "Bon voyage!"
   },
   "allTrips": {
     "subtitle": "Everything in one place",

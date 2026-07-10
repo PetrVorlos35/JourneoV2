@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Save, MapPin, Calendar, Pencil, Check, PackageOpen, Link as LinkIcon, Plus, Trash2, ExternalLink, Layout, Briefcase, Info, Users, Eye, Heart, Wallet } from 'lucide-react';
+import { ArrowLeft, Save, MapPin, Calendar, Pencil, Check, PackageOpen, Link as LinkIcon, Plus, Trash2, ExternalLink, Layout, Briefcase, Info, Users, Eye, Heart, Wallet, FileDown } from 'lucide-react';
 import { format, eachDayOfInterval } from 'date-fns';
 import { cs } from 'date-fns/locale';
 import { enUS } from 'date-fns/locale';
@@ -12,6 +12,8 @@ import CharCount from '../ui/CharCount';
 import { useUnsavedChanges } from '../../contexts/UnsavedChangesContext';
 import LikeButton from '../ui/LikeButton';
 import ShareTripModal from './ShareTripModal';
+import TripPdfExport from './TripPdfExport';
+import TripPdfOptionsModal from './TripPdfOptionsModal';
 import Budget from './Budget';
 import { useCurrency } from '../../contexts/CurrencyContext';
 
@@ -41,6 +43,8 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const titleInputRef = useRef(null);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showPdfOptions, setShowPdfOptions] = useState(false);
+  const [pdfSections, setPdfSections] = useState(null);
   const { currency } = useCurrency();
   const currSymbols = { CZK: 'Kč', EUR: '€', USD: '$', GBP: '£' };
   const currSymbol = currSymbols[currency] || currency;
@@ -182,10 +186,42 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
     navigate(backHref);
   };
 
+  const pdfAvailability = {
+    itinerary: dailyPlans.length > 0,
+    packing: packingList.length > 0,
+    documents: documents.length > 0,
+    budget: (trip.expenses?.length > 0) || !!trip.budgetTarget,
+  };
+  const pdfCounts = {
+    itinerary: `${dailyPlans.length} ${t('pdf.days')}`,
+    packing: `${packingList.filter(i => i.checked).length}/${packingList.length} ${t('tripDetail.mobile.items')}`,
+    documents: `${documents.length} ${t('tripDetail.mobile.records')}`,
+    budget: trip.expenses?.length > 0
+      ? `${trip.expenses.reduce((s, e) => s + e.amount, 0).toLocaleString(i18n.language)} ${currSymbol}`
+      : t('tripDetail.mobile.budgetEmpty'),
+  };
+
   return (
     <div className="w-full h-full flex flex-col min-h-0 pb-10">
       {ModalPortal}
       <ShareTripModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} trip={trip} />
+      <TripPdfOptionsModal
+        isOpen={showPdfOptions}
+        onClose={() => setShowPdfOptions(false)}
+        availability={pdfAvailability}
+        counts={pdfCounts}
+        onConfirm={setPdfSections}
+      />
+      {pdfSections && (
+        <TripPdfExport
+          trip={trip}
+          dailyPlans={dailyPlans}
+          packingList={packingList}
+          documents={documents}
+          sections={pdfSections}
+          onDone={() => setPdfSections(null)}
+        />
+      )}
 
       {/* Mobile Bottom Nav */}
       <div className="lg:hidden fixed bottom-6 left-6 right-6 z-50 flex justify-center pointer-events-none">
@@ -309,6 +345,22 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
               initialIsLiked={trip.isLiked || false}
             />
           )}
+          <button
+            onClick={() => setShowPdfOptions(true)}
+            disabled={!!pdfSections}
+            className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-95 transition-all duration-300 cursor-pointer disabled:opacity-50 shrink-0"
+            title={t('tripDetail.exportPdf')}
+          >
+            <FileDown size={18} strokeWidth={2.5} />
+          </button>
+          <button
+            onClick={() => setShowPdfOptions(true)}
+            disabled={!!pdfSections}
+            className="hidden md:flex items-center justify-center w-[52px] h-[52px] rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-95 transition-all duration-300 cursor-pointer disabled:opacity-50 shrink-0"
+            title={t('tripDetail.exportPdf')}
+          >
+            <FileDown size={18} strokeWidth={2.5} />
+          </button>
           {trip.role === 'owner' && (
             <>
               <button

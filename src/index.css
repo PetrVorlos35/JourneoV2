@@ -210,6 +210,216 @@
   .skeleton::after { animation: none; }
 }
 
+/* ===== Trip PDF Export ===== */
+/* Hidden on screen; becomes the whole document when printing a trip.
+   Markup lives in components/dashboard/TripPdfExport.jsx. */
+.trip-print-sheet { display: none; }
+
+@media print {
+  @page { size: A4; margin: 13mm 12mm; }
+
+  body.printing-trip { background: #fff !important; }
+  /* Hide the app, toasts and any open modals — only the sheet prints. */
+  body.printing-trip > *:not(.trip-print-sheet) { display: none !important; }
+
+  .trip-print-sheet {
+    display: block !important;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #1d1d1f;
+    font-size: 10pt;
+    line-height: 1.55;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Brand row */
+  .pp-brand { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+  .pp-brand-logo { width: 20px; height: 20px; object-fit: contain; }
+  .pp-brand-name { font-weight: 800; font-size: 12pt; letter-spacing: -0.02em; }
+  .pp-brand-tag {
+    margin-left: auto; font-size: 7.5pt; font-weight: 700; color: #2563eb;
+    text-transform: uppercase; letter-spacing: 0.18em;
+  }
+
+  /* Hero */
+  .pp-hero {
+    position: relative;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 55%, #e0e7ff 100%);
+    border: 1px solid #dbeafe;
+    border-radius: 20px;
+    padding: 22px 26px 20px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .pp-hero-script {
+    position: absolute; top: 14px; right: 22px;
+    font-family: 'Caveat', cursive; font-size: 15pt; color: #2563eb;
+    transform: rotate(-4deg); opacity: 0.85;
+  }
+  .pp-title {
+    font-size: 24pt; font-weight: 800; letter-spacing: -0.03em;
+    line-height: 1.1; margin: 0 0 6px; max-width: 85%; overflow-wrap: break-word;
+  }
+  .pp-dates { font-size: 10pt; font-weight: 600; color: #4b5563; margin: 0 0 12px; }
+  .pp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pp-chip {
+    background: rgba(255, 255, 255, 0.75); border: 1px solid #dbeafe;
+    border-radius: 999px; padding: 3px 12px;
+    font-size: 8.5pt; font-weight: 500; color: #4b5563;
+  }
+  .pp-chip strong { font-weight: 800; color: #1d1d1f; }
+  .pp-chip-blue { background: #2563eb; border-color: #2563eb; color: #dbeafe; }
+  .pp-chip-blue strong { color: #fff; }
+
+  /* Sections */
+  .pp-section { margin-bottom: 22px; }
+  .pp-section-head {
+    display: flex; align-items: baseline; gap: 10px;
+    margin-bottom: 12px; break-after: avoid; page-break-after: avoid;
+  }
+  .pp-section-num { font-size: 9pt; font-weight: 800; color: #2563eb; letter-spacing: 0.05em; }
+  .pp-section-title { font-size: 14pt; font-weight: 800; letter-spacing: -0.02em; margin: 0; }
+  .pp-section-line { flex: 1; height: 1px; background: #e5e7eb; align-self: center; }
+  .pp-subnote { font-size: 8.5pt; font-weight: 600; color: #9ca3af; margin: -6px 0 10px; }
+  .pp-subhead {
+    font-size: 7.5pt; font-weight: 700; color: #9ca3af; text-transform: uppercase;
+    letter-spacing: 0.12em; margin: 14px 0 6px; break-after: avoid; page-break-after: avoid;
+  }
+
+  /* Itinerary day cards */
+  .pp-day {
+    display: flex; gap: 14px;
+    border: 1px solid #e5e7eb; border-radius: 14px;
+    padding: 12px 16px; margin-bottom: 8px;
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .pp-day-rail {
+    display: flex; flex-direction: column; align-items: center;
+    min-width: 34px; padding-top: 1px;
+  }
+  .pp-day-num {
+    font-size: 16pt; font-weight: 800; letter-spacing: -0.03em;
+    color: #2563eb; line-height: 1.1;
+  }
+  .pp-day-dow { font-size: 7pt; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; }
+  .pp-day-body { flex: 1; min-width: 0; }
+  .pp-day-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .pp-day-title { font-size: 11pt; font-weight: 800; letter-spacing: -0.01em; }
+  .pp-day-date { font-size: 8pt; font-weight: 600; color: #2563eb; white-space: nowrap; }
+  .pp-day-loc {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 9pt; font-weight: 700; color: #4b5563; margin: 2px 0 0;
+  }
+  .pp-day-loc svg { color: #2563eb; flex-shrink: 0; }
+  .pp-day-plan { font-size: 9.5pt; color: #374151; white-space: pre-wrap; overflow-wrap: break-word; margin: 4px 0 0; }
+  .pp-muted-italic { color: #9ca3af; font-style: italic; }
+
+  /* Packing list */
+  .pp-pack-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; }
+  .pp-pack-item {
+    display: flex; align-items: flex-start; gap: 8px;
+    padding: 3px 0; font-size: 9.5pt; font-weight: 600;
+    break-inside: avoid; page-break-inside: avoid; overflow-wrap: anywhere;
+  }
+  .pp-checkbox {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 12px; height: 12px; margin-top: 2.5px; flex-shrink: 0;
+    border: 1.5px solid #d1d5db; border-radius: 3.5px;
+    font-size: 7.5pt; font-weight: 800; color: #fff; line-height: 1;
+  }
+  .pp-checkbox-checked { background: #2563eb; border-color: #2563eb; }
+  .pp-pack-done { color: #9ca3af; text-decoration: line-through; }
+
+  /* Links & notes */
+  .pp-doc {
+    border: 1px solid #e5e7eb; border-radius: 14px;
+    padding: 10px 16px; margin-bottom: 8px;
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .pp-doc-title { font-size: 10pt; font-weight: 800; margin: 0 0 2px; }
+  .pp-doc-url { font-size: 8.5pt; font-weight: 600; color: #2563eb; word-break: break-all; margin: 0; }
+  .pp-doc-note { font-size: 9pt; color: #4b5563; white-space: pre-wrap; overflow-wrap: break-word; margin: 0; }
+
+  /* Budget */
+  .pp-budget-summary {
+    background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 14px;
+    padding: 14px 16px; margin-bottom: 12px;
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .pp-budget-label {
+    font-size: 7.5pt; font-weight: 700; color: #9ca3af;
+    text-transform: uppercase; letter-spacing: 0.12em; margin: 0;
+  }
+  .pp-budget-total { font-size: 18pt; font-weight: 800; letter-spacing: -0.02em; margin: 0; }
+  .pp-budget-target { font-size: 9pt; font-weight: 600; color: #6b7280; margin: 0; }
+  .pp-progress {
+    height: 6px; background: #e5e7eb; border-radius: 999px;
+    overflow: hidden; margin-top: 10px;
+  }
+  .pp-progress-fill { height: 100%; background: #2563eb; border-radius: 999px; }
+  .pp-progress-over { background: #ef4444; }
+
+  .pp-cats { margin-bottom: 12px; }
+  .pp-cat-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 2px; font-size: 9.5pt;
+    border-bottom: 1px solid #f3f4f6;
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .pp-cat-dot { width: 8px; height: 8px; border-radius: 999px; flex-shrink: 0; }
+  .pp-cat-dot-sm { display: inline-block; width: 6px; height: 6px; margin-right: 5px; }
+  .pp-cat-name { font-weight: 700; }
+  .pp-cat-count { font-size: 8pt; font-weight: 600; color: #9ca3af; }
+  .pp-cat-amount { margin-left: auto; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+  .pp-table { width: 100%; border-collapse: collapse; font-size: 9pt; }
+  .pp-table th {
+    text-align: left; font-size: 7.5pt; font-weight: 700; color: #9ca3af;
+    text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 4px 8px 6px 0; border-bottom: 1.5px solid #e5e7eb;
+  }
+  .pp-table td {
+    padding: 5px 8px 5px 0; border-bottom: 1px solid #f3f4f6;
+    vertical-align: top; color: #374151;
+  }
+  .pp-table tr { break-inside: avoid; page-break-inside: avoid; }
+  .pp-table tfoot td { border-bottom: none; border-top: 1.5px solid #e5e7eb; font-weight: 800; color: #1d1d1f; }
+  .pp-right { text-align: right; padding-right: 0 !important; }
+  .pp-nowrap { white-space: nowrap; }
+  .pp-strong { font-weight: 700; color: #1d1d1f; }
+  .pp-muted { color: #9ca3af; }
+  .pp-green { color: #059669; }
+  .pp-red { color: #ef4444; }
+
+  /* Balances */
+  .pp-balance-row {
+    display: flex; align-items: baseline; gap: 8px;
+    padding: 4px 2px; font-size: 9.5pt; border-bottom: 1px solid #f3f4f6;
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .pp-balance-label { font-size: 8pt; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.06em; }
+  .pp-balance-amount { margin-left: auto; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .pp-settle-row {
+    display: flex; align-items: baseline; gap: 8px;
+    padding: 3px 2px; font-size: 9.5pt; font-weight: 600;
+    break-inside: avoid; page-break-inside: avoid;
+  }
+  .pp-settle-arrow { color: #9ca3af; }
+  .pp-settle-amount { margin-left: auto; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+  /* Footer */
+  .pp-footer { margin-top: 28px; text-align: center; }
+  .pp-footer-script {
+    display: block; font-family: 'Caveat', cursive;
+    font-size: 17pt; color: #2563eb; margin-bottom: 10px;
+  }
+  .pp-footer-meta {
+    display: flex; justify-content: space-between;
+    border-top: 1px solid #e5e7eb; padding-top: 8px;
+    font-size: 7.5pt; font-weight: 600; color: #9ca3af;
+  }
+}
+
 /* Mesh Gradient Animations */
 @keyframes mesh {
   0% { transform: scale(1) translate(0, 0); }
