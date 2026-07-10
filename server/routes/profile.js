@@ -62,28 +62,44 @@ router.get('/:userId', async (req, res) => {
       [targetUserId]
     );
 
-    // Also get activity count and location for each trip
-    const tripsWithMeta = await Promise.all(trips.map(async (trip) => {
-      const [activities] = await pool.query(
-        'SELECT id, location FROM trip_activities WHERE trip_id = ? ORDER BY day_index ASC',
-        [trip.id]
+    // Aktivity a hlasy dotáhneme dvěma dávkovými dotazy místo dvou dotazů
+    // na každý výlet (stejný vzor jako GET /api/trips).
+    let tripsWithMeta = [];
+    if (trips.length > 0) {
+      const tripIds = trips.map(t => t.id);
+
+      const [[activities], [userVotes]] = await Promise.all([
+        pool.query(
+          'SELECT trip_id AS tripId, location FROM trip_activities WHERE trip_id IN (?) ORDER BY day_index ASC',
+          [tripIds]
+        ),
+        pool.query(
+          'SELECT trip_id AS tripId, value FROM votes WHERE user_id = ? AND trip_id IN (?)',
+          [currentUserId, tripIds]
+        ),
+      ]);
+
+      const activitiesByTrip = new Map();
+      for (const a of activities) {
+        if (!activitiesByTrip.has(a.tripId)) activitiesByTrip.set(a.tripId, []);
+        activitiesByTrip.get(a.tripId).push(a);
+      }
+      const likedTripIds = new Set(
+        userVotes.filter(v => v.value === 1).map(v => v.tripId)
       );
 
-      // Get current user's vote on this trip
-      const [userVote] = await pool.query(
-        'SELECT value FROM votes WHERE user_id = ? AND trip_id = ?',
-        [currentUserId, trip.id]
-      );
-
-      return {
-        ...trip,
-        id: trip.id.toString(),
-        likes: parseInt(trip.likes),
-        isLiked: userVote.length > 0 && userVote[0].value === 1,
-        activityCount: activities.length,
-        locations: activities.filter(a => a.location).map(a => a.location),
-      };
-    }));
+      tripsWithMeta = trips.map(trip => {
+        const tripActivities = activitiesByTrip.get(trip.id) || [];
+        return {
+          ...trip,
+          id: trip.id.toString(),
+          likes: parseInt(trip.likes),
+          isLiked: likedTripIds.has(trip.id),
+          activityCount: tripActivities.length,
+          locations: tripActivities.filter(a => a.location).map(a => a.location),
+        };
+      });
+    }
 
     res.json({
       user: users[0],
@@ -120,43 +136,46 @@ router.get('/:userId/trip/:tripId', async (req, res) => {
 
     const trip = trips[0];
 
-    // Get all sub-data
-    const [activities] = await pool.query(
-      'SELECT id, day_index AS dayIndex, date, title, plan, location FROM trip_activities WHERE trip_id = ? ORDER BY day_index ASC',
-      [tripId]
-    );
-
-    const [expenses] = await pool.query(
-      'SELECT id, description, amount, category, date FROM trip_expenses WHERE trip_id = ? ORDER BY created_at DESC',
-      [tripId]
-    );
-
-    const [packingItems] = await pool.query(
-      'SELECT id, text, checked FROM trip_packing_items WHERE trip_id = ? ORDER BY created_at ASC',
-      [tripId]
-    );
-
-    const [documents] = await pool.query(
-      'SELECT id, title, content FROM trip_documents WHERE trip_id = ? ORDER BY created_at ASC',
-      [tripId]
-    );
-
-    // Get vote info
-    const [voteScore] = await pool.query(
-      `SELECT COUNT(*) AS likes FROM votes WHERE trip_id = ? AND value = 1`,
-      [tripId]
-    );
-
-    const [userVote] = await pool.query(
-      'SELECT value FROM votes WHERE user_id = ? AND trip_id = ?',
-      [currentUserId, tripId]
-    );
-
-    // Get trip owner info
-    const [owner] = await pool.query(
-      'SELECT id, first_name, last_name, avatar_url FROM users WHERE id = ?',
-      [targetUserId]
-    );
+    // Sub-data jsou na sobě nezávislá — jeden Promise.all místo sedmi
+    // sekvenčních dotazů (roundtrip do DB je tu dražší než dotaz sám).
+    const [
+      [activities],
+      [expenses],
+      [packingItems],
+      [documents],
+      [voteScore],
+      [userVote],
+      [owner],
+    ] = await Promise.all([
+      pool.query(
+        'SELECT id, day_index AS dayIndex, date, title, plan, location FROM trip_activities WHERE trip_id = ? ORDER BY day_index ASC',
+        [tripId]
+      ),
+      pool.query(
+        'SELECT id, description, amount, category, date FROM trip_expenses WHERE trip_id = ? ORDER BY created_at DESC',
+        [tripId]
+      ),
+      pool.query(
+        'SELECT id, text, checked FROM trip_packing_items WHERE trip_id = ? ORDER BY created_at ASC',
+        [tripId]
+      ),
+      pool.query(
+        'SELECT id, title, content FROM trip_documents WHERE trip_id = ? ORDER BY created_at ASC',
+        [tripId]
+      ),
+      pool.query(
+        'SELECT COUNT(*) AS likes FROM votes WHERE trip_id = ? AND value = 1',
+        [tripId]
+      ),
+      pool.query(
+        'SELECT value FROM votes WHERE user_id = ? AND trip_id = ?',
+        [currentUserId, tripId]
+      ),
+      pool.query(
+        'SELECT id, first_name, last_name, avatar_url FROM users WHERE id = ?',
+        [targetUserId]
+      ),
+    ]);
 
     res.json({
       trip: {

@@ -1,12 +1,12 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
-import AuthFlow from './components/auth/AuthFlow';
 import NotFound from './components/NotFound';
 import { useAuth } from './contexts/AuthContext';
 import { Analytics } from '@vercel/analytics/react';
 
-// Lazy load the dashboard to speed up initial landing page load
+// Lazy load everything except the landing page to speed up initial load
+const AuthFlow = lazy(() => import('./components/auth/AuthFlow'));
 const DashboardHome = lazy(() => import('./components/dashboard/DashboardHome'));
 const AdminHome = lazy(() => import('./components/admin/AdminHome'));
 const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));

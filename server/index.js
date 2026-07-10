@@ -1,3 +1,4 @@
+import './lib/quietLogs.js';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -9,7 +10,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 console.log('--- START SERVERU ---');
 console.log('Port:', process.env.PORT || 3001);
-console.log('DB Host:', process.env.DB_HOST);
 
 import { testConnection } from './config/db.js';
 import auth from './middleware/auth.js';

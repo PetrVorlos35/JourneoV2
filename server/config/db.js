@@ -9,9 +9,6 @@ if (process.env.NODE_ENV !== 'production') {
   dotenv.config({ path: join(__dirname, '..', '..', '.env') });
 }
 
-console.log('--- DB CONFIG ---');
-console.log('Konfiguruji pool pro:', process.env.DB_HOST || 'NEDEFINOVÁNO');
-
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -19,7 +16,11 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
   port: parseInt(process.env.DB_PORT) || 3306,
   waitForConnections: true,
-  connectionLimit: 15,
+  // Serverless: každá warm lambda má vlastní pool, takže reálný počet spojení
+  // je limit × počet instancí. Držíme ho nízko, ať N instancí nevyčerpá
+  // max_connections MariaDB; jedna instance stejně obsluhuje jen pár
+  // souběžných requestů.
+  connectionLimit: parseInt(process.env.DB_POOL_LIMIT) || 5,
   queueLimit: 0,
   connectTimeout: 10000,
 });
@@ -27,7 +28,7 @@ const pool = mysql.createPool({
 export async function testConnection() {
   try {
     const connection = await pool.getConnection();
-    console.log('✅ Připojeno k MariaDB:', process.env.DB_HOST);
+    console.log('✅ Připojeno k MariaDB');
     connection.release();
   } catch (err) {
     console.error('❌ Chyba připojení k databázi:', err.message);

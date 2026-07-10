@@ -32,13 +32,6 @@ const FriendProfile = lazy(() => import('./FriendProfile'));
 const AddFriendInvite = lazy(() => import('./AddFriendInvite'));
 const ReadOnlyTripView = lazy(() => import('./ReadOnlyTripView'));
 
-const EXCHANGE_RATES = {
-  CZK: { CZK: 1, EUR: 0.04, USD: 0.043, GBP: 0.034 },
-  EUR: { CZK: 25, EUR: 1, USD: 1.08, GBP: 0.85 },
-  USD: { CZK: 23, EUR: 0.93, USD: 1, GBP: 0.79 },
-  GBP: { CZK: 29, EUR: 1.18, USD: 1.27, GBP: 1 }
-};
-
 // Wrap a lazy route element in its own Suspense boundary with a matching
 // skeleton fallback. Because each matched route mounts a *new* boundary,
 // React shows the fallback immediately on navigation (instead of preserving
@@ -119,32 +112,36 @@ const DashboardHome = () => {
     }
   };
 
+  // Converting rewrites every expense amount in the DB irreversibly, so the
+  // rate comes from the server (live ECB data) and the whole operation fails
+  // closed — no conversion happens if the current rate can't be fetched.
   const handleConvertCurrency = async (oldCurr, newCurr) => {
-    const rate = EXCHANGE_RATES[oldCurr]?.[newCurr] || 1;
-    const convertedTrips = trips.map(trip => {
-      if (!trip.expenses || trip.expenses.length === 0) return trip;
-      return {
-        ...trip,
-        expenses: trip.expenses.map(exp => ({
-          ...exp,
-          amount: parseFloat((exp.amount * rate).toFixed(2)),
-          splits: Array.isArray(exp.splits)
-            ? exp.splits.map(s => ({ ...s, amount: parseFloat((s.amount * rate).toFixed(2)) }))
-            : exp.splits,
-        }))
-      };
-    });
-
-    // Update each trip with converted expenses on the server
     try {
+      const { rate } = await api.settings.getExchangeRate(oldCurr, newCurr);
+      const convertedTrips = trips.map(trip => {
+        if (!trip.expenses || trip.expenses.length === 0) return trip;
+        return {
+          ...trip,
+          expenses: trip.expenses.map(exp => ({
+            ...exp,
+            amount: parseFloat((exp.amount * rate).toFixed(2)),
+            splits: Array.isArray(exp.splits)
+              ? exp.splits.map(s => ({ ...s, amount: parseFloat((s.amount * rate).toFixed(2)) }))
+              : exp.splits,
+          }))
+        };
+      });
+
       await Promise.all(
         convertedTrips
           .filter(trip => trip.expenses && trip.expenses.length > 0)
           .map(trip => api.trips.update(trip.id, trip))
       );
       setTrips(convertedTrips);
+      return true;
     } catch (err) {
-      toast.error(t('dashboardHome.currencyError'));
+      toast.error(err.message || t('dashboardHome.currencyError'));
+      return false;
     }
   };
 

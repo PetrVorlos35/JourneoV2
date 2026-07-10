@@ -165,12 +165,15 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
 
     if (result === null) return;
 
-    setCurrency(newCurr);
-
     if (result === true) {
-      onConvertCurrency(oldCurr, newCurr);
+      // Conversion can fail (live rate unavailable) — only switch the
+      // displayed currency once the amounts were actually recalculated.
+      const converted = await onConvertCurrency(oldCurr, newCurr);
+      if (!converted) return;
+      setCurrency(newCurr);
       toast.success(t('settings.currency.recalculated', { currency: newCurr }));
     } else {
+      setCurrency(newCurr);
       toast.success(t('settings.currency.symbolChanged', { currency: newCurr }));
     }
   };

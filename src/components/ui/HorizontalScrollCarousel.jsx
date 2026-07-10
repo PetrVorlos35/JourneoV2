@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Clock, MapPin, Calendar, TrendingUp, ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import heroImage from '../../assets/hero_travel.png';
+import heroImage from '../../assets/hero_travel.webp';
 import JourneoLogo from '../../assets/Journeo_whitelogo.png';
 
 export const HorizontalScrollCarousel = () => {

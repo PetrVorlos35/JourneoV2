@@ -165,6 +165,9 @@ export const api = {
   settings: {
     get: () => request('/settings'),
 
+    getExchangeRate: (from, to) =>
+      request(`/settings/exchange-rate?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
+
     update: (settings) =>
       request('/settings', {
         method: 'PUT',
