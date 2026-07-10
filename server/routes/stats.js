@@ -27,7 +27,7 @@ router.get('/', async (req, res) => {
         SELECT COALESCE(SUM(e.amount), 0) AS total_spent
         FROM trip_expenses e
         JOIN trips t ON e.trip_id = t.id
-        WHERE t.user_id = ?
+        WHERE t.user_id = ? AND t.deleted_at IS NULL
       `, [userId]),
 
       // ─── 2. Financial: Expense breakdown by category ───────────
@@ -40,12 +40,12 @@ router.get('/', async (req, res) => {
               SELECT SUM(e2.amount)
               FROM trip_expenses e2
               JOIN trips t2 ON e2.trip_id = t2.id
-              WHERE t2.user_id = ?
+              WHERE t2.user_id = ? AND t2.deleted_at IS NULL
             ), 0),
           1) AS percentage
         FROM trip_expenses e
         JOIN trips t ON e.trip_id = t.id
-        WHERE t.user_id = ?
+        WHERE t.user_id = ? AND t.deleted_at IS NULL
         GROUP BY e.category
         ORDER BY category_total DESC
       `, [userId, userId]),
@@ -58,7 +58,7 @@ router.get('/', async (req, res) => {
           COALESCE(SUM(e.amount), 0) AS trip_total
         FROM trips t
         LEFT JOIN trip_expenses e ON e.trip_id = t.id
-        WHERE t.user_id = ?
+        WHERE t.user_id = ? AND t.deleted_at IS NULL
         GROUP BY t.id, t.title
         ORDER BY trip_total DESC
         LIMIT 1
@@ -69,7 +69,7 @@ router.get('/', async (req, res) => {
         SELECT COUNT(DISTINCT a.location) AS unique_locations
         FROM trip_activities a
         JOIN trips t ON a.trip_id = t.id
-        WHERE t.user_id = ?
+        WHERE t.user_id = ? AND t.deleted_at IS NULL
           AND a.location IS NOT NULL
           AND a.location != ''
       `, [userId]),
@@ -80,7 +80,7 @@ router.get('/', async (req, res) => {
           MONTH(t.start_date) AS month_number,
           COUNT(*) AS trip_count
         FROM trips t
-        WHERE t.user_id = ?
+        WHERE t.user_id = ? AND t.deleted_at IS NULL
         GROUP BY MONTH(t.start_date)
         ORDER BY trip_count DESC, month_number ASC
         LIMIT 1
@@ -93,7 +93,7 @@ router.get('/', async (req, res) => {
           t.title,
           DATEDIFF(t.end_date, t.start_date) AS duration_days
         FROM trips t
-        WHERE t.user_id = ?
+        WHERE t.user_id = ? AND t.deleted_at IS NULL
         ORDER BY duration_days DESC
         LIMIT 1
       `, [userId]),
@@ -109,7 +109,7 @@ router.get('/', async (req, res) => {
           1) AS checked_percentage
         FROM trip_packing_items p
         JOIN trips t ON p.trip_id = t.id
-        WHERE t.user_id = ?
+        WHERE t.user_id = ? AND t.deleted_at IS NULL
       `, [userId]),
 
       // ─── 8. Social: Total community score ──────────────────────
@@ -117,7 +117,7 @@ router.get('/', async (req, res) => {
         SELECT COUNT(v.id) AS community_score
         FROM votes v
         JOIN trips t ON v.trip_id = t.id
-        WHERE t.user_id = ? AND v.value = 1
+        WHERE t.user_id = ? AND t.deleted_at IS NULL AND v.value = 1
       `, [userId]),
 
       // ─── 9. Social: Most popular trip ──────────────────────────
@@ -128,7 +128,7 @@ router.get('/', async (req, res) => {
           COUNT(v.id) AS net_score
         FROM trips t
         LEFT JOIN votes v ON v.trip_id = t.id AND v.value = 1
-        WHERE t.user_id = ?
+        WHERE t.user_id = ? AND t.deleted_at IS NULL
         GROUP BY t.id, t.title
         ORDER BY net_score DESC
         LIMIT 1

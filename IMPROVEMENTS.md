@@ -27,6 +27,17 @@ Email/password login is unaffected either way.
 `DB_POOL_LIMIT` — per-instance MariaDB connection pool size, defaults to **5**
 (was hardcoded 15). Raise it only for a long-running (non-serverless) deployment.
 
+## ✅ Deploy note — migration 004 + CRON_SECRET applied (2026-07-10)
+
+`server/migrations/004_trash.sql` (adds nullable `trips.deleted_at` + index) was run
+by the user on the production DB, and `CRON_SECRET` was set in both local `.env` and
+Vercel production env. The trash / undo-delete feature (see UX section below) depends
+on both — if deleting a trip ever returns "Unknown column 'deleted_at'" again, re-run
+the migration (idempotent). If the daily purge cron (`GET /api/cron/purge-trash`,
+03:30 UTC) ever 401s, re-check `CRON_SECRET` is present in the Vercel environment for
+the target deployment — it fails closed without it. Even without the cron running,
+expired trips are purged lazily per-user whenever their Trash page loads.
+
 ---
 
 ## ✅ Security — fixed 2026-07-07 (requires migration 003)
@@ -91,92 +102,40 @@ Email/password login is unaffected either way.
 5. *(2026-07-07)* **`GET /api/trips` N+1 eliminated** — constant ~7 batched queries
    regardless of trip count. — `server/routes/trips.js`
 
-## 🔵 UX ideas — proposed 2026-07-10 (not started, no code written yet)
+## ✅ UX — implemented 2026-07-10 (requires migration 004, see deploy note above)
 
-Three related ideas around softening destructive actions. Written up in more detail
-than usual because they touch several files and a schema change — read this before
-starting so the pieces aren't built in the wrong order.
+All three "softening destructive actions" ideas are built, in the planned order
+(#2 trash → #1 undo toast → #3 Cmd+Z on the same undo function):
 
-**Suggested build order:** #2 (trash / soft-delete) first, since #1 depends on it —
-then #1 (undo toast) — then #3 (Cmd+Z), which should just wire into the same undo
-function #1 already built rather than being a separate mechanism.
+1. **Instant delete + 5s Undo toast.** The confirm modal is gone from trip deletion
+   (`AllTrips.jsx`, `TripsOverview.jsx`). `handleDeleteTrip` in `DashboardHome.jsx`
+   removes the trip optimistically, fires the soft-delete immediately (no client-side
+   fake delay — closing the tab mid-toast can't lose the delete), and shows a 5 s
+   `react-hot-toast` toast whose Undo button calls `POST /api/trips/:id/restore` and
+   puts the kept trip object back into state. If the delete request itself fails, the
+   optimistic removal is rolled back and the undo offer withdrawn. Scoped to trips
+   only, as recommended.
+2. **Trash with 30-day retention.** `server/migrations/004_trash.sql` adds nullable
+   `trips.deleted_at` (+ index). `DELETE /api/trips/:id` now soft-deletes; child rows
+   stay intact until purge (hard delete cascades them). New endpoints:
+   `GET /api/trips/trash`, `POST /api/trips/:id/restore`, `DELETE /api/trips/:id/permanent`,
+   `DELETE /api/trips/trash` (empty). `deleted_at IS NULL` filters added to `getTripRole`
+   and every trip listing: `GET /api/trips`, profile, public share link, votes, all
+   stats queries. Trash page at `/dashboard/trash` (`Trash.jsx`, linked from AllTrips)
+   with per-trip Restore / Delete forever, Empty trash, and days-left badges.
+   Purge: daily Vercel Cron (`vercel.json` → `GET /api/cron/purge-trash`,
+   `server/routes/cron.js`, CRON_SECRET-guarded, fails closed) **plus** a lazy per-user
+   purge on Trash page load as a no-config fallback. Admin routes intentionally still
+   see trashed trips.
+3. **Cmd/Ctrl+Z.** `src/hooks/undoStack.js` holds the single most recent undoable
+   action; both the toast's Undo button and a new Cmd/Ctrl+Z branch in
+   `DashboardLayout.jsx`'s keydown listener call the same `undo()`. The text-input
+   guard runs first, so native text-undo in form fields is untouched. Trip delete is
+   the only producer for now — widen only when a second real use case exists.
 
-### 1. Instant delete + 5s "Undo" toast (replace the confirm modal)
-
-Today, deleting a trip shows a blocking confirm dialog first (`confirmDialog()` from
-`useDialog()` in `src/components/ui/DialogModal.jsx`, triggered from
-`handleDelete()` in `AllTrips.jsx` / `TripsOverview.jsx`) and only then calls
-`onDeleteTrip` → `DELETE /api/trips/:id`, which is a **hard**, irreversible delete
-today (`server/routes/trips.js`).
-
-New flow: remove the "are you sure?" modal for trip deletion. Clicking delete
-removes the trip from the UI immediately (optimistic) and fires the delete request
-right away, and a toast appears for 5 seconds with an "Undo" button. If the user
-doesn't click Undo, the deletion stands (and the trip lands in Trash — see #2). If
-they click Undo, it calls a restore action and the trip reappears.
-
-Key implementation decision: **don't fake the undo client-side** (i.e. don't delay
-the real API call until the toast expires) — if the tab is closed or navigated away
-mid-toast, a client-only delay would either lose the delete or silently keep it
-around. Instead, delete for real immediately via soft-delete (see #2), and "Undo"
-just calls the restore endpoint. This also means the same delete action is safe to
-reuse for #3's Cmd+Z.
-
-`react-hot-toast` is already the toast library in use (`toast.success(...)`
-elsewhere) — it supports a custom render (`toast.custom(...)`) which is what a toast
-with a button needs, rather than the plain `toast.success()` calls used today.
-
-Also worth deciding: does this pattern extend to other deletions (expenses,
-activities, packing items) or just trips for now? Recommend starting with trips only
-and extending the same pattern later, since each one needs its own soft-delete
-support server-side.
-
-### 2. Trash for deleted trips (30-day retention, or empty manually)
-
-Requires trips to be soft-deleted instead of hard-deleted:
-
-- New migration adding a nullable `deleted_at` column to `trips` (following the
-  existing pattern in `server/migrations/003_security.sql`).
-- `DELETE /api/trips/:id` changes from `DELETE FROM trips ...` to
-  `UPDATE trips SET deleted_at = NOW() ...`. Related rows (`trip_activities`,
-  `trip_expenses`, `trip_packing_items`, `trip_documents`) should stay intact while
-  a trip is in the trash — only cascade-delete them at permanent purge time, not at
-  soft-delete time — otherwise "restore" can't bring back a fully intact trip.
-- Every place that lists a user's trips (`GET /api/trips`, dashboard home, profile,
-  etc.) needs a `WHERE deleted_at IS NULL` filter added, or deleted trips will
-  reappear in the normal trip list.
-- New "Trash" view (new route/page) listing trips where `deleted_at IS NOT NULL`,
-  sorted by deletion date, each with "Restore" (clears `deleted_at`) and "Delete
-  forever" (hard delete now) actions, plus a bulk "Empty trash" action for
-  dumping everything on demand.
-- 30-day auto-purge: since this app is deployed serverless on Vercel, the natural
-  fit is a Vercel Cron Job hitting a new endpoint (e.g.
-  `POST /api/trips/purge-expired`) once a day, which hard-deletes anything with
-  `deleted_at < NOW() - INTERVAL 30 DAY`. A lazy check on every visit to the Trash
-  page would also work and needs no cron config, but means a trip past 30 days
-  could still show in the trash until someone opens that page — cron is the more
-  correct choice.
-
-### 3. Cmd+Z / Ctrl+Z to undo recent actions
-
-There's already a global `keydown` listener in `DashboardLayout.jsx` for single-key
-nav shortcuts (`n`, `h`, `t`, ...), but it explicitly **ignores** any event where
-`ctrlKey || metaKey || altKey || shiftKey` is true — so Cmd/Ctrl+Z currently does
-nothing app-side and needs new handling, not a tweak to the existing one.
-
-Recommended shape: a small shared hook (e.g. `useUndoStack`) that holds the single
-most recent undoable action as `{ label, undo: () => Promise }`. Any destructive
-action (starting with trip delete from #1) pushes onto it when it fires, and both
-the toast's "Undo" button and a new global Cmd/Ctrl+Z handler call the *same*
-`undo()` function off that stack — so the logic isn't duplicated between the two
-entry points. Keep the guard that ignores keydown while focused in a text input
-(same as the existing pattern) so this doesn't fight the browser's native text-undo
-inside form fields.
-
-Scope this to one action (trip delete) to start. Widening it to other actions
-(expenses, activities, etc.) is straightforward once each of those has its own
-soft-delete / inverse operation, but don't build the generic version before there's
-a second real use case.
+Note: Settings → "clear all data" still deletes trips one-by-one, so those now land
+in the trash too (restorable) instead of vanishing — arguably an improvement, but
+worth remembering.
 
 ## 🟡 Remaining — deliberately deferred
 

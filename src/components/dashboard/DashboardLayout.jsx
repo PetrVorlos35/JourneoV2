@@ -9,6 +9,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useDialog } from '../ui/DialogModal';
 import { useUnsavedChanges } from '../../contexts/UnsavedChangesContext';
+import { takeUndo } from '../../hooks/undoStack';
 import NotificationBell from '../ui/NotificationBell';
 import JourneoLogo from '../../assets/Journeo_whitelogo.png';
 import JourneoLogoDark from '../../assets/Journeo_blacklogo.png';
@@ -175,7 +176,19 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
   useEffect(() => {
     const NAV_SHORTCUTS = { h: '/dashboard', t: '/dashboard/all-trips', s: '/dashboard/statistics', f: '/dashboard/friends', b: '/dashboard/budget' };
     const onKey = (e) => {
+      // Inside text fields nothing fires app-side — the browser's native
+      // text-undo must keep working for Cmd/Ctrl+Z.
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+      // Cmd/Ctrl+Z undoes the most recent undoable action (e.g. trip delete)
+      // via the same shared undo stack the delete toast's Undo button uses.
+      if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'z') {
+        const action = takeUndo();
+        if (action) {
+          e.preventDefault();
+          action.undo();
+        }
+        return;
+      }
       if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
       const key = e.key.toLowerCase();
       if (key === 'n') { e.preventDefault(); handleOpenCreateModalRef.current?.(); return; }

@@ -2,9 +2,7 @@ import { useState } from 'react';
 import { format, differenceInDays } from 'date-fns';
 import { MapPin, Calendar, Trash2, ArrowRight, Search, Filter, X, Users, Heart, ChevronRight, ArrowUpDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { useDialog } from '../ui/DialogModal';
 
 const CARD_COLORS = [
   { bg: 'bg-blue-50 dark:bg-blue-500/10',     icon: 'text-blue-600 dark:text-blue-400'   },
@@ -26,7 +24,6 @@ const getTripColor = (title = '') => {
 };
 
 const AllTrips = ({ trips, onDeleteTrip }) => {
-  const { confirmDialog, ModalPortal } = useDialog();
   const { t } = useTranslation();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -58,28 +55,21 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
       }
     });
 
-  const handleDelete = async (id) => {
-    const ok = await confirmDialog({
-      title: t('allTrips.delete.title'),
-      message: t('allTrips.delete.message'),
-      variant: 'danger',
-      confirmLabel: t('allTrips.delete.confirm'),
-    });
-    if (ok) {
-      onDeleteTrip(id);
-      toast.success(t('allTrips.delete.success'));
-    }
-  };
-
   const hasActiveFilters = searchQuery || statusFilter !== 'all';
 
   return (
     <div className="space-y-8 w-full pb-10">
-      {ModalPortal}
-
-      <div className="space-y-1 sm:space-y-2">
-        <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium">{t('allTrips.subtitle')}</p>
-        <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('allTrips.title')}</h1>
+      <div className="flex items-end justify-between gap-4">
+        <div className="space-y-1 sm:space-y-2">
+          <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium">{t('allTrips.subtitle')}</p>
+          <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('allTrips.title')}</h1>
+        </div>
+        <Link
+          to="/dashboard/trash"
+          className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-3 py-2 transition-all shrink-0"
+        >
+          <Trash2 size={15} strokeWidth={2.5} aria-hidden="true" /> {t('allTrips.trash')}
+        </Link>
       </div>
 
       {/* Filter Bar */}
@@ -194,7 +184,7 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
                       {statusLabels[status]}
                     </span>
                     <button
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(trip.id); }}
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDeleteTrip(trip.id); }}
                       className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer"
                       aria-label={t('allTrips.delete.title')}
                     >

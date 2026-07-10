@@ -56,7 +56,7 @@ router.get('/:userId', async (req, res) => {
               COALESCE(SUM(CASE WHEN v.value = 1 THEN 1 ELSE 0 END), 0) AS likes
        FROM trips t
        LEFT JOIN votes v ON v.trip_id = t.id
-       WHERE t.user_id = ?
+       WHERE t.user_id = ? AND t.deleted_at IS NULL
        GROUP BY t.id
        ORDER BY t.start_date DESC`,
       [targetUserId]
@@ -126,7 +126,7 @@ router.get('/:userId/trip/:tripId', async (req, res) => {
 
     // Verify trip belongs to the target user
     const [trips] = await pool.query(
-      "SELECT id, title, DATE_FORMAT(start_date, '%Y-%m-%d') AS startDate, DATE_FORMAT(end_date, '%Y-%m-%d') AS endDate, created_at AS createdAt FROM trips WHERE id = ? AND user_id = ?",
+      "SELECT id, title, DATE_FORMAT(start_date, '%Y-%m-%d') AS startDate, DATE_FORMAT(end_date, '%Y-%m-%d') AS endDate, created_at AS createdAt FROM trips WHERE id = ? AND user_id = ? AND deleted_at IS NULL",
       [tripId, targetUserId]
     );
 

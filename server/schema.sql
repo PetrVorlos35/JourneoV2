@@ -46,10 +46,12 @@ CREATE TABLE IF NOT EXISTS trips (
     end_date DATE NOT NULL,
     share_token VARCHAR(64) UNIQUE NULL DEFAULT NULL,
     budget_target DECIMAL(12,2) NULL DEFAULT NULL,
+    deleted_at DATETIME NULL DEFAULT NULL COMMENT 'Non-NULL = výlet je v koši; po 30 dnech se maže natvrdo',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     INDEX idx_trips_user (user_id),
+    INDEX idx_trips_deleted (deleted_at),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

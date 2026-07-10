@@ -4,14 +4,11 @@ import { cs } from 'date-fns/locale';
 import { enUS } from 'date-fns/locale';
 import { MapPin, Calendar, Trash2, Plane, ArrowRight, Wallet, Search, X, Users, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
-import { useDialog } from '../ui/DialogModal';
 // eslint-disable-next-line no-unused-vars
 import { motion, useReducedMotion } from 'framer-motion';
 
 const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
-  const { confirmDialog, ModalPortal } = useDialog();
   const { t, i18n } = useTranslation();
   const [activeCategory, setActiveCategory] = useState('ongoing');
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,18 +45,9 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
     past: filterTrips(trips.filter(trip => categorizeTrips(trip) === 'past')),
   };
 
-  const handleDelete = async (id, e) => {
+  const handleDelete = (id, e) => {
     e.preventDefault();
-    const ok = await confirmDialog({
-      title: t('tripsOverview.delete.title'),
-      message: t('tripsOverview.delete.message'),
-      variant: 'danger',
-      confirmLabel: t('tripsOverview.delete.confirm')
-    });
-    if (ok) {
-      onDeleteTrip(id);
-      toast.success(t('tripsOverview.delete.success'));
-    }
+    onDeleteTrip(id);
   };
 
   const allUpcoming = trips.filter(trip => categorizeTrips(trip) === 'upcoming').sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
@@ -68,7 +56,6 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
 
   return (
     <div className="space-y-6 sm:space-y-10 w-full pb-10">
-      {ModalPortal}
       <div className="flex justify-between items-end">
         <div className="space-y-1 sm:space-y-2">
           <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold" style={{ textWrap: 'balance' }}>{t('tripsOverview.title')}</h1>

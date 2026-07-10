@@ -365,10 +365,7 @@
       "description": "V této kategorii nemáte zatím žádné výlety. Zkuste si nějaký naplánovat."
     },
     "delete": {
-      "title": "Smazat výlet?",
-      "message": "Opravdu chcete tento výlet trvale smazat? Tato akce nelze vrátit zpět.",
-      "confirm": "Smazat",
-      "success": "Výlet byl úspěšně smazán"
+      "title": "Smazat výlet"
     }
   },
   "createTripModal": {
@@ -599,11 +596,9 @@
       "description": "Vytvořte svůj první výlet a začněte plánovat dobrodružství."
     },
     "delete": {
-      "title": "Smazat výlet?",
-      "message": "Opravdu chcete tento výlet trvale smazat? Tato akce nelze vrátit zpět.",
-      "confirm": "Smazat",
-      "success": "Výlet byl úspěšně smazán"
-    }
+      "title": "Smazat výlet"
+    },
+    "trash": "Koš"
   },
   "budget": {
     "subtitle": "Rozpočet",
@@ -1049,7 +1044,11 @@
     "deleteError": "Nepodařilo se smazat výlet.",
     "updateError": "Nepodařilo se aktualizovat výlet.",
     "clearError": "Nepodařilo se smazat data.",
-    "currencyError": "Chyba při přepočtu měny."
+    "currencyError": "Chyba při přepočtu měny.",
+    "tripDeleted": "Výlet byl přesunut do koše",
+    "undo": "Vrátit zpět",
+    "tripRestored": "Výlet byl obnoven",
+    "restoreError": "Nepodařilo se obnovit výlet."
   },
   "admin": {
     "nav": {
@@ -1265,5 +1264,36 @@
       "title": "6. Kontakt",
       "content": "Pro jakékoli dotazy ohledně těchto podmínek nás kontaktujte na podpora@journeo.app."
     }
+  },
+  "trash": {
+    "title": "Koš",
+    "subtitle": "Smazané výlety tu zůstanou 30 dní, pak se trvale odstraní.",
+    "backToTrips": "Moje výlety",
+    "emptyTrash": "Vysypat koš",
+    "restore": "Obnovit",
+    "deleteForever": "Smazat trvale",
+    "deletedOn": "Smazáno {{date}}",
+    "daysLeft_one": "zbývá {{count}} den",
+    "daysLeft_few": "zbývají {{count}} dny",
+    "daysLeft_other": "zbývá {{count}} dní",
+    "empty": {
+      "title": "Koš je prázdný",
+      "description": "Smazané výlety tu zůstanou 30 dní, než se trvale odstraní."
+    },
+    "confirmForever": {
+      "title": "Smazat trvale?",
+      "message": "Výlet „{{title}}“ bude trvale smazán včetně všech aktivit, výdajů a dokumentů. Tato akce nelze vrátit zpět.",
+      "confirm": "Smazat trvale"
+    },
+    "confirmEmpty": {
+      "title": "Vysypat koš?",
+      "message": "Všechny výlety v koši budou trvale smazány. Tato akce nelze vrátit zpět.",
+      "confirm": "Vysypat koš"
+    },
+    "restored": "Výlet byl obnoven",
+    "deletedForever": "Výlet byl trvale smazán",
+    "emptied": "Koš byl vysypán",
+    "loadError": "Nepodařilo se načíst koš.",
+    "error": "Něco se pokazilo."
   }
 }

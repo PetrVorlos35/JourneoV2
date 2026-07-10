@@ -365,10 +365,7 @@
       "description": "You have no trips in this category yet. Try planning one."
     },
     "delete": {
-      "title": "Delete trip?",
-      "message": "Are you sure you want to permanently delete this trip? This action cannot be undone.",
-      "confirm": "Delete",
-      "success": "Trip deleted successfully"
+      "title": "Delete trip"
     }
   },
   "createTripModal": {
@@ -599,11 +596,9 @@
       "description": "Create your first trip and start planning an adventure."
     },
     "delete": {
-      "title": "Delete trip?",
-      "message": "Are you sure you want to permanently delete this trip? This action cannot be undone.",
-      "confirm": "Delete",
-      "success": "Trip deleted successfully"
-    }
+      "title": "Delete trip"
+    },
+    "trash": "Trash"
   },
   "budget": {
     "subtitle": "Budget",
@@ -1049,7 +1044,11 @@
     "deleteError": "Failed to delete trip.",
     "updateError": "Failed to update trip.",
     "clearError": "Failed to delete data.",
-    "currencyError": "Error converting currency."
+    "currencyError": "Error converting currency.",
+    "tripDeleted": "Trip moved to Trash",
+    "undo": "Undo",
+    "tripRestored": "Trip restored",
+    "restoreError": "Failed to restore trip."
   },
   "admin": {
     "nav": {
@@ -1265,5 +1264,35 @@
       "title": "6. Contact",
       "content": "For any questions about these terms, contact us at podpora@journeo.app."
     }
+  },
+  "trash": {
+    "title": "Trash",
+    "subtitle": "Deleted trips stay here for 30 days, then they're removed forever.",
+    "backToTrips": "My trips",
+    "emptyTrash": "Empty trash",
+    "restore": "Restore",
+    "deleteForever": "Delete forever",
+    "deletedOn": "Deleted {{date}}",
+    "daysLeft_one": "{{count}} day left",
+    "daysLeft_other": "{{count}} days left",
+    "empty": {
+      "title": "Trash is empty",
+      "description": "Deleted trips stay here for 30 days before being removed forever."
+    },
+    "confirmForever": {
+      "title": "Delete forever?",
+      "message": "“{{title}}” will be permanently deleted along with all its activities, expenses and documents. This cannot be undone.",
+      "confirm": "Delete forever"
+    },
+    "confirmEmpty": {
+      "title": "Empty trash?",
+      "message": "All trips in the trash will be permanently deleted. This cannot be undone.",
+      "confirm": "Empty trash"
+    },
+    "restored": "Trip restored",
+    "deletedForever": "Trip permanently deleted",
+    "emptied": "Trash emptied",
+    "loadError": "Failed to load trash.",
+    "error": "Something went wrong."
   }
 }

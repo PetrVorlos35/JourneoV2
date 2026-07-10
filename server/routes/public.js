@@ -18,7 +18,7 @@ router.get('/trips/:token', async (req, res) => {
          DATE_FORMAT(t.end_date, '%Y-%m-%d') AS endDate,
          t.user_id AS ownerId
        FROM trips t
-       WHERE t.share_token = ?`,
+       WHERE t.share_token = ? AND t.deleted_at IS NULL`,
       [token]
     );
 

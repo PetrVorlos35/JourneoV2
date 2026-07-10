@@ -24,6 +24,7 @@ import statsRoutes from './routes/stats.js';
 import adminRoutes from './routes/admin.js';
 import adminAuth from './middleware/adminAuth.js';
 import publicRoutes from './routes/public.js';
+import cronRoutes from './routes/cron.js';
 import { globalLimiter, authLimiter } from './middleware/rateLimit.js';
 
 const app = express();
@@ -70,6 +71,8 @@ app.use(express.json({ limit: '10mb' }));
 app.use('/api', globalLimiter);
 
 app.use('/api/public', publicRoutes);
+// Vercel Cron jobs (secured by CRON_SECRET, not user JWTs).
+app.use('/api/cron', cronRoutes);
 // Přísnější limit na citlivé auth endpointy (login, register, reset…).
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/trips', auth, tripRoutes);

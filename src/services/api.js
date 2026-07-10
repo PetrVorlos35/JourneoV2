@@ -114,10 +114,21 @@ export const api = {
         body: JSON.stringify(tripData),
       }),
 
+    // Soft delete — the trip moves to the trash and can be restored for 30 days
     delete: (id) =>
       request(`/trips/${id}`, {
         method: 'DELETE',
       }),
+
+    restore: (id) =>
+      request(`/trips/${id}/restore`, { method: 'POST' }),
+
+    getTrash: () => request('/trips/trash'),
+
+    deleteForever: (id) =>
+      request(`/trips/${id}/permanent`, { method: 'DELETE' }),
+
+    emptyTrash: () => request('/trips/trash', { method: 'DELETE' }),
 
     getCollaborators: (id) => request(`/trips/${id}/collaborators`),
 

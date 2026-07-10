@@ -16,7 +16,7 @@ router.post('/', async (req, res) => {
     }
 
     // Check that the trip exists and get the owner
-    const [tripRows] = await pool.query('SELECT id, user_id FROM trips WHERE id = ?', [tripId]);
+    const [tripRows] = await pool.query('SELECT id, user_id FROM trips WHERE id = ? AND deleted_at IS NULL', [tripId]);
     if (tripRows.length === 0) {
       return res.status(404).json({ error: 'Výlet nenalezen.' });
     }

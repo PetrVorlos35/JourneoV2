@@ -86,16 +86,20 @@ const validateTripDates = (startDate, endDate) => {
   return null;
 };
 
-// Returns 'owner' | 'editor' | 'viewer' | null (no access)
+// Returns 'owner' | 'editor' | 'viewer' | null (no access).
+// Trips sitting in the trash (deleted_at set) count as not found for
+// everyone — they're only reachable via the trash endpoints below.
 const getTripRole = async (tripId, userId) => {
   const [[owned]] = await pool.query(
-    'SELECT id FROM trips WHERE id = ? AND user_id = ?',
+    'SELECT id FROM trips WHERE id = ? AND user_id = ? AND deleted_at IS NULL',
     [tripId, userId]
   );
   if (owned) return 'owner';
 
   const [[collab]] = await pool.query(
-    'SELECT role FROM trip_collaborators WHERE trip_id = ? AND user_id = ?',
+    `SELECT tc.role FROM trip_collaborators tc
+     JOIN trips t ON t.id = tc.trip_id AND t.deleted_at IS NULL
+     WHERE tc.trip_id = ? AND tc.user_id = ?`,
     [tripId, userId]
   );
   return collab ? collab.role : null;
@@ -117,7 +121,7 @@ router.get('/', async (req, res) => {
          t.share_token AS shareToken,
          t.budget_target AS budgetTarget
        FROM trips t
-       WHERE t.user_id = ?
+       WHERE t.user_id = ? AND t.deleted_at IS NULL
        UNION
        SELECT t.id, t.title,
          DATE_FORMAT(t.start_date, '%Y-%m-%d') AS startDate,
@@ -129,7 +133,7 @@ router.get('/', async (req, res) => {
          t.budget_target AS budgetTarget
        FROM trips t
        JOIN trip_collaborators tc ON tc.trip_id = t.id AND tc.user_id = ?
-       WHERE t.user_id != ?
+       WHERE t.user_id != ? AND t.deleted_at IS NULL
        ORDER BY startDate DESC`,
       [userId, userId, userId]
     );
@@ -437,15 +441,64 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+// ── GET /api/trips/trash ────────────────────────────────────
+// Lists the caller's soft-deleted trips, newest deletion first.
+// Anything past the 30-day retention window is purged lazily here as a
+// fallback — the daily cron (/api/cron/purge-trash) is the primary sweeper.
+router.get('/trash', async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    await pool.query(
+      'DELETE FROM trips WHERE user_id = ? AND deleted_at IS NOT NULL AND deleted_at < NOW() - INTERVAL 30 DAY',
+      [userId]
+    );
+
+    const [trips] = await pool.query(
+      `SELECT id, title,
+         DATE_FORMAT(start_date, '%Y-%m-%d') AS startDate,
+         DATE_FORMAT(end_date, '%Y-%m-%d') AS endDate,
+         deleted_at AS deletedAt
+       FROM trips
+       WHERE user_id = ? AND deleted_at IS NOT NULL
+       ORDER BY deleted_at DESC`,
+      [userId]
+    );
+
+    res.json({ trips: trips.map((t) => ({ ...t, id: t.id.toString() })) });
+  } catch (err) {
+    console.error('Get trash error:', err);
+    res.status(500).json({ error: 'Chyba při načítání koše.' });
+  }
+});
+
+// ── DELETE /api/trips/trash ─────────────────────────────────
+// Empties the caller's trash (hard-deletes every soft-deleted trip).
+// Must be registered before DELETE /:id so 'trash' isn't parsed as an id.
+router.delete('/trash', async (req, res) => {
+  try {
+    const [result] = await pool.query(
+      'DELETE FROM trips WHERE user_id = ? AND deleted_at IS NOT NULL',
+      [req.userId]
+    );
+    res.json({ message: 'Koš byl vysypán.', deleted: result.affectedRows });
+  } catch (err) {
+    console.error('Empty trash error:', err);
+    res.status(500).json({ error: 'Chyba při vysypání koše.' });
+  }
+});
+
 // ── DELETE /api/trips/:id ───────────────────────────────────
-// Only the owner can delete a trip
+// Only the owner can delete a trip. This is a soft delete: the trip moves
+// to the trash (deleted_at = NOW()) and can be restored for 30 days.
+// Related rows (activities, expenses, …) stay intact until the purge.
 router.delete('/:id', async (req, res) => {
   try {
     const userId = req.userId;
     const tripId = parseInt(req.params.id);
 
     const [result] = await pool.query(
-      'DELETE FROM trips WHERE id = ? AND user_id = ?',
+      'UPDATE trips SET deleted_at = NOW() WHERE id = ? AND user_id = ? AND deleted_at IS NULL',
       [tripId, userId]
     );
 
@@ -453,10 +506,57 @@ router.delete('/:id', async (req, res) => {
       return res.status(404).json({ error: 'Výlet nenalezen nebo nemáte oprávnění jej smazat.' });
     }
 
-    res.json({ message: 'Výlet byl smazán.' });
+    res.json({ message: 'Výlet byl přesunut do koše.' });
   } catch (err) {
     console.error('Delete trip error:', err);
     res.status(500).json({ error: 'Chyba při mazání výletu.' });
+  }
+});
+
+// ── POST /api/trips/:id/restore ─────────────────────────────
+// Owner brings a trip back from the trash fully intact.
+router.post('/:id/restore', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const tripId = parseInt(req.params.id);
+
+    const [result] = await pool.query(
+      'UPDATE trips SET deleted_at = NULL WHERE id = ? AND user_id = ? AND deleted_at IS NOT NULL',
+      [tripId, userId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Výlet v koši nenalezen.' });
+    }
+
+    res.json({ message: 'Výlet byl obnoven.' });
+  } catch (err) {
+    console.error('Restore trip error:', err);
+    res.status(500).json({ error: 'Chyba při obnovení výletu.' });
+  }
+});
+
+// ── DELETE /api/trips/:id/permanent ─────────────────────────
+// Owner hard-deletes a trip from the trash right now ("Delete forever").
+// Only trips already in the trash can be purged this way.
+router.delete('/:id/permanent', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const tripId = parseInt(req.params.id);
+
+    const [result] = await pool.query(
+      'DELETE FROM trips WHERE id = ? AND user_id = ? AND deleted_at IS NOT NULL',
+      [tripId, userId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Výlet v koši nenalezen.' });
+    }
+
+    res.json({ message: 'Výlet byl trvale smazán.' });
+  } catch (err) {
+    console.error('Permanent delete trip error:', err);
+    res.status(500).json({ error: 'Chyba při trvalém mazání výletu.' });
   }
 });
 
