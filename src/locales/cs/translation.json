@@ -1,6 +1,7 @@
 {
   "nav": {
-    "login": "Přihlásit se"
+    "login": "Přihlásit se",
+    "getStarted": "Začít zdarma"
   },
   "changelog": {
     "open": "Zobrazit novinky",
@@ -54,7 +55,11 @@
       "title": "Všechny vaše cesty na jednom místě.",
       "subtitle": "Od nápadu až po cíl. Sestavte si jednoduché itineráře pro své vlastní výlety v čistém a minimalistickém designu.",
       "cta": "Vytvořit první výlet",
-      "eyebrow": "Journeo — Cestovní společník"
+      "eyebrow": "Journeo — Cestovní společník",
+      "secondary": "Jak to funguje",
+      "microcopy": "Zdarma · Bez platební karty",
+      "note": "vaše další cesta, přehledně",
+      "newBadge": "Novinka ve"
     },
     "problem": {
       "label": "Starý způsob",
@@ -106,7 +111,9 @@
           "expense": "nevím...",
           "status": "🤔"
         }
-      ]
+      ],
+      "body": "Plánování cest dnes žije v tabulkách, skupinových chatech a poznámkách. Termíny se ztrácejí, vzorce se rozbíjejí a nikdo si nepamatuje, který hotel je vlastně zabookovaný.",
+      "body2": "Journeo dává itinerář, rozpočet, balicí seznam i dokumenty na jedno klidné místo — a sdílení zvládnete jedním odkazem."
     },
     "solution": {
       "label": "Nový způsob — Journeo",
@@ -146,25 +153,52 @@
       "subtitle": "Journeo není jen deník. Je to komplexní nástroj pro plánování, zaznamenávání a sdílení vašich dobrodružství.",
       "budget": {
         "title": "Chytrý rozpočet",
-        "description": "Mějte své výdaje pod kontrolou. Sledujte útraty za letenky, ubytování, jídlo i aktivity přímo během cesty a vyhněte se nepříjemným překvapením."
+        "description": "Mějte své výdaje pod kontrolou. Sledujte útraty za letenky, ubytování, jídlo i aktivity přímo během cesty a vyhněte se nepříjemným překvapením.",
+        "vignette": {
+          "label": "Zatím utraceno",
+          "total": "31 200 Kč",
+          "limit": "z rozpočtu 50 000 Kč",
+          "cats": [
+            {
+              "name": "Letenky",
+              "amount": "13 500 Kč"
+            },
+            {
+              "name": "Ubytování",
+              "amount": "11 700 Kč"
+            },
+            {
+              "name": "Jídlo a aktivity",
+              "amount": "6 000 Kč"
+            }
+          ]
+        }
       },
       "community": {
         "title": "Cestovatelská komunita",
-        "description": "Sledujte, kam cestují vaši přátelé, inspirujte se, komentujte a sdílejte zážitky."
+        "description": "Sledujte, kam cestují vaši přátelé, inspirujte se, komentujte a sdílejte zážitky.",
+        "shared": "Sdíleno se 4 přáteli"
       },
       "stats": {
         "title": "Detailní statistiky",
-        "description": "Sledujte, kolik zemí jste navštívili a kolik dní jste celkem strávili poznáváním světa."
+        "description": "Sledujte, kolik zemí jste navštívili a kolik dní jste celkem strávili poznáváním světa.",
+        "countries": "navštívených zemí",
+        "days": "dní na cestách"
       },
       "everything": {
         "title": "Vše na jednom místě",
-        "description": "Spravujte své minulé i plánované cesty v přehledném dashboardu. Každá cesta má svůj vlastní profil plný vzpomínek, fotek a poznámek z cest."
+        "description": "Spravujte své minulé i plánované cesty v přehledném dashboardu. Každá cesta má svůj vlastní profil plný vzpomínek, fotek a poznámek z cest.",
+        "itinerary": "Itinerář",
+        "budget": "Rozpočet",
+        "packing": "Balicí seznam",
+        "documents": "Dokumenty"
       }
     },
     "cta": {
       "title": "Jste připraveni vyrazit?",
       "subtitle": "Připojte se a začněte tvořit svou osobní mapu světa. Bez závazků, bez zbytečností.",
-      "button": "Začít zdarma"
+      "button": "Začít zdarma",
+      "script": "Kam to bude příště?"
     },
     "feedback": {
       "label": "Zpětná vazba",
@@ -176,6 +210,11 @@
       "madeWith": "Vytvořeno s důrazem na detail.",
       "privacy": "Ochrana soukromí",
       "terms": "Podmínky použití"
+    },
+    "changelog": {
+      "title": "Journeo se pořád zlepšuje.",
+      "subtitle": "Nové funkce přibývají pravidelně — tady je, co přinesly poslední verze.",
+      "viewFull": "Kompletní přehled novinek"
     }
   },
   "carousel": {

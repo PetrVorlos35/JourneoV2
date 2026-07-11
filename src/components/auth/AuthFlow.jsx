@@ -3,9 +3,11 @@ import { ArrowLeft, Eye, EyeOff, Check, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useGoogleLogin } from '@react-oauth/google';
+// eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
+import useForceLightTheme from '../../hooks/useForceLightTheme';
 import OtpInput from './OtpInput';
 import JourneoWhiteLogo from '../../assets/Journeo_whitelogo.png';
 import JourneoBlackLogo from '../../assets/Journeo_blacklogo.png';
@@ -20,6 +22,7 @@ const getPasswordStrength = (password) => {
 };
 
 const AuthFlow = () => {
+  useForceLightTheme();
   const location = useLocation();
   const { t } = useTranslation();
   const [mode, setMode] = useState(location.state?.mode || 'login');

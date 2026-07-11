@@ -1,7 +1,7 @@
 # Journeo V2 — Audit Findings & Remaining Work
 
 This file tracks the outcome of a full security / design / performance audit and the
-work still outstanding, so future sessions have context. Last updated: **2026-07-10**.
+work still outstanding, so future sessions have context. Last updated: **2026-07-11**.
 
 ---
 
@@ -136,6 +136,33 @@ All three "softening destructive actions" ideas are built, in the planned order
 Note: Settings → "clear all data" still deletes trips one-by-one, so those now land
 in the trash too (restorable) instead of vanishing — arguably an improvement, but
 worth remembering.
+
+## 💡 Landing page ideas — proposed 2026-07-11, awaiting decision
+
+Follow-ups to the landing redesign (light mode, dashboard-matching, shipped 2026-07-11).
+Owner wants to review each before implementing.
+
+1. **Show the killer feature: sharing.** The product promise is "share a trip link
+   instead of a screenshot", but sharing only appears as an avatar stack in a feature
+   card. Add a section demoing the share flow — or better, a **"View a sample trip"
+   link to a real public read-only trip** (`PublicTripView`) so visitors experience
+   the product before signing up. Strongest conversion tool available.
+2. **Make the dashboard mock feel alive.** One restrained micro-interaction — e.g. the
+   countdown number counting up to 121 when scrolled into view, or a subtle hover lift
+   on the mock's trip rows — makes the mock read as a real product, not a picture.
+3. **Personal social proof.** Brand is "made by a person, not a product team". A short
+   signed note — "I built Journeo because my own trips lived in seven spreadsheets" —
+   with the author's name and a Caveat-script signature beats generic testimonial cards.
+4. **FAQ before the CTA.** 3–4 questions that kill signup hesitation: Is it free? Can I
+   export my trip (PDF — newest feature, otherwise invisible on the page)? Can friends
+   view trips without an account? What happens to my data?
+5. ~~**"What's new" on the landing.**~~ ✅ Implemented 2026-07-11: dedicated changelog
+   section on the landing (timeline built from `src/config/changelog.js`, same
+   translation keys as the modal) + a "New in v1.2" pill under the hero that scrolls to
+   it. The `ChangelogModal` stays untouched for the dashboard (`VersionBadge`).
+6. **SEO/sharing polish.** `@vercel/og` is already a dependency — generate a proper OG
+   image with the light hero so shared links match the page; check meta descriptions
+   for both languages.
 
 ## 🟡 Remaining — deliberately deferred
 

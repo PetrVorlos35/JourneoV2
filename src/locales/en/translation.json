@@ -1,6 +1,7 @@
 {
   "nav": {
-    "login": "Log in"
+    "login": "Log in",
+    "getStarted": "Start free"
   },
   "changelog": {
     "open": "What's new",
@@ -54,7 +55,11 @@
       "title": "All your journeys in one place.",
       "subtitle": "From idea to destination. Build simple itineraries for your trips in a clean and minimalist design.",
       "cta": "Create your first trip",
-      "eyebrow": "Journeo — Your travel companion"
+      "eyebrow": "Journeo — Your travel companion",
+      "secondary": "See how it works",
+      "microcopy": "Free to use · No credit card needed",
+      "note": "your next trip, sorted",
+      "newBadge": "New in"
     },
     "problem": {
       "label": "The old way",
@@ -106,7 +111,9 @@
           "expense": "no idea...",
           "status": "🤔"
         }
-      ]
+      ],
+      "body": "Trip planning today lives in spreadsheets, group chats and notes apps. Dates get lost, formulas break, and nobody remembers which hotel was actually booked.",
+      "body2": "Journeo brings the itinerary, budget, packing list and documents into one calm place — and sharing it takes one link."
     },
     "solution": {
       "label": "The new way — Journeo",
@@ -146,25 +153,52 @@
       "subtitle": "Journeo isn't just a diary. It's a comprehensive tool for planning, recording, and sharing your adventures.",
       "budget": {
         "title": "Smart budget",
-        "description": "Keep your expenses under control. Track spending on flights, accommodation, food, and activities during your trip and avoid unpleasant surprises."
+        "description": "Keep your expenses under control. Track spending on flights, accommodation, food, and activities during your trip and avoid unpleasant surprises.",
+        "vignette": {
+          "label": "Spent so far",
+          "total": "$1,240",
+          "limit": "of $2,000 budget",
+          "cats": [
+            {
+              "name": "Flights",
+              "amount": "$540"
+            },
+            {
+              "name": "Accommodation",
+              "amount": "$460"
+            },
+            {
+              "name": "Food & activities",
+              "amount": "$240"
+            }
+          ]
+        }
       },
       "community": {
         "title": "Travel community",
-        "description": "Follow where your friends are traveling, get inspired, comment, and share experiences."
+        "description": "Follow where your friends are traveling, get inspired, comment, and share experiences.",
+        "shared": "Shared with 4 friends"
       },
       "stats": {
         "title": "Detailed statistics",
-        "description": "Track how many countries you've visited and how many days you've spent exploring the world."
+        "description": "Track how many countries you've visited and how many days you've spent exploring the world.",
+        "countries": "countries visited",
+        "days": "days on the road"
       },
       "everything": {
         "title": "Everything in one place",
-        "description": "Manage your past and planned trips in a clear dashboard. Each trip has its own profile full of memories, photos, and travel notes."
+        "description": "Manage your past and planned trips in a clear dashboard. Each trip has its own profile full of memories, photos, and travel notes.",
+        "itinerary": "Itinerary",
+        "budget": "Budget",
+        "packing": "Packing list",
+        "documents": "Documents"
       }
     },
     "cta": {
       "title": "Ready to go?",
       "subtitle": "Join and start building your personal world map. No commitments, no clutter.",
-      "button": "Start for free"
+      "button": "Start for free",
+      "script": "Where to next?"
     },
     "feedback": {
       "label": "Feedback",
@@ -176,6 +210,11 @@
       "madeWith": "Made with attention to detail.",
       "privacy": "Privacy Policy",
       "terms": "Terms of Use"
+    },
+    "changelog": {
+      "title": "Journeo keeps getting better.",
+      "subtitle": "New features land regularly — here's what shipped in the latest releases.",
+      "viewFull": "Full release notes"
     }
   },
   "carousel": {

@@ -1,561 +1,687 @@
-"use client";
-import React, { useRef, useMemo } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Home, Plane, Wallet, Users, LineChart, BarChart2, Mail } from 'lucide-react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import {
+  ArrowRight, Home, Map, BarChart2, Users, Wallet, Plane, Plus, Mail,
+  CalendarDays, CheckSquare, FileText, MapPin, Check, ChevronDown,
+} from 'lucide-react';
+// eslint-disable-next-line no-unused-vars
+import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import Navbar from './Navbar';
-import JourneoLogo from '../assets/Journeo_whitelogo.png';
 import VersionBadge from './ui/VersionBadge';
+import useForceLightTheme from '../hooks/useForceLightTheme';
+import { CHANGELOG } from '../config/changelog';
 
-const LandingPage = () => {
-  const { t } = useTranslation();
-  const scrollRef = useRef(null);
+const EASE = [0.16, 1, 0.3, 1];
 
-  const sectionScrollRange = useMemo(
-    () => (typeof window !== 'undefined' ? window.innerHeight * 5 : 4500),
-    []
+// Scroll-triggered reveal used by every section below the hero.
+const Reveal = ({ children, delay = 0, className = '' }) => {
+  const reduce = useReducedMotion();
+  return (
+    <motion.div
+      className={className}
+      initial={reduce ? false : { opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.7, delay, ease: EASE }}
+    >
+      {children}
+    </motion.div>
   );
-  const { scrollY } = useScroll();
-  const scrollYProgress = useTransform(scrollY, [0, sectionScrollRange], [0, 1]);
+};
 
-  // ── Phase 1 : HERO (0.00 → 0.20) ─────────────────────────────────────────
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.02, 0.14, 0.20], [1, 1, 1, 0]);
-  const heroScale   = useTransform(scrollYProgress, [0.02, 0.20], [1, 0.88]);
-  const heroY       = useTransform(scrollYProgress, [0.02, 0.20], [0, -80]);
-  const watermarkY  = useTransform(scrollYProgress, [0, 0.20], [0, -240]);
-  const orbY        = useTransform(scrollYProgress, [0, 0.20], [0, -100]);
-  const orbOp       = useTransform(scrollYProgress, [0, 0.14, 0.20], [1, 1, 0]);
+const PrimaryCta = ({ children, className = '' }) => (
+  <Link
+    to="/auth"
+    state={{ mode: 'register' }}
+    className={`inline-flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold rounded-full px-8 py-4 shadow-lg shadow-blue-600/25 hover:bg-blue-700 active:scale-[0.98] transition-all duration-300 ${className}`}
+  >
+    {children}
+    <ArrowRight size={17} strokeWidth={2.5} />
+  </Link>
+);
 
-  // ── Phase 2 : PROBLEM (0.22 → 0.44) ──────────────────────────────────────
-  const probOpacity = useTransform(scrollYProgress, [0.22, 0.30, 0.37, 0.44], [0, 1, 1, 0]);
-  const probY       = useTransform(scrollYProgress, [0.22, 0.30], [100, 0]);
-  const probBlurRaw = useTransform(scrollYProgress, [0.37, 0.44], [0, 20]);
-  const probFilter  = useTransform(probBlurRaw, v => `blur(${v}px)`);
+// ── Light dashboard replica shown in the hero ────────────────────────────────
+const DashboardMock = () => {
+  const { t } = useTranslation();
 
-  // ── Phase 3 : DASHBOARD (0.46 → 0.68) ────────────────────────────────────
-  const cardOpacity = useTransform(scrollYProgress, [0.46, 0.54, 0.61, 0.68], [0, 1, 1, 0]);
-  const cardY       = useTransform(scrollYProgress, [0.46, 0.54], [140, 0]);
-  const cardRotateX = useTransform(scrollYProgress, [0.54, 0.68], [0, -12]);
-  const cardGlowOp  = useTransform(scrollYProgress, [0.46, 0.54, 0.61, 0.68], [0, 1, 1, 0]);
+  const trips = [
+    {
+      dest: t('landing.solution.destination'),
+      dates: t('landing.solution.dates'),
+      chip: 'bg-blue-100 text-blue-600',
+    },
+    {
+      dest: t('landing.solution.trip2'),
+      dates: t('landing.solution.trip2dates'),
+      chip: 'bg-emerald-100 text-emerald-600',
+    },
+  ];
 
-  // ── Phase 4 : FEATURES (0.70 → 0.87) ─────────────────────────────────────
-  const f1Op = useTransform(scrollYProgress, [0.70, 0.75, 0.82, 0.87], [0, 1, 1, 0]);
-  const f1Y  = useTransform(scrollYProgress, [0.70, 0.75], [80, 0]);
-  const f1X  = useTransform(scrollYProgress, [0.70, 0.75], [-40, 0]);
-  const f2Op = useTransform(scrollYProgress, [0.73, 0.78, 0.82, 0.87], [0, 1, 1, 0]);
-  const f2Y  = useTransform(scrollYProgress, [0.73, 0.78], [80, 0]);
-  const f3Op = useTransform(scrollYProgress, [0.76, 0.81, 0.82, 0.87], [0, 1, 1, 0]);
-  const f3Y  = useTransform(scrollYProgress, [0.76, 0.81], [80, 0]);
-  const f3X  = useTransform(scrollYProgress, [0.76, 0.81], [40, 0]);
+  const sideIcons = [Home, Map, BarChart2, Users, Wallet];
 
-  // ── Phase 5 : CTA (0.89 → 1.00) ──────────────────────────────────────────
-  const ctaOpacity = useTransform(scrollYProgress, [0.89, 0.96], [0, 1]);
-  const ctaScale   = useTransform(scrollYProgress, [0.89, 0.96], [0.92, 1]);
-  const ctaY       = useTransform(scrollYProgress, [0.89, 0.96], [60, 0]);
-  const ctaPtr     = useTransform(ctaOpacity, v => (v > 0.15 ? 'auto' : 'none'));
+  return (
+    <div className="rounded-[2rem] border border-gray-200/70 bg-white/80 backdrop-blur-xl overflow-hidden shadow-[0_24px_80px_-24px_rgba(37,99,235,0.25),0_8px_32px_rgba(0,0,0,0.06)]">
+      {/* App header */}
+      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <div className="flex items-center gap-2.5">
+          <div className="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm shadow-blue-600/30">
+            <span className="text-white text-[10px] font-black">J</span>
+          </div>
+          <span className="text-gray-900 text-sm font-semibold">{t('tripsOverview.title')}</span>
+        </div>
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-white bg-blue-600 rounded-full px-3 py-1.5 shadow-sm shadow-blue-600/30">
+          <Plus size={12} strokeWidth={3} />
+          <span className="hidden sm:inline">{t('tripsOverview.actions.newTrip')}</span>
+        </div>
+      </div>
 
-  const sheetCols = [
+      <div className="flex">
+        {/* Sidebar */}
+        <div className="hidden sm:flex w-16 border-r border-gray-100 flex-col items-center py-5 gap-2 flex-shrink-0">
+          {sideIcons.map((Icon, i) => (
+            <div
+              key={i}
+              className={`p-2.5 rounded-xl ${i === 0 ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25' : 'text-gray-400'}`}
+            >
+              <Icon size={15} strokeWidth={2.25} />
+            </div>
+          ))}
+        </div>
+
+        {/* Main content */}
+        <div className="flex-1 p-4 sm:p-6 space-y-3 min-w-0">
+          {/* Countdown */}
+          <div className="rounded-2xl bg-blue-50 border border-blue-100 px-4 sm:px-5 py-4">
+            <p className="text-blue-700 text-[10px] uppercase tracking-widest mb-1.5 font-bold">
+              {t('tripsOverview.countdown.label')}
+            </p>
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className="text-gray-900 font-bold text-4xl sm:text-5xl leading-none tracking-tighter">121</span>
+              <span className="text-gray-500 text-xs uppercase tracking-widest font-semibold">
+                {t('tripsOverview.countdown.days')}
+              </span>
+              <span className="text-gray-500 text-sm truncate">· {t('landing.solution.destination')}</span>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-2.5">
+            {[
+              { num: '8', label: t('tripsOverview.stats.trips') },
+              { num: '156', label: t('tripsOverview.countdown.days') },
+              { num: '24', label: t('tripsOverview.stats.places') },
+            ].map((stat, i) => (
+              <div key={i} className="rounded-xl bg-gray-50/80 border border-gray-100 px-2 sm:px-3 py-3 text-center">
+                <p className="text-gray-900 font-bold text-lg sm:text-2xl tracking-tight">{stat.num}</p>
+                <p className="text-gray-500 text-[9px] uppercase tracking-wider mt-0.5 font-semibold">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Trip rows */}
+          {trips.map((trip, i) => (
+            <div key={i} className="rounded-xl bg-gray-50/80 border border-gray-100 px-4 py-3 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className={`w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center ${trip.chip}`}>
+                  <Plane size={13} strokeWidth={2.25} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-gray-900 text-xs font-semibold truncate">{trip.dest}</p>
+                  <p className="text-gray-500 text-[10px] truncate">{trip.dates}</p>
+                </div>
+              </div>
+              <span className="flex-shrink-0 text-[10px] font-semibold text-blue-600 bg-blue-50 border border-blue-100 rounded-lg px-2.5 py-1">
+                {t('tripsOverview.open')}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── Messy spreadsheet visual for the problem section ─────────────────────────
+const SpreadsheetMock = () => {
+  const { t } = useTranslation();
+
+  const cols = [
     t('landing.problem.col1'),
     t('landing.problem.col2'),
     t('landing.problem.col3'),
     t('landing.problem.col4'),
   ];
-
-  const sheetRowMeta = [
-    { bg: 'bg-red-500/[0.06]',   colors: ['text-white/55', 'text-white/32', 'text-red-400 font-mono',         'text-red-400/70'] },
-    { bg: '',                     colors: ['text-white/55', 'text-white/32', 'text-emerald-400/65 font-mono', 'text-emerald-400/65'] },
-    { bg: 'bg-yellow-500/[0.04]', colors: ['text-white/55', 'text-white/22', 'text-white/38 font-mono',        'text-yellow-400/65'] },
-    { bg: 'bg-red-500/[0.04]',   colors: ['text-white/55', 'text-white/32', 'text-red-400/75 font-mono',      'text-red-400/70'] },
-    { bg: '',                     colors: ['text-white/38', 'text-white/22', 'text-white/18 font-mono',        'text-white/28'] },
-  ];
-
-  const sheetRows = t('landing.problem.rows', { returnObjects: true });
-
-  const dashTrips = [
-    {
-      dest: t('landing.solution.destination'),
-      dates: t('landing.solution.dates'),
-      activities: t('landing.solution.activities1'),
-      colorIcon: 'text-indigo-300',
-      colorBg: 'bg-indigo-500/15',
-      colorBtn: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/18',
-    },
-    {
-      dest: t('landing.solution.trip2'),
-      dates: t('landing.solution.trip2dates'),
-      activities: t('landing.solution.activities2'),
-      colorIcon: 'text-emerald-300',
-      colorBg: 'bg-emerald-500/15',
-      colorBtn: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/18',
-    },
+  const rows = t('landing.problem.rows', { returnObjects: true });
+  const rowMeta = [
+    { bg: 'bg-red-50/80', expense: 'text-red-600 font-mono', status: 'text-red-600' },
+    { bg: '', expense: 'text-emerald-600 font-mono', status: 'text-emerald-600' },
+    { bg: 'bg-amber-50/80', expense: 'text-gray-500 font-mono', status: 'text-amber-600' },
+    { bg: 'bg-red-50/60', expense: 'text-red-600 font-mono', status: 'text-red-600' },
+    { bg: '', expense: 'text-gray-400 font-mono', status: 'text-gray-400' },
   ];
 
   return (
-    <div className="bg-neutral-950 text-[#f5f5f7] font-sans selection:bg-blue-500/30 min-h-screen">
-      <Navbar />
-
-      <div ref={scrollRef} className="relative h-[600vh]">
-        <div className="sticky top-0 h-screen overflow-hidden bg-neutral-950">
-
-          {/* Dot grid */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage: 'radial-gradient(rgba(255,255,255,0.055) 1px, transparent 1px)',
-              backgroundSize: '36px 36px',
-            }}
-          />
-
-          {/* ── PHASE 1 — HERO ─────────────────────────────────────────── */}
-          <motion.div
-            style={{ opacity: heroOpacity, scale: heroScale, y: heroY }}
-            className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center px-6"
-          >
-            {/* JOURNEO watermark */}
-            <motion.div
-              style={{ y: watermarkY }}
-              className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
-            >
-              <span className="text-[24vw] font-black tracking-tighter text-white/[0.04] leading-none">
-                JOURNEO
-              </span>
-            </motion.div>
-
-            {/* Glow orb */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
-              <motion.div style={{ y: orbY, opacity: orbOp }}>
-                <motion.div
-                  animate={{ scale: [1, 1.1, 1], opacity: [0.6, 1, 0.6] }}
-                  transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-                  className="w-[500px] h-[500px] sm:w-[700px] sm:h-[700px] rounded-full"
-                  style={{
-                    background:
-                      'radial-gradient(circle, rgba(99,102,241,0.22) 0%, rgba(139,92,246,0.09) 45%, transparent 70%)',
-                  }}
-                />
-              </motion.div>
-            </div>
-
-            <motion.p
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.9 }}
-              className="relative text-[10px] tracking-[0.45em] text-white/22 uppercase mb-5 sm:mb-10 font-semibold"
-            >
-              {t('landing.hero.eyebrow')}
-            </motion.p>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 44 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
-              className="relative font-black tracking-tight text-white leading-[0.92] max-w-4xl"
-              style={{ fontSize: 'clamp(2.4rem, 6vw, 6rem)' }}
-            >
-              {t('landing.hero.title')}
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.8, duration: 0.9 }}
-              className="relative mt-4 sm:mt-8 text-white/35 max-w-xs sm:max-w-lg leading-relaxed text-sm sm:text-base"
-            >
-              {t('landing.hero.subtitle')}
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.5, duration: 1 }}
-              className="relative mt-8 sm:mt-16 flex flex-col items-center gap-3"
-            >
-              <span className="text-white/18 text-[9px] tracking-[0.4em] uppercase font-medium">
-                Scroll
-              </span>
-              <motion.div
-                animate={{ y: [0, 10, 0] }}
-                transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
-                className="w-px h-8 sm:h-10 bg-gradient-to-b from-white/22 to-transparent"
-              />
-            </motion.div>
-          </motion.div>
-
-          {/* ── PHASE 2 — PROBLEM ──────────────────────────────────────── */}
-          <motion.div
-            style={{ opacity: probOpacity, y: probY, filter: probFilter }}
-            className="absolute inset-0 z-20 flex flex-col items-center justify-center px-4 sm:px-6 pointer-events-none"
-          >
-            <div className="relative w-full max-w-2xl lg:max-w-3xl mb-5 sm:mb-8">
-              {/* Ghost rows — hidden on mobile so they don't overflow */}
-              <div className="hidden sm:block absolute -top-10 left-4 right-4 h-14 rounded-2xl bg-red-500/6 border border-red-500/12 rotate-[-2deg]" />
-              <div className="hidden sm:block absolute -top-4 left-0 right-10 h-14 rounded-2xl bg-yellow-500/6 border border-yellow-500/10 rotate-[1.5deg]" />
-
-              {/* Spreadsheet */}
-              <div className="relative rounded-2xl border border-white/8 bg-neutral-900/90 overflow-hidden">
-                <div className="flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 bg-white/[0.03] border-b border-white/5">
-                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500/70" />
-                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500/70" />
-                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500/35" />
-                  <span className="ml-2 text-white/18 text-[10px] font-mono truncate">
-                    {t('landing.problem.filename')}
-                  </span>
-                </div>
-                {/* On mobile show 4 cols; on sm+ show 5 (with empty action col) */}
-                <div className="grid grid-cols-4 sm:grid-cols-5 bg-white/[0.03] border-b border-white/5">
-                  {sheetCols.map((h, i) => (
-                    <div key={i} className="px-2 sm:px-3 py-2 text-[8px] sm:text-[9px] font-bold uppercase tracking-widest text-white/18 border-r border-white/[0.04] last:border-r-0">
-                      {h}
-                    </div>
-                  ))}
-                  <div className="hidden sm:block px-3 py-2 border-l border-white/[0.04]" />
-                </div>
-                {sheetRows.map((row, i) => {
-                  const meta = sheetRowMeta[i];
-                  const cells = [row.dest, row.date, row.expense, row.status];
-                  return (
-                    <div key={i} className={`grid grid-cols-4 sm:grid-cols-5 border-b border-white/[0.03] last:border-b-0 ${meta.bg}`}>
-                      {cells.map((cell, j) => (
-                        <div key={j} className={`px-2 sm:px-3 py-2.5 sm:py-3 text-[10px] sm:text-[11px] border-r border-white/[0.03] last:border-r-0 truncate ${meta.colors[j]}`}>
-                          {cell}
-                        </div>
-                      ))}
-                      <div className="hidden sm:block border-l border-white/[0.03]" />
-                    </div>
-                  );
-                })}
-              </div>
-
-              {/* Floating bubbles — desktop only */}
-              <div className="hidden sm:block absolute -right-14 top-8 bg-[#1c1c1e] border border-white/10 rounded-2xl p-3.5 w-52 shadow-2xl rotate-[2deg]">
-                <p className="text-white/75 text-xs font-semibold">{t('landing.problem.chat.name')}</p>
-                <p className="text-white/38 text-[11px] mt-1 leading-snug">{t('landing.problem.chat.msg')}</p>
-                <p className="text-white/18 text-[10px] mt-2">{t('landing.problem.chat.ago')}</p>
-              </div>
-              <div className="hidden sm:block absolute -left-14 bottom-8 bg-[#1c1c1e] border border-white/10 rounded-2xl p-3.5 w-46 shadow-2xl -rotate-[1.5deg]">
-                <p className="text-white/75 text-xs font-semibold">{t('landing.problem.notes.name')}</p>
-                <p className="text-white/38 text-[11px] mt-1 leading-snug">{t('landing.problem.notes.msg')}</p>
-                <p className="text-white/18 text-[10px] mt-2">{t('landing.problem.notes.today')}</p>
-              </div>
-            </div>
-
-            <p className="text-white/18 text-[10px] font-semibold tracking-[0.4em] uppercase mb-4">
-              {t('landing.problem.label')}
-            </p>
-            <h2
-              className="font-black tracking-tight text-white text-center leading-[0.92]"
-              style={{ fontSize: 'clamp(2rem, 7vw, 7rem)' }}
-            >
-              {t('landing.problem.title')}<br />
-              <span className="text-white/22">{t('landing.problem.titleAlt')}</span>
-            </h2>
-          </motion.div>
-
-          {/* ── PHASE 3 — DASHBOARD ────────────────────────────────────── */}
-          <motion.div
-            style={{ opacity: cardOpacity, y: cardY }}
-            className="absolute inset-0 z-30 flex flex-col items-center justify-center pointer-events-none px-4 sm:px-6"
-          >
-            <p className="text-white/18 text-[10px] font-semibold tracking-[0.4em] uppercase mb-4 sm:mb-8">
-              {t('landing.solution.label')}
-            </p>
-
-            <div style={{ perspective: '1400px' }} className="relative w-full max-w-sm sm:max-w-lg lg:max-w-3xl">
-              {/* Glow */}
-              <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                <motion.div
-                  className="w-full h-full"
-                  style={{
-                    opacity: cardGlowOp,
-                    background:
-                      'radial-gradient(ellipse at center, rgba(99,102,241,0.35) 0%, rgba(139,92,246,0.15) 45%, transparent 70%)',
-                    filter: 'blur(50px)',
-                  }}
-                />
-              </div>
-
-              <motion.div style={{ rotateX: cardRotateX }}>
-                <div
-                  className="rounded-2xl sm:rounded-3xl p-[1.5px]"
-                  style={{
-                    background:
-                      'linear-gradient(135deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.02) 50%, rgba(99,102,241,0.3) 100%)',
-                  }}
-                >
-                  <div className="rounded-[18px] sm:rounded-[22px] bg-[#0c0c0f] overflow-hidden">
-
-                    {/* App header */}
-                    <div className="flex items-center justify-between px-4 sm:px-5 py-3 sm:py-4 border-b border-white/5">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg flex items-center justify-center flex-shrink-0"
-                          style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
-                        >
-                          <span className="text-white text-[9px] sm:text-[10px] font-black">J</span>
-                        </div>
-                        <span className="text-white/60 text-xs sm:text-sm font-semibold">
-                          {t('tripsOverview.title')}
-                        </span>
-                      </div>
-                      <div className="text-[10px] sm:text-[11px] text-white/40 bg-white/[0.04] border border-white/8 rounded-lg sm:rounded-xl px-2.5 sm:px-3 py-1 sm:py-1.5 flex items-center gap-1">
-                        <span className="text-indigo-400 font-bold leading-none">+</span>
-                        <span className="hidden sm:inline">{t('tripsOverview.actions.newTrip')}</span>
-                      </div>
-                    </div>
-
-                    <div className="flex">
-                      {/* Sidebar — hidden on mobile */}
-                      <div className="hidden sm:flex w-12 lg:w-14 border-r border-white/5 flex-col items-center py-4 gap-4 lg:gap-5 flex-shrink-0">
-                        <Home size={14} className="text-indigo-400" />
-                        <Plane size={14} className="text-white/22" />
-                        <BarChart2 size={14} className="text-white/22" />
-                        <Users size={14} className="text-white/22" />
-                        <Wallet size={14} className="text-white/22" />
-                      </div>
-
-                      {/* Main content */}
-                      <div className="flex-1 p-3 sm:p-4 lg:p-5 space-y-2.5 sm:space-y-3 min-w-0">
-
-                        {/* Countdown */}
-                        <div className="rounded-xl sm:rounded-2xl bg-indigo-500/8 border border-indigo-500/14 px-3 sm:px-4 py-3 sm:py-4">
-                          <p className="text-white/28 text-[8px] sm:text-[9px] uppercase tracking-widest mb-1.5 font-semibold">
-                            {t('tripsOverview.countdown.label')}
-                          </p>
-                          <div className="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
-                            <span className="text-white font-black text-3xl sm:text-4xl lg:text-5xl leading-none tracking-tighter">
-                              121
-                            </span>
-                            <span className="text-white/35 text-[10px] sm:text-xs uppercase tracking-widest font-medium">
-                              {t('tripsOverview.countdown.days')}
-                            </span>
-                            <span className="text-white/38 text-xs sm:text-sm ml-0.5 truncate">
-                              · {t('landing.solution.destination')}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Stats */}
-                        <div className="grid grid-cols-3 gap-2">
-                          {[
-                            { num: '8',   label: t('tripsOverview.stats.trips') },
-                            { num: '156', label: t('tripsOverview.countdown.days') },
-                            { num: '24',  label: t('tripsOverview.stats.places') },
-                          ].map((stat, i) => (
-                            <div key={i} className="rounded-lg sm:rounded-xl bg-white/[0.04] border border-white/5 px-2 sm:px-3 py-2.5 sm:py-3 text-center">
-                              <p className="text-white font-bold text-lg sm:text-xl lg:text-2xl">{stat.num}</p>
-                              <p className="text-white/25 text-[8px] sm:text-[9px] uppercase tracking-wider mt-0.5 sm:mt-1 font-semibold">
-                                {stat.label}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Trip cards */}
-                        {dashTrips.map((trip, i) => (
-                          <div key={i} className="rounded-lg sm:rounded-xl bg-white/[0.04] border border-white/5 px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                              <div className={`w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 rounded-lg sm:rounded-xl flex-shrink-0 flex items-center justify-center ${trip.colorBg}`}>
-                                <Plane size={11} className={trip.colorIcon} />
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-white/80 text-[11px] sm:text-xs font-semibold truncate">{trip.dest}</p>
-                                <p className="text-white/30 text-[9px] sm:text-[10px] truncate">{trip.dates}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-                              <span className="text-white/22 text-[10px] hidden lg:block">{trip.activities}</span>
-                              <span className={`text-[10px] font-medium border rounded-md sm:rounded-lg px-2 sm:px-2.5 py-0.5 sm:py-1 ${trip.colorBtn}`}>
-                                {t('tripsOverview.open')}
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </motion.div>
-
-          {/* ── PHASE 4 — FEATURES ─────────────────────────────────────── */}
-          <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none px-4 sm:px-6">
-            <div className="w-full max-w-xs sm:max-w-2xl lg:max-w-6xl">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 lg:gap-7">
-                {[
-                  {
-                    op: f1Op, y: f1Y, x: f1X,
-                    num: '01',
-                    icon: <Wallet size={22} className="sm:hidden" />,
-                    iconLg: <Wallet size={26} className="hidden sm:block" />,
-                    iconBg: 'bg-emerald-500/14', iconColor: 'text-emerald-400',
-                    border: 'border-emerald-500/10', from: 'from-emerald-500/7',
-                    title: t('landing.features.budget.title'),
-                    desc: t('landing.features.budget.description'),
-                  },
-                  {
-                    op: f2Op, y: f2Y, x: 0,
-                    num: '02',
-                    icon: <Users size={22} className="sm:hidden" />,
-                    iconLg: <Users size={26} className="hidden sm:block" />,
-                    iconBg: 'bg-blue-500/14', iconColor: 'text-blue-400',
-                    border: 'border-blue-500/10', from: 'from-blue-500/7',
-                    title: t('landing.features.community.title'),
-                    desc: t('landing.features.community.description'),
-                  },
-                  {
-                    op: f3Op, y: f3Y, x: f3X,
-                    num: '03',
-                    icon: <LineChart size={22} className="sm:hidden" />,
-                    iconLg: <LineChart size={26} className="hidden sm:block" />,
-                    iconBg: 'bg-violet-500/14', iconColor: 'text-violet-400',
-                    border: 'border-violet-500/10', from: 'from-violet-500/7',
-                    title: t('landing.features.stats.title'),
-                    desc: t('landing.features.stats.description'),
-                  },
-                ].map((feat, i) => (
-                  <motion.div key={i} style={{ opacity: feat.op, y: feat.y, x: feat.x }}>
-                    <div className={`rounded-2xl sm:rounded-3xl bg-gradient-to-b ${feat.from} to-transparent border ${feat.border} p-5 sm:p-7 lg:p-10 h-full`}>
-                      <div className="flex items-start justify-between mb-4 sm:mb-7 lg:mb-8">
-                        <div className={`w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 rounded-xl sm:rounded-2xl ${feat.iconBg} flex items-center justify-center ${feat.iconColor} flex-shrink-0`}>
-                          {feat.icon}
-                          {feat.iconLg}
-                        </div>
-                        <span
-                          className="font-black text-5xl sm:text-6xl lg:text-7xl leading-none select-none"
-                          style={{ color: 'rgba(255,255,255,0.05)' }}
-                        >
-                          {feat.num}
-                        </span>
-                      </div>
-                      <h3 className="text-white font-bold text-sm sm:text-base lg:text-2xl mb-2 sm:mb-3">{feat.title}</h3>
-                      <p className="text-white/30 text-xs sm:text-sm lg:text-base leading-relaxed line-clamp-3 sm:line-clamp-none">{feat.desc}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* ── PHASE 5 — CTA ──────────────────────────────────────────── */}
-          <motion.div
-            style={{ opacity: ctaOpacity, scale: ctaScale, y: ctaY, pointerEvents: ctaPtr }}
-            className="absolute inset-0 z-50 flex items-center justify-center px-4 sm:px-6"
-          >
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
-              <motion.div
-                animate={{ scale: [1, 1.06, 1], opacity: [0.18, 0.26, 0.18] }}
-                transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
-                className="w-[350px] h-[350px] sm:w-[650px] sm:h-[650px] rounded-full"
-                style={{
-                  background:
-                    'radial-gradient(circle, rgba(99,102,241,0.45) 0%, rgba(139,92,246,0.2) 40%, transparent 70%)',
-                  filter: 'blur(70px)',
-                }}
-              />
-            </div>
-
-            <div className="relative text-center w-full max-w-sm sm:max-w-xl lg:max-w-3xl">
-              <div
-                className="rounded-2xl sm:rounded-3xl p-[1.5px]"
-                style={{
-                  background:
-                    'linear-gradient(135deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.02) 50%, rgba(99,102,241,0.28) 100%)',
-                }}
-              >
-                <div className="rounded-[18px] sm:rounded-[22px] bg-[#09090c] backdrop-blur-3xl p-7 sm:p-10 lg:p-16">
-                  <img
-                    src={JourneoLogo}
-                    alt="Journeo"
-                    className="h-6 sm:h-8 lg:h-10 w-auto object-contain mx-auto mb-5 sm:mb-8 opacity-65"
-                  />
-                  <h2
-                    className="text-white font-black tracking-tight leading-[0.92] mb-4 sm:mb-5"
-                    style={{ fontSize: 'clamp(1.8rem, 5.5vw, 5.5rem)' }}
-                  >
-                    {t('landing.cta.title')}
-                  </h2>
-                  <p className="text-white/32 leading-relaxed mb-7 sm:mb-10 max-w-xs sm:max-w-md mx-auto text-sm sm:text-base">
-                    {t('landing.cta.subtitle')}
-                  </p>
-                  <Link
-                    to="/auth"
-                    state={{ mode: 'register' }}
-                    className="inline-flex items-center gap-2 sm:gap-3 bg-white text-neutral-950 font-bold rounded-full text-sm sm:text-base px-6 sm:px-10 py-3 sm:py-4 lg:py-5 hover:scale-[1.04] hover:shadow-[0_0_50px_rgba(255,255,255,0.14)] transition-all duration-300 shadow-lg"
-                  >
-                    {t('landing.cta.button')}
-                    <ArrowRight size={15} />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
+    <div className="relative">
+      <div className="rounded-2xl border border-gray-200 bg-white shadow-[0_16px_48px_-16px_rgba(0,0,0,0.12)] overflow-hidden rotate-[-1deg]">
+        <div className="flex items-center gap-2 px-4 py-3 bg-gray-50 border-b border-gray-100">
+          <div className="w-3 h-3 rounded-full bg-red-400" />
+          <div className="w-3 h-3 rounded-full bg-amber-400" />
+          <div className="w-3 h-3 rounded-full bg-green-400" />
+          <span className="ml-2 text-gray-400 text-[10px] font-mono truncate">
+            {t('landing.problem.filename')}
+          </span>
         </div>
+        <div className="grid grid-cols-4 bg-gray-50/70 border-b border-gray-100">
+          {cols.map((h, i) => (
+            <div key={i} className="px-3 py-2 text-[9px] font-bold uppercase tracking-widest text-gray-400 border-r border-gray-100 last:border-r-0">
+              {h}
+            </div>
+          ))}
+        </div>
+        {rows.map((row, i) => {
+          const meta = rowMeta[i];
+          const cells = [
+            { text: row.dest, cls: 'text-gray-700 font-medium' },
+            { text: row.date, cls: 'text-gray-500' },
+            { text: row.expense, cls: meta.expense },
+            { text: row.status, cls: meta.status },
+          ];
+          return (
+            <div key={i} className={`grid grid-cols-4 border-b border-gray-100 last:border-b-0 ${meta.bg}`}>
+              {cells.map((cell, j) => (
+                <div key={j} className={`px-3 py-3 text-[11px] border-r border-gray-100/70 last:border-r-0 truncate ${cell.cls}`}>
+                  {cell.text}
+                </div>
+              ))}
+            </div>
+          );
+        })}
       </div>
 
-      {/* Feedback / contact */}
-      <section className="relative bg-neutral-950 border-t border-white/5 px-6 py-20 sm:py-28 overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden">
+      {/* Floating chat bubble */}
+      <div className="absolute -right-3 sm:-right-8 -bottom-8 bg-white border border-gray-200 rounded-2xl p-3.5 w-52 shadow-xl rotate-[2deg]">
+        <p className="text-gray-900 text-xs font-semibold">{t('landing.problem.chat.name')}</p>
+        <p className="text-gray-600 text-[11px] mt-1 leading-snug">{t('landing.problem.chat.msg')}</p>
+        <p className="text-gray-400 text-[10px] mt-2">{t('landing.problem.chat.ago')}</p>
+      </div>
+    </div>
+  );
+};
+
+// ── Feature card vignettes ───────────────────────────────────────────────────
+const EverythingVignette = () => {
+  const { t } = useTranslation();
+  const chips = [
+    { icon: CalendarDays, key: 'itinerary' },
+    { icon: Wallet, key: 'budget' },
+    { icon: CheckSquare, key: 'packing' },
+    { icon: FileText, key: 'documents' },
+  ];
+  return (
+    <div className="rounded-2xl bg-gray-50/80 border border-gray-100 p-4 sm:p-5">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">
+          <MapPin size={16} strokeWidth={2.25} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-gray-900 text-sm font-semibold truncate">{t('landing.solution.destination')}</p>
+          <p className="text-gray-500 text-[11px] truncate">{t('landing.solution.dates')}</p>
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {/* eslint-disable-next-line no-unused-vars */}
+        {chips.map(({ icon: Icon, key }) => (
+          <span key={key} className="inline-flex items-center gap-1.5 rounded-full bg-white border border-gray-200 px-3 py-1.5 text-[11px] font-semibold text-gray-700">
+            <Icon size={12} strokeWidth={2.25} className="text-blue-600" />
+            {t(`landing.features.everything.${key}`)}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const StatsVignette = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex gap-8">
+      <div>
+        <p className="text-4xl font-bold tracking-tighter text-gray-900">12</p>
+        <p className="text-[11px] font-semibold text-gray-500 mt-1">{t('landing.features.stats.countries')}</p>
+      </div>
+      <div>
+        <p className="text-4xl font-bold tracking-tighter text-gray-900">87</p>
+        <p className="text-[11px] font-semibold text-gray-500 mt-1">{t('landing.features.stats.days')}</p>
+      </div>
+    </div>
+  );
+};
+
+const CommunityVignette = () => {
+  const { t } = useTranslation();
+  const avatars = [
+    { initials: 'JN', bg: 'bg-blue-500' },
+    { initials: 'MK', bg: 'bg-emerald-500' },
+    { initials: 'AT', bg: 'bg-violet-500' },
+    { initials: 'PV', bg: 'bg-amber-500' },
+  ];
+  return (
+    <div className="flex items-center gap-4">
+      <div className="flex -space-x-2.5">
+        {avatars.map((a) => (
           <div
-            className="w-[420px] h-[420px] sm:w-[620px] sm:h-[620px] rounded-full"
-            style={{
-              background:
-                'radial-gradient(circle, rgba(99,102,241,0.10) 0%, rgba(139,92,246,0.04) 45%, transparent 70%)',
-              filter: 'blur(60px)',
-            }}
-          />
-        </div>
-
-        <div className="relative max-w-2xl mx-auto text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/15 text-indigo-300 mb-6">
-            <Mail size={22} />
+            key={a.initials}
+            className={`w-9 h-9 rounded-full ${a.bg} ring-2 ring-white flex items-center justify-center text-white text-[10px] font-bold`}
+          >
+            {a.initials}
           </div>
-          <p className="text-white/22 text-[10px] font-semibold tracking-[0.4em] uppercase mb-4">
-            {t('landing.feedback.label')}
-          </p>
-          <h2
-            className="font-black tracking-tight text-white leading-[0.95] mb-4"
-            style={{ fontSize: 'clamp(1.8rem, 4.5vw, 3.25rem)' }}
-          >
-            {t('landing.feedback.title')}
-          </h2>
-          <p className="text-white/35 leading-relaxed max-w-md mx-auto text-sm sm:text-base mb-8">
-            {t('landing.feedback.subtitle')}
-          </p>
-          <a
-            href="mailto:petr@vorlos.eu"
-            className="inline-flex items-center gap-2.5 bg-white text-neutral-950 font-bold rounded-full text-sm sm:text-base px-6 sm:px-8 py-3 sm:py-4 hover:scale-[1.04] hover:shadow-[0_0_50px_rgba(255,255,255,0.14)] transition-all duration-300 shadow-lg"
-          >
-            <Mail size={16} />
-            petr@vorlos.eu
-          </a>
-        </div>
-      </section>
+        ))}
+      </div>
+      <span className="text-[11px] font-semibold text-gray-600 bg-gray-100 rounded-full px-3 py-1.5">
+        {t('landing.features.community.shared')}
+      </span>
+    </div>
+  );
+};
 
-      {/* Footer */}
-      <footer className="py-6 sm:py-8 px-6 text-center text-sm font-medium text-white/28 bg-neutral-950 border-t border-white/5">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+const BudgetVignette = () => {
+  const { t } = useTranslation();
+  const cats = t('landing.features.budget.vignette.cats', { returnObjects: true });
+  const dots = ['bg-blue-500', 'bg-emerald-500', 'bg-amber-500'];
+  const widths = ['27%', '23%', '12%'];
+  return (
+    <div className="rounded-2xl bg-gray-50/80 border border-gray-100 p-4 sm:p-5">
+      <p className="text-[10px] uppercase tracking-widest font-bold text-gray-500">
+        {t('landing.features.budget.vignette.label')}
+      </p>
+      <div className="flex items-baseline gap-2 mt-1 mb-3">
+        <span className="text-2xl font-bold tracking-tight text-gray-900">
+          {t('landing.features.budget.vignette.total')}
+        </span>
+        <span className="text-[11px] font-medium text-gray-500">
+          {t('landing.features.budget.vignette.limit')}
+        </span>
+      </div>
+      <div className="h-2 rounded-full bg-gray-200 overflow-hidden flex">
+        {widths.map((w, i) => (
+          <div key={i} className={`h-full ${dots[i]}`} style={{ width: w }} />
+        ))}
+      </div>
+      <div className="mt-4 space-y-2">
+        {Array.isArray(cats) && cats.map((cat, i) => (
+          <div key={i} className="flex items-center gap-2.5 text-[12px]">
+            <span className={`w-2 h-2 rounded-full flex-shrink-0 ${dots[i]}`} />
+            <span className="text-gray-700 font-medium">{cat.name}</span>
+            <span className="ml-auto font-semibold text-gray-900 tabular-nums">{cat.amount}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ── What's new — inline changelog built from the same data as the modal ─────
+const formatReleaseDate = (iso, lng) => {
+  try {
+    return new Date(iso).toLocaleDateString(lng, { day: 'numeric', month: 'long', year: 'numeric' });
+  } catch {
+    return iso;
+  }
+};
+
+const ChangelogSection = () => {
+  const { t, i18n } = useTranslation();
+  const [latest, ...older] = CHANGELOG;
+  const latestBase = `changelog.releases.${latest.key}`;
+  const latestHighlights = t(`${latestBase}.highlights`, { returnObjects: true });
+
+  return (
+    <section id="changelog" className="px-6 pb-24 sm:pb-32 scroll-mt-24">
+      <div className="max-w-3xl mx-auto">
+        <Reveal className="text-center max-w-xl mx-auto mb-12 sm:mb-14">
+          <h2
+            className="font-bold tracking-tight leading-[1.08]"
+            style={{ fontSize: 'clamp(1.9rem, 3.5vw, 2.75rem)', textWrap: 'balance' }}
+          >
+            {t('landing.changelog.title')}
+          </h2>
+          <p className="mt-4 text-gray-600 leading-relaxed text-base sm:text-lg" style={{ textWrap: 'pretty' }}>
+            {t('landing.changelog.subtitle')}
+          </p>
+        </Reveal>
+
+        {/* Latest release — full card */}
+        <Reveal>
+          <article className="rounded-[2rem] border border-gray-200/70 bg-white/70 backdrop-blur-sm p-7 sm:p-9">
+            <div className="flex items-center gap-2.5 flex-wrap mb-4">
+              <span className="text-[12px] font-bold tracking-wide px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow-sm shadow-blue-600/25">
+                v{latest.version}
+              </span>
+              <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md bg-emerald-50 text-emerald-600">
+                {t('changelog.current')}
+              </span>
+              <span className="text-gray-500 text-[13px] font-medium ml-auto">
+                {formatReleaseDate(latest.date, i18n.language)}
+              </span>
+            </div>
+            <h3 className="text-xl font-bold tracking-tight mb-2">{t(`${latestBase}.title`)}</h3>
+            <p className="text-gray-600 leading-relaxed text-[15px] mb-6">{t(`${latestBase}.summary`)}</p>
+            {Array.isArray(latestHighlights) && (
+              <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-2.5">
+                {latestHighlights.slice(0, 4).map((item, i) => (
+                  <li key={i} className="flex items-start gap-2.5">
+                    <span className="mt-0.5 w-4 h-4 shrink-0 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                      <Check size={10} strokeWidth={3} />
+                    </span>
+                    <span className="text-gray-700 text-[13px] leading-relaxed">{item}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </article>
+        </Reveal>
+
+        {/* Older releases — compact rows */}
+        <Reveal delay={0.1}>
+          <div className="mt-2 divide-y divide-gray-100 px-2 sm:px-4">
+            {older.map((release) => (
+              <div key={release.version} className="py-5 flex items-baseline gap-3 sm:gap-4">
+                <span className="text-[12px] font-bold tracking-wide px-2.5 py-1 rounded-lg bg-gray-100 text-gray-600 shrink-0">
+                  v{release.version}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-gray-900 font-semibold text-[15px]">
+                    {t(`changelog.releases.${release.key}.title`)}
+                  </p>
+                  <p className="text-gray-600 text-[13px] leading-relaxed mt-0.5 line-clamp-2">
+                    {t(`changelog.releases.${release.key}.summary`)}
+                  </p>
+                </div>
+                <span className="text-gray-500 text-[12px] font-medium ml-auto shrink-0 hidden sm:block">
+                  {formatReleaseDate(release.date, i18n.language)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+};
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+const LandingPage = () => {
+  useForceLightTheme();
+  const { t } = useTranslation();
+  const reduce = useReducedMotion();
+
+  const heroEntrance = (delay) =>
+    reduce
+      ? {}
+      : {
+          initial: { opacity: 0, y: 26 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.8, delay, ease: EASE },
+        };
+
+  const scrollToId = (id) => (e) => {
+    e.preventDefault();
+    document.getElementById(id)?.scrollIntoView({
+      behavior: reduce ? 'auto' : 'smooth',
+      block: 'start',
+    });
+  };
+
+  const latestRelease = CHANGELOG[0];
+
+  return (
+    <div className="relative min-h-screen bg-[#fbfbfd] text-gray-900 font-sans selection:bg-blue-500/30 overflow-x-clip">
+      <Navbar variant="light" />
+
+      {/* Ambient glow, same family as the dashboard background */}
+      <div className="absolute inset-x-0 top-0 h-[900px] z-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        <div className="absolute -top-56 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full bg-blue-500/10 blur-[120px]" />
+        <div className="absolute -top-24 -right-40 w-[600px] h-[600px] rounded-full bg-purple-500/10 blur-[100px]" />
+      </div>
+
+      <main className="relative z-10">
+        {/* ── Hero ── */}
+        <section className="px-6 pt-36 sm:pt-44 pb-14 sm:pb-16 text-center">
+          <motion.div {...heroEntrance(0)} className="mb-6 sm:mb-7">
+            <a
+              href="#changelog"
+              onClick={scrollToId('changelog')}
+              className="inline-flex items-center gap-2 rounded-full bg-blue-50 border border-blue-100 pl-1.5 pr-3 py-1.5 text-[13px] font-semibold text-blue-700 hover:bg-blue-100 transition-colors max-w-full"
+            >
+              <span className="shrink-0 rounded-full bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wide px-2 py-0.5">
+                {t('landing.hero.newBadge')} v{latestRelease.version}
+              </span>
+              <span className="truncate">{t(`changelog.releases.${latestRelease.key}.title`)}</span>
+              <ChevronDown size={14} strokeWidth={2.5} className="shrink-0 text-blue-500" />
+            </a>
+          </motion.div>
+
+          <motion.h1
+            {...heroEntrance(0.1)}
+            className="font-bold tracking-tight leading-[1.05] max-w-3xl mx-auto"
+            style={{ fontSize: 'clamp(2.5rem, 5.5vw, 4.5rem)', textWrap: 'balance' }}
+          >
+            {t('landing.hero.title')}
+          </motion.h1>
+
+          <motion.p
+            {...heroEntrance(0.25)}
+            className="mt-5 sm:mt-6 text-gray-600 max-w-xl mx-auto leading-relaxed text-base sm:text-lg"
+            style={{ textWrap: 'pretty' }}
+          >
+            {t('landing.hero.subtitle')}
+          </motion.p>
+
+          <motion.div {...heroEntrance(0.4)} className="mt-8 sm:mt-10 flex flex-col items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              <PrimaryCta>{t('landing.hero.cta')}</PrimaryCta>
+              <a
+                href="#features"
+                onClick={scrollToId('features')}
+                className="inline-flex items-center justify-center font-semibold text-gray-700 rounded-full px-7 py-4 border border-gray-200 bg-white/60 hover:bg-white hover:border-gray-300 transition-colors duration-300"
+              >
+                {t('landing.hero.secondary')}
+              </a>
+            </div>
+            <p className="text-[13px] font-medium text-gray-500">{t('landing.hero.microcopy')}</p>
+          </motion.div>
+        </section>
+
+        {/* ── Product mock ── */}
+        <section className="px-6 pb-24 sm:pb-32">
+          <motion.div
+            initial={reduce ? false : { opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, delay: 0.55, ease: EASE }}
+            className="relative max-w-4xl mx-auto"
+          >
+            {/* Handwritten note */}
+            <div
+              className="absolute -top-10 right-4 sm:right-10 rotate-[-4deg] text-blue-600 text-xl sm:text-2xl select-none pointer-events-none"
+              style={{ fontFamily: "'Caveat', cursive" }}
+              aria-hidden="true"
+            >
+              {t('landing.hero.note')} ↴
+            </div>
+            <DashboardMock />
+          </motion.div>
+        </section>
+
+        {/* ── Problem ── */}
+        <section className="px-6 py-20 sm:py-28 bg-white border-y border-gray-100">
+          <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
+            <Reveal>
+              <h2
+                className="font-bold tracking-tight leading-[1.08]"
+                style={{ fontSize: 'clamp(2rem, 4vw, 3.25rem)', textWrap: 'balance' }}
+              >
+                {t('landing.problem.title')}{' '}
+                <span className="text-gray-400">{t('landing.problem.titleAlt')}</span>
+              </h2>
+              <p className="mt-6 text-gray-600 leading-relaxed text-base sm:text-lg max-w-lg" style={{ textWrap: 'pretty' }}>
+                {t('landing.problem.body')}
+              </p>
+              <p className="mt-4 text-gray-900 font-medium leading-relaxed text-base sm:text-lg max-w-lg" style={{ textWrap: 'pretty' }}>
+                {t('landing.problem.body2')}
+              </p>
+            </Reveal>
+            <Reveal delay={0.15} className="pb-10 lg:pb-0">
+              <SpreadsheetMock />
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ── Features ── */}
+        <section id="features" className="px-6 py-24 sm:py-32 scroll-mt-24">
+          <div className="max-w-6xl mx-auto">
+            <Reveal className="text-center max-w-2xl mx-auto mb-14 sm:mb-16">
+              <h2
+                className="font-bold tracking-tight leading-[1.08]"
+                style={{ fontSize: 'clamp(2rem, 4vw, 3.25rem)', textWrap: 'balance' }}
+              >
+                {t('landing.features.title')}
+              </h2>
+              <p className="mt-5 text-gray-600 leading-relaxed text-base sm:text-lg" style={{ textWrap: 'pretty' }}>
+                {t('landing.features.subtitle')}
+              </p>
+            </Reveal>
+
+            <div className="grid lg:grid-cols-3 gap-5">
+              {/* Everything in one place — wide */}
+              <Reveal className="lg:col-span-2">
+                <div className="h-full rounded-[2rem] border border-gray-200/70 bg-white/70 backdrop-blur-sm p-7 sm:p-9 grid sm:grid-cols-2 gap-8 items-center">
+                  <div>
+                    <h3 className="text-xl font-bold tracking-tight mb-2.5">{t('landing.features.everything.title')}</h3>
+                    <p className="text-gray-600 leading-relaxed text-[15px]">{t('landing.features.everything.description')}</p>
+                  </div>
+                  <EverythingVignette />
+                </div>
+              </Reveal>
+
+              {/* Statistics */}
+              <Reveal delay={0.1}>
+                <div className="h-full rounded-[2rem] border border-gray-200/70 bg-white/70 backdrop-blur-sm p-7 sm:p-9 flex flex-col justify-between gap-8">
+                  <div>
+                    <h3 className="text-xl font-bold tracking-tight mb-2.5">{t('landing.features.stats.title')}</h3>
+                    <p className="text-gray-600 leading-relaxed text-[15px]">{t('landing.features.stats.description')}</p>
+                  </div>
+                  <StatsVignette />
+                </div>
+              </Reveal>
+
+              {/* Community */}
+              <Reveal>
+                <div className="h-full rounded-[2rem] border border-gray-200/70 bg-white/70 backdrop-blur-sm p-7 sm:p-9 flex flex-col justify-between gap-8">
+                  <div>
+                    <h3 className="text-xl font-bold tracking-tight mb-2.5">{t('landing.features.community.title')}</h3>
+                    <p className="text-gray-600 leading-relaxed text-[15px]">{t('landing.features.community.description')}</p>
+                  </div>
+                  <CommunityVignette />
+                </div>
+              </Reveal>
+
+              {/* Budget — wide */}
+              <Reveal delay={0.1} className="lg:col-span-2">
+                <div className="h-full rounded-[2rem] border border-gray-200/70 bg-white/70 backdrop-blur-sm p-7 sm:p-9 grid sm:grid-cols-2 gap-8 items-center">
+                  <div>
+                    <h3 className="text-xl font-bold tracking-tight mb-2.5">{t('landing.features.budget.title')}</h3>
+                    <p className="text-gray-600 leading-relaxed text-[15px]">{t('landing.features.budget.description')}</p>
+                  </div>
+                  <BudgetVignette />
+                </div>
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
+        {/* ── What's new ── */}
+        <ChangelogSection />
+
+        {/* ── CTA ── */}
+        <section className="px-6 pb-24 sm:pb-32">
+          <Reveal className="max-w-5xl mx-auto">
+            <div className="relative overflow-hidden rounded-[2.5rem] bg-blue-600 px-6 py-16 sm:p-20 text-center shadow-[0_32px_80px_-32px_rgba(37,99,235,0.55)]">
+              <div
+                className="absolute -top-32 left-1/2 -translate-x-1/2 w-[560px] h-[560px] rounded-full bg-blue-400/30 blur-[100px] pointer-events-none"
+                aria-hidden="true"
+              />
+              <div className="relative">
+                <p
+                  className="text-blue-100 text-2xl sm:text-3xl rotate-[-2deg] mb-4 select-none"
+                  style={{ fontFamily: "'Caveat', cursive" }}
+                >
+                  {t('landing.cta.script')}
+                </p>
+                <h2
+                  className="text-white font-bold tracking-tight leading-[1.05] mb-5"
+                  style={{ fontSize: 'clamp(2.2rem, 5vw, 3.75rem)', textWrap: 'balance' }}
+                >
+                  {t('landing.cta.title')}
+                </h2>
+                <p className="text-blue-100 leading-relaxed max-w-md mx-auto text-base sm:text-lg mb-9" style={{ textWrap: 'pretty' }}>
+                  {t('landing.cta.subtitle')}
+                </p>
+                <Link
+                  to="/auth"
+                  state={{ mode: 'register' }}
+                  className="inline-flex items-center gap-2.5 bg-white text-blue-700 font-bold rounded-full text-base px-9 py-4 shadow-lg hover:scale-[1.03] active:scale-[0.98] transition-transform duration-300"
+                >
+                  {t('landing.cta.button')}
+                  <ArrowRight size={17} strokeWidth={2.5} />
+                </Link>
+                <p className="mt-5 text-[13px] font-medium text-blue-100">{t('landing.hero.microcopy')}</p>
+              </div>
+            </div>
+          </Reveal>
+        </section>
+
+        {/* ── Feedback ── */}
+        <section className="px-6 pb-24 sm:pb-28">
+          <Reveal className="max-w-xl mx-auto text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4" style={{ textWrap: 'balance' }}>
+              {t('landing.feedback.title')}
+            </h2>
+            <p className="text-gray-600 leading-relaxed mb-8" style={{ textWrap: 'pretty' }}>
+              {t('landing.feedback.subtitle')}
+            </p>
+            <a
+              href="mailto:petr@vorlos.eu"
+              className="inline-flex items-center gap-2.5 font-semibold text-gray-900 rounded-full px-7 py-3.5 border border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm transition-all duration-300"
+            >
+              <Mail size={16} strokeWidth={2.25} className="text-blue-600" />
+              petr@vorlos.eu
+            </a>
+          </Reveal>
+        </section>
+      </main>
+
+      {/* ── Footer ── */}
+      <footer className="relative z-10 py-8 px-6 text-sm font-medium text-gray-500 bg-white border-t border-gray-100">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>
             &copy; {new Date().getFullYear()}{' '}
             <a
               href="https://vorlos.eu"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
+              className="hover:text-gray-900 transition-colors"
             >
               Petr Vorlíček
             </a>
             . {t('landing.footer.madeWith')}
           </p>
           <div className="flex items-center gap-6">
-            <VersionBadge className="text-[11px] font-bold tracking-wide px-2 py-0.5 rounded-md bg-white/[0.06] border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-colors" />
-            <Link to="/privacy" className="hover:text-white transition-colors">
+            <VersionBadge className="text-[11px] font-bold tracking-wide px-2 py-0.5 rounded-md bg-gray-100 border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-200 transition-colors" />
+            <Link to="/privacy" className="hover:text-gray-900 transition-colors">
               {t('landing.footer.privacy')}
             </Link>
-            <Link to="/terms" className="hover:text-white transition-colors">
+            <Link to="/terms" className="hover:text-gray-900 transition-colors">
               {t('landing.footer.terms')}
             </Link>
           </div>

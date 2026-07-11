@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Navbar from './Navbar';
+import useForceLightTheme from '../hooks/useForceLightTheme';
 
 const TermsOfService = () => {
+  useForceLightTheme();
   const { t } = useTranslation();
 
   const sections = [
@@ -17,20 +19,20 @@ const TermsOfService = () => {
   ];
 
   return (
-    <div className="dark min-h-screen bg-black text-[#f5f5f7] font-sans selection:bg-blue-500/30 pb-20">
-      <Navbar />
+    <div className="min-h-screen bg-[#fbfbfd] text-gray-900 font-sans selection:bg-blue-500/30 pb-20">
+      <Navbar variant="light" />
       <div className="max-w-3xl mx-auto px-6 pt-32">
-        <Link to="/" className="inline-flex items-center text-blue-400 hover:text-blue-300 font-medium mb-8 transition-colors">
+        <Link to="/" className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium mb-8 transition-colors">
           <ArrowLeft size={16} className="mr-2" /> {t('termsOfService.back')}
         </Link>
-        <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-8 text-white">
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-8 text-gray-900">
           {t('termsOfService.title')}
         </h1>
-        <div className="space-y-6 text-gray-300 leading-relaxed">
+        <div className="space-y-6 text-gray-600 leading-relaxed">
           <p>{t('termsOfService.effectiveDate')}</p>
           {sections.map((section, i) => (
             <React.Fragment key={i}>
-              <h2 className="text-2xl font-bold text-white mt-8 mb-4">{section.title}</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{section.title}</h2>
               <p>{section.content}</p>
             </React.Fragment>
           ))}

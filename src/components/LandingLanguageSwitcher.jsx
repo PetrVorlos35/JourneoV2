@@ -13,7 +13,7 @@ const LandingLanguageSwitcher = ({ isDark = true }) => {
   };
 
   const activeClass   = isDark ? 'text-white'                        : 'text-gray-900';
-  const inactiveClass = isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-700';
+  const inactiveClass = isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-800';
   const sepClass      = isDark ? 'text-white/20'                     : 'text-gray-300';
 
   return (
