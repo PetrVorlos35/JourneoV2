@@ -225,11 +225,19 @@ const TripPdfExport = ({ trip, dailyPlans, packingList, documents, sections, onD
               {target > 0 && <p className="pp-budget-target">{t('pdf.target', { amount: money(target) })}</p>}
             </div>
             {target > 0 && (
-              <div className="pp-progress">
+              <div className={`pp-progress${totalSpent > target ? ' pp-progress-over' : ''}`}>
                 <div
-                  className={`pp-progress-fill${totalSpent > target ? ' pp-progress-over' : ''}`}
+                  className="pp-progress-fill"
                   style={{ width: `${Math.min((totalSpent / target) * 100, 100)}%` }}
-                />
+                >
+                  {byCategory.map((c) => (
+                    <span
+                      key={c.id}
+                      className="pp-progress-seg"
+                      style={{ flexGrow: c.amount, backgroundColor: CATEGORY_COLORS[c.id] }}
+                    />
+                  ))}
+                </div>
               </div>
             )}
           </div>
