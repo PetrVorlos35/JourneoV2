@@ -339,6 +339,16 @@
       "resendSuccess": "New code sent successfully.",
       "googleRegisterSuccess": "Registration successful! Welcome to Journeo.",
       "resetSuccess": "Password changed successfully."
+    },
+    "scene": {
+      "quote": "The best stories are written on the road.",
+      "tagline": "Your itinerary, packing lists and plans — in one calm place."
+    },
+    "switch": {
+      "noAccount": "Don't have an account?",
+      "createOne": "Create one",
+      "haveAccount": "Already have an account?",
+      "logIn": "Log in"
     }
   },
   "dashboardLayout": {

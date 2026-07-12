@@ -339,6 +339,16 @@
       "resendSuccess": "Nový kód byl úspěšně odeslán.",
       "googleRegisterSuccess": "Registrace úspěšná! Vítejte v Journeo.",
       "resetSuccess": "Heslo bylo úspěšně změněno."
+    },
+    "scene": {
+      "quote": "Ty nejlepší příběhy se píší na cestách.",
+      "tagline": "Váš itinerář, seznamy na balení a plány — na jednom klidném místě."
+    },
+    "switch": {
+      "noAccount": "Ještě nemáte účet?",
+      "createOne": "Vytvořit účet",
+      "haveAccount": "Už máte účet?",
+      "logIn": "Přihlásit se"
     }
   },
   "dashboardLayout": {

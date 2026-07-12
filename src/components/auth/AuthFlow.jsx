@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Eye, EyeOff, Check, X } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft, ArrowRight, Eye, EyeOff, Check, X } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useGoogleLogin } from '@react-oauth/google';
 // eslint-disable-next-line no-unused-vars
@@ -9,9 +9,11 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import useForceLightTheme from '../../hooks/useForceLightTheme';
 import OtpInput from './OtpInput';
+import HeroTravel from '../../assets/hero_travel.webp';
 import JourneoWhiteLogo from '../../assets/Journeo_whitelogo.png';
-import JourneoBlackLogo from '../../assets/Journeo_blacklogo.png';
 import GoogleIcon from '../../assets/google.png';
+
+const EASE = [0.16, 1, 0.3, 1];
 
 const getPasswordStrength = (password) => {
   let strength = 0;
@@ -19,6 +21,66 @@ const getPasswordStrength = (password) => {
   if (/[A-Z]/.test(password)) strength++;
   if (/[0-9]/.test(password)) strength++;
   return strength;
+};
+
+// Shared field styling for the frosted panel
+const inputClass =
+  'w-full bg-black/[0.04] border border-black/[0.06] rounded-xl px-4 py-2.5 text-[15px] text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/60 focus:border-transparent transition-all font-medium';
+const labelClass = 'block text-[13px] font-semibold text-gray-700 mb-1';
+const primaryBtnClass =
+  'w-full flex items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full shadow-lg shadow-blue-600/25 transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2';
+
+const ErrorBanner = ({ message, reduceMotion }) => (
+  <AnimatePresence>
+    {message && (
+      <motion.div
+        initial={reduceMotion ? false : { opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={reduceMotion ? {} : { opacity: 0, y: -8 }}
+        transition={{ duration: reduceMotion ? 0 : 0.2 }}
+        role="alert"
+        className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-[13px] font-semibold text-center"
+      >
+        {message}
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
+const PasswordChecklist = ({ password, t }) => {
+  const strength = getPasswordStrength(password);
+  return (
+    <div className="mt-2 space-y-1.5">
+      <div className="flex gap-1.5">
+        {[1, 2, 3].map((segment) => {
+          let bgClass = 'bg-black/10';
+          if (strength >= segment) {
+            if (strength === 1) bgClass = 'bg-red-500';
+            else if (strength === 2) bgClass = 'bg-yellow-500';
+            else bgClass = 'bg-green-500';
+          }
+          return (
+            <div key={segment} className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${bgClass}`} />
+          );
+        })}
+      </div>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 px-0.5">
+        {[
+          { label: t('auth.passwordReq.length'), met: password.length >= 8 },
+          { label: t('auth.passwordReq.uppercase'), met: /[A-Z]/.test(password) },
+          { label: t('auth.passwordReq.digit'), met: /[0-9]/.test(password) },
+        ].map((req, i) => (
+          <div
+            key={i}
+            className={`flex items-center gap-1.5 text-[11px] font-medium transition-colors duration-300 ${req.met ? 'text-green-600' : 'text-gray-500'}`}
+          >
+            {req.met ? <Check size={11} strokeWidth={4} /> : <X size={11} strokeWidth={3} className="opacity-50" />}
+            <span>{req.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 const AuthFlow = () => {
@@ -78,6 +140,11 @@ const AuthFlow = () => {
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (errorMsg) setErrorMsg('');
+  };
+
+  const switchMode = (nextMode) => {
+    setMode(nextMode);
+    setErrorMsg('');
   };
 
   const handleLogin = async (e) => {
@@ -208,119 +275,110 @@ const AuthFlow = () => {
     }
   };
 
-  return (
-    <div className="min-h-[100dvh] w-full flex items-center justify-center p-4 relative overflow-hidden bg-[#fbfbfd] dark:bg-black text-[#1d1d1f] dark:text-[#f5f5f7] font-sans">
+  const passwordToggleBtn = (
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      aria-label={showPassword ? t('auth.password.hide') : t('auth.password.show')}
+      className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-500 hover:text-gray-800 transition-colors cursor-pointer"
+    >
+      {showPassword ? <EyeOff size={16} strokeWidth={2.5} /> : <Eye size={16} strokeWidth={2.5} />}
+    </button>
+  );
 
-      {/* Subtle background glow */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none flex justify-center items-center">
-        <div className="absolute w-[800px] h-[800px] rounded-[100%] bg-blue-500/5 dark:bg-blue-500/10 blur-[120px]" />
+  return (
+    <div className="relative min-h-[100dvh] w-full overflow-hidden bg-[#1c2a20] font-sans">
+
+      {/* Full-bleed photo with a slow settle-in */}
+      <motion.img
+        src={HeroTravel}
+        alt=""
+        aria-hidden="true"
+        initial={shouldReduceMotion ? false : { scale: 1.06 }}
+        animate={{ scale: 1 }}
+        transition={{ duration: 1.8, ease: EASE }}
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+      {/* Legibility overlays: vignette toward the bottom + darker photo edge on desktop */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-black/30" />
+      <div className="absolute inset-0 hidden lg:block bg-gradient-to-r from-black/40 via-transparent to-black/10" />
+
+      {/* Back home */}
+      <div className="absolute top-5 left-5 sm:top-6 sm:left-8 z-20">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 rounded-full bg-black/25 backdrop-blur-md border border-white/20 px-4 py-2 text-[13px] font-semibold text-white/90 hover:bg-black/40 hover:text-white transition-colors duration-300 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+        >
+          <ArrowLeft size={15} strokeWidth={2.5} />
+          <span>{t('auth.backHome')}</span>
+        </button>
       </div>
 
-      <div className="w-full max-w-md relative z-10 flex flex-col items-center">
-        {/* Top Nav */}
-        <div className="mb-6 flex justify-center w-full">
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors duration-300 font-semibold text-[13px] glass px-5 py-2.5 rounded-full cursor-pointer"
+      {/* Brand mark, top-right — same logo + wordmark lockup as the navbar.
+          A glass pill keeps it legible no matter what part of the photo —
+          sky, fog, foliage — sits behind it. */}
+      <Link
+        to="/"
+        className="absolute top-5 right-5 sm:top-6 sm:right-8 z-20 flex items-center gap-2 rounded-full bg-black/25 backdrop-blur-md border border-white/20 pl-3 pr-4 py-2 hover:bg-black/40 transition-colors duration-300 group focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+      >
+        <img
+          src={JourneoWhiteLogo}
+          alt=""
+          className="h-6 w-auto object-contain transition-transform group-hover:scale-105"
+        />
+        <span className="font-semibold text-[15px] tracking-tight text-white">Journeo</span>
+      </Link>
+
+      {/* Brand moment over the photo (desktop only) */}
+      <motion.div
+        initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.9, delay: 0.25, ease: EASE }}
+        className="absolute bottom-10 left-10 xl:bottom-14 xl:left-14 z-10 hidden lg:block max-w-md pointer-events-none select-none"
+      >
+        <p
+          className="text-white text-3xl xl:text-4xl leading-snug rotate-[-1.5deg] drop-shadow-md"
+          style={{ fontFamily: "'Caveat', cursive" }}
+        >
+          “{t('auth.scene.quote')}”
+        </p>
+        <p className="mt-4 text-sm text-white/80 font-medium max-w-xs">{t('auth.scene.tagline')}</p>
+      </motion.div>
+
+      {/* Form panel */}
+      <div className="relative z-10 flex min-h-[100dvh] items-center justify-center px-4 pt-20 pb-6 sm:px-6 lg:py-8 lg:justify-end lg:pr-[7vw]">
+        <div className="w-full max-w-[430px]">
+
+          <motion.div
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: EASE }}
+            className="bg-white/80 backdrop-blur-2xl border border-white/60 rounded-[1.75rem] shadow-[0_24px_80px_-16px_rgba(0,0,0,0.45)] p-5 sm:p-7"
           >
-            <ArrowLeft size={16} strokeWidth={2.5} />
-            <span>{t('auth.backHome')}</span>
-          </button>
-        </div>
-
-        {/* Glass Card */}
-        <div className="glass-card p-6 sm:p-10 w-full max-w-md rounded-[2rem] relative overflow-hidden">
-
-          {/* Header */}
-          <div className="text-center mb-6">
-            <img src={JourneoBlackLogo} alt="Journeo Logo" className="h-10 w-auto object-contain mx-auto mb-4 drop-shadow-md block dark:hidden" />
-            <img src={JourneoWhiteLogo} alt="Journeo Logo" className="h-10 w-auto object-contain mx-auto mb-4 drop-shadow-md hidden dark:block" />
-            <h1 className="text-2xl font-bold tracking-tight mb-1">
-              {mode === 'login' ? t('auth.title.login') :
-               mode === 'forgot' ? t('auth.title.forgot') :
-               mode === 'reset' ? t('auth.title.reset') : t('auth.title.register')}
-            </h1>
-            <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium">
-              {mode === 'login'
-                ? t('auth.subtitle.login')
-                : mode === 'forgot'
-                ? t('auth.subtitle.forgot')
-                : mode === 'reset'
-                ? t('auth.subtitle.reset')
-                : t('auth.subtitle.register')}
-            </p>
-          </div>
-
-          {/* Pill Toggle */}
-          <div className={`relative flex p-1 mb-6 bg-gray-100/80 dark:bg-white/5 rounded-full ${['otp', 'forgot', 'reset'].includes(mode) ? 'hidden' : ''}`}>
-            <button
-              type="button"
-              onClick={() => { setMode('login'); setErrorMsg(''); }}
-              className={`flex-1 relative py-2.5 text-[13px] font-bold z-10 transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed ${mode === 'login' ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
-            >
-              {mode === 'login' && (
-                <motion.div
-                  layoutId="auth-tab"
-                  className="absolute inset-0 bg-white dark:bg-white/10 rounded-full shadow-sm"
-                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              <span className="relative z-10">{t('auth.tab.login')}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => { setMode('register'); setErrorMsg(''); }}
-              className={`flex-1 relative py-2.5 text-[13px] font-bold z-10 transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed ${mode === 'register' ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}
-            >
-              {mode === 'register' && (
-                <motion.div
-                  layoutId="auth-tab"
-                  className="absolute inset-0 bg-white dark:bg-white/10 rounded-full shadow-sm"
-                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              <span className="relative z-10">{t('auth.tab.register')}</span>
-            </button>
-          </div>
-
-          {/* Form Area */}
-          <div className="relative overflow-visible min-h-[160px]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={mode}
-                initial={shouldReduceMotion ? false : { opacity: 0, x: mode === 'login' ? -15 : 15 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: mode === 'login' ? 15 : -15 }}
-                transition={{ duration: shouldReduceMotion ? 0 : 0.25, ease: 'easeOut' }}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
+                transition={{ duration: shouldReduceMotion ? 0 : 0.22, ease: 'easeOut' }}
               >
                 {mode === 'otp' ? (
-                  <div className="py-2">
-                    <div className="text-center space-y-3 mb-6">
-                      <div className="mx-auto w-14 h-14 bg-blue-500/10 dark:bg-blue-500/20 rounded-full flex items-center justify-center mb-2">
-                        <Check size={28} className="text-blue-500" strokeWidth={2.5} />
+                  <div>
+                    <div className="text-center space-y-2.5 mb-6">
+                      <div className="mx-auto w-14 h-14 bg-blue-600/10 rounded-full flex items-center justify-center mb-3">
+                        <Check size={26} className="text-blue-600" strokeWidth={2.5} />
                       </div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">{t('auth.otp.checkEmail')}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {t('auth.otp.description')} <span className="font-semibold text-gray-900 dark:text-white">{formData.email}</span>
+                      <h1 className="text-[22px] font-bold tracking-tight text-gray-900">{t('auth.otp.checkEmail')}</h1>
+                      <p className="text-sm text-gray-600">
+                        {t('auth.otp.description')}{' '}
+                        <span className="font-semibold text-gray-900 break-all">{formData.email}</span>
                       </p>
                     </div>
 
-                    <AnimatePresence>
-                      {errorMsg && (
-                        <motion.div
-                          initial={shouldReduceMotion ? false : { opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={shouldReduceMotion ? {} : { opacity: 0, y: -10 }}
-                          transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-                          role="alert"
-                          className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
-                        >
-                          {errorMsg}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                    <ErrorBanner message={errorMsg} reduceMotion={shouldReduceMotion} />
 
-                    <form onSubmit={handleVerify} className="space-y-4">
+                    <form onSubmit={handleVerify} className="space-y-5">
                       <OtpInput
                         value={otpCode}
                         autoFocus
@@ -330,12 +388,7 @@ const AuthFlow = () => {
                           if (errorMsg) setErrorMsg('');
                         }}
                       />
-
-                      <button
-                        type="submit"
-                        disabled={isLoading || otpCode.length !== 6}
-                        className="w-full py-3.5 bg-black dark:bg-white text-white dark:text-black text-sm font-bold rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-lg active:scale-[0.98] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-                      >
+                      <button type="submit" disabled={isLoading || otpCode.length !== 6} className={primaryBtnClass}>
                         {isLoading ? t('auth.otp.verifying') : t('auth.otp.verify')}
                       </button>
                     </form>
@@ -345,7 +398,7 @@ const AuthFlow = () => {
                         type="button"
                         onClick={handleResendOtp}
                         disabled={isLoading || resendCooldown > 0}
-                        className="text-sm font-semibold text-blue-500 hover:text-blue-600 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                        className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                       >
                         {resendCooldown > 0
                           ? t('auth.otp.resendWait', { seconds: resendCooldown })
@@ -353,32 +406,25 @@ const AuthFlow = () => {
                       </button>
                       <button
                         type="button"
-                        onClick={() => { setMode('login'); setErrorMsg(''); setOtpCode(''); }}
-                        className="text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                        onClick={() => { switchMode('login'); setOtpCode(''); }}
+                        className="text-[13px] font-semibold text-gray-500 hover:text-gray-800 transition-colors cursor-pointer"
                       >
                         {t('auth.otp.backToLogin')}
                       </button>
                     </div>
                   </div>
                 ) : mode === 'forgot' ? (
-                  <div className="py-2">
-                    <AnimatePresence>
-                      {errorMsg && (
-                        <motion.div
-                          initial={shouldReduceMotion ? false : { opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={shouldReduceMotion ? {} : { opacity: 0, y: -10 }}
-                          transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-                          role="alert"
-                          className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
-                        >
-                          {errorMsg}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                  <div>
+                    <div className="mb-6">
+                      <h1 className="text-[22px] font-bold tracking-tight text-gray-900 mb-1">{t('auth.title.forgot')}</h1>
+                      <p className="text-sm text-gray-600">{t('auth.subtitle.forgot')}</p>
+                    </div>
+
+                    <ErrorBanner message={errorMsg} reduceMotion={shouldReduceMotion} />
+
                     <form onSubmit={handleForgotPassword} className="space-y-4">
                       <div>
-                        <label htmlFor="forgot-email" className="sr-only">{t('auth.forgot.emailPlaceholder')}</label>
+                        <label htmlFor="forgot-email" className={labelClass}>{t('auth.fields.email')}</label>
                         <input
                           type="email"
                           id="forgot-email"
@@ -387,48 +433,38 @@ const AuthFlow = () => {
                           autoFocus
                           value={formData.email}
                           onChange={handleInputChange}
-                          placeholder={t('auth.forgot.emailPlaceholder')}
+                          placeholder="name@email.com"
                           autoComplete="email"
-                          className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+                          className={inputClass}
                         />
                       </div>
-                      <button
-                        type="submit"
-                        disabled={isLoading || !formData.email}
-                        className="w-full py-3.5 bg-black dark:bg-white text-white dark:text-black text-sm font-bold rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-lg active:scale-[0.98] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-                      >
+                      <button type="submit" disabled={isLoading || !formData.email} className={primaryBtnClass}>
                         {isLoading ? t('auth.forgot.submitting') : t('auth.forgot.submit')}
                       </button>
                     </form>
+
                     <div className="mt-6 flex justify-center">
                       <button
                         type="button"
-                        onClick={() => { setMode('login'); setErrorMsg(''); }}
-                        className="text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                        onClick={() => switchMode('login')}
+                        className="text-[13px] font-semibold text-gray-500 hover:text-gray-800 transition-colors cursor-pointer"
                       >
                         {t('auth.forgot.backToLogin')}
                       </button>
                     </div>
                   </div>
                 ) : mode === 'reset' ? (
-                  <div className="py-2">
-                    <AnimatePresence>
-                      {errorMsg && (
-                        <motion.div
-                          initial={shouldReduceMotion ? false : { opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={shouldReduceMotion ? {} : { opacity: 0, y: -10 }}
-                          transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-                          role="alert"
-                          className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
-                        >
-                          {errorMsg}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                  <div>
+                    <div className="mb-6">
+                      <h1 className="text-[22px] font-bold tracking-tight text-gray-900 mb-1">{t('auth.title.reset')}</h1>
+                      <p className="text-sm text-gray-600">{t('auth.subtitle.reset')}</p>
+                    </div>
+
+                    <ErrorBanner message={errorMsg} reduceMotion={shouldReduceMotion} />
+
                     <form onSubmit={handleResetPassword} className="space-y-4">
                       <div>
-                        <label htmlFor="reset-otp" className="text-[12px] font-medium text-gray-500 dark:text-gray-400 mb-1.5 block text-center">{t('auth.reset.codeLabel')}</label>
+                        <label htmlFor="reset-otp" className={`${labelClass} text-center`}>{t('auth.reset.codeLabel')}</label>
                         <OtpInput
                           value={otpCode}
                           autoFocus
@@ -441,7 +477,7 @@ const AuthFlow = () => {
                       </div>
 
                       <div>
-                        <label htmlFor="reset-password" className="text-[12px] font-medium text-gray-500 dark:text-gray-400 mb-1.5 block">{t('auth.reset.newPasswordLabel')}</label>
+                        <label htmlFor="reset-password" className={labelClass}>{t('auth.reset.newPasswordLabel')}</label>
                         <div className="relative">
                           <input
                             type={showPassword ? 'text' : 'password'}
@@ -450,58 +486,17 @@ const AuthFlow = () => {
                             required
                             value={formData.password}
                             onChange={handleInputChange}
-                            placeholder={t('auth.reset.newPasswordPlaceholder')}
-                            className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 pr-12 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+                            placeholder="••••••••"
+                            autoComplete="new-password"
+                            className={`${inputClass} pr-12`}
                           />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            aria-label={showPassword ? t('auth.password.hide') : t('auth.password.show')}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer disabled:cursor-not-allowed"
-                          >
-                            {showPassword ? <EyeOff size={16} strokeWidth={2.5} /> : <Eye size={16} strokeWidth={2.5} />}
-                          </button>
+                          {passwordToggleBtn}
                         </div>
-
-                        {formData.password.length > 0 && (
-                          <div className="mt-2.5 space-y-2">
-                            <div className="flex gap-1.5">
-                              {[1, 2, 3].map((segment) => {
-                                const strength = getPasswordStrength(formData.password);
-                                let bgClass = 'bg-black/10 dark:bg-white/10';
-                                if (strength >= segment) {
-                                  if (strength === 1) bgClass = 'bg-red-500';
-                                  else if (strength === 2) bgClass = 'bg-yellow-500';
-                                  else bgClass = 'bg-green-500';
-                                }
-                                return (
-                                  <div
-                                    key={segment}
-                                    className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${bgClass}`}
-                                  />
-                                );
-                              })}
-                            </div>
-                            <div className="space-y-1.5 px-1">
-                              {[
-                                { label: t('auth.passwordReq.length'), met: formData.password.length >= 8 },
-                                { label: t('auth.passwordReq.uppercase'), met: /[A-Z]/.test(formData.password) },
-                                { label: t('auth.passwordReq.digit'), met: /[0-9]/.test(formData.password) },
-                              ].map((req, i) => (
-                                <div key={i} className={`flex items-center gap-2 text-[11px] font-medium transition-colors duration-300 ${req.met ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
-                                  <div className={`p-0.5 rounded-full ${req.met ? 'bg-green-100 dark:bg-green-500/20' : 'bg-transparent'}`}>
-                                    {req.met ? <Check size={10} strokeWidth={4} /> : <X size={10} strokeWidth={3} className="opacity-50" />}
-                                  </div>
-                                  <span>{req.label}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                        {formData.password.length > 0 && <PasswordChecklist password={formData.password} t={t} />}
                       </div>
 
                       <div>
-                        <label htmlFor="reset-confirm" className="sr-only">{t('auth.reset.confirmPasswordPlaceholder')}</label>
+                        <label htmlFor="reset-confirm" className={labelClass}>{t('auth.fields.confirmPassword')}</label>
                         <input
                           type={showPassword ? 'text' : 'password'}
                           id="reset-confirm"
@@ -509,226 +504,192 @@ const AuthFlow = () => {
                           required
                           value={formData.confirmPassword}
                           onChange={handleInputChange}
-                          placeholder={t('auth.reset.confirmPasswordPlaceholder')}
-                          className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
+                          placeholder="••••••••"
+                          autoComplete="new-password"
+                          className={inputClass}
                         />
                       </div>
 
                       <button
                         type="submit"
                         disabled={isLoading || otpCode.length !== 6 || !formData.password}
-                        className="w-full py-3.5 mt-2 bg-black dark:bg-white text-white dark:text-black text-sm font-bold rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-lg active:scale-[0.98] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                        className={`${primaryBtnClass} mt-1`}
                       >
                         {isLoading ? t('auth.reset.submitting') : t('auth.reset.submit')}
                       </button>
                     </form>
+
                     <div className="mt-6 flex justify-center">
                       <button
                         type="button"
-                        onClick={() => { setMode('login'); setErrorMsg(''); setOtpCode(''); }}
-                        className="text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                        onClick={() => { switchMode('login'); setOtpCode(''); }}
+                        className="text-[13px] font-semibold text-gray-500 hover:text-gray-800 transition-colors cursor-pointer"
                       >
                         {t('auth.reset.backToLogin')}
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <>
-                    <AnimatePresence>
-                      {errorMsg && (
-                        <motion.div
-                          initial={shouldReduceMotion ? false : { opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={shouldReduceMotion ? {} : { opacity: 0, y: -10 }}
-                          transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
-                          role="alert"
-                          className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold text-center"
-                        >
-                          {errorMsg}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-
-                <form onSubmit={mode === 'login' ? handleLogin : handleRegister} className="space-y-3">
-
-                  {mode === 'register' && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label htmlFor="firstName" className="sr-only">{t('auth.fields.firstName')}</label>
-                        <input
-                          type="text"
-                          id="firstName"
-                          name="firstName"
-                          value={formData.firstName}
-                          onChange={handleInputChange}
-                          placeholder={t('auth.fields.firstName')}
-                          autoComplete="given-name"
-                          className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="lastName" className="sr-only">{t('auth.fields.lastName')}</label>
-                        <input
-                          type="text"
-                          id="lastName"
-                          name="lastName"
-                          value={formData.lastName}
-                          onChange={handleInputChange}
-                          placeholder={t('auth.fields.lastName')}
-                          autoComplete="family-name"
-                          className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
-                        />
-                      </div>
+                  <div>
+                    <div className="mb-5">
+                      <h1 className="text-[22px] font-bold tracking-tight text-gray-900 mb-1">
+                        {mode === 'login' ? t('auth.title.login') : t('auth.title.register')}
+                      </h1>
+                      <p className="text-sm text-gray-600">
+                        {mode === 'login' ? t('auth.subtitle.login') : t('auth.subtitle.register')}
+                      </p>
                     </div>
-                  )}
 
-                  <div>
-                    <label htmlFor="email" className="sr-only">{t('auth.fields.email')}</label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      required
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder={t('auth.fields.email')}
-                      autoComplete="email"
-                      className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
-                    />
-                  </div>
+                    <ErrorBanner message={errorMsg} reduceMotion={shouldReduceMotion} />
 
-                  <div>
-                    <label htmlFor="password" className="sr-only">{t('auth.fields.password')}</label>
-                    <div className="relative">
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        id="password"
-                        name="password"
-                        required
-                        value={formData.password}
-                        onChange={handleInputChange}
-                        placeholder={t('auth.fields.password')}
-                        autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-                        className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 pr-12 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
-                      />
+                    <form onSubmit={mode === 'login' ? handleLogin : handleRegister} className="space-y-3">
+                      {mode === 'register' && (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label htmlFor="firstName" className={labelClass}>{t('auth.fields.firstName')}</label>
+                            <input
+                              type="text"
+                              id="firstName"
+                              name="firstName"
+                              value={formData.firstName}
+                              onChange={handleInputChange}
+                              autoComplete="given-name"
+                              className={inputClass}
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="lastName" className={labelClass}>{t('auth.fields.lastName')}</label>
+                            <input
+                              type="text"
+                              id="lastName"
+                              name="lastName"
+                              value={formData.lastName}
+                              onChange={handleInputChange}
+                              autoComplete="family-name"
+                              className={inputClass}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      <div>
+                        <label htmlFor="email" className={labelClass}>{t('auth.fields.email')}</label>
+                        <input
+                          type="email"
+                          id="email"
+                          name="email"
+                          required
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          placeholder="name@email.com"
+                          autoComplete="email"
+                          className={inputClass}
+                        />
+                      </div>
+
+                      <div>
+                        <div className="flex items-baseline justify-between mb-1">
+                          <label htmlFor="password" className="text-[13px] font-semibold text-gray-700">
+                            {t('auth.fields.password')}
+                          </label>
+                          {mode === 'login' && (
+                            <button
+                              type="button"
+                              onClick={() => switchMode('forgot')}
+                              className="text-[12px] font-semibold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
+                            >
+                              {t('auth.forgotPassword')}
+                            </button>
+                          )}
+                        </div>
+                        <div className="relative">
+                          <input
+                            type={showPassword ? 'text' : 'password'}
+                            id="password"
+                            name="password"
+                            required
+                            value={formData.password}
+                            onChange={handleInputChange}
+                            placeholder="••••••••"
+                            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                            className={`${inputClass} pr-12`}
+                          />
+                          {passwordToggleBtn}
+                        </div>
+                        {mode === 'register' && formData.password.length > 0 && (
+                          <PasswordChecklist password={formData.password} t={t} />
+                        )}
+                      </div>
+
+                      {mode === 'register' && (
+                        <div>
+                          <label htmlFor="confirmPassword" className={labelClass}>{t('auth.fields.confirmPassword')}</label>
+                          <input
+                            type={showPassword ? 'text' : 'password'}
+                            id="confirmPassword"
+                            name="confirmPassword"
+                            required
+                            value={formData.confirmPassword}
+                            onChange={handleInputChange}
+                            placeholder="••••••••"
+                            autoComplete="new-password"
+                            className={inputClass}
+                          />
+                        </div>
+                      )}
+
+                      <button type="submit" disabled={isLoading || isGoogleLoading} className={`${primaryBtnClass} mt-2`}>
+                        {isLoading ? (
+                          t('auth.submit.loading')
+                        ) : (
+                          <>
+                            <span>{mode === 'login' ? t('auth.submit.login') : t('auth.submit.register')}</span>
+                            <ArrowRight size={16} strokeWidth={2.5} />
+                          </>
+                        )}
+                      </button>
+                    </form>
+
+                    <div className="relative flex items-center my-3.5">
+                      <div className="flex-grow border-t border-gray-900/10"></div>
+                      <span className="flex-shrink-0 mx-3 text-gray-500 text-[12px] font-medium">{t('auth.or')}</span>
+                      <div className="flex-grow border-t border-gray-900/10"></div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => googleLoginFn()}
+                      disabled={isLoading || isGoogleLoading}
+                      className="w-full flex items-center justify-center gap-2.5 py-2.5 bg-white border border-gray-900/10 rounded-full text-sm font-semibold text-gray-900 hover:bg-gray-50 transition-all duration-300 shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+                    >
+                      {isGoogleLoading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-900 rounded-full animate-spin"></div>
+                          <span className="opacity-70">{t('auth.googleLoading')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <img src={GoogleIcon} alt="" className="w-[18px] h-[18px]" />
+                          <span>{t('auth.google')}</span>
+                        </>
+                      )}
+                    </button>
+
+                    <p className="mt-4 text-center text-sm text-gray-600">
+                      {mode === 'login' ? t('auth.switch.noAccount') : t('auth.switch.haveAccount')}{' '}
                       <button
                         type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        aria-label={showPassword ? t('auth.password.hide') : t('auth.password.show')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                        onClick={() => switchMode(mode === 'login' ? 'register' : 'login')}
+                        className="font-semibold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
                       >
-                        {showPassword ? <EyeOff size={16} strokeWidth={2.5} /> : <Eye size={16} strokeWidth={2.5} />}
+                        {mode === 'login' ? t('auth.switch.createOne') : t('auth.switch.logIn')}
                       </button>
-                    </div>
-                    {mode === 'login' && (
-                      <div className="mt-2 text-right">
-                        <button
-                          type="button"
-                          onClick={() => { setMode('forgot'); setErrorMsg(''); }}
-                          className="text-xs font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
-                        >
-                          {t('auth.forgotPassword')}
-                        </button>
-                      </div>
-                    )}
-
-                    {mode === 'register' && formData.password.length > 0 && (
-                      <div className="mt-2.5 space-y-2">
-                        <div className="flex gap-1.5">
-                          {[1, 2, 3].map((segment) => {
-                            const strength = getPasswordStrength(formData.password);
-                            let bgClass = 'bg-black/10 dark:bg-white/10';
-                            if (strength >= segment) {
-                              if (strength === 1) bgClass = 'bg-red-500';
-                              else if (strength === 2) bgClass = 'bg-yellow-500';
-                              else bgClass = 'bg-green-500';
-                            }
-                            return (
-                              <div
-                                key={segment}
-                                className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${bgClass}`}
-                              />
-                            );
-                          })}
-                        </div>
-                        <div className="space-y-1.5 px-1">
-                          {[
-                            { label: t('auth.passwordReq.length'), met: formData.password.length >= 8 },
-                            { label: t('auth.passwordReq.uppercase'), met: /[A-Z]/.test(formData.password) },
-                            { label: t('auth.passwordReq.digit'), met: /[0-9]/.test(formData.password) },
-                          ].map((req, i) => (
-                            <div key={i} className={`flex items-center gap-2 text-[11px] font-medium transition-colors duration-300 ${req.met ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
-                              <div className={`p-0.5 rounded-full ${req.met ? 'bg-green-100 dark:bg-green-500/20' : 'bg-transparent'}`}>
-                                {req.met ? <Check size={10} strokeWidth={4} /> : <X size={10} strokeWidth={3} className="opacity-50" />}
-                              </div>
-                              <span>{req.label}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                    </p>
                   </div>
-
-                  {mode === 'register' && (
-                    <div>
-                      <label htmlFor="confirmPassword" className="sr-only">{t('auth.fields.confirmPassword')}</label>
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        required
-                        value={formData.confirmPassword}
-                        onChange={handleInputChange}
-                        placeholder={t('auth.fields.confirmPassword')}
-                        autoComplete="new-password"
-                        className="w-full bg-black/[0.03] dark:bg-white/[0.05] border border-black/5 dark:border-white/10 rounded-xl px-4 py-3 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium"
-                      />
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={isLoading || isGoogleLoading}
-                    className="w-full py-3.5 mt-2 bg-black dark:bg-white text-white dark:text-black text-sm font-bold rounded-xl hover:scale-[1.02] transition-transform duration-300 shadow-lg active:scale-[0.98] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
-                  >
-                    {isLoading
-                      ? t('auth.submit.loading')
-                      : mode === 'login'
-                        ? t('auth.submit.login')
-                        : t('auth.submit.register')}
-                  </button>
-                </form>
-
-                <div className="relative flex items-center my-4">
-                  <div className="flex-grow border-t border-gray-200 dark:border-white/10"></div>
-                  <span className="flex-shrink-0 mx-3 text-gray-400 text-[12px] font-medium">{t('auth.or')}</span>
-                  <div className="flex-grow border-t border-gray-200 dark:border-white/10"></div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => googleLoginFn()}
-                  disabled={isLoading || isGoogleLoading}
-                  className="w-full flex items-center justify-center gap-2.5 py-3 bg-white/40 dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-xl text-sm font-bold text-gray-900 dark:text-white hover:bg-white/80 dark:hover:bg-white/10 hover:scale-[1.02] transition-all duration-300 shadow-sm active:scale-[0.98] disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed glass"
-                >
-                  {isGoogleLoading ? (
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-gray-400 border-t-gray-900 dark:border-white/30 dark:border-t-white rounded-full animate-spin"></div>
-                      <span className="opacity-70">{t('auth.googleLoading')}</span>
-                    </div>
-                  ) : (
-                    <>
-                      <img src={GoogleIcon} alt="Google" className="w-[18px] h-[18px]" />
-                      <span>{t('auth.google')}</span>
-                    </>
-                  )}
-                </button>
-                  </>
                 )}
               </motion.div>
             </AnimatePresence>
-          </div>
-
+          </motion.div>
         </div>
       </div>
     </div>
