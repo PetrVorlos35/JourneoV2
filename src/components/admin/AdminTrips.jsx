@@ -95,18 +95,18 @@ const AdminTrips = () => {
 
       {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: 0.25, ease: 'easeOut' }}
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
             {t('admin.trips.title')}
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1 font-medium">{t('admin.trips.total', { count: pagination.total })}</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1.5 text-sm font-medium">{t('admin.trips.total', { count: pagination.total })}</p>
         </div>
-        
+
         <form onSubmit={handleSearch} className="flex gap-2">
           <div className="relative flex-1 sm:flex-none">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none" />
@@ -116,12 +116,12 @@ const AdminTrips = () => {
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('admin.trips.searchPlaceholder')}
               aria-label={t('admin.trips.searchPlaceholder')}
-              className="pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08] text-sm font-medium focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all w-full sm:w-64 placeholder:text-gray-500 dark:placeholder:text-gray-500"
+              className="pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08] text-sm font-medium focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all w-full sm:w-64 placeholder:text-gray-500 dark:placeholder:text-gray-500"
             />
           </div>
           <button
             type="submit"
-            className="px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-sm font-bold hover:shadow-lg hover:shadow-orange-500/20 transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60"
+            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-sm shadow-blue-500/20 transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
           >
             {t('admin.trips.searchButton')}
           </button>
@@ -130,40 +130,37 @@ const AdminTrips = () => {
 
       {/* Trips Table */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="rounded-2xl border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none backdrop-blur-xl overflow-hidden"
+        transition={{ duration: 0.25, delay: 0.05, ease: 'easeOut' }}
+        className="rounded-2xl border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none overflow-hidden"
       >
         {loading ? (
           <div className="p-4">
             <AdminTableSkeleton rows={8} />
           </div>
         ) : trips.length === 0 ? (
-          <div className="flex items-center justify-center h-64 text-gray-500">
+          <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400 text-sm">
             {t('admin.trips.notFound')}
           </div>
         ) : (
           <>
             {/* Mobile card layout */}
-            <div className="md:hidden divide-y divide-white/[0.04]">
-              {trips.map((trip, i) => (
-                <motion.div
+            <div className="md:hidden divide-y divide-gray-100 dark:divide-white/[0.04]">
+              {trips.map((trip) => (
+                <div
                   key={trip.id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.03 }}
                   onClick={() => handleViewTrip(trip.id)}
-                  className="p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors active:bg-gray-200 dark:active:bg-white/[0.04] cursor-pointer"
+                  className="p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors active:bg-gray-100 dark:active:bg-white/[0.04] cursor-pointer"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-[14px] font-bold truncate">{trip.title}</p>
+                      <p className="text-[14px] font-semibold truncate">{trip.title}</p>
                       <div className="flex items-center gap-2 mt-1.5">
                         <UserAvatar user={{ first_name: trip.user.firstName, last_name: trip.user.lastName, avatar_url: trip.user.avatarUrl }} size="xs" />
                         <span className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{trip.user.firstName ? `${trip.user.firstName} ${trip.user.lastName || ''}` : trip.user.email}</span>
                       </div>
-                      <div className="flex items-center gap-3 mt-2 text-[11px] text-gray-500">
+                      <div className="flex items-center gap-3 mt-2 text-[11px] text-gray-500 dark:text-gray-400">
                         <span className="flex items-center gap-1"><Calendar size={12} /> {trip.durationDays}d</span>
                         <span className="flex items-center gap-1"><DollarSign size={12} /> {trip.totalExpenses.toLocaleString(i18n.language)} Kč</span>
                         <span className="flex items-center gap-1"><Heart size={12} /> {trip.likes}</span>
@@ -180,7 +177,7 @@ const AdminTrips = () => {
                       </button>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
 
@@ -188,7 +185,7 @@ const AdminTrips = () => {
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest border-b border-gray-200 dark:border-white/[0.06]">
+                  <tr className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-white/[0.06]">
                     <th scope="col" className="px-6 py-4">{t('admin.trips.table.trip')}</th>
                     <th scope="col" className="px-4 py-4">{t('admin.trips.table.user')}</th>
                     <th scope="col" className="px-4 py-4">{t('admin.trips.table.period')}</th>
@@ -199,27 +196,24 @@ const AdminTrips = () => {
                     <th scope="col" className="px-4 py-4 text-right">{t('admin.trips.table.actions')}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/[0.04]">
-                  {trips.map((trip, i) => (
-                    <motion.tr
+                <tbody className="divide-y divide-gray-100 dark:divide-white/[0.04]">
+                  {trips.map((trip) => (
+                    <tr
                       key={trip.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.03 }}
                       className="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer"
                       onClick={() => handleViewTrip(trip.id)}
                     >
                       <td className="px-6 py-4">
-                        <span className="text-[13px] font-bold">{trip.title}</span>
+                        <span className="text-[13px] font-semibold">{trip.title}</span>
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-2">
                           <UserAvatar user={{ first_name: trip.user.firstName, last_name: trip.user.lastName, avatar_url: trip.user.avatarUrl }} size="xs" />
                           <div>
-                            <p className="text-[12px] font-bold truncate max-w-[120px]">
+                            <p className="text-[12px] font-semibold truncate max-w-[120px]">
                               {trip.user.firstName ? `${trip.user.firstName} ${trip.user.lastName || ''}` : trip.user.email.split('@')[0]}
                             </p>
-                            <p className="text-[10px] text-gray-500 truncate max-w-[120px]">{trip.user.email}</p>
+                            <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate max-w-[120px]">{trip.user.email}</p>
                           </div>
                         </div>
                       </td>
@@ -227,22 +221,22 @@ const AdminTrips = () => {
                         <span className="text-[12px] text-gray-500 dark:text-gray-400">{trip.startDate} → {trip.endDate}</span>
                       </td>
                       <td className="px-4 py-4">
-                        <span className="text-[13px] font-bold">{trip.durationDays}</span>
+                        <span className="text-[13px] font-semibold tabular-nums">{trip.durationDays}</span>
                       </td>
                       <td className="px-4 py-4 hidden lg:table-cell">
-                        <span className="text-[13px] font-bold">{trip.activityCount}</span>
+                        <span className="text-[13px] font-semibold tabular-nums">{trip.activityCount}</span>
                       </td>
                       <td className="px-4 py-4">
-                        <span className="text-[13px] font-bold text-orange-400">{trip.totalExpenses.toLocaleString(i18n.language)} Kč</span>
+                        <span className="text-[13px] font-semibold tabular-nums">{trip.totalExpenses.toLocaleString(i18n.language)} Kč</span>
                       </td>
                       <td className="px-4 py-4 hidden lg:table-cell">
-                        <span className="text-[13px] font-bold flex items-center gap-1"><Heart size={12} className="text-red-400" /> {trip.likes}</span>
+                        <span className="text-[13px] font-semibold tabular-nums flex items-center gap-1"><Heart size={12} className="text-red-400" /> {trip.likes}</span>
                       </td>
                       <td className="px-4 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 transition-opacity">
                           <button
                             onClick={() => handleViewTrip(trip.id)}
-                            className="p-2 rounded-lg hover:bg-blue-500/10 text-gray-500 dark:text-gray-400 hover:text-blue-400 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                            className="p-2 rounded-lg hover:bg-blue-500/10 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
                             title={t('admin.trips.tooltips.viewTrip')}
                             aria-label={t('admin.trips.tooltips.viewTrip')}
                           >
@@ -258,7 +252,7 @@ const AdminTrips = () => {
                           </button>
                         </div>
                       </td>
-                    </motion.tr>
+                    </tr>
                   ))}
                 </tbody>
               </table>
@@ -269,23 +263,25 @@ const AdminTrips = () => {
         {/* Pagination */}
         {pagination.totalPages > 1 && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-white/[0.06]">
-            <p className="text-[12px] text-gray-500 font-medium">
+            <p className="text-[12px] text-gray-500 dark:text-gray-400 font-medium">
               {t('admin.trips.pageMeta', { page: pagination.page, pages: pagination.totalPages, count: pagination.total })}
             </p>
             <div className="flex gap-1">
               <button
                 onClick={() => fetchTrips(pagination.page - 1, search)}
                 disabled={pagination.page <= 1}
-                className="inline-flex items-center min-h-[44px] px-4 rounded-lg text-[12px] font-bold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60"
+                aria-label={t('admin.trips.prevPage')}
+                className="inline-flex items-center gap-1 min-h-[44px] px-4 rounded-xl text-[12px] font-semibold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
               >
-                {t('admin.trips.prevPage')}
+                <ChevronLeft size={15} /> {t('admin.trips.prevPage').replace('← ', '')}
               </button>
               <button
                 onClick={() => fetchTrips(pagination.page + 1, search)}
                 disabled={pagination.page >= pagination.totalPages}
-                className="inline-flex items-center min-h-[44px] px-4 rounded-lg text-[12px] font-bold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60"
+                aria-label={t('admin.trips.nextPage')}
+                className="inline-flex items-center gap-1 min-h-[44px] px-4 rounded-xl text-[12px] font-semibold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
               >
-                {t('admin.trips.nextPage')}
+                {t('admin.trips.nextPage').replace(' →', '')} <ChevronRight size={15} />
               </button>
             </div>
           </div>
@@ -337,14 +333,14 @@ const AdminTrips = () => {
                     <button
                       onClick={() => setSelectedTrip(null)}
                       aria-label={t('admin.close')}
-                      className="absolute top-6 right-6 p-2.5 rounded-full bg-gray-100 dark:bg-white/[0.06] hover:bg-gray-200 dark:hover:bg-white/[0.12] transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60"
+                      className="absolute top-6 right-6 p-2.5 rounded-full bg-gray-100 dark:bg-white/[0.06] hover:bg-gray-200 dark:hover:bg-white/[0.12] transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
                     >
                       <X size={16} className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
                     </button>
 
                     {/* Trip Header */}
                     <div className="pt-2">
-                      <h2 className="text-2xl font-black tracking-tight pr-12">{selectedTrip.title}</h2>
+                      <h2 className="text-2xl font-bold tracking-tight pr-12">{selectedTrip.title}</h2>
                       <div className="flex items-center gap-3 mt-3 flex-wrap">
                         <span className="text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5 bg-gray-100 dark:bg-white/[0.04] px-3 py-1.5 rounded-lg">
                           <Calendar size={13} /> {selectedTrip.startDate} → {selectedTrip.endDate}
@@ -352,7 +348,7 @@ const AdminTrips = () => {
                         <span className="text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5 bg-gray-100 dark:bg-white/[0.04] px-3 py-1.5 rounded-lg">
                           <Clock size={13} /> {selectedTrip.durationDays} {t('admin.trips.detail.daysLabel')}
                         </span>
-                        <span className="text-[12px] text-red-400 flex items-center gap-1.5 bg-red-500/10 px-3 py-1.5 rounded-lg font-bold">
+                        <span className="text-[12px] text-red-500 dark:text-red-400 flex items-center gap-1.5 bg-red-500/10 px-3 py-1.5 rounded-lg font-semibold">
                           <Heart size={13} /> {selectedTrip.likes}
                         </span>
                       </div>
@@ -360,10 +356,10 @@ const AdminTrips = () => {
                       <div className="flex items-center gap-3 mt-4 p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <UserAvatar user={{ first_name: selectedTrip.user?.firstName, last_name: selectedTrip.user?.lastName, avatar_url: selectedTrip.user?.avatarUrl }} size="sm" />
                         <div>
-                          <p className="text-[12px] font-bold">
+                          <p className="text-[12px] font-semibold">
                             {selectedTrip.user?.firstName ? `${selectedTrip.user.firstName} ${selectedTrip.user.lastName || ''}` : selectedTrip.user?.email}
                           </p>
-                          <p className="text-[11px] text-gray-500">{selectedTrip.user?.email}</p>
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400">{selectedTrip.user?.email}</p>
                         </div>
                       </div>
                     </div>
@@ -371,43 +367,43 @@ const AdminTrips = () => {
                     {/* Stats row */}
                     <div className="grid grid-cols-4 gap-2">
                       <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
-                        <p className="text-lg font-black">{selectedTrip.activities?.length || 0}</p>
-                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">{t('admin.trips.detail.daysLabel')}</p>
+                        <p className="text-lg font-bold tabular-nums">{selectedTrip.activities?.length || 0}</p>
+                        <p className="text-[9px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">{t('admin.trips.detail.daysLabel')}</p>
                       </div>
                       <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
-                        <p className="text-lg font-black text-orange-400">{totalTripExpenses(selectedTrip).toLocaleString(i18n.language)}</p>
-                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">Kč</p>
+                        <p className="text-lg font-bold tabular-nums text-blue-600 dark:text-blue-400">{totalTripExpenses(selectedTrip).toLocaleString(i18n.language)}</p>
+                        <p className="text-[9px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">Kč</p>
                       </div>
                       <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
-                        <p className="text-lg font-black">{selectedTrip.packingList?.length || 0}</p>
-                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">{t('admin.trips.detail.packingLabel')}</p>
+                        <p className="text-lg font-bold tabular-nums">{selectedTrip.packingList?.length || 0}</p>
+                        <p className="text-[9px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">{t('admin.trips.detail.packingLabel')}</p>
                       </div>
                       <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
-                        <p className="text-lg font-black">{selectedTrip.documents?.length || 0}</p>
-                        <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">{t('admin.trips.detail.notesLabel')}</p>
+                        <p className="text-lg font-bold tabular-nums">{selectedTrip.documents?.length || 0}</p>
+                        <p className="text-[9px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">{t('admin.trips.detail.notesLabel')}</p>
                       </div>
                     </div>
 
                     {/* Itinerary / Activities */}
                     {selectedTrip.activities?.length > 0 && (
                       <div>
-                        <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <h3 className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                           <MapPin size={13} /> {t('tripDetail.tabs.itinerary')} ({selectedTrip.activities.length} {t('admin.trips.detail.daysLabel')})
                         </h3>
                         <div className="space-y-2">
                           {selectedTrip.activities.map((a, i) => (
                             <div key={a.id} className="p-4 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                               <div className="flex items-start gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-orange-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                                  <span className="text-[11px] font-black text-orange-500 dark:text-orange-400">{i + 1}</span>
+                                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                                  <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 tabular-nums">{i + 1}</span>
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-center justify-between gap-2">
-                                    <p className="text-[13px] font-bold truncate">{a.title || `Den ${i + 1}`}</p>
-                                    <span className="text-[10px] text-gray-500 shrink-0">{a.date}</span>
+                                    <p className="text-[13px] font-semibold truncate">{a.title || `Den ${i + 1}`}</p>
+                                    <span className="text-[10px] text-gray-500 dark:text-gray-400 shrink-0">{a.date}</span>
                                   </div>
                                   {a.location && (
-                                    <p className="text-[11px] text-orange-400 mt-0.5 flex items-center gap-1">
+                                    <p className="text-[11px] text-blue-600 dark:text-blue-400 mt-0.5 flex items-center gap-1">
                                       <MapPin size={10} /> {a.location}
                                     </p>
                                   )}
@@ -425,7 +421,7 @@ const AdminTrips = () => {
                     {/* Expenses */}
                     {selectedTrip.expenses?.length > 0 && (
                       <div>
-                        <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <h3 className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                           <DollarSign size={13} /> {t('budget.title')} ({selectedTrip.expenses.length} {t('budget.items')} · {totalTripExpenses(selectedTrip).toLocaleString(i18n.language)} Kč)
                         </h3>
                         <div className="space-y-1.5">
@@ -436,10 +432,10 @@ const AdminTrips = () => {
                               <div key={e.id} className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                                 <span className="text-lg">{catEmoji}</span>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-[12px] font-bold truncate">{e.description}</p>
-                                  <p className="text-[10px] text-gray-500">{catLabel}{e.date ? ` · ${e.date}` : ''}</p>
+                                  <p className="text-[12px] font-semibold truncate">{e.description}</p>
+                                  <p className="text-[10px] text-gray-500 dark:text-gray-400">{catLabel}{e.date ? ` · ${e.date}` : ''}</p>
                                 </div>
-                                <span className="text-[13px] font-bold text-orange-400 shrink-0">{e.amount.toLocaleString(i18n.language)} Kč</span>
+                                <span className="text-[13px] font-semibold tabular-nums shrink-0">{e.amount.toLocaleString(i18n.language)} Kč</span>
                               </div>
                             );
                           })}
@@ -450,15 +446,15 @@ const AdminTrips = () => {
                     {/* Packing List */}
                     {selectedTrip.packingList?.length > 0 && (
                       <div>
-                        <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <h3 className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                           <Package size={13} /> {t('admin.trips.detail.packingLabel')} ({selectedTrip.packingList.filter(p => p.checked).length}/{selectedTrip.packingList.length})
                         </h3>
                         <div className="grid grid-cols-2 gap-1.5">
                           {selectedTrip.packingList.map(p => (
                             <div key={p.id} className={`flex items-center gap-2 p-2.5 rounded-lg text-[12px] ${
-                              p.checked ? 'text-gray-500 line-through bg-gray-50 dark:bg-white/[0.02]' : 'text-gray-600 dark:text-gray-300 bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none'
+                              p.checked ? 'text-gray-500 dark:text-gray-400 line-through bg-gray-50 dark:bg-white/[0.02]' : 'text-gray-600 dark:text-gray-300 bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none'
                             }`}>
-                              {p.checked ? <CheckSquare size={14} className="text-green-500 shrink-0" /> : <Square size={14} className="text-gray-600 shrink-0" />}
+                              {p.checked ? <CheckSquare size={14} className="text-green-500 shrink-0" /> : <Square size={14} className="text-gray-400 dark:text-gray-600 shrink-0" />}
                               <span className="truncate">{p.text}</span>
                             </div>
                           ))}
@@ -469,13 +465,13 @@ const AdminTrips = () => {
                     {/* Documents */}
                     {selectedTrip.documents?.length > 0 && (
                       <div>
-                        <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <h3 className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                           <FileText size={13} /> {t('admin.trips.detail.notesLabel')} ({selectedTrip.documents.length})
                         </h3>
                         <div className="space-y-2">
                           {selectedTrip.documents.map(d => (
                             <div key={d.id} className="p-4 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
-                              <p className="text-[13px] font-bold mb-2">{d.title}</p>
+                              <p className="text-[13px] font-semibold mb-2">{d.title}</p>
                               <p className="text-[12px] text-gray-500 dark:text-gray-400 leading-relaxed whitespace-pre-wrap">{d.content}</p>
                             </div>
                           ))}
@@ -495,7 +491,7 @@ const AdminTrips = () => {
                     <div className="pt-4 border-t border-gray-200 dark:border-white/[0.06]">
                       <button
                         onClick={() => handleDeleteTrip(selectedTrip.id, selectedTrip.title)}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors font-bold text-[13px] cursor-pointer"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors font-semibold text-[13px] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60"
                       >
                         <Trash2 size={16} />
                         {t('admin.trips.detail.deleteButton')}

@@ -1338,9 +1338,6 @@
     },
     "close": "Close"
   },
-  "dashboardSplash": {
-    "tagline": "Your travel diary"
-  },
   "common": {
     "loading": "Loading...",
     "error": "Something went wrong.",

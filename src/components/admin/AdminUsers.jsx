@@ -12,6 +12,14 @@ import { useAuth } from '../../contexts/AuthContext';
 import Skeleton, { AdminTableSkeleton } from '../ui/Skeletons';
 import useSlideOverA11y from '../../hooks/useSlideOverA11y';
 
+const RoleChip = ({ role }) => (
+  <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+    role === 'admin' ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400' : 'bg-gray-100 dark:bg-white/[0.06] text-gray-500 dark:text-gray-400'
+  }`}>
+    {role}
+  </span>
+);
+
 const AdminUsers = () => {
   const { user: currentUser } = useAuth();
   const { t, i18n } = useTranslation();
@@ -110,18 +118,18 @@ const AdminUsers = () => {
 
       {/* Header */}
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+        transition={{ duration: 0.25, ease: 'easeOut' }}
         className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
       >
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
             {t('admin.users.title')}
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1 font-medium">{t('admin.users.total', { count: pagination.total })}</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1.5 text-sm font-medium">{t('admin.users.total', { count: pagination.total })}</p>
         </div>
-        
+
         <form onSubmit={handleSearch} className="flex gap-2">
           <div className="relative flex-1 sm:flex-none">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none" />
@@ -131,12 +139,12 @@ const AdminUsers = () => {
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('admin.users.searchPlaceholder')}
               aria-label={t('admin.users.searchPlaceholder')}
-              className="pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08] text-sm font-medium focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/20 transition-all w-full sm:w-64 placeholder:text-gray-500 dark:placeholder:text-gray-500"
+              className="pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08] text-sm font-medium focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all w-full sm:w-64 placeholder:text-gray-500 dark:placeholder:text-gray-500"
             />
           </div>
           <button
             type="submit"
-            className="px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-sm font-bold hover:shadow-lg hover:shadow-orange-500/20 transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60"
+            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-sm shadow-blue-500/20 transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
           >
             {t('admin.users.searchButton')}
           </button>
@@ -145,63 +153,60 @@ const AdminUsers = () => {
 
       {/* Users Table */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="rounded-2xl border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none backdrop-blur-xl overflow-hidden"
+        transition={{ duration: 0.25, delay: 0.05, ease: 'easeOut' }}
+        className="rounded-2xl border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none overflow-hidden"
       >
         {loading ? (
           <div className="p-4">
             <AdminTableSkeleton rows={8} />
           </div>
         ) : users.length === 0 ? (
-          <div className="flex items-center justify-center h-64 text-gray-500">
+          <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400 text-sm">
             {t('admin.users.notFound')}
           </div>
         ) : (
           <>
             {/* Mobile card layout */}
-            <div className="md:hidden divide-y divide-white/[0.04]">
-              {users.map((u, i) => (
-                <motion.div
+            <div className="md:hidden divide-y divide-gray-100 dark:divide-white/[0.04]">
+              {users.map((u) => (
+                <div
                   key={u.id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.03 }}
                   onClick={() => handleViewUser(u.id)}
-                  className="p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors active:bg-gray-200 dark:active:bg-white/[0.04] cursor-pointer"
+                  className="p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors active:bg-gray-100 dark:active:bg-white/[0.04] cursor-pointer"
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <UserAvatar user={{ first_name: u.firstName, last_name: u.lastName, avatar_url: u.avatarUrl }} size="md" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="text-[14px] font-bold truncate">
+                          <p className="text-[14px] font-semibold truncate">
                             {u.firstName ? `${u.firstName} ${u.lastName || ''}` : u.email.split('@')[0]}
                           </p>
                           {u.role === 'admin' && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-orange-500/20 text-orange-400 rounded-full">admin</span>
+                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-amber-500/15 text-amber-600 dark:text-amber-400 rounded-full">admin</span>
                           )}
                           {isSelf(u.id) && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-blue-500/20 text-blue-400 rounded-full">ty</span>
+                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-blue-500/15 text-blue-600 dark:text-blue-400 rounded-full">{t('admin.users.you')}</span>
                           )}
                         </div>
-                        <p className="text-[12px] text-gray-500 truncate">{u.email}</p>
-                        <div className="flex items-center gap-3 mt-1.5 text-[11px] text-gray-500">
+                        <p className="text-[12px] text-gray-500 dark:text-gray-400 truncate">{u.email}</p>
+                        <div className="flex items-center gap-3 mt-1.5 text-[11px] text-gray-500 dark:text-gray-400">
                           <span>{u.tripCount} {t('admin.users.table.trips')}</span>
                           <span>{u.friendCount} {t('admin.users.table.friends')}</span>
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Action buttons on mobile (tapping the card opens detail) */}
                     {!isSelf(u.id) && (
                       <div className="flex flex-col gap-2 shrink-0">
                         <button
                           onClick={(e) => { e.stopPropagation(); handleChangeRole(u.id, u.role); }}
                           aria-label={u.role === 'admin' ? t('admin.users.tooltips.revokeAdmin') : t('admin.users.tooltips.grantAdmin')}
-                          className={`w-11 h-11 rounded-full flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60 ${
-                            u.role === 'admin' ? 'bg-red-500/10 text-red-400' : 'bg-orange-500/10 text-orange-400'
+                          className={`w-11 h-11 rounded-full flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 ${
+                            u.role === 'admin' ? 'bg-red-500/10 text-red-500' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
                           }`}
                         >
                           <Shield size={16} />
@@ -216,7 +221,7 @@ const AdminUsers = () => {
                       </div>
                     )}
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
 
@@ -224,7 +229,7 @@ const AdminUsers = () => {
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left text-[11px] font-bold text-gray-500 uppercase tracking-widest border-b border-gray-200 dark:border-white/[0.06]">
+                  <tr className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-white/[0.06]">
                     <th scope="col" className="px-6 py-4">{t('admin.users.table.user')}</th>
                     <th scope="col" className="px-4 py-4">{t('admin.users.table.email')}</th>
                     <th scope="col" className="px-4 py-4">{t('admin.users.table.role')}</th>
@@ -234,13 +239,10 @@ const AdminUsers = () => {
                     <th scope="col" className="px-4 py-4 text-right">{t('admin.users.table.actions')}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/[0.04]">
-                  {users.map((u, i) => (
-                    <motion.tr
+                <tbody className="divide-y divide-gray-100 dark:divide-white/[0.04]">
+                  {users.map((u) => (
+                    <tr
                       key={u.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.03 }}
                       className="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer"
                       onClick={() => handleViewUser(u.id)}
                     >
@@ -248,11 +250,11 @@ const AdminUsers = () => {
                         <div className="flex items-center gap-3">
                           <UserAvatar user={{ first_name: u.firstName, last_name: u.lastName, avatar_url: u.avatarUrl }} size="sm" />
                           <div className="flex items-center gap-2">
-                            <span className="text-[13px] font-bold truncate max-w-[140px]">
+                            <span className="text-[13px] font-semibold truncate max-w-[140px]">
                               {u.firstName ? `${u.firstName} ${u.lastName || ''}` : u.email.split('@')[0]}
                             </span>
                             {isSelf(u.id) && (
-                              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-blue-500/20 text-blue-400 rounded-full shrink-0">{t('admin.users.you')}</span>
+                              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-blue-500/15 text-blue-600 dark:text-blue-400 rounded-full shrink-0">{t('admin.users.you')}</span>
                             )}
                           </div>
                         </div>
@@ -261,26 +263,22 @@ const AdminUsers = () => {
                         <span className="text-[13px] text-gray-500 dark:text-gray-400">{u.email}</span>
                       </td>
                       <td className="px-4 py-4">
-                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
-                          u.role === 'admin' ? 'bg-orange-500/20 text-orange-400' : 'bg-gray-100 dark:bg-white/[0.06] text-gray-500 dark:text-gray-400'
-                        }`}>
-                          {u.role}
-                        </span>
+                        <RoleChip role={u.role} />
                       </td>
                       <td className="px-4 py-4">
-                        <span className="text-[13px] font-bold">{u.tripCount}</span>
+                        <span className="text-[13px] font-semibold tabular-nums">{u.tripCount}</span>
                       </td>
                       <td className="px-4 py-4 hidden lg:table-cell">
-                        <span className="text-[13px] font-bold">{u.friendCount}</span>
+                        <span className="text-[13px] font-semibold tabular-nums">{u.friendCount}</span>
                       </td>
                       <td className="px-4 py-4 hidden xl:table-cell">
-                        <span className="text-[12px] text-gray-500">{new Date(u.createdAt).toLocaleDateString(i18n.language)}</span>
+                        <span className="text-[12px] text-gray-500 dark:text-gray-400">{new Date(u.createdAt).toLocaleDateString(i18n.language)}</span>
                       </td>
                       <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 transition-opacity">
                           <button
                             onClick={() => handleViewUser(u.id)}
-                            className="p-2 rounded-lg hover:bg-blue-500/10 text-gray-500 dark:text-gray-400 hover:text-blue-400 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                            className="p-2 rounded-lg hover:bg-blue-500/10 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
                             title={t('admin.users.tooltips.viewUser')}
                             aria-label={t('admin.users.tooltips.viewUser')}
                           >
@@ -290,10 +288,10 @@ const AdminUsers = () => {
                           {!isSelf(u.id) && (
                             <button
                               onClick={() => handleChangeRole(u.id, u.role)}
-                              className={`p-2 rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60 ${
+                              className={`p-2 rounded-lg transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 ${
                                 u.role === 'admin'
-                                  ? 'hover:bg-red-500/10 text-gray-500 hover:text-red-400'
-                                  : 'hover:bg-orange-500/10 text-gray-500 hover:text-orange-400'
+                                  ? 'hover:bg-red-500/10 text-gray-500 dark:text-gray-400 hover:text-red-500'
+                                  : 'hover:bg-amber-500/10 text-gray-500 dark:text-gray-400 hover:text-amber-600 dark:hover:text-amber-400'
                               }`}
                               title={u.role === 'admin' ? t('admin.users.tooltips.revokeAdmin') : t('admin.users.tooltips.grantAdmin')}
                               aria-label={u.role === 'admin' ? t('admin.users.tooltips.revokeAdmin') : t('admin.users.tooltips.grantAdmin')}
@@ -304,7 +302,7 @@ const AdminUsers = () => {
                           {!isSelf(u.id) && (
                             <button
                               onClick={() => handleDeleteUser(u.id, u.email)}
-                              className="p-2 rounded-lg hover:bg-red-500/10 text-gray-500 hover:text-red-500 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60"
+                              className="p-2 rounded-lg hover:bg-red-500/10 text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60"
                               title={t('admin.users.tooltips.deleteUser')}
                               aria-label={t('admin.users.tooltips.deleteUser')}
                             >
@@ -313,7 +311,7 @@ const AdminUsers = () => {
                           )}
                         </div>
                       </td>
-                    </motion.tr>
+                    </tr>
                   ))}
                 </tbody>
               </table>
@@ -324,23 +322,25 @@ const AdminUsers = () => {
         {/* Pagination */}
         {pagination.totalPages > 1 && (
           <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-white/[0.06]">
-            <p className="text-[12px] text-gray-500 font-medium">
+            <p className="text-[12px] text-gray-500 dark:text-gray-400 font-medium">
               {t('admin.users.pageMeta', { page: pagination.page, pages: pagination.totalPages, count: pagination.total })}
             </p>
             <div className="flex gap-1">
               <button
                 onClick={() => fetchUsers(pagination.page - 1, search)}
                 disabled={pagination.page <= 1}
-                className="inline-flex items-center min-h-[44px] px-4 rounded-lg text-[12px] font-bold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60"
+                aria-label={t('admin.users.prevPage')}
+                className="inline-flex items-center gap-1 min-h-[44px] px-4 rounded-xl text-[12px] font-semibold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
               >
-                {t('admin.users.prevPage')}
+                <ChevronLeft size={15} /> {t('admin.users.prevPage').replace('← ', '')}
               </button>
               <button
                 onClick={() => fetchUsers(pagination.page + 1, search)}
                 disabled={pagination.page >= pagination.totalPages}
-                className="inline-flex items-center min-h-[44px] px-4 rounded-lg text-[12px] font-bold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60"
+                aria-label={t('admin.users.nextPage')}
+                className="inline-flex items-center gap-1 min-h-[44px] px-4 rounded-xl text-[12px] font-semibold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
               >
-                {t('admin.users.nextPage')}
+                {t('admin.users.nextPage').replace(' →', '')} <ChevronRight size={15} />
               </button>
             </div>
           </div>
@@ -397,7 +397,7 @@ const AdminUsers = () => {
                     <button
                       onClick={() => setSelectedUser(null)}
                       aria-label={t('admin.close')}
-                      className="absolute top-6 right-6 p-2.5 rounded-full bg-gray-100 dark:bg-white/[0.06] hover:bg-gray-200 dark:hover:bg-white/[0.12] transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500/60"
+                      className="absolute top-6 right-6 p-2.5 rounded-full bg-gray-100 dark:bg-white/[0.06] hover:bg-gray-200 dark:hover:bg-white/[0.12] transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
                     >
                       <X size={16} className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
                     </button>
@@ -407,23 +407,19 @@ const AdminUsers = () => {
                       <div className="relative">
                         <UserAvatar user={{ first_name: selectedUser.firstName, last_name: selectedUser.lastName, avatar_url: selectedUser.avatarUrl }} size="lg" />
                         {selectedUser.role === 'admin' && (
-                          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center border-2 border-[#111113]">
+                          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center border-2 border-white dark:border-[#111113]">
                             <Shield size={10} className="text-white" />
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h2 className="text-xl font-black truncate">
+                        <h2 className="text-xl font-bold tracking-tight truncate">
                           {selectedUser.firstName ? `${selectedUser.firstName} ${selectedUser.lastName || ''}` : t('admin.users.detail.noName')}
                         </h2>
                         <p className="text-gray-500 dark:text-gray-400 text-sm truncate">{selectedUser.email}</p>
                         <div className="flex items-center gap-2 mt-2.5 flex-wrap">
-                          <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
-                            selectedUser.role === 'admin' ? 'bg-orange-500/20 text-orange-400' : 'bg-gray-100 dark:bg-white/[0.06] text-gray-500 dark:text-gray-400'
-                          }`}>
-                            {selectedUser.role}
-                          </span>
-                          <span className="text-[11px] text-gray-500 flex items-center gap-1">
+                          <RoleChip role={selectedUser.role} />
+                          <span className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1">
                             <Calendar size={12} />
                             {new Date(selectedUser.createdAt).toLocaleDateString(i18n.language, { day: 'numeric', month: 'long', year: 'numeric' })}
                           </span>
@@ -440,37 +436,37 @@ const AdminUsers = () => {
                     {/* Stats row */}
                     <div className="grid grid-cols-3 gap-3">
                       <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
-                        <p className="text-xl font-black">{selectedUser.trips?.length || 0}</p>
-                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">{t('admin.users.detail.trips')}</p>
+                        <p className="text-xl font-bold tabular-nums">{selectedUser.trips?.length || 0}</p>
+                        <p className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">{t('admin.users.detail.trips')}</p>
                       </div>
                       <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
-                        <p className="text-xl font-black">{selectedUser.friends?.length || 0}</p>
-                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">{t('admin.users.detail.friends')}</p>
+                        <p className="text-xl font-bold tabular-nums">{selectedUser.friends?.length || 0}</p>
+                        <p className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">{t('admin.users.detail.friends')}</p>
                       </div>
                       <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
-                        <p className="text-xl font-black text-orange-400">
+                        <p className="text-xl font-bold tabular-nums text-blue-600 dark:text-blue-400">
                           {selectedUser.trips?.reduce((sum, trip) => sum + trip.totalExpenses, 0).toLocaleString(i18n.language) || 0}
                         </p>
-                        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-0.5">{t('admin.users.detail.totalCzk')}</p>
+                        <p className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">{t('admin.users.detail.totalCzk')}</p>
                       </div>
                     </div>
 
                     {/* User's Trips */}
                     <div>
-                      <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                      <h3 className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                         <MapPin size={13} /> {t('admin.users.detail.trips')} ({selectedUser.trips?.length || 0})
                       </h3>
                       <div className="space-y-2">
                         {selectedUser.trips?.length > 0 ? selectedUser.trips.map(trip => (
-                          <div key={trip.id} className="p-4 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06] hover:border-gray-300 dark:hover:border-white/[0.12] transition-all duration-200">
+                          <div key={trip.id} className="p-4 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06] hover:border-gray-300 dark:hover:border-white/[0.12] transition-colors duration-200">
                             <div className="flex items-center justify-between">
                               <div className="min-w-0 flex-1">
-                                <p className="text-[13px] font-bold truncate">{trip.title}</p>
-                                <p className="text-[11px] text-gray-500 mt-0.5">{trip.startDate} → {trip.endDate}</p>
+                                <p className="text-[13px] font-semibold truncate">{trip.title}</p>
+                                <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5">{trip.startDate} → {trip.endDate}</p>
                               </div>
                               <div className="text-right shrink-0 ml-3">
-                                <p className="text-[13px] font-bold text-orange-400">{trip.totalExpenses.toLocaleString(i18n.language)} Kč</p>
-                                <p className="text-[11px] text-gray-500 flex items-center justify-end gap-1"><Heart size={10} /> {trip.likes}</p>
+                                <p className="text-[13px] font-semibold tabular-nums">{trip.totalExpenses.toLocaleString(i18n.language)} Kč</p>
+                                <p className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center justify-end gap-1"><Heart size={10} /> {trip.likes}</p>
                               </div>
                             </div>
                           </div>
@@ -484,7 +480,7 @@ const AdminUsers = () => {
 
                     {/* User's Friends */}
                     <div>
-                      <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+                      <h3 className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
                         <Users size={13} /> {t('admin.users.detail.friends')} ({selectedUser.friends?.length || 0})
                       </h3>
                       <div className="space-y-1.5">
@@ -492,8 +488,8 @@ const AdminUsers = () => {
                           <div key={f.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-white/[0.03] transition-colors">
                             <UserAvatar user={{ first_name: f.firstName, last_name: f.lastName, avatar_url: f.avatarUrl }} size="sm" />
                             <div className="min-w-0">
-                              <p className="text-[13px] font-bold truncate">{f.firstName ? `${f.firstName} ${f.lastName || ''}` : f.email}</p>
-                              <p className="text-[11px] text-gray-500 truncate">{f.email}</p>
+                              <p className="text-[13px] font-semibold truncate">{f.firstName ? `${f.firstName} ${f.lastName || ''}` : f.email}</p>
+                              <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{f.email}</p>
                             </div>
                           </div>
                         )) : (

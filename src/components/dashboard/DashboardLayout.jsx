@@ -174,7 +174,14 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
   handleNavigationRef.current = (path) => handleNavigation(path);
 
   useEffect(() => {
-    const NAV_SHORTCUTS = { h: '/dashboard', t: '/dashboard/all-trips', s: '/dashboard/statistics', f: '/dashboard/friends', b: '/dashboard/budget' };
+    const NAV_SHORTCUTS = {
+      h: '/dashboard',
+      t: '/dashboard/all-trips',
+      s: '/dashboard/statistics',
+      f: '/dashboard/friends',
+      b: '/dashboard/budget',
+      ...(isAdmin ? { a: '/admin' } : {}),
+    };
     const onKey = (e) => {
       // Inside text fields nothing fires app-side — the browser's native
       // text-undo must keep working for Cmd/Ctrl+Z.
@@ -197,7 +204,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, []);
+  }, [isAdmin]);
 
   return (
     <div className="h-[100dvh] overflow-hidden bg-[#fbfbfd] dark:bg-black text-gray-900 dark:text-[#f5f5f7] flex selection:bg-blue-500/30 font-sans relative transition-colors duration-500">
@@ -307,16 +314,6 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
               <LogOut size={20} strokeWidth={2} />
               <span>{t('dashboardLayout.dialogs.logout.confirm')}</span>
             </button>
-
-            {isAdmin && (
-              <Link
-                to="/admin"
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-300 active:scale-95 font-semibold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
-              >
-                <Shield size={20} strokeWidth={2} className="text-amber-500/80" />
-                <span>{t('dashboardLayout.nav.admin')}</span>
-              </Link>
-            )}
           </div>
         </aside>
       </div>
@@ -433,16 +430,6 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
                   <LogOut size={20} strokeWidth={2.5} />
                   <span>{t('dashboardLayout.dialogs.logout.confirm')}</span>
                 </button>
-                {isAdmin && (
-                  <Link
-                    to="/admin"
-                    onClick={closeMobile}
-                    className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-white/15 transition-all font-bold mt-3"
-                  >
-                    <Shield size={20} strokeWidth={2.5} className="text-amber-500/80" />
-                    <span>{t('dashboardLayout.nav.admin')}</span>
-                  </Link>
-                )}
               </div>
             </motion.aside>
           </div>
@@ -462,6 +449,16 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
             <span className="font-bold text-lg tracking-tight mt-0.5">Journeo</span>
           </div>
           <div className="flex items-center gap-1">
+            {isAdmin && (
+              <Link
+                to="/admin"
+                onClick={(e) => handleNavigation('/admin', e)}
+                aria-label={t('dashboardLayout.nav.admin')}
+                className="w-10 h-10 flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors text-amber-500 cursor-pointer"
+              >
+                <Shield size={20} strokeWidth={2.25} />
+              </Link>
+            )}
             <NotificationBell />
             <button onClick={() => setMobileOpen(true)} className="w-10 h-10 flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors text-gray-900 dark:text-white cursor-pointer disabled:cursor-not-allowed">
               <Menu size={24} strokeWidth={2.5} />
@@ -469,8 +466,21 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
           </div>
         </div>
 
-        {/* ── Desktop Floating Notification Bell ── */}
-        <div className="hidden md:block fixed top-6 right-6 z-50">
+        {/* ── Desktop Floating Actions (Admin entry + Notification Bell) ── */}
+        <div className="hidden md:flex fixed top-6 right-6 z-50 items-center gap-2">
+          {isAdmin && (
+            <Link
+              to="/admin"
+              onClick={(e) => handleNavigation('/admin', e)}
+              title={t('dashboardLayout.nav.admin')}
+              aria-label={t('dashboardLayout.nav.admin')}
+              className="group glass-nav flex items-center gap-2 h-10 px-3.5 rounded-2xl text-[13px] font-semibold text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+            >
+              <Shield size={15} strokeWidth={2.25} className="text-amber-500" />
+              <span>Admin</span>
+              <kbd className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-200/60 dark:bg-white/[0.07] text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity">A</kbd>
+            </Link>
+          )}
           <NotificationBell />
         </div>
 

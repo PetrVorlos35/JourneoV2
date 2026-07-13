@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import AdminLayout from './AdminLayout';
 import { Toaster } from 'react-hot-toast';
+import { useTheme } from '../../contexts/ThemeContext';
 import { AdminDashboardSkeleton, AdminTableSkeleton } from '../ui/Skeletons';
 
 const AdminDashboard = lazy(() => import('./AdminDashboard'));
@@ -24,6 +25,9 @@ const AdminTableLoading = () => (
 );
 
 const AdminHome = () => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
   return (
     <AdminLayout>
       <Toaster
@@ -31,11 +35,11 @@ const AdminHome = () => {
         containerStyle={{ zIndex: 99999 }}
         toastOptions={{
           style: {
-            background: '#1C1C1E',
-            color: '#f5f5f7',
+            background: isDark ? '#1C1C1E' : '#fff',
+            color: isDark ? '#f5f5f7' : '#111827',
             borderRadius: '1rem',
-            boxShadow: '0 10px 15px -3px rgba(0,0,0,0.4)',
-            border: '1px solid rgba(255,255,255,0.1)',
+            boxShadow: isDark ? '0 10px 15px -3px rgba(0,0,0,0.4)' : '0 10px 15px -3px rgba(0,0,0,0.1)',
+            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.05)',
           },
         }}
       />
