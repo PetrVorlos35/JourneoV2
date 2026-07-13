@@ -61,6 +61,30 @@
       "note": "your next trip, sorted",
       "newBadge": "New in"
     },
+    "float": {
+      "packing": {
+        "progress": "7 of 10 packed",
+        "items": ["Passport", "Camera", "Flip flops"]
+      },
+      "ticket": {
+        "label": "Boarding pass",
+        "date": "Oct 12",
+        "seat": "Seat 14A"
+      },
+      "weather": "24° in Kyoto"
+    },
+    "marquee": [
+      "🇯🇵 Kyoto",
+      "🇵🇹 Lisbon",
+      "🇮🇹 Rome",
+      "🇮🇸 Reykjavík",
+      "🇪🇸 Barcelona",
+      "🇺🇸 New York",
+      "🇮🇩 Bali",
+      "🇫🇷 Paris",
+      "🇳🇴 Oslo",
+      "🇹🇭 Bangkok"
+    ],
     "problem": {
       "label": "The old way",
       "title": "Chaos.",
@@ -215,6 +239,32 @@
       "title": "Journeo keeps getting better.",
       "subtitle": "New features land regularly — here's what shipped in the latest releases.",
       "viewFull": "Full release notes"
+    },
+    "faq": {
+      "title": "Good to know.",
+      "subtitle": "Quick answers to what people usually ask before their first trip.",
+      "items": [
+        {
+          "q": "Is Journeo really free?",
+          "a": "Yes. Journeo is free to use — no credit card, no trial that quietly expires. Create an account, plan your first trip, and that's it."
+        },
+        {
+          "q": "Does it work on my phone?",
+          "a": "Journeo runs in the browser and adapts to your device: the full planning experience on desktop, a focused view for checking your itinerary while traveling."
+        },
+        {
+          "q": "Can I share a trip with people who don't have an account?",
+          "a": "Yes. Every trip can be shared with a link, so friends and family can view the plan without signing up. What you share stays read-only — nobody can change your trip."
+        },
+        {
+          "q": "What can I keep in one trip?",
+          "a": "The itinerary day by day, your budget and expenses, a packing list and travel documents — everything for one journey lives in one place instead of five apps."
+        },
+        {
+          "q": "Is my data private?",
+          "a": "Your trips are private by default. Others only see what you explicitly share, and you can stop sharing or delete a trip at any time."
+        }
+      ]
     }
   },
   "carousel": {

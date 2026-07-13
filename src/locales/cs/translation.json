@@ -61,6 +61,30 @@
       "note": "vaše další cesta, přehledně",
       "newBadge": "Novinka ve"
     },
+    "float": {
+      "packing": {
+        "progress": "Sbaleno 7 z 10",
+        "items": ["Pas", "Foťák", "Žabky"]
+      },
+      "ticket": {
+        "label": "Palubní vstupenka",
+        "date": "12. říj",
+        "seat": "Sedadlo 14A"
+      },
+      "weather": "24° v Kjótu"
+    },
+    "marquee": [
+      "🇯🇵 Kjóto",
+      "🇵🇹 Lisabon",
+      "🇮🇹 Řím",
+      "🇮🇸 Reykjavík",
+      "🇪🇸 Barcelona",
+      "🇺🇸 New York",
+      "🇮🇩 Bali",
+      "🇫🇷 Paříž",
+      "🇳🇴 Oslo",
+      "🇹🇭 Bangkok"
+    ],
     "problem": {
       "label": "Starý způsob",
       "title": "Chaos.",
@@ -215,6 +239,32 @@
       "title": "Journeo se pořád zlepšuje.",
       "subtitle": "Nové funkce přibývají pravidelně — tady je, co přinesly poslední verze.",
       "viewFull": "Kompletní přehled novinek"
+    },
+    "faq": {
+      "title": "Dobré vědět.",
+      "subtitle": "Rychlé odpovědi na to, na co se lidé před prvním výletem ptají nejčastěji.",
+      "items": [
+        {
+          "q": "Je Journeo opravdu zdarma?",
+          "a": "Ano. Journeo je zdarma — bez platební karty a bez zkušební doby, která tiše vyprší. Stačí si vytvořit účet, naplánovat první výlet a je to."
+        },
+        {
+          "q": "Funguje i na mobilu?",
+          "a": "Journeo běží v prohlížeči a přizpůsobí se vašemu zařízení: na počítači plnohodnotné plánování, na cestách přehledné zobrazení itineráře."
+        },
+        {
+          "q": "Můžu sdílet výlet s lidmi, kteří nemají účet?",
+          "a": "Ano. Každý výlet můžete sdílet odkazem, takže si ho přátelé a rodina prohlédnou bez registrace. Sdílený výlet je jen pro čtení — nikdo vám plán nepřepíše."
+        },
+        {
+          "q": "Co všechno se do jednoho výletu vejde?",
+          "a": "Itinerář den po dni, rozpočet a výdaje, balicí seznam i cestovní dokumenty — všechno k jedné cestě na jednom místě, místo pěti aplikací."
+        },
+        {
+          "q": "Jsou moje data v soukromí?",
+          "a": "Vaše výlety jsou ve výchozím stavu soukromé. Ostatní vidí jen to, co sami nasdílíte, a sdílení můžete kdykoli zrušit nebo celý výlet smazat."
+        }
+      ]
     }
   },
   "carousel": {

@@ -2,10 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import {
   ArrowRight, Home, Map, BarChart2, Users, Wallet, Plane, Plus, Mail,
-  CalendarDays, CheckSquare, FileText, MapPin, Check, ChevronDown,
+  CalendarDays, CheckSquare, FileText, MapPin, Check, ChevronDown, Sun,
 } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import Navbar from './Navbar';
 import VersionBadge from './ui/VersionBadge';
@@ -34,12 +34,361 @@ const PrimaryCta = ({ children, className = '' }) => (
   <Link
     to="/auth"
     state={{ mode: 'register' }}
-    className={`inline-flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold rounded-full px-8 py-4 shadow-lg shadow-blue-600/25 hover:bg-blue-700 active:scale-[0.98] transition-all duration-300 ${className}`}
+    className={`group inline-flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold rounded-full px-8 py-4 shadow-lg shadow-blue-600/25 hover:bg-blue-700 active:scale-[0.98] transition-all duration-300 ${className}`}
   >
     {children}
-    <ArrowRight size={17} strokeWidth={2.5} />
+    <ArrowRight
+      size={17}
+      strokeWidth={2.5}
+      className="transition-transform duration-300 group-hover:translate-x-0.5 motion-reduce:transition-none"
+    />
   </Link>
 );
+
+// ── Hand-drawn margin doodles, desktop only ──────────────────────────────────
+// Sketches scattered through the page margins, like notes in a travel journal.
+// Solid strokes draw themselves in when scrolled into view; dotted trails fade.
+const DOODLE_VIEWPORT = { once: true, margin: '-40px' };
+
+const DoodleStroke = ({ d, delay = 0, dotted = false, ...rest }) => {
+  const reduce = useReducedMotion();
+  const common = {
+    d,
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2.25,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+    ...(dotted ? { strokeDasharray: '0.5 7.5' } : {}),
+    ...rest,
+  };
+  if (reduce) return <path {...common} />;
+  if (dotted) {
+    return (
+      <motion.path
+        {...common}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={DOODLE_VIEWPORT}
+        transition={{ duration: 0.9, delay, ease: EASE }}
+      />
+    );
+  }
+  return (
+    <motion.path
+      {...common}
+      initial={{ pathLength: 0, opacity: 0 }}
+      whileInView={{ pathLength: 1, opacity: 1 }}
+      viewport={DOODLE_VIEWPORT}
+      transition={{
+        pathLength: { duration: 0.9, delay, ease: EASE },
+        opacity: { duration: 0.2, delay },
+      }}
+    />
+  );
+};
+
+// Each doodle: viewBox + a list of strokes ({ d, dt: extra delay, dotted })
+// and optional Caveat text labels ({ text, x, y, size }).
+const DOODLES = {
+  plane: {
+    viewBox: '0 0 140 96',
+    parts: [
+      { d: 'M8 84 C34 84 48 66 58 50', dotted: true, dt: 0.35 },
+      { d: 'M112 14 C95 21 81 29 66 38 C73 40 80 42 88 44 Z' },
+      { d: 'M112 14 C104 25 97 34 89 44', dt: 0.15 },
+      { d: 'M88 44 C88 49 89 53 90 57 C93 53 96 50 99 46', dt: 0.3 },
+    ],
+  },
+  sun: {
+    viewBox: '0 0 96 96',
+    parts: [
+      { d: 'M48 26 C60 25 71 35 70 48 C69 61 59 70 47 69 C35 68 26 58 27 46 C28 35 37 27 48 26' },
+      { d: 'M48 15 C48 12 48 9 47 6', dt: 0.25 },
+      { d: 'M64 21 C66 18 68 16 70 13', dt: 0.3 },
+      { d: 'M80 47 C83 47 86 47 89 46', dt: 0.35 },
+      { d: 'M73 66 C75 68 77 71 79 73', dt: 0.4 },
+      { d: 'M47 81 C47 84 47 87 47 90', dt: 0.45 },
+      { d: 'M29 68 C27 70 24 73 22 75', dt: 0.5 },
+      { d: 'M16 45 C13 45 10 46 7 46', dt: 0.55 },
+      { d: 'M30 22 C28 19 25 17 23 14', dt: 0.6 },
+    ],
+  },
+  compass: {
+    viewBox: '0 0 96 108',
+    parts: [
+      { text: 'N', x: 48, y: 18, size: 22 },
+      { d: 'M48 30 C64 31 76 43 75 59 C74 74 62 86 47 85 C32 84 21 72 22 57 C23 43 34 30 48 30' },
+      { d: 'M49 38 L56 58 L48 78 L42 58 Z', dt: 0.25 },
+      { d: 'M74 58 L69 58', dt: 0.4 },
+      { d: 'M27 57 L32 57', dt: 0.45 },
+      { dot: { cx: 49, cy: 58, r: 2 } },
+    ],
+  },
+  scribble: {
+    viewBox: '0 0 130 80',
+    parts: [
+      { d: 'M10 58 C20 30 42 18 52 30 C62 42 40 58 32 46 C24 34 44 22 62 26 C80 30 90 40 102 38', dt: 0 },
+      { text: '?!', x: 114, y: 30, size: 26 },
+    ],
+  },
+  suitcase: {
+    viewBox: '0 0 96 96',
+    parts: [
+      { d: 'M16 36 C15 58 15 68 18 76 C40 79 60 79 78 76 C81 60 81 48 79 36 C58 32 37 32 16 36 Z' },
+      { d: 'M38 34 C38 26 41 22 48 22 C55 22 58 26 58 34', dt: 0.2 },
+      { d: 'M33 35 C32 48 32 62 33 77', dt: 0.35 },
+      { d: 'M63 35 C64 48 64 62 63 77', dt: 0.45 },
+    ],
+  },
+  mountains: {
+    viewBox: '0 0 110 76',
+    parts: [
+      { d: 'M6 68 C20 46 30 32 40 20 C46 30 50 38 55 46 C61 36 66 30 72 24 C82 40 90 54 102 68' },
+      { d: 'M33 30 C35 33 37 35 40 37 C43 34 45 32 47 30', dt: 0.3 },
+    ],
+  },
+  stars: {
+    viewBox: '0 0 96 72',
+    parts: [
+      { d: 'M24 14 L24 30 M16 22 L32 22' },
+      { d: 'M62 32 L62 44 M56 38 L68 38', dt: 0.2 },
+      { d: 'M38 52 L38 60 M34 56 L42 56', dt: 0.35 },
+    ],
+  },
+  pin: {
+    viewBox: '0 0 72 88',
+    parts: [
+      { d: 'M36 12 C48 12 58 22 58 34 C58 48 36 74 36 74 C36 74 14 48 14 34 C14 22 24 12 36 12 Z' },
+      { d: 'M36 26 C41 26 44 30 44 34 C44 39 40 42 36 42 C31 42 28 39 28 34 C28 30 31 26 36 26', dt: 0.3 },
+    ],
+  },
+  qmark: {
+    viewBox: '0 0 72 96',
+    parts: [
+      { d: 'M22 26 C22 12 50 8 56 22 C61 34 48 40 42 47 C39 51 38 56 38 62' },
+      { dot: { cx: 38, cy: 76, r: 2.5 } },
+    ],
+  },
+  arrow: {
+    viewBox: '0 0 100 76',
+    parts: [
+      { d: 'M14 8 C36 16 62 32 80 54' },
+      { d: 'M70 50 L84 58 L68 64', dt: 0.3 },
+    ],
+  },
+  heart: {
+    viewBox: '0 0 96 88',
+    parts: [
+      { d: 'M48 74 C22 54 12 36 22 26 C32 17 45 24 48 34 C51 24 64 17 74 26 C84 36 74 54 48 74 Z' },
+    ],
+  },
+  ticket: {
+    viewBox: '0 0 110 58',
+    parts: [
+      {
+        d: 'M6 12 C6 8 9 6 13 6 L97 6 C101 6 104 8 104 12 L104 18 C100 18 98 21 98 24 C98 27 100 30 104 30 L104 46 C104 50 101 52 97 52 L13 52 C9 52 6 50 6 46 L6 30 C10 30 12 27 12 24 C12 21 10 18 6 18 Z',
+      },
+      { d: 'M60 10 L60 48', dotted: true, dt: 0.25 },
+    ],
+  },
+};
+
+const Doodle = ({ name, className = '', delay = 0, inline = false }) => {
+  const spec = DOODLES[name];
+  return (
+    <div
+      className={`hidden xl:block pointer-events-none select-none text-blue-600 opacity-50 ${inline ? 'relative' : 'absolute'} ${className}`}
+      aria-hidden="true"
+    >
+      <svg viewBox={spec.viewBox} className="w-full h-auto">
+        {spec.parts.map((part, i) => {
+          if (part.text) {
+            return (
+              <text
+                key={i}
+                x={part.x}
+                y={part.y}
+                textAnchor="middle"
+                fontSize={part.size}
+                fill="currentColor"
+                style={{ fontFamily: "'Caveat', cursive" }}
+              >
+                {part.text}
+              </text>
+            );
+          }
+          if (part.dot) {
+            return <circle key={i} {...part.dot} fill="currentColor" />;
+          }
+          return <DoodleStroke key={i} d={part.d} dotted={part.dotted} delay={delay + (part.dt || 0)} />;
+        })}
+      </svg>
+    </div>
+  );
+};
+
+// ── Floating product fragments in the desktop margins ────────────────────────
+// Real pieces of the app (packing list, boarding pass, sharing chip) drifting
+// beside the hero, so the margins belong to the product instead of whitespace.
+const FloatIn = ({ className = '', delay = 0, rotate = 0, drift = 8, children }) => {
+  const reduce = useReducedMotion();
+  return (
+    <motion.div
+      className={`hidden xl:block absolute z-10 pointer-events-none select-none ${className}`}
+      initial={reduce ? false : { opacity: 0, y: 30, rotate: rotate + 5 }}
+      animate={{ opacity: 1, y: 0, rotate }}
+      transition={{ duration: 0.9, delay, ease: EASE }}
+      aria-hidden="true"
+    >
+      <motion.div
+        animate={reduce ? {} : { y: [0, -drift, 0] }}
+        transition={{ duration: 6.5, delay: delay + 1, repeat: Infinity, ease: 'easeInOut' }}
+      >
+        {children}
+      </motion.div>
+    </motion.div>
+  );
+};
+
+const FLOAT_CARD =
+  'rounded-2xl border border-gray-200/80 bg-white/90 backdrop-blur-sm shadow-[0_20px_48px_-20px_rgba(37,99,235,0.35)]';
+
+const PackingCard = () => {
+  const { t } = useTranslation();
+  const items = t('landing.float.packing.items', { returnObjects: true });
+  if (!Array.isArray(items)) return null;
+  return (
+    <div className={`w-48 p-4 ${FLOAT_CARD}`}>
+      <div className="flex items-center gap-2 mb-3">
+        <span className="w-6 h-6 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
+          <CheckSquare size={12} strokeWidth={2.5} />
+        </span>
+        <span className="text-[12px] font-bold text-gray-900">
+          {t('landing.features.everything.packing')}
+        </span>
+      </div>
+      <div className="space-y-2">
+        {items.map((label, i) => {
+          const done = i < 2;
+          return (
+            <div key={i} className="flex items-center gap-2">
+              <span
+                className={`w-4 h-4 rounded-md flex items-center justify-center flex-shrink-0 ${
+                  done ? 'bg-blue-600 text-white' : 'border-[1.5px] border-gray-300'
+                }`}
+              >
+                {done && <Check size={9} strokeWidth={3.5} />}
+              </span>
+              <span className={`text-[11px] font-medium truncate ${done ? 'text-gray-400 line-through' : 'text-gray-700'}`}>
+                {label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="mt-3.5 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+        <div className="h-full w-[70%] rounded-full bg-blue-500" />
+      </div>
+      <p className="mt-1.5 text-[10px] font-semibold text-gray-500">
+        {t('landing.float.packing.progress')}
+      </p>
+    </div>
+  );
+};
+
+const TicketCard = () => {
+  const { t } = useTranslation();
+  return (
+    <div className={`w-48 ${FLOAT_CARD}`}>
+      <div className="px-4 pt-3.5 pb-3">
+        <p className="text-[9px] font-bold uppercase tracking-widest text-blue-600 mb-2.5">
+          {t('landing.float.ticket.label')}
+        </p>
+        <div className="flex items-center gap-2">
+          <span className="text-lg font-bold tracking-tight text-gray-900">PRG</span>
+          <span className="relative flex-1 border-t-2 border-dotted border-gray-300">
+            <span className="absolute left-1/2 -translate-x-1/2 -top-[9px] bg-white px-1 text-blue-600">
+              <Plane size={12} strokeWidth={2.25} />
+            </span>
+          </span>
+          <span className="text-lg font-bold tracking-tight text-gray-900">KIX</span>
+        </div>
+      </div>
+      <div className="relative border-t border-dashed border-gray-300 rounded-b-2xl bg-gray-50/80 px-4 py-2.5 flex items-center justify-between">
+        <span className="absolute -left-[7px] -top-[7px] w-3.5 h-3.5 rounded-full bg-[#fbfbfd] border border-gray-200/80" />
+        <span className="absolute -right-[7px] -top-[7px] w-3.5 h-3.5 rounded-full bg-[#fbfbfd] border border-gray-200/80" />
+        <span className="text-[10px] font-semibold text-gray-500">{t('landing.float.ticket.date')}</span>
+        <span className="text-[10px] font-semibold text-gray-500">{t('landing.float.ticket.seat')}</span>
+      </div>
+    </div>
+  );
+};
+
+const SharedChip = () => {
+  const { t } = useTranslation();
+  const avatars = [
+    { initials: 'JN', bg: 'bg-blue-500' },
+    { initials: 'MK', bg: 'bg-emerald-500' },
+    { initials: 'AT', bg: 'bg-violet-500' },
+  ];
+  return (
+    <div className="flex items-center gap-2.5 rounded-full border border-gray-200/80 bg-white/90 backdrop-blur-sm shadow-[0_16px_40px_-16px_rgba(37,99,235,0.3)] pl-2 pr-4 py-1.5">
+      <div className="flex -space-x-2">
+        {avatars.map((a) => (
+          <div
+            key={a.initials}
+            className={`w-7 h-7 rounded-full ${a.bg} ring-2 ring-white flex items-center justify-center text-white text-[9px] font-bold`}
+          >
+            {a.initials}
+          </div>
+        ))}
+      </div>
+      <span className="text-[11px] font-semibold text-gray-700 whitespace-nowrap">
+        {t('landing.features.community.shared')}
+      </span>
+    </div>
+  );
+};
+
+const WeatherChip = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex items-center gap-2 rounded-full border border-gray-200/80 bg-white/90 backdrop-blur-sm shadow-[0_16px_40px_-16px_rgba(37,99,235,0.3)] px-4 py-2">
+      <Sun size={15} strokeWidth={2.25} className="text-amber-500" />
+      <span className="text-[12px] font-semibold text-gray-700 whitespace-nowrap">
+        {t('landing.float.weather')}
+      </span>
+    </div>
+  );
+};
+
+// ── Destination marquee — a slow drift of places between hero and problem ────
+const DestinationMarquee = () => {
+  const { t } = useTranslation();
+  const items = t('landing.marquee', { returnObjects: true });
+  if (!Array.isArray(items)) return null;
+  // Four copies so one animation cycle (-50%) always spans at least a full
+  // viewport, even on ultrawide screens — no gap at the loop point.
+  const row = [...items, ...items, ...items, ...items];
+  const mask = 'linear-gradient(to right, transparent, black 12%, black 88%, transparent)';
+  return (
+    <section className="relative pb-20 sm:pb-28" aria-hidden="true">
+      <div className="overflow-hidden" style={{ maskImage: mask, WebkitMaskImage: mask }}>
+        <div className="flex w-max animate-marquee">
+          {row.map((label, i) => (
+            <span
+              key={i}
+              className="mr-3 whitespace-nowrap rounded-full border border-gray-200/80 bg-white/80 px-4 py-2 text-[13px] font-semibold text-gray-600"
+            >
+              {label}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 // ── Light dashboard replica shown in the hero ────────────────────────────────
 const DashboardMock = () => {
@@ -337,71 +686,163 @@ const ChangelogSection = () => {
   const latestHighlights = t(`${latestBase}.highlights`, { returnObjects: true });
 
   return (
-    <section id="changelog" className="px-6 pb-24 sm:pb-32 scroll-mt-24">
-      <div className="max-w-3xl mx-auto">
-        <Reveal className="text-center max-w-xl mx-auto mb-12 sm:mb-14">
+    <section id="changelog" className="relative px-6 pb-24 sm:pb-32 scroll-mt-24">
+      <div className="max-w-6xl mx-auto lg:grid lg:grid-cols-[1fr_1.6fr] gap-10 lg:gap-20 items-start">
+        <Reveal className="mb-12 lg:mb-0 lg:sticky lg:top-28">
           <h2
             className="font-bold tracking-tight leading-[1.08]"
             style={{ fontSize: 'clamp(1.9rem, 3.5vw, 2.75rem)', textWrap: 'balance' }}
           >
             {t('landing.changelog.title')}
           </h2>
-          <p className="mt-4 text-gray-600 leading-relaxed text-base sm:text-lg" style={{ textWrap: 'pretty' }}>
+          <p className="mt-4 text-gray-600 leading-relaxed text-base sm:text-lg max-w-md" style={{ textWrap: 'pretty' }}>
             {t('landing.changelog.subtitle')}
           </p>
+          <Doodle name="stars" inline className="w-[76px] mt-10 -rotate-3" />
         </Reveal>
 
-        {/* Latest release — full card */}
-        <Reveal>
-          <article className="rounded-[2rem] border border-gray-200/70 bg-white/70 backdrop-blur-sm p-7 sm:p-9">
-            <div className="flex items-center gap-2.5 flex-wrap mb-4">
-              <span className="text-[12px] font-bold tracking-wide px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow-sm shadow-blue-600/25">
-                v{latest.version}
-              </span>
-              <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md bg-emerald-50 text-emerald-600">
-                {t('changelog.current')}
-              </span>
-              <span className="text-gray-500 text-[13px] font-medium ml-auto">
-                {formatReleaseDate(latest.date, i18n.language)}
-              </span>
-            </div>
-            <h3 className="text-xl font-bold tracking-tight mb-2">{t(`${latestBase}.title`)}</h3>
-            <p className="text-gray-600 leading-relaxed text-[15px] mb-6">{t(`${latestBase}.summary`)}</p>
-            {Array.isArray(latestHighlights) && (
-              <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-2.5">
-                {latestHighlights.slice(0, 4).map((item, i) => (
-                  <li key={i} className="flex items-start gap-2.5">
-                    <span className="mt-0.5 w-4 h-4 shrink-0 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
-                      <Check size={10} strokeWidth={3} />
-                    </span>
-                    <span className="text-gray-700 text-[13px] leading-relaxed">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </article>
-        </Reveal>
-
-        {/* Older releases — compact rows */}
-        <Reveal delay={0.1}>
-          <div className="mt-2 divide-y divide-gray-100 px-2 sm:px-4">
-            {older.map((release) => (
-              <div key={release.version} className="py-5 flex items-baseline gap-3 sm:gap-4">
-                <span className="text-[12px] font-bold tracking-wide px-2.5 py-1 rounded-lg bg-gray-100 text-gray-600 shrink-0">
-                  v{release.version}
+        <div>
+          {/* Latest release — full card */}
+          <Reveal>
+            <article className="rounded-[2rem] border border-gray-200/70 bg-white/70 backdrop-blur-sm p-7 sm:p-9">
+              <div className="flex items-center gap-2.5 flex-wrap mb-4">
+                <span className="text-[12px] font-bold tracking-wide px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow-sm shadow-blue-600/25">
+                  v{latest.version}
                 </span>
-                <div className="min-w-0">
-                  <p className="text-gray-900 font-semibold text-[15px]">
-                    {t(`changelog.releases.${release.key}.title`)}
-                  </p>
-                  <p className="text-gray-600 text-[13px] leading-relaxed mt-0.5 line-clamp-2">
-                    {t(`changelog.releases.${release.key}.summary`)}
-                  </p>
-                </div>
-                <span className="text-gray-500 text-[12px] font-medium ml-auto shrink-0 hidden sm:block">
-                  {formatReleaseDate(release.date, i18n.language)}
+                <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md bg-emerald-50 text-emerald-600">
+                  {t('changelog.current')}
+                </span>
+                <span className="text-gray-500 text-[13px] font-medium ml-auto">
+                  {formatReleaseDate(latest.date, i18n.language)}
                 </span>
               </div>
+              <h3 className="text-xl font-bold tracking-tight mb-2">{t(`${latestBase}.title`)}</h3>
+              <p className="text-gray-600 leading-relaxed text-[15px] mb-6">{t(`${latestBase}.summary`)}</p>
+              {Array.isArray(latestHighlights) && (
+                <ul className="grid sm:grid-cols-2 gap-x-8 gap-y-2.5">
+                  {latestHighlights.slice(0, 4).map((item, i) => (
+                    <li key={i} className="flex items-start gap-2.5">
+                      <span className="mt-0.5 w-4 h-4 shrink-0 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                        <Check size={10} strokeWidth={3} />
+                      </span>
+                      <span className="text-gray-700 text-[13px] leading-relaxed">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </article>
+          </Reveal>
+
+          {/* Older releases — compact rows */}
+          <Reveal delay={0.1}>
+            <div className="mt-2 divide-y divide-gray-100 px-2 sm:px-4">
+              {older.map((release) => (
+                <div key={release.version} className="py-5 flex items-baseline gap-3 sm:gap-4">
+                  <span className="text-[12px] font-bold tracking-wide px-2.5 py-1 rounded-lg bg-gray-100 text-gray-600 shrink-0">
+                    v{release.version}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-gray-900 font-semibold text-[15px]">
+                      {t(`changelog.releases.${release.key}.title`)}
+                    </p>
+                    <p className="text-gray-600 text-[13px] leading-relaxed mt-0.5 line-clamp-2">
+                      {t(`changelog.releases.${release.key}.summary`)}
+                    </p>
+                  </div>
+                  <span className="text-gray-500 text-[12px] font-medium ml-auto shrink-0 hidden sm:block">
+                    {formatReleaseDate(release.date, i18n.language)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ── FAQ ──────────────────────────────────────────────────────────────────────
+const FaqItem = ({ item, index, open, onToggle }) => {
+  const reduce = useReducedMotion();
+  return (
+    <div>
+      <button
+        type="button"
+        id={`faq-question-${index}`}
+        aria-expanded={open}
+        aria-controls={`faq-answer-${index}`}
+        onClick={onToggle}
+        className="w-full flex items-center justify-between gap-4 py-5 text-left group"
+      >
+        <span className="text-gray-900 font-semibold text-[15px] sm:text-base group-hover:text-blue-700 transition-colors duration-300">
+          {item.q}
+        </span>
+        <ChevronDown
+          size={18}
+          strokeWidth={2.5}
+          className={`shrink-0 transition-transform duration-300 motion-reduce:transition-none ${
+            open ? 'rotate-180 text-blue-600' : 'text-gray-400 group-hover:text-gray-600'
+          }`}
+        />
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            id={`faq-answer-${index}`}
+            role="region"
+            aria-labelledby={`faq-question-${index}`}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: reduce ? 0 : 0.45, ease: EASE }}
+            className="overflow-hidden"
+          >
+            <p
+              className="pb-6 pr-8 text-gray-600 leading-relaxed text-[15px] sm:text-base"
+              style={{ textWrap: 'pretty' }}
+            >
+              {item.a}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+const FaqSection = () => {
+  const { t } = useTranslation();
+  const [openIndex, setOpenIndex] = React.useState(0);
+  const items = t('landing.faq.items', { returnObjects: true });
+
+  if (!Array.isArray(items)) return null;
+
+  return (
+    <section id="faq" className="relative px-6 pb-24 sm:pb-32 scroll-mt-24">
+      <div className="max-w-6xl mx-auto lg:grid lg:grid-cols-[1fr_1.5fr] gap-10 lg:gap-20 items-start">
+        <Reveal className="mb-10 lg:mb-0 lg:sticky lg:top-28">
+          <h2
+            className="font-bold tracking-tight leading-[1.08]"
+            style={{ fontSize: 'clamp(1.9rem, 3.5vw, 2.75rem)', textWrap: 'balance' }}
+          >
+            {t('landing.faq.title')}
+          </h2>
+          <p className="mt-4 text-gray-600 leading-relaxed text-base sm:text-lg max-w-md" style={{ textWrap: 'pretty' }}>
+            {t('landing.faq.subtitle')}
+          </p>
+          <Doodle name="qmark" inline className="w-[58px] mt-10 rotate-[-8deg]" />
+        </Reveal>
+        <Reveal delay={0.1}>
+          <div className="divide-y divide-gray-200/80 border-y border-gray-200/80">
+            {items.map((item, i) => (
+              <FaqItem
+                key={i}
+                item={item}
+                index={i}
+                open={openIndex === i}
+                onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
+              />
             ))}
           </div>
         </Reveal>
@@ -439,6 +880,18 @@ const LandingPage = () => {
     <div className="relative min-h-screen bg-[#fbfbfd] text-gray-900 font-sans selection:bg-blue-500/30 overflow-x-clip">
       <Navbar variant="light" />
 
+      {/* Faint dot-grid, like graph paper in a travel journal */}
+      <div
+        className="absolute inset-0 z-0 pointer-events-none opacity-70"
+        style={{
+          backgroundImage: 'radial-gradient(rgba(37,99,235,0.16) 1px, transparent 1px)',
+          backgroundSize: '26px 26px',
+          maskImage: 'linear-gradient(to bottom, transparent, black 320px, black calc(100% - 400px), transparent)',
+          WebkitMaskImage: 'linear-gradient(to bottom, transparent, black 320px, black calc(100% - 400px), transparent)',
+        }}
+        aria-hidden="true"
+      />
+
       {/* Ambient glow, same family as the dashboard background */}
       <div className="absolute inset-x-0 top-0 h-[900px] z-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <div className="absolute -top-56 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full bg-blue-500/10 blur-[120px]" />
@@ -447,7 +900,17 @@ const LandingPage = () => {
 
       <main className="relative z-10">
         {/* ── Hero ── */}
-        <section className="px-6 pt-36 sm:pt-44 pb-14 sm:pb-16 text-center">
+        <section className="relative px-6 pt-36 sm:pt-44 pb-14 sm:pb-16 text-center">
+          <Doodle name="plane" className="left-[8%] top-32 w-[120px] rotate-[-3deg]" delay={1.2} />
+          <FloatIn className="left-[3%] top-64" delay={0.9} rotate={-5}>
+            <PackingCard />
+          </FloatIn>
+          <FloatIn className="right-[3%] top-40" delay={1.05} rotate={4}>
+            <TicketCard />
+          </FloatIn>
+          <FloatIn className="right-[6%] top-[24rem]" delay={1.2} rotate={-2} drift={6}>
+            <SharedChip />
+          </FloatIn>
           <motion.div {...heroEntrance(0)} className="mb-6 sm:mb-7">
             <a
               href="#changelog"
@@ -494,7 +957,11 @@ const LandingPage = () => {
         </section>
 
         {/* ── Product mock ── */}
-        <section className="px-6 pb-24 sm:pb-32">
+        <section className="relative px-6 pb-16 sm:pb-20">
+          <Doodle name="compass" className="left-[7%] bottom-20 w-[72px] rotate-[-6deg]" />
+          <FloatIn className="right-[5%] top-24" delay={0.8} rotate={3} drift={6}>
+            <WeatherChip />
+          </FloatIn>
           <motion.div
             initial={reduce ? false : { opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -513,8 +980,13 @@ const LandingPage = () => {
           </motion.div>
         </section>
 
+        {/* ── Destination marquee ── */}
+        <DestinationMarquee />
+
         {/* ── Problem ── */}
-        <section className="px-6 py-20 sm:py-28 bg-white border-y border-gray-100">
+        <section className="relative px-6 py-20 sm:py-28 bg-white border-y border-gray-100">
+          <Doodle name="scribble" className="right-[4%] top-8 w-[110px] rotate-[4deg]" />
+          <Doodle name="suitcase" className="left-[5%] bottom-14 w-[68px] rotate-[4deg]" />
           <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 lg:gap-20 items-center">
             <Reveal>
               <h2
@@ -538,7 +1010,11 @@ const LandingPage = () => {
         </section>
 
         {/* ── Features ── */}
-        <section id="features" className="px-6 py-24 sm:py-32 scroll-mt-24">
+        <section id="features" className="relative px-6 py-24 sm:py-32 scroll-mt-24">
+          <Doodle name="suitcase" className="left-[6%] top-20 w-[82px] rotate-[-5deg]" />
+          <Doodle name="mountains" className="right-[5%] top-48 w-[104px] rotate-[3deg]" delay={0.15} />
+          <Doodle name="stars" className="left-[4%] bottom-16 w-[64px]" delay={0.1} />
+          <Doodle name="ticket" className="right-[6%] bottom-20 w-[90px] rotate-[-3deg]" delay={0.2} />
           <div className="max-w-6xl mx-auto">
             <Reveal className="text-center max-w-2xl mx-auto mb-14 sm:mb-16">
               <h2
@@ -555,7 +1031,7 @@ const LandingPage = () => {
             <div className="grid lg:grid-cols-3 gap-5">
               {/* Everything in one place — wide */}
               <Reveal className="lg:col-span-2">
-                <div className="h-full rounded-[2rem] border border-gray-200/70 bg-white/70 backdrop-blur-sm p-7 sm:p-9 grid sm:grid-cols-2 gap-8 items-center">
+                <div className="h-full rounded-[2rem] border border-gray-200/70 bg-white/70 backdrop-blur-sm p-7 sm:p-9 transition-all duration-300 xl:hover:-translate-y-1 xl:hover:border-gray-300/80 xl:hover:shadow-[0_20px_48px_-24px_rgba(37,99,235,0.25)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 grid sm:grid-cols-2 gap-8 items-center">
                   <div>
                     <h3 className="text-xl font-bold tracking-tight mb-2.5">{t('landing.features.everything.title')}</h3>
                     <p className="text-gray-600 leading-relaxed text-[15px]">{t('landing.features.everything.description')}</p>
@@ -566,7 +1042,7 @@ const LandingPage = () => {
 
               {/* Statistics */}
               <Reveal delay={0.1}>
-                <div className="h-full rounded-[2rem] border border-gray-200/70 bg-white/70 backdrop-blur-sm p-7 sm:p-9 flex flex-col justify-between gap-8">
+                <div className="h-full rounded-[2rem] border border-gray-200/70 bg-white/70 backdrop-blur-sm p-7 sm:p-9 transition-all duration-300 xl:hover:-translate-y-1 xl:hover:border-gray-300/80 xl:hover:shadow-[0_20px_48px_-24px_rgba(37,99,235,0.25)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 flex flex-col justify-between gap-8">
                   <div>
                     <h3 className="text-xl font-bold tracking-tight mb-2.5">{t('landing.features.stats.title')}</h3>
                     <p className="text-gray-600 leading-relaxed text-[15px]">{t('landing.features.stats.description')}</p>
@@ -577,7 +1053,7 @@ const LandingPage = () => {
 
               {/* Community */}
               <Reveal>
-                <div className="h-full rounded-[2rem] border border-gray-200/70 bg-white/70 backdrop-blur-sm p-7 sm:p-9 flex flex-col justify-between gap-8">
+                <div className="h-full rounded-[2rem] border border-gray-200/70 bg-white/70 backdrop-blur-sm p-7 sm:p-9 transition-all duration-300 xl:hover:-translate-y-1 xl:hover:border-gray-300/80 xl:hover:shadow-[0_20px_48px_-24px_rgba(37,99,235,0.25)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 flex flex-col justify-between gap-8">
                   <div>
                     <h3 className="text-xl font-bold tracking-tight mb-2.5">{t('landing.features.community.title')}</h3>
                     <p className="text-gray-600 leading-relaxed text-[15px]">{t('landing.features.community.description')}</p>
@@ -588,7 +1064,7 @@ const LandingPage = () => {
 
               {/* Budget — wide */}
               <Reveal delay={0.1} className="lg:col-span-2">
-                <div className="h-full rounded-[2rem] border border-gray-200/70 bg-white/70 backdrop-blur-sm p-7 sm:p-9 grid sm:grid-cols-2 gap-8 items-center">
+                <div className="h-full rounded-[2rem] border border-gray-200/70 bg-white/70 backdrop-blur-sm p-7 sm:p-9 transition-all duration-300 xl:hover:-translate-y-1 xl:hover:border-gray-300/80 xl:hover:shadow-[0_20px_48px_-24px_rgba(37,99,235,0.25)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 grid sm:grid-cols-2 gap-8 items-center">
                   <div>
                     <h3 className="text-xl font-bold tracking-tight mb-2.5">{t('landing.features.budget.title')}</h3>
                     <p className="text-gray-600 leading-relaxed text-[15px]">{t('landing.features.budget.description')}</p>
@@ -603,8 +1079,13 @@ const LandingPage = () => {
         {/* ── What's new ── */}
         <ChangelogSection />
 
+        {/* ── FAQ ── */}
+        <FaqSection />
+
         {/* ── CTA ── */}
-        <section className="px-6 pb-24 sm:pb-32">
+        <section className="relative px-6 pb-24 sm:pb-32">
+          <Doodle name="arrow" className="left-[3%] top-16 w-[80px]" />
+          <Doodle name="plane" className="right-[5%] top-10 w-[86px] rotate-[8deg]" delay={0.15} />
           <Reveal className="max-w-5xl mx-auto">
             <div className="relative overflow-hidden rounded-[2.5rem] bg-blue-600 px-6 py-16 sm:p-20 text-center shadow-[0_32px_80px_-32px_rgba(37,99,235,0.55)]">
               <div
@@ -642,7 +1123,9 @@ const LandingPage = () => {
         </section>
 
         {/* ── Feedback ── */}
-        <section className="px-6 pb-24 sm:pb-28">
+        <section className="relative px-6 pb-24 sm:pb-28">
+          <Doodle name="heart" className="right-[17%] top-8 w-[52px] rotate-[8deg]" />
+          <Doodle name="pin" className="left-[15%] top-4 w-[46px] rotate-[-6deg]" delay={0.1} />
           <Reveal className="max-w-xl mx-auto text-center">
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4" style={{ textWrap: 'balance' }}>
               {t('landing.feedback.title')}
