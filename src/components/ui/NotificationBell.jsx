@@ -40,10 +40,17 @@ const NotificationBell = () => {
         setIsOpen(false);
       }
     };
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
+      window.addEventListener('keydown', handleKeyDown);
     }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [isOpen]);
 
   useEffect(() => {
@@ -116,6 +123,7 @@ const NotificationBell = () => {
     <div className="relative" ref={panelRef}>
       <button
         onClick={handleToggle}
+        aria-label={t('notifications.title')}
         className="relative w-10 h-10 flex items-center justify-center rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-300 cursor-pointer"
       >
         <Bell size={20} strokeWidth={2} className="text-gray-500 dark:text-gray-400" />
@@ -140,21 +148,21 @@ const NotificationBell = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="fixed md:absolute left-0 right-0 md:left-auto top-[72px] md:top-14 w-full md:w-96 max-h-[80vh] md:max-h-[420px] bg-white dark:bg-[#1c1c1e] shadow-2xl rounded-b-[2rem] md:rounded-2xl border-b md:border border-black/5 dark:border-white/10 overflow-hidden z-[100] flex flex-col"
+            className="fixed md:absolute left-0 right-0 md:left-auto top-[max(4.25rem,calc(env(safe-area-inset-top)+3.75rem))] md:top-14 w-full md:w-96 max-h-[calc(100dvh-max(4.25rem,calc(env(safe-area-inset-top)+3.75rem))-1rem)] md:max-h-[420px] bg-white dark:bg-[#1c1c1e] shadow-2xl rounded-b-[2rem] md:rounded-2xl border-b md:border border-black/5 dark:border-white/10 overflow-hidden z-[100] flex flex-col"
           >
             <div className="px-5 py-4 border-b border-gray-100 dark:border-white/10 flex items-center justify-between">
               <h3 className="font-bold text-[15px] text-gray-900 dark:text-white tracking-tight">{t('notifications.title')}</h3>
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
-                  className="text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors uppercase tracking-widest cursor-pointer"
+                  className="p-2 -m-2 text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors uppercase tracking-widest cursor-pointer"
                 >
                   {t('notifications.markAllRead')}
                 </button>
               )}
             </div>
 
-            <div className="overflow-y-auto max-h-[340px] custom-scrollbar">
+            <div className="flex-1 min-h-0 overflow-y-auto md:max-h-[340px] custom-scrollbar">
               {loading ? (
                 <NotificationListSkeleton />
               ) : notifications.length === 0 ? (
@@ -200,13 +208,13 @@ const NotificationBell = () => {
                             <div className="flex flex-row gap-2 mt-2">
                               <button
                                 onClick={() => handleAcceptRequest(n.referenceId, n.id)}
-                                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-blue-600 text-white text-[12px] font-bold rounded-xl hover:bg-blue-500 transition-colors cursor-pointer"
+                                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3 md:py-2.5 bg-blue-600 text-white text-[12px] font-bold rounded-xl hover:bg-blue-500 transition-colors cursor-pointer"
                               >
                                 <Check size={14} strokeWidth={3} /> {t('notifications.accept')}
                               </button>
                               <button
                                 onClick={() => handleDeclineRequest(n.referenceId, n.id)}
-                                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 text-[12px] font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/15 transition-colors cursor-pointer"
+                                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3 md:py-2.5 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 text-[12px] font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/15 transition-colors cursor-pointer"
                               >
                                 <X size={14} strokeWidth={3} /> {t('notifications.decline')}
                               </button>

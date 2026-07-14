@@ -60,13 +60,13 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
   return (
     <div className="space-y-8 w-full pb-10">
       <div className="flex items-end justify-between gap-4">
-        <div className="space-y-1 sm:space-y-2">
+        <div className="space-y-1 sm:space-y-2 min-w-0">
           <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium">{t('allTrips.subtitle')}</p>
-          <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('allTrips.title')}</h1>
+          <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold truncate">{t('allTrips.title')}</h1>
         </div>
         <Link
           to="/dashboard/trash"
-          className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-3 py-2 transition-all shrink-0"
+          className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-3 py-2.5 transition-all shrink-0"
         >
           <Trash2 size={15} strokeWidth={2.5} aria-hidden="true" /> {t('allTrips.trash')}
         </Link>
@@ -83,7 +83,7 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
             placeholder={t('allTrips.search.placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px]"
+            className="w-full pl-10 pr-4 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-base sm:text-[14px]"
           />
         </div>
 
@@ -96,7 +96,7 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="pl-9 pr-10 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px] appearance-none cursor-pointer h-full w-full sm:w-auto"
+              className="pl-9 pr-10 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-base sm:text-[14px] appearance-none cursor-pointer h-full w-full sm:w-auto"
             >
               <option value="all">{t('allTrips.filter.all')}</option>
               <option value="ongoing">{t('allTrips.filter.ongoing')}</option>
@@ -114,7 +114,7 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="pl-9 pr-10 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px] appearance-none cursor-pointer h-full w-full sm:w-auto"
+              className="pl-9 pr-10 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-base sm:text-[14px] appearance-none cursor-pointer h-full w-full sm:w-auto"
             >
               <option value="date-desc">{t('allTrips.sort.dateDesc')}</option>
               <option value="date-asc">{t('allTrips.sort.dateAsc')}</option>
@@ -136,12 +136,12 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
 
       {/* Grid */}
       {trips.length === 0 ? (
-        <div className="py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none">
+        <div className="py-14 sm:py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none px-4">
           <p className="text-2xl text-gray-900 dark:text-white font-bold tracking-tight">{t('allTrips.noTrips.title')}</p>
           <p className="text-[15px] text-gray-500 dark:text-gray-400 font-medium max-w-md">{t('allTrips.noTrips.description')}</p>
         </div>
       ) : filteredTrips.length === 0 ? (
-        <div className="py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none">
+        <div className="py-14 sm:py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none px-4">
           <p className="text-2xl text-gray-900 dark:text-white font-bold tracking-tight">{t('allTrips.empty.title')}</p>
           <p className="text-[15px] text-gray-500 dark:text-gray-400 font-medium max-w-md">{t('allTrips.empty.description')}</p>
         </div>
@@ -185,15 +185,15 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
                     </span>
                     <button
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDeleteTrip(trip.id); }}
-                      className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer"
+                      className="w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer"
                       aria-label={t('allTrips.delete.title')}
                     >
-                      <Trash2 size={14} strokeWidth={2} aria-hidden="true" />
+                      <Trash2 size={16} strokeWidth={2} aria-hidden="true" />
                     </button>
                   </div>
                 </div>
 
-                <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white tracking-tight">{trip.title}</h2>
+                <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white tracking-tight truncate min-w-0">{trip.title}</h2>
 
                 <div className="flex items-center text-[13px] font-medium text-gray-500 dark:text-gray-400 gap-2 mb-8">
                   <Calendar size={15} strokeWidth={2} aria-hidden="true" />

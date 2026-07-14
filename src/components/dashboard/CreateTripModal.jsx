@@ -139,10 +139,10 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
               y: { type: "spring", damping: 25, stiffness: 200 },
               layout: { type: "spring", damping: 25, stiffness: 200 }
             }}
-            className="relative w-full max-w-2xl bg-[#fbfbfd] dark:bg-[#1C1C1E] rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl flex flex-col h-auto max-h-[90vh] overflow-hidden z-10"
+            className="relative w-full max-w-2xl bg-[#fbfbfd] dark:bg-[#1C1C1E] rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl flex flex-col h-auto max-h-[85dvh] sm:max-h-[90dvh] overflow-hidden z-10"
           >
             <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10">
-              <button onClick={onClose} className="w-10 h-10 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer disabled:cursor-not-allowed">
+              <button onClick={onClose} aria-label={t('common.close')} className="w-10 h-10 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer disabled:cursor-not-allowed">
                 <X size={20} strokeWidth={2.5} />
               </button>
             </div>
@@ -269,7 +269,7 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                           </div>
                         </div>
                         <div className="flex flex-col items-center w-full gap-2">
-                          <div className="inline-block glass-card p-2 sm:p-4 rounded-2xl sm:rounded-[2rem] w-fit flex justify-center overflow-hidden scale-95 sm:scale-100 origin-top">
+                          <div className="inline-block glass-card p-2 sm:p-4 rounded-2xl sm:rounded-[2rem] w-fit max-w-full flex justify-center overflow-hidden">
                             <DayPicker mode="range" selected={range} onSelect={(newRange) => {
                                 setRange(newRange);
                                 setDateError(false);
@@ -278,7 +278,7 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                                 if (newRange?.to) setFormData(prev => ({ ...prev, endDate: format(newRange.to, 'yyyy-MM-dd') }));
                               }}
                               fromDate={MIN_DATE} toDate={MAX_DATE}
-                              locale={dateLocale} numberOfMonths={1} className="premium-calendar"
+                              locale={dateLocale} numberOfMonths={1} className="premium-calendar max-sm:[--rdp-day-width:36px]! max-sm:[--rdp-day-height:36px]! max-sm:[--rdp-day\_button-width:36px]! max-sm:[--rdp-day\_button-height:36px]!"
                             />
                           </div>
                           {dateError && (
@@ -337,9 +337,9 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
               </div>
             </div>
 
-            <div className="flex justify-between items-center p-6 sm:p-8 pt-4 pb-6 sm:pb-6 border-t border-gray-100 dark:border-white/5 bg-[#fbfbfd] dark:bg-[#1C1C1E] w-full shrink-0 z-10">
+            <div className="flex justify-between items-center p-6 sm:p-8 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:pb-6 border-t border-gray-100 dark:border-white/5 bg-[#fbfbfd] dark:bg-[#1C1C1E] w-full shrink-0 z-10">
               {step > 1 ? (
-                <button onClick={prevStep} className="flex items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 text-[11px] sm:text-[13px] text-gray-500 hover:text-gray-900 dark:hover:text-white uppercase tracking-widest font-bold transition-colors bg-white/40 dark:bg-white/5 rounded-2xl cursor-pointer disabled:cursor-not-allowed">
+                <button onClick={prevStep} aria-label={step === 3 ? t('createTripModal.nav.edit') : t('createTripModal.nav.back')} className="flex items-center gap-2 px-4 sm:px-6 py-3.5 sm:py-4 text-[11px] sm:text-[13px] text-gray-500 hover:text-gray-900 dark:hover:text-white uppercase tracking-widest font-bold transition-colors bg-white/40 dark:bg-white/5 rounded-2xl cursor-pointer disabled:cursor-not-allowed">
                   <ArrowLeft size={16} strokeWidth={2.5} />
                   <span className="hidden sm:inline">{step === 3 ? t('createTripModal.nav.edit') : t('createTripModal.nav.back')}</span>
                 </button>

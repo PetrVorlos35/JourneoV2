@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { MapPin, Loader2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLength }) => {
+  const { t } = useTranslation();
   const [inputValue, setInputValue] = useState(value || '');
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -130,9 +132,10 @@ const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLeng
           {isLoading ? (
             <Loader2 size={18} className="text-blue-500 animate-spin" strokeWidth={2.5} />
           ) : inputValue ? (
-            <button 
+            <button
               onClick={clearInput}
-              className="text-gray-400 hover:text-red-500 transition-colors p-1 cursor-pointer disabled:cursor-not-allowed"
+              aria-label={t('friends.search.clear')}
+              className="text-gray-400 hover:text-red-500 transition-colors p-3 -m-3 cursor-pointer disabled:cursor-not-allowed"
             >
               <X size={16} strokeWidth={2.5} />
             </button>
@@ -154,7 +157,7 @@ const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLeng
                 <li key={suggestion.id}>
                   <button
                     onClick={() => handleSelect(suggestion)}
-                    className="w-full text-left px-4 py-3 rounded-xl flex items-start gap-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors group cursor-pointer disabled:cursor-not-allowed"
+                    className="w-full min-h-[44px] text-left px-4 py-3 rounded-xl flex items-start gap-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors group cursor-pointer disabled:cursor-not-allowed"
                   >
                     <div className="mt-0.5 text-gray-400 group-hover:text-blue-500 transition-colors shrink-0">
                       <MapPin size={18} strokeWidth={2} />

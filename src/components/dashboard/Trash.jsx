@@ -106,14 +106,14 @@ const Trash = ({ onTripsChanged }) => {
           >
             <ArrowLeft size={14} strokeWidth={2.5} aria-hidden="true" /> {t('trash.backToTrips')}
           </Link>
-          <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('trash.title')}</h1>
+          <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('trash.title')}</h1>
           <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium">{t('trash.subtitle')}</p>
         </div>
 
         {trips.length > 0 && (
           <button
             onClick={handleEmptyTrash}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-500 font-semibold text-[14px] hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors shrink-0 cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-500 font-semibold text-[14px] hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors shrink-0 cursor-pointer min-h-[44px]"
           >
             <Trash2 size={16} strokeWidth={2.5} aria-hidden="true" />
             {t('trash.emptyTrash')}
@@ -122,7 +122,7 @@ const Trash = ({ onTripsChanged }) => {
       </div>
 
       {trips.length === 0 ? (
-        <div className="py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none">
+        <div className="py-14 sm:py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none px-4">
           <div className="w-14 h-14 bg-gray-100 dark:bg-white/5 rounded-2xl flex items-center justify-center text-gray-400">
             <Trash2 size={26} strokeWidth={2} aria-hidden="true" />
           </div>
@@ -147,7 +147,7 @@ const Trash = ({ onTripsChanged }) => {
                   </span>
                 </div>
 
-                <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white tracking-tight">{trip.title}</h2>
+                <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white tracking-tight truncate min-w-0">{trip.title}</h2>
 
                 <div className="flex items-center text-[13px] font-medium text-gray-500 dark:text-gray-400 gap-2">
                   <Calendar size={15} strokeWidth={2} aria-hidden="true" />
@@ -161,7 +161,7 @@ const Trash = ({ onTripsChanged }) => {
                   <button
                     onClick={() => handleRestore(trip)}
                     disabled={busy}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600 text-white text-[13px] font-semibold hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600 text-white text-[13px] font-semibold hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                   >
                     <RotateCcw size={14} strokeWidth={2.5} aria-hidden="true" />
                     {t('trash.restore')}
@@ -169,7 +169,7 @@ const Trash = ({ onTripsChanged }) => {
                   <button
                     onClick={() => handleDeleteForever(trip)}
                     disabled={busy}
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-500 text-[13px] font-semibold hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-500 text-[13px] font-semibold hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                   >
                     {t('trash.deleteForever')}
                   </button>

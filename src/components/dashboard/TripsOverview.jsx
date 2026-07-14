@@ -155,7 +155,7 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
             placeholder={t('tripsOverview.search.placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px]"
+            className="w-full pl-10 pr-4 py-2.5 sm:py-2 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-base sm:text-[14px]"
           />
         </div>
         <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-4">
@@ -163,7 +163,7 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
             type="date"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className="w-full sm:w-auto px-4 py-2 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-[14px] cursor-pointer"
+            className="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-base sm:text-[14px] cursor-pointer"
           />
           {(searchQuery || dateFilter) && (
             <button
@@ -205,7 +205,7 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
           hidden: { opacity: 0 },
           visible: { opacity: 1, transition: { staggerChildren: shouldReduceMotion ? 0 : 0.05 } }
         }}
-        className="flex md:grid overflow-x-auto md:overflow-visible snap-x snap-mandatory md:snap-none no-scrollbar pb-6 md:pb-0 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 -mx-4 px-4 md:mx-0 md:px-0"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
       >
         {tripsByCategory[activeCategory].length > 0 ? (
           tripsByCategory[activeCategory].map(trip => (
@@ -215,7 +215,7 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
                 visible: { opacity: 1, y: 0 }
               }}
               key={trip.id}
-              className="min-w-[85vw] sm:min-w-[320px] md:min-w-0 snap-center glass-card hover:-translate-y-2 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)] transition-all duration-300 p-6 sm:p-8 relative flex flex-col min-h-[200px] sm:min-h-[220px] group shrink-0"
+              className="glass-card hover:-translate-y-2 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:hover:shadow-[0_8px_30px_rgba(255,255,255,0.05)] transition-all duration-300 p-6 sm:p-8 relative flex flex-col min-h-[200px] sm:min-h-[220px] group"
             >
               <div className="flex justify-between items-start mb-6">
                 <div className="w-12 h-12 rounded-[1rem] bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
@@ -238,7 +238,7 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
                 </div>
               </div>
 
-              <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white tracking-tight">{trip.title}</h3>
+              <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white tracking-tight truncate min-w-0">{trip.title}</h3>
 
               <div className="flex items-center text-[13px] font-bold text-gray-500 gap-2 mb-8">
                 <Calendar size={16} strokeWidth={2} />
@@ -265,7 +265,7 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal }) => {
             </motion.div>
           ))
         ) : (
-          <div className="col-span-full py-10 sm:py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none min-h-[50vh] md:min-h-0">
+          <div className="col-span-full py-10 sm:py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none min-h-[50dvh] md:min-h-0">
             <p className="text-xl sm:text-2xl text-gray-900 dark:text-white font-bold tracking-tight">{t('tripsOverview.empty.title')}</p>
             <p className="text-[14px] sm:text-[15px] text-gray-500 font-medium max-w-md px-4">{t('tripsOverview.empty.description')}</p>
           </div>

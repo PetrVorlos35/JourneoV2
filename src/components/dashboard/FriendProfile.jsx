@@ -138,7 +138,7 @@ const FriendProfile = () => {
       {/* Back */}
       <Link
         to="/dashboard/friends"
-        className="inline-flex items-center text-[13px] font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-300"
+        className="inline-flex items-center text-[13px] font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-300 py-2 -my-2"
       >
         <ArrowLeft size={16} className="mr-2" strokeWidth={2.5} /> {t('friendProfile.backToFriends')}
       </Link>
@@ -157,7 +157,7 @@ const FriendProfile = () => {
           <UserAvatar user={profile} size="xl" />
 
           <div className="flex-1 min-w-0">
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-1" style={{ textWrap: 'balance' }}>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white mb-1 break-words" style={{ textWrap: 'balance' }}>
               {profile
                 ? `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email
                 : t('friendProfile.privateProfile.title')}
@@ -180,7 +180,7 @@ const FriendProfile = () => {
           </div>
 
           {/* Action Button */}
-          <div className="shrink-0">
+          <div className="w-full sm:w-auto sm:shrink-0">
             {friendshipStatus === 'NONE' || friendshipStatus === 'DECLINED' ? (
               <button
                 onClick={handleSendRequest}
@@ -197,11 +197,11 @@ const FriendProfile = () => {
                 <Clock size={16} strokeWidth={2.5} /> {t('friendProfile.waitingConfirm')}
               </span>
             ) : friendshipStatus === 'PENDING_RECEIVED' ? (
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                 <button
                   onClick={handleAcceptRequest}
                   disabled={pendingAction !== null}
-                  className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-500 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-500 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed w-full sm:w-auto"
                 >
                   {pendingAction === 'accept'
                     ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -211,7 +211,7 @@ const FriendProfile = () => {
                 <button
                   onClick={handleDeclineRequest}
                   disabled={pendingAction !== null}
-                  className="flex items-center gap-2 px-5 py-3 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 font-bold rounded-2xl hover:bg-gray-200 dark:hover:bg-white/15 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 px-5 py-3 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 font-bold rounded-2xl hover:bg-gray-200 dark:hover:bg-white/15 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed w-full sm:w-auto"
                 >
                   {pendingAction === 'decline'
                     ? <div className="w-4 h-4 border-2 border-gray-400/30 border-t-gray-400 rounded-full animate-spin" />
@@ -234,7 +234,7 @@ const FriendProfile = () => {
           initial={shouldReduceMotion ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3 }}
-          className="glass-card p-12 sm:p-16 rounded-[2rem] text-center relative overflow-hidden"
+          className="glass-card p-8 sm:p-16 rounded-[2rem] text-center relative overflow-hidden"
         >
           <div className="absolute inset-0 backdrop-blur-sm bg-white/30 dark:bg-black/30 pointer-events-none" />
           <div className="relative">
@@ -297,7 +297,7 @@ const FriendProfile = () => {
                     )}
                   </div>
 
-                  <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white tracking-tight">{trip.title}</h3>
+                  <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white tracking-tight break-words">{trip.title}</h3>
 
                   <div className="flex items-center text-[13px] font-bold text-gray-500 gap-2 mb-4">
                     <Calendar size={16} strokeWidth={2} />

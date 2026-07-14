@@ -61,7 +61,7 @@ const TripPdfOptionsModal = ({ isOpen, onClose, availability, counts, onConfirm 
             animate={{ opacity: 1, y: 0 }}
             exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: '100%' }}
             transition={shouldReduceMotion ? { duration: 0.2 } : { ease: [0.22, 1, 0.36, 1], duration: 0.35 }}
-            className="relative w-full max-w-md bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-t-[2rem] sm:rounded-[2rem] p-6 sm:p-8 shadow-2xl z-10"
+            className="relative w-full max-w-md bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-t-[2rem] sm:rounded-[2rem] max-h-[85dvh] overflow-y-auto custom-scrollbar p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8 shadow-2xl z-10"
           >
             <div className="flex justify-between items-start gap-4 mb-6 pb-4 border-b border-gray-200 dark:border-white/10">
               <div className="flex items-center gap-3 min-w-0">
@@ -79,8 +79,8 @@ const TripPdfOptionsModal = ({ isOpen, onClose, availability, counts, onConfirm 
               </div>
               <button
                 onClick={onClose}
-                aria-label={t('budget.addModal.close')}
-                className="w-9 h-9 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer shrink-0"
+                aria-label={t('common.close')}
+                className="w-10 h-10 sm:w-9 sm:h-9 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer shrink-0"
               >
                 <X size={18} strokeWidth={2.5} aria-hidden="true" />
               </button>

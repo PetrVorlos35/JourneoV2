@@ -63,11 +63,12 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="relative z-10 bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-t-[2rem] sm:rounded-[2rem] w-full max-w-md p-6 sm:p-8 shadow-2xl"
+            className="relative z-10 bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-t-[2rem] sm:rounded-[2rem] w-full max-w-md max-h-[85dvh] overflow-y-auto custom-scrollbar p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8 shadow-2xl"
           >
             {/* Close btn */}
             <button
               onClick={onClose}
+              aria-label={t('common.close')}
               className="absolute top-4 right-4 w-10 h-10 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer disabled:cursor-not-allowed"
             >
               <X size={20} strokeWidth={2.5} />
@@ -83,7 +84,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
             </div>
 
             {/* Title */}
-            <h2 className="font-bold text-3xl tracking-tight text-gray-900 dark:text-white mb-4">
+            <h2 className="font-bold text-2xl sm:text-3xl tracking-tight text-gray-900 dark:text-white mb-4">
               {config?.title || t('dialog.defaultTitle')}
             </h2>
 

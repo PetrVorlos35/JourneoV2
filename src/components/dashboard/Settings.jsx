@@ -183,13 +183,13 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
       {ModalPortal}
       <div className="space-y-2">
         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('settings.subtitle')}</p>
-        <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold" style={{ textWrap: 'balance' }}>{t('settings.title')}</h1>
+        <h1 className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold" style={{ textWrap: 'balance' }}>{t('settings.title')}</h1>
       </div>
 
       <div className="space-y-8">
 
         {/* Profile Section */}
-        <div className="glass-card p-8 md:p-10">
+        <div className="glass-card p-5 sm:p-8 md:p-10">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
               <User size={20} strokeWidth={2} />
@@ -306,7 +306,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                     onClick={handleCopyInvite}
                     disabled={!inviteUrl}
                     aria-label={t('friends.invite.copy')}
-                    className="shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-500 dark:text-white/70 hover:text-gray-900 dark:hover:text-white transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="shrink-0 w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-500 dark:text-white/70 hover:text-gray-900 dark:hover:text-white transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {linkCopied ? <Check size={14} strokeWidth={2.5} className="text-green-500 dark:text-green-400" /> : <Copy size={14} strokeWidth={2} />}
                   </button>
@@ -333,7 +333,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
               <button
                 type="submit"
                 disabled={saving}
-                className={`flex items-center gap-2 px-6 py-3 text-white rounded-2xl font-bold transition-all duration-300 shadow-md active:scale-95 disabled:opacity-50 disabled:hover:scale-100 ${
+                className={`flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 text-white rounded-2xl font-bold transition-all duration-300 shadow-md active:scale-95 disabled:opacity-50 disabled:hover:scale-100 ${
                   hasUnsavedChanges
                     ? 'bg-amber-500 hover:bg-amber-400 shadow-amber-500/20'
                     : 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/20 disabled:hover:bg-blue-600'
@@ -351,7 +351,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
         </div>
 
         {/* Currency */}
-        <div className="glass-card p-8 md:p-10">
+        <div className="glass-card p-5 sm:p-8 md:p-10">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
               <DollarSign size={20} strokeWidth={2} />
@@ -379,7 +379,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
         </div>
 
         {/* Appearance (Theme) Section */}
-        <div className="glass-card p-8 md:p-10">
+        <div className="glass-card p-5 sm:p-8 md:p-10">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
               <Sun size={20} strokeWidth={2} className="dark:hidden" />
@@ -409,7 +409,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
         </div>
 
         {/* Language Section */}
-        <div className="glass-card p-8 md:p-10">
+        <div className="glass-card p-5 sm:p-8 md:p-10">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
               <Globe size={20} strokeWidth={2} />
@@ -423,7 +423,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
         </div>
 
         {/* Change Password Section */}
-        <div className="glass-card p-8 md:p-10">
+        <div className="glass-card p-5 sm:p-8 md:p-10">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
             <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
               <KeyRound size={20} strokeWidth={2} />
@@ -450,12 +450,13 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                   required
                   value={pwdForm.oldPassword}
                   onChange={e => handlePwdChange('oldPassword', e.target.value)}
-                  className="glass-input pr-12"
+                  className="glass-input pr-14 md:pr-12"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPwd(p => ({ ...p, old: !p.old }))}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                  aria-label={showPwd.old ? t('auth.password.hide') : t('auth.password.show')}
+                  className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 p-3 md:p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
                 >
                   {showPwd.old ? <EyeOff size={16} strokeWidth={2.5} /> : <Eye size={16} strokeWidth={2.5} />}
                 </button>
@@ -471,12 +472,13 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                   required
                   value={pwdForm.newPassword}
                   onChange={e => handlePwdChange('newPassword', e.target.value)}
-                  className="glass-input pr-12"
+                  className="glass-input pr-14 md:pr-12"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPwd(p => ({ ...p, new: !p.new }))}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                  aria-label={showPwd.new ? t('auth.password.hide') : t('auth.password.show')}
+                  className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 p-3 md:p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
                 >
                   {showPwd.new ? <EyeOff size={16} strokeWidth={2.5} /> : <Eye size={16} strokeWidth={2.5} />}
                 </button>
@@ -528,12 +530,13 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                   required
                   value={pwdForm.confirmPassword}
                   onChange={e => handlePwdChange('confirmPassword', e.target.value)}
-                  className="glass-input pr-12"
+                  className="glass-input pr-14 md:pr-12"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPwd(p => ({ ...p, confirm: !p.confirm }))}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
+                  aria-label={showPwd.confirm ? t('auth.password.hide') : t('auth.password.show')}
+                  className="absolute right-2 md:right-3 top-1/2 -translate-y-1/2 p-3 md:p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors cursor-pointer"
                 >
                   {showPwd.confirm ? <EyeOff size={16} strokeWidth={2.5} /> : <Eye size={16} strokeWidth={2.5} />}
                 </button>
@@ -543,7 +546,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
             <button
               type="submit"
               disabled={savingPwd || !pwdForm.oldPassword || !pwdForm.newPassword || pwdForm.newPassword !== pwdForm.confirmPassword}
-              className="px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-bold transition-all duration-300 shadow-md active:scale-95 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+              className="w-full sm:w-auto px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-bold transition-all duration-300 shadow-md active:scale-95 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
             >
               {savingPwd ? t('settings.password.submitting') : t('settings.password.submit')}
             </button>
@@ -551,7 +554,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
         </div>
 
         {/* Danger zone */}
-        <div className="bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-[2rem] p-8 md:p-10">
+        <div className="bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-[2rem] p-5 sm:p-8 md:p-10">
           <h2 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4 flex items-center gap-3">
             <div className="w-10 h-10 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl flex items-center justify-center">
               <Trash2 size={20} strokeWidth={2} />

@@ -202,7 +202,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   };
 
   return (
-    <div className="w-full h-full flex flex-col min-h-0 pb-10">
+    <div className="w-full h-full flex flex-col min-h-0 pb-10 md:pb-28 lg:pb-10">
       {ModalPortal}
       <ShareTripModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} trip={trip} />
       <TripPdfOptionsModal
@@ -224,7 +224,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
       )}
 
       {/* Mobile Bottom Nav */}
-      <div className="lg:hidden fixed bottom-6 left-6 right-6 z-50 flex justify-center pointer-events-none">
+      <div className="lg:hidden fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-6 right-6 z-50 flex justify-center pointer-events-none">
         <div className="glass-panel w-full max-w-sm rounded-[2rem] flex justify-around items-center px-2 py-3 pointer-events-auto border border-gray-200 dark:border-white/10 shadow-2xl">
           <button
             onClick={() => setMobileTab('itinerary')}
@@ -261,9 +261,9 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
       </div>
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-        <div className="flex-1">
-          <button onClick={handleBack} className="inline-flex items-center text-[13px] font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 md:mb-12">
+        <div className="flex-1 min-w-0">
+          <button onClick={handleBack} className="inline-flex items-center py-2 -my-2 text-[13px] font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed">
             <ArrowLeft size={16} className="mr-2" strokeWidth={2.5} /> {backText}
           </button>
 
@@ -281,10 +281,10 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                       setHasUnsavedChanges(true);
                     }}
                     onKeyDown={e => { if (e.key === 'Enter') setEditingTitle(false); }}
-                    className="text-4xl md:text-5xl font-bold tracking-tight bg-transparent border-b-2 border-blue-600 text-gray-900 dark:text-white focus:outline-none w-full pb-1"
+                    className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight bg-transparent border-b-2 border-blue-600 text-gray-900 dark:text-white focus:outline-none w-full min-w-0 pb-1"
                     autoFocus
                   />
-                  <button onClick={() => setEditingTitle(false)} className="text-gray-400 hover:text-blue-600 transition-colors p-2 bg-gray-100 dark:bg-white/10 rounded-full cursor-pointer disabled:cursor-not-allowed">
+                  <button onClick={() => setEditingTitle(false)} aria-label={t('tripDetail.rename')} className="text-gray-400 hover:text-blue-600 transition-colors p-2.5 shrink-0 bg-gray-100 dark:bg-white/10 rounded-full cursor-pointer disabled:cursor-not-allowed">
                     <Check size={20} strokeWidth={2.5} />
                   </button>
                 </div>
@@ -293,10 +293,10 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-4 group">
-                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight" style={{ textWrap: 'balance' }}>{tripTitle}</h1>
+              <div className="flex items-center gap-3 sm:gap-4 group min-w-0">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight min-w-0 break-words" style={{ textWrap: 'balance' }}>{tripTitle}</h1>
                 {!isViewer && (
-                  <button onClick={() => setEditingTitle(true)} className="text-gray-400 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity p-2 bg-gray-100 dark:bg-white/5 rounded-full hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 cursor-pointer disabled:cursor-not-allowed" title={t('tripDetail.rename')}>
+                  <button onClick={() => setEditingTitle(true)} className="text-gray-400 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity p-2.5 shrink-0 bg-gray-100 dark:bg-white/5 rounded-full hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 cursor-pointer disabled:cursor-not-allowed" title={t('tripDetail.rename')} aria-label={t('tripDetail.rename')}>
                     <Pencil size={18} strokeWidth={2} />
                   </button>
                 )}
@@ -310,7 +310,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
             {(trip.expenses?.length > 0 || trip.budgetTarget) && (
               <button
                 onClick={() => { setMobileTab('tools'); setActiveView('budget'); }}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors cursor-pointer"
               >
                 <Wallet size={10} strokeWidth={2.5} />
                 {trip.expenses?.length > 0
@@ -348,8 +348,9 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           <button
             onClick={() => setShowPdfOptions(true)}
             disabled={!!pdfSections}
-            className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-95 transition-all duration-300 cursor-pointer disabled:opacity-50 shrink-0"
+            className="md:hidden w-11 h-11 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-95 transition-all duration-300 cursor-pointer disabled:opacity-50 shrink-0"
             title={t('tripDetail.exportPdf')}
+            aria-label={t('tripDetail.exportPdf')}
           >
             <FileDown size={18} strokeWidth={2.5} />
           </button>
@@ -365,8 +366,9 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
             <>
               <button
                 onClick={() => setShowShareModal(true)}
-                className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-95 transition-all duration-300 cursor-pointer shrink-0"
+                className="md:hidden w-11 h-11 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-95 transition-all duration-300 cursor-pointer shrink-0"
                 title={t('shareModal.shareButton')}
+                aria-label={t('shareModal.shareButton')}
               >
                 <Users size={18} strokeWidth={2.5} />
               </button>
@@ -476,9 +478,9 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                 {t('tripDetail.info.title')}
               </h2>
               <div className="space-y-6">
-                <div className="flex justify-between items-center pb-4 border-b border-gray-100 dark:border-white/10">
+                <div className="flex justify-between items-center gap-3 flex-wrap pb-4 border-b border-gray-100 dark:border-white/10">
                   <span className="text-gray-600 dark:text-gray-400 text-[13px] font-medium">{t('tripDetail.info.date')}</span>
-                  <span className="font-bold text-gray-900 dark:text-white text-[15px]">
+                  <span className="font-bold text-gray-900 dark:text-white text-[15px] text-right">
                     {format(new Date(trip.startDate), 'd. M. yyyy')} — {format(new Date(trip.endDate), 'd. M. yyyy')}
                   </span>
                 </div>
@@ -583,7 +585,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                         onKeyDown={addPackingItem}
                         maxLength={255}
                         placeholder={t('tripDetail.packing.placeholder')}
-                        className="glass-input !py-3 sm:!py-4 !pl-12 sm:!pl-14 text-[15px] sm:text-base w-full"
+                        className="glass-input !py-3 sm:!py-4 !pl-12 sm:!pl-14 text-base w-full"
                       />
                     </div>
                     <div className="flex justify-end mt-1.5 pr-1">
@@ -600,6 +602,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                     packingList.map(item => (
                       <div key={item.id} className="group flex items-center gap-4 py-4 px-5 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
                         <input
+                          id={`packing-check-${item.id}`}
                           type="checkbox"
                           aria-labelledby={`packing-item-${item.id}`}
                           checked={item.checked}
@@ -607,12 +610,13 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                           disabled={isViewer}
                           className={`w-6 h-6 shrink-0 rounded-md border-2 border-gray-300 dark:border-gray-600 text-blue-600 bg-transparent focus:ring-blue-500 ${isViewer ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
                         />
-                        <span id={`packing-item-${item.id}`} className={`flex-1 min-w-0 break-words text-[15px] font-bold transition-colors ${item.checked ? 'text-gray-400 line-through' : 'text-gray-900 dark:text-white'}`}>
+                        <label htmlFor={`packing-check-${item.id}`} id={`packing-item-${item.id}`} className={`flex-1 min-w-0 break-words py-1 -my-1 text-[15px] font-bold transition-colors ${item.checked ? 'text-gray-400 line-through' : 'text-gray-900 dark:text-white'} ${isViewer ? '' : 'cursor-pointer'}`}>
                           {item.text}
-                        </span>
+                        </label>
                         {!isViewer && (
                           <button
                             onClick={() => deletePackingItem(item.id)}
+                            aria-label={t('tripDetail.packing.delete.title')}
                             className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer disabled:cursor-not-allowed"
                           >
                             <Trash2 size={18} strokeWidth={2} />
@@ -650,7 +654,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                         placeholder={t('tripDetail.documents.titlePlaceholder')}
                         value={docTitle}
                         onChange={e => setDocTitle(e.target.value)}
-                        className="glass-input border-none bg-white dark:bg-black/50 !py-3 sm:!py-4 shadow-sm text-[15px] sm:text-base w-full"
+                        className="glass-input border-none bg-white dark:bg-black/50 !py-3 sm:!py-4 shadow-sm text-base w-full"
                       />
                       <div className="flex justify-end mt-1.5 pr-1">
                         <CharCount value={docTitle} max={255} />
@@ -666,7 +670,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                         rows="2"
                         value={docContent}
                         onChange={e => setDocContent(e.target.value)}
-                        className="glass-input border-none bg-white dark:bg-black/50 !py-3 sm:!py-4 resize-y shadow-sm text-[15px] sm:text-base min-h-[100px] w-full"
+                        className="glass-input border-none bg-white dark:bg-black/50 !py-3 sm:!py-4 resize-y shadow-sm text-base min-h-[100px] w-full"
                       />
                       <div className="flex justify-end mt-1.5 pr-1">
                         <CharCount value={docContent} max={2000} />
@@ -690,6 +694,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                           {!isViewer && (
                             <button
                               onClick={() => deleteDocument(doc.id)}
+                              aria-label={t('tripDetail.documents.delete.title')}
                               className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer disabled:cursor-not-allowed"
                             >
                               <Trash2 size={16} strokeWidth={2} />
@@ -779,7 +784,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                             setHasUnsavedChanges(true);
                           }}
                           placeholder={t('tripDetail.itinerary.planPlaceholder')}
-                          className="glass-input flex-1 min-h-[250px] lg:min-h-0 resize-y font-medium text-[15px] sm:text-base leading-relaxed"
+                          className="glass-input flex-1 min-h-[250px] lg:min-h-0 resize-y font-medium text-base leading-relaxed"
                         />
                         <div className="flex justify-end mt-1.5 pr-1">
                           <CharCount value={day.plan} max={2000} />

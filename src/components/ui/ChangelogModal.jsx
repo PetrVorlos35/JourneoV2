@@ -43,7 +43,7 @@ const ChangelogModal = ({ isOpen, onClose }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "100%" }}
             transition={{ type: 'spring', damping: 28, stiffness: 240 }}
-            className="relative w-full max-w-md z-10 flex flex-col bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl overflow-hidden max-h-[88vh]"
+            className="relative w-full max-w-md z-10 flex flex-col bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl overflow-hidden max-h-[85dvh] sm:max-h-[88dvh]"
           >
             {/* Header */}
             <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-5 border-b border-gray-100 dark:border-white/10 shrink-0">
@@ -62,15 +62,15 @@ const ChangelogModal = ({ isOpen, onClose }) => {
               </div>
               <button
                 onClick={onClose}
-                className="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/15 transition-all cursor-pointer"
-                aria-label={t('changelog.title')}
+                className="w-10 h-10 sm:w-9 sm:h-9 shrink-0 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/15 transition-all cursor-pointer"
+                aria-label={t('common.close')}
               >
                 <X size={16} strokeWidth={2.5} />
               </button>
             </div>
 
             {/* Scrollable body */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-6 space-y-8">
+            <div className="flex-1 overflow-y-auto custom-scrollbar px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:pb-6 space-y-8">
               {CHANGELOG.length === 0 && (
                 <p className="text-gray-500 dark:text-white/40 text-sm font-medium text-center py-8">
                   {t('changelog.empty')}

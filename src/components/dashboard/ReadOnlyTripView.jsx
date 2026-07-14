@@ -86,44 +86,44 @@ const ReadOnlyTripView = () => {
   return (
     <div className="w-full h-full flex flex-col min-h-0 pb-10">
       {/* Mobile bottom nav */}
-      <div className="md:hidden fixed bottom-6 left-6 right-6 z-50 flex justify-center pointer-events-none">
+      <div className="md:hidden fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-6 right-6 z-50 flex justify-center pointer-events-none">
         <div className="glass-panel w-full max-w-sm rounded-[2rem] flex justify-around items-center px-2 py-3 pointer-events-auto border border-gray-200 dark:border-white/10 shadow-2xl">
           <button
             onClick={() => setMobileTab('itinerary')}
-            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'itinerary' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400'} cursor-pointer`}
+            className={`flex flex-col items-center gap-1 flex-1 py-1 transition-all duration-300 ${mobileTab === 'itinerary' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'} cursor-pointer`}
           >
-            <Layout size={20} strokeWidth={mobileTab === 'itinerary' ? 2.5 : 2} />
-            {mobileTab === 'itinerary' && <span className="text-[9px] font-bold uppercase tracking-widest">{t('readOnlyTrip.tabs.itinerary')}</span>}
+            <Layout size={20} strokeWidth={mobileTab === 'itinerary' ? 2.5 : 2} aria-hidden="true" />
+            <span className="text-[11px] font-semibold">{t('readOnlyTrip.tabs.itinerary')}</span>
           </button>
           <button
             onClick={() => setMobileTab('tools')}
-            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'tools' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400'} cursor-pointer`}
+            className={`flex flex-col items-center gap-1 flex-1 py-1 transition-all duration-300 ${mobileTab === 'tools' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'} cursor-pointer`}
           >
-            <Briefcase size={20} strokeWidth={mobileTab === 'tools' ? 2.5 : 2} />
-            {mobileTab === 'tools' && <span className="text-[9px] font-bold uppercase tracking-widest">{t('readOnlyTrip.tabs.tools')}</span>}
+            <Briefcase size={20} strokeWidth={mobileTab === 'tools' ? 2.5 : 2} aria-hidden="true" />
+            <span className="text-[11px] font-semibold">{t('readOnlyTrip.tabs.tools')}</span>
           </button>
           <button
             onClick={() => setMobileTab('info')}
-            className={`flex flex-col items-center gap-1.5 flex-1 transition-all duration-300 ${mobileTab === 'info' ? 'text-blue-600 dark:text-blue-400 scale-110' : 'text-gray-500 dark:text-gray-400'} cursor-pointer`}
+            className={`flex flex-col items-center gap-1 flex-1 py-1 transition-all duration-300 ${mobileTab === 'info' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'} cursor-pointer`}
           >
-            <Info size={20} strokeWidth={mobileTab === 'info' ? 2.5 : 2} />
-            {mobileTab === 'info' && <span className="text-[9px] font-bold uppercase tracking-widest">{t('readOnlyTrip.tabs.details')}</span>}
+            <Info size={20} strokeWidth={mobileTab === 'info' ? 2.5 : 2} aria-hidden="true" />
+            <span className="text-[11px] font-semibold">{t('readOnlyTrip.tabs.details')}</span>
           </button>
         </div>
       </div>
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-        <div>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 md:mb-12">
+        <div className="min-w-0">
           <Link
             to={`/dashboard/profile/${userId}`}
-            className="inline-flex items-center text-[12px] uppercase tracking-widest font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 transition-colors duration-300"
+            className="inline-flex items-center py-2 -my-2 text-[12px] uppercase tracking-widest font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 transition-colors duration-300"
           >
-            <ArrowLeft size={16} className="mr-2" strokeWidth={2.5} /> {t('readOnlyTrip.backToProfile')} {ownerName}
+            <ArrowLeft size={16} className="mr-2 shrink-0" strokeWidth={2.5} /> {t('readOnlyTrip.backToProfile')} {ownerName}
           </Link>
 
-          <div className="flex items-center gap-4 mb-3">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight">
+          <div className="flex items-center flex-wrap gap-3 sm:gap-4 mb-3">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight min-w-0 break-words">
               {trip.title}
             </h1>
             {/* Read-only badge */}
@@ -132,8 +132,8 @@ const ReadOnlyTripView = () => {
             </span>
           </div>
 
-          <p className="text-gray-500 flex items-center gap-2 text-[13px] font-bold tracking-widest uppercase">
-            <Calendar size={16} strokeWidth={2.5} />
+          <p className="text-gray-500 flex items-center flex-wrap gap-2 text-[13px] font-bold tracking-widest uppercase">
+            <Calendar size={16} strokeWidth={2.5} className="shrink-0" />
             {format(new Date(trip.startDate), 'dd.MM.yyyy')} — {format(new Date(trip.endDate), 'dd.MM.yyyy')}
           </p>
         </div>
@@ -221,16 +221,16 @@ const ReadOnlyTripView = () => {
                 {t('readOnlyTrip.info.title')}
               </h2>
               <div className="space-y-6">
-                <div className="flex justify-between items-center pb-4 border-b border-gray-100 dark:border-white/10">
+                <div className="flex justify-between items-center gap-3 flex-wrap pb-4 border-b border-gray-100 dark:border-white/10">
                   <span className="text-gray-500 text-[11px] font-bold uppercase tracking-widest">{t('readOnlyTrip.info.author')}</span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
                     <UserAvatar user={owner} size="sm" className="w-6 h-6 md:w-6 md:h-6 text-[9px]" />
-                    <span className="font-bold text-gray-900 dark:text-white text-[15px]">{ownerName}</span>
+                    <span className="font-bold text-gray-900 dark:text-white text-[15px] truncate">{ownerName}</span>
                   </div>
                 </div>
-                <div className="flex justify-between items-center pb-4 border-b border-gray-100 dark:border-white/10">
+                <div className="flex justify-between items-center gap-3 flex-wrap pb-4 border-b border-gray-100 dark:border-white/10">
                   <span className="text-gray-500 text-[11px] font-bold uppercase tracking-widest">{t('readOnlyTrip.info.date')}</span>
-                  <span className="font-bold text-gray-900 dark:text-white text-[15px]">
+                  <span className="font-bold text-gray-900 dark:text-white text-[15px] text-right">
                     {format(new Date(trip.startDate), 'd. M. yyyy')} — {format(new Date(trip.endDate), 'd. M. yyyy')}
                   </span>
                 </div>

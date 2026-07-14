@@ -31,13 +31,13 @@ const RoleBadge = ({ role, t }) => {
   );
 };
 
-const RoleSelect = ({ value, onChange, disabled, t }) => (
-  <div className="relative">
+const RoleSelect = ({ value, onChange, disabled, t, fullWidthMobile = false }) => (
+  <div className={`relative ${fullWidthMobile ? 'w-full sm:w-auto' : ''}`}>
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
-      className="appearance-none bg-white/10 border border-white/10 text-white text-[12px] font-bold uppercase tracking-widest rounded-xl pl-3 pr-7 py-1.5 focus:outline-none focus:ring-1 focus:ring-white/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:bg-white/15"
+      className={`appearance-none bg-white/10 border border-white/10 text-white font-bold uppercase tracking-widest rounded-xl pl-3 pr-7 py-2.5 sm:py-1.5 focus:outline-none focus:ring-1 focus:ring-white/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-colors hover:bg-white/15 ${fullWidthMobile ? 'w-full sm:w-auto text-[16px] sm:text-[12px]' : 'text-[12px]'}`}
     >
       {ROLES.map((r) => (
         <option key={r} value={r} className="bg-gray-900 text-white normal-case tracking-normal">
@@ -203,7 +203,7 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
   return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6">
+        <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-6 overflow-hidden">
           {/* Overlay */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -216,30 +216,31 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
 
           {/* Panel */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 16 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 8 }}
+            initial={{ opacity: 0, y: '100%' }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 260 }}
-            className="relative w-full max-w-md z-10 flex flex-col bg-white/5 backdrop-blur-2xl border border-white/10 rounded-[2rem] shadow-2xl shadow-black/60 overflow-hidden max-h-[90vh]"
+            className="relative w-full max-w-md z-10 flex flex-col bg-white/5 backdrop-blur-2xl border border-white/10 rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl shadow-black/60 overflow-hidden max-h-[85dvh] sm:max-h-[90dvh]"
           >
             {/* Header */}
             <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-5 border-b border-white/10 shrink-0">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 <div className="w-10 h-10 rounded-2xl bg-blue-500/20 text-blue-300 flex items-center justify-center shrink-0">
                   <Users size={18} strokeWidth={2.5} />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <h2 className="text-white font-bold text-lg leading-tight tracking-tight">
                     {t('shareModal.title')}
                   </h2>
-                  <p className="text-white/40 text-[12px] font-medium mt-0.5 truncate max-w-[220px]">
+                  <p className="text-white/40 text-[12px] font-medium mt-0.5 truncate sm:max-w-[220px]">
                     {trip?.title}
                   </p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+                aria-label={t('common.close')}
+                className="w-10 h-10 sm:w-9 sm:h-9 shrink-0 flex items-center justify-center rounded-xl bg-white/5 border border-white/10 text-white/50 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
               >
                 <X size={16} strokeWidth={2.5} />
               </button>
@@ -260,14 +261,15 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
                 {shareToken ? (
                   <div className="space-y-2">
                     {/* URL display + copy */}
-                    <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl px-4 py-2.5">
-                      <span className="flex-1 text-[12px] text-white/60 font-mono truncate select-all">
+                    <div className="flex items-center gap-2 min-w-0 bg-white/5 border border-white/10 rounded-2xl px-3 sm:px-4 py-1.5 sm:py-2.5">
+                      <span className="flex-1 min-w-0 text-[12px] text-white/60 font-mono truncate select-all">
                         {shareUrl}
                       </span>
                       <button
                         onClick={handleCopyLink}
-                        className="shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all cursor-pointer"
+                        className="shrink-0 w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all cursor-pointer"
                         title={t('shareModal.linkCopy')}
+                        aria-label={t('shareModal.linkCopy')}
                       >
                         {linkCopied ? <Check size={14} strokeWidth={2.5} className="text-green-400" /> : <Copy size={14} strokeWidth={2} />}
                       </button>
@@ -276,7 +278,7 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
                     <button
                       onClick={handleRevokeLink}
                       disabled={isRevokingLink}
-                      className="flex items-center gap-2 text-[11px] font-bold text-red-400/70 hover:text-red-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center gap-2 min-h-[44px] sm:min-h-0 text-[11px] font-bold text-red-400/70 hover:text-red-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isRevokingLink ? <Loader2 size={12} className="animate-spin" /> : <X size={12} strokeWidth={2.5} />}
                       {t('shareModal.linkDisable')}
@@ -288,7 +290,7 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
                     <button
                       onClick={handleGenerateLink}
                       disabled={isGeneratingLink}
-                      className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/15 border border-white/10 rounded-2xl text-[13px] font-bold text-white/80 hover:text-white transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex items-center gap-2 px-4 py-3 sm:py-2.5 min-h-[44px] sm:min-h-0 bg-white/10 hover:bg-white/15 border border-white/10 rounded-2xl text-[13px] font-bold text-white/80 hover:text-white transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isGeneratingLink ? <Loader2 size={14} className="animate-spin" /> : <LinkIcon size={14} strokeWidth={2} />}
                       {t('shareModal.linkEnable')}
@@ -302,7 +304,7 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
                 <p className="text-white/50 text-[11px] font-bold uppercase tracking-widest mb-3">
                   {t('shareModal.addSection')}
                 </p>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   {/* Search input */}
                   <div className="flex-1 relative">
                     <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
@@ -322,7 +324,7 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
                       }}
                       onFocus={() => setShowDropdown(true)}
                       placeholder={t('shareModal.searchPlaceholder')}
-                      className="w-full bg-white/5 border border-white/10 text-white text-sm font-medium placeholder:text-white/30 rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:ring-1 focus:ring-white/20 focus:bg-white/8 transition-all"
+                      className="w-full bg-white/5 border border-white/10 text-white text-base sm:text-sm font-medium placeholder:text-white/30 rounded-xl pl-9 pr-4 py-3 sm:py-2.5 focus:outline-none focus:ring-1 focus:ring-white/20 focus:bg-white/8 transition-all"
                     />
 
                     {/* Search results dropdown */}
@@ -375,7 +377,7 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
                   </div>
 
                   {/* Role selector for new invite */}
-                  <RoleSelect value={selectedRole} onChange={setSelectedRole} disabled={!!addingId} t={t} />
+                  <RoleSelect value={selectedRole} onChange={setSelectedRole} disabled={!!addingId} t={t} fullWidthMobile />
                 </div>
 
                 <p className="text-white/30 text-[11px] mt-2.5 font-medium">
@@ -442,7 +444,8 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
                             <button
                               onClick={() => handleRemove(collab)}
                               disabled={isRemoving || !!updatingId}
-                              className="w-7 h-7 flex items-center justify-center rounded-xl text-white/20 hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all disabled:pointer-events-none cursor-pointer disabled:cursor-not-allowed"
+                              aria-label={t('common.delete')}
+                              className="w-9 h-9 sm:w-7 sm:h-7 flex items-center justify-center rounded-xl text-white/30 hover:text-red-400 hover:bg-red-500/10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all disabled:pointer-events-none cursor-pointer disabled:cursor-not-allowed"
                             >
                               {isRemoving ? (
                                 <Loader2 size={13} className="animate-spin" />
@@ -460,7 +463,7 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
             </div>
 
             {/* Footer */}
-            <div className="px-6 pb-5 pt-4 border-t border-white/10 shrink-0">
+            <div className="px-6 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:pb-5 border-t border-white/10 shrink-0">
               <p className="text-white/20 text-[11px] font-medium text-center">
                 {t('shareModal.footer')}
               </p>

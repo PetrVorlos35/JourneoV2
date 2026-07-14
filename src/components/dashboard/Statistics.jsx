@@ -214,7 +214,7 @@ const Statistics = ({ trips }) => {
           <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium">{t('statistics.error.subtitle')}</p>
           <button
             onClick={handleRetry}
-            className="mt-2 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-[13px] font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            className="mt-2 px-5 py-2.5 sm:py-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-[13px] font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
             {t('statistics.error.retry')}
           </button>
@@ -254,7 +254,7 @@ const Statistics = ({ trips }) => {
         {t('statistics.title')}
       </motion.h1>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <MetricCard icon={Globe} label={t('statistics.metrics.trips')} value={totalTrips} glowColor="#3b82f6" delay={0} />
         <MetricCard icon={CalendarDays} label={t('statistics.metrics.days')} value={totalDays} glowColor="#8b5cf6" delay={0.05} />
         <MetricCard icon={MapPin} label={t('statistics.metrics.places')} value={stats?.travelHabits?.uniqueLocations ?? 0} glowColor="#10b981" delay={0.1} />
@@ -278,10 +278,10 @@ const Statistics = ({ trips }) => {
         </div>
 
         <div className="mb-6 sm:mb-8">
-          <div className="flex items-baseline gap-2 sm:gap-3">
+          <div className="flex flex-wrap items-baseline gap-2 sm:gap-3">
             <AnimatedValue
               value={Math.round(stats?.financial?.totalSpent ?? 0)}
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white tracking-tighter leading-none"
+              className="text-3xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white tracking-tighter leading-none"
             />
             <span className="text-lg sm:text-xl font-bold text-gray-400 dark:text-gray-500">{currencySymbol}</span>
           </div>

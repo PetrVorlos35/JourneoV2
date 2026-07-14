@@ -68,7 +68,7 @@ const AddFriendInvite = () => {
     <div className="space-y-10 w-full pb-10">
       <Link
         to="/dashboard/friends"
-        className="inline-flex items-center text-[13px] font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-300"
+        className="inline-flex items-center text-[13px] font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-300 py-2 -my-2"
       >
         <ArrowLeft size={16} className="mr-2" strokeWidth={2.5} /> {t('addFriendInvite.backToFriends')}
       </Link>
@@ -115,7 +115,7 @@ const AddFriendInvite = () => {
           <div className="relative flex flex-col items-center text-center gap-5">
             <UserAvatar user={inviter} size="xl" />
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-1" style={{ textWrap: 'balance' }}>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-1 break-words" style={{ textWrap: 'balance' }}>
                 {`${inviter?.first_name || ''} ${inviter?.last_name || ''}`.trim() || t('friends.defaultName')}
               </h1>
               <p className="text-[13px] font-semibold text-gray-400 uppercase tracking-widest">

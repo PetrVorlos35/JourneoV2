@@ -204,7 +204,7 @@ const Friends = () => {
 
       <div className="space-y-2">
         <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('friends.subtitle')}</p>
-        <h1 className="text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('friends.title')}</h1>
+        <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('friends.title')}</h1>
       </div>
 
       {/* Invite link — compact */}
@@ -263,7 +263,7 @@ const Friends = () => {
             <button
               onClick={() => { setSearchQuery(''); setSearchResults([]); }}
               aria-label={t('friends.search.clear')}
-              className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors cursor-pointer"
+              className="absolute inset-y-0 right-2 flex items-center px-3 text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors cursor-pointer"
             >
               <X size={18} />
             </button>
@@ -297,21 +297,21 @@ const Friends = () => {
                         <p className="text-[12px] text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
                       </div>
                       {user.friendshipStatus === 'ACCEPTED' ? (
-                        <button disabled className="flex items-center gap-2 px-4 py-2.5 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 text-[12px] font-bold rounded-xl shrink-0 opacity-70 cursor-not-allowed">
+                        <button disabled className="flex items-center gap-2 px-4 py-3 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 text-[12px] font-bold rounded-xl shrink-0 opacity-70 cursor-not-allowed">
                           <UserCheck size={16} strokeWidth={2.5} /> {t('friends.status.alreadyFriends')}
                         </button>
                       ) : user.friendshipStatus === 'PENDING_SENT' ? (
-                        <button disabled className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-[12px] font-bold rounded-xl shrink-0 opacity-70 cursor-not-allowed">
+                        <button disabled className="flex items-center gap-2 px-4 py-3 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-[12px] font-bold rounded-xl shrink-0 opacity-70 cursor-not-allowed">
                           <Clock size={16} strokeWidth={2.5} /> {t('friends.status.requestSent')}
                         </button>
                       ) : user.friendshipStatus === 'PENDING_RECEIVED' ? (
-                        <button disabled className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-[12px] font-bold rounded-xl shrink-0 opacity-70 cursor-not-allowed">
+                        <button disabled className="flex items-center gap-2 px-4 py-3 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-[12px] font-bold rounded-xl shrink-0 opacity-70 cursor-not-allowed">
                           <Clock size={16} strokeWidth={2.5} /> {t('friends.status.pendingReceived')}
                         </button>
                       ) : (
                         <button
                           onClick={() => handleSendRequest(user.id)}
-                          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-[12px] font-bold rounded-xl hover:bg-blue-500 transition-colors shrink-0 cursor-pointer"
+                          className="flex items-center gap-2 px-4 py-3 bg-blue-600 text-white text-[12px] font-bold rounded-xl hover:bg-blue-500 transition-colors shrink-0 cursor-pointer"
                         >
                           <UserPlus size={16} strokeWidth={2.5} /> {t('friends.status.addButton')}
                         </button>
@@ -396,7 +396,7 @@ const Friends = () => {
                     <button
                       onClick={() => handleRemoveFriend(friend.id, friend.first_name || t('friends.defaultName'))}
                       disabled={pendingActions.has(friend.id)}
-                      className="inline-flex items-center gap-1.5 text-[12px] font-medium text-gray-400 hover:text-red-500 transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="inline-flex items-center gap-1.5 text-[12px] font-medium text-gray-400 hover:text-red-500 transition-colors opacity-100 lg:opacity-0 lg:group-hover:opacity-100 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed py-2.5 -my-2.5 pr-2 -mr-2"
                     >
                       {pendingActions.has(friend.id) ? (
                         <div className="w-3.5 h-3.5 border border-current border-t-transparent rounded-full animate-spin" />
@@ -405,7 +405,7 @@ const Friends = () => {
                     </button>
                     <Link
                       to={`/dashboard/profile/${friend.id}`}
-                      className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors"
+                      className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors py-2.5 -my-2.5 pl-2 -ml-2"
                     >
                       {t('friends.status.profile')} <ArrowRight size={15} strokeWidth={2.5} aria-hidden="true" />
                     </Link>
@@ -439,26 +439,28 @@ const Friends = () => {
                 key={req.friendshipId}
                 variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
                 exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -50 }}
-                className="glass-card p-6 flex items-center gap-4 hover:-translate-y-1 transition-transform duration-300"
+                className="glass-card p-6 flex flex-col sm:flex-row sm:items-center gap-4 hover:-translate-y-1 transition-transform duration-300"
               >
-                <div className={`rounded-full ring-2 ${getFriendColor(req.first_name || req.email || '').ring} shrink-0`}>
-                  <UserAvatar user={req} size="md" />
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className={`rounded-full ring-2 ${getFriendColor(req.first_name || req.email || '').ring} shrink-0`}>
+                    <UserAvatar user={req} size="md" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-[15px] text-gray-900 dark:text-white truncate">
+                      {req.first_name || req.last_name
+                        ? `${req.first_name || ''} ${req.last_name || ''}`.trim()
+                        : req.email}
+                    </h3>
+                    <p className="text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5 font-medium mt-0.5">
+                      <Clock size={12} aria-hidden="true" /> {t('friends.status.waitingConfirm')}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-[15px] text-gray-900 dark:text-white truncate">
-                    {req.first_name || req.last_name
-                      ? `${req.first_name || ''} ${req.last_name || ''}`.trim()
-                      : req.email}
-                  </h3>
-                  <p className="text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5 font-medium mt-0.5">
-                    <Clock size={12} aria-hidden="true" /> {t('friends.status.waitingConfirm')}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 sm:shrink-0">
                   <button
                     onClick={() => handleAccept(req.friendshipId)}
                     disabled={pendingActions.has(req.friendshipId)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-[12px] font-bold rounded-xl hover:bg-blue-500 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed min-w-[100px] justify-center"
+                    className="flex-1 sm:flex-none flex items-center gap-2 px-4 py-3 sm:py-2.5 bg-blue-600 text-white text-[12px] font-bold rounded-xl hover:bg-blue-500 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed sm:min-w-[100px] justify-center"
                   >
                     {pendingActions.has(req.friendshipId) ? (
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -469,7 +471,7 @@ const Friends = () => {
                   <button
                     onClick={() => handleDecline(req.friendshipId)}
                     disabled={pendingActions.has(req.friendshipId)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 text-[12px] font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/15 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed min-w-[100px] justify-center"
+                    className="flex-1 sm:flex-none flex items-center gap-2 px-4 py-3 sm:py-2.5 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 text-[12px] font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/15 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed sm:min-w-[100px] justify-center"
                   >
                     {pendingActions.has(req.friendshipId) ? (
                       <div className="w-4 h-4 border-2 border-gray-400/30 border-t-gray-600 dark:border-white/30 dark:border-t-white rounded-full animate-spin" />

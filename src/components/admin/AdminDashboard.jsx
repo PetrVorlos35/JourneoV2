@@ -51,7 +51,7 @@ const AdminDashboard = () => {
 
   if (!data) {
     return (
-      <div className="flex items-center justify-center h-[50vh] text-gray-500 dark:text-gray-400">
+      <div className="flex items-center justify-center h-[50dvh] text-gray-500 dark:text-gray-400">
         {t('admin.dashboard.loadError')}
       </div>
     );
@@ -106,7 +106,7 @@ const AdminDashboard = () => {
       {/* KPI strip — one panel, hairline-separated segments, primary metric accented */}
       <motion.div
         {...reveal(0.05)}
-        className="rounded-2xl overflow-hidden border border-gray-200 dark:border-white/[0.06] bg-gray-200 dark:bg-white/[0.06] grid grid-cols-2 lg:grid-cols-4 gap-px"
+        className="rounded-2xl overflow-hidden border border-gray-200 dark:border-white/[0.06] bg-gray-200 dark:bg-white/[0.06] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px"
       >
         {kpis.map((k, i) => {
           const Icon = k.icon;

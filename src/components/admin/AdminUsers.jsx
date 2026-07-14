@@ -139,12 +139,12 @@ const AdminUsers = () => {
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('admin.users.searchPlaceholder')}
               aria-label={t('admin.users.searchPlaceholder')}
-              className="pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08] text-sm font-medium focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all w-full sm:w-64 placeholder:text-gray-500 dark:placeholder:text-gray-500"
+              className="pl-9 pr-4 py-3 sm:py-2.5 rounded-xl bg-white dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08] text-base md:text-sm font-medium focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all w-full sm:w-64 placeholder:text-gray-500 dark:placeholder:text-gray-500"
             />
           </div>
           <button
             type="submit"
-            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-sm shadow-blue-500/20 transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+            className="px-4 py-3 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-sm shadow-blue-500/20 transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
           >
             {t('admin.users.searchButton')}
           </button>
@@ -321,11 +321,11 @@ const AdminUsers = () => {
 
         {/* Pagination */}
         {pagination.totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-white/[0.06]">
-            <p className="text-[12px] text-gray-500 dark:text-gray-400 font-medium">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 border-t border-gray-200 dark:border-white/[0.06]">
+            <p className="text-[12px] text-gray-500 dark:text-gray-400 font-medium text-center sm:text-left">
               {t('admin.users.pageMeta', { page: pagination.page, pages: pagination.totalPages, count: pagination.total })}
             </p>
-            <div className="flex gap-1">
+            <div className="flex gap-1 justify-center sm:justify-end">
               <button
                 onClick={() => fetchUsers(pagination.page - 1, search)}
                 disabled={pagination.page <= 1}
@@ -373,7 +373,7 @@ const AdminUsers = () => {
                 className="relative w-full max-w-lg bg-white dark:bg-[#111113] border-l border-gray-200 dark:border-white/[0.08] h-full overflow-y-auto z-10 custom-scrollbar shadow-2xl shadow-black/50 focus:outline-none"
               >
                 {detailLoading || selectedUser?.loading ? (
-                  <div className="p-8 space-y-8">
+                  <div className="p-5 sm:p-8 space-y-8">
                     <div className="flex items-center gap-4">
                       <Skeleton className="w-16 h-16" rounded="rounded-full" />
                       <div className="flex-1 space-y-2">
@@ -392,12 +392,12 @@ const AdminUsers = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="p-8 space-y-8">
+                  <div className="p-5 sm:p-8 pb-[max(2rem,env(safe-area-inset-bottom))] sm:pb-8 space-y-8">
                     {/* Close button */}
                     <button
                       onClick={() => setSelectedUser(null)}
                       aria-label={t('admin.close')}
-                      className="absolute top-6 right-6 p-2.5 rounded-full bg-gray-100 dark:bg-white/[0.06] hover:bg-gray-200 dark:hover:bg-white/[0.12] transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                      className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2.5 rounded-full bg-gray-100 dark:bg-white/[0.06] hover:bg-gray-200 dark:hover:bg-white/[0.12] transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
                     >
                       <X size={16} className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
                     </button>
@@ -428,7 +428,7 @@ const AdminUsers = () => {
                     </div>
 
                     {selectedUser.bio && (
-                      <p className="text-[13px] text-gray-500 dark:text-gray-400 leading-relaxed bg-gray-50 dark:bg-white/[0.02] p-4 rounded-xl border border-gray-100 dark:border-white/[0.04] italic">
+                      <p className="text-[13px] text-gray-500 dark:text-gray-400 leading-relaxed bg-gray-50 dark:bg-white/[0.02] p-4 rounded-xl border border-gray-100 dark:border-white/[0.04] italic break-words">
                         "{selectedUser.bio}"
                       </p>
                     )}

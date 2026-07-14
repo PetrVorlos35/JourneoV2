@@ -15,11 +15,24 @@
     box-sizing: border-box;
   }
 
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    -webkit-tap-highlight-color: transparent;
     @apply bg-[#fbfbfd] text-gray-900 font-sans transition-colors duration-500;
+  }
+
+  /* Comfortable touch feedback in place of hover on coarse pointers */
+  @media (pointer: coarse) {
+    button, a {
+      touch-action: manipulation;
+    }
   }
   
   .dark body {

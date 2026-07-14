@@ -11,7 +11,7 @@ const AdminTab = ({ icon: Icon, label, path, active, layoutId, reduceMotion }) =
   <Link
     to={path}
     aria-current={active ? 'page' : undefined}
-    className={`relative flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 h-9 rounded-[10px] text-[13px] font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 ${
+    className={`relative flex-1 md:flex-none flex items-center justify-center gap-2 px-3 md:px-4 h-11 md:h-9 rounded-[10px] text-[13px] font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 ${
       active
         ? 'text-gray-900 dark:text-white'
         : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
@@ -57,7 +57,7 @@ const AdminLayout = ({ children }) => {
       </div>
 
       {/* ── Console header ── */}
-      <header className="sticky top-0 z-40 glass-nav border-x-0 border-t-0">
+      <header className="sticky top-0 z-40 glass-nav border-x-0 border-t-0 pt-[env(safe-area-inset-top)]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-16 flex items-center justify-between gap-3">
             {/* Identity — amber shield marks admin mode */}
@@ -93,7 +93,7 @@ const AdminLayout = ({ children }) => {
             </nav>
 
             {/* Actions */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2 sm:gap-1">
               <Link
                 to="/dashboard"
                 className="hidden sm:flex items-center gap-2 h-10 px-3.5 rounded-xl text-[13px] font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
@@ -104,7 +104,7 @@ const AdminLayout = ({ children }) => {
               <Link
                 to="/dashboard"
                 aria-label={t('admin.backToDashboard')}
-                className="sm:hidden w-10 h-10 flex items-center justify-center rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                className="sm:hidden w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
               >
                 <ArrowLeft size={19} strokeWidth={2.25} />
               </Link>
@@ -112,7 +112,7 @@ const AdminLayout = ({ children }) => {
                 onClick={handleLogout}
                 aria-label={t('admin.logout')}
                 title={t('admin.logout')}
-                className="w-10 h-10 flex items-center justify-center rounded-xl text-gray-500 dark:text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
+                className="w-11 h-11 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl text-gray-500 dark:text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
               >
                 <LogOut size={17} strokeWidth={2.25} />
               </button>
@@ -141,7 +141,7 @@ const AdminLayout = ({ children }) => {
       </header>
 
       {/* ── Main content ── */}
-      <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pb-16">
+      <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pb-[max(4rem,calc(env(safe-area-inset-bottom)+3rem))]">
         {children}
       </main>
     </div>

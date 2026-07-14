@@ -28,7 +28,7 @@ const DashboardLanguageSwitcher = () => {
         <button
           key={code}
           onClick={() => handleSwitch(code)}
-          className={`flex items-center justify-center py-3 sm:py-4 px-2 rounded-2xl border-2 font-bold transition-colors duration-300 uppercase tracking-widest text-[11px] sm:text-[12px] ${
+          className={`flex items-center justify-center min-h-[44px] py-3 sm:py-4 px-2 rounded-2xl border-2 font-bold transition-colors duration-300 uppercase tracking-widest text-[11px] sm:text-[12px] ${
             current === code
               ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
               : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10'

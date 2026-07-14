@@ -116,12 +116,12 @@ const AdminTrips = () => {
               onChange={(e) => setSearch(e.target.value)}
               placeholder={t('admin.trips.searchPlaceholder')}
               aria-label={t('admin.trips.searchPlaceholder')}
-              className="pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08] text-sm font-medium focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all w-full sm:w-64 placeholder:text-gray-500 dark:placeholder:text-gray-500"
+              className="pl-9 pr-4 py-3 sm:py-2.5 rounded-xl bg-white dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08] text-base md:text-sm font-medium focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all w-full sm:w-64 placeholder:text-gray-500 dark:placeholder:text-gray-500"
             />
           </div>
           <button
             type="submit"
-            className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-sm shadow-blue-500/20 transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+            className="px-4 py-3 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-sm shadow-blue-500/20 transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
           >
             {t('admin.trips.searchButton')}
           </button>
@@ -262,11 +262,11 @@ const AdminTrips = () => {
 
         {/* Pagination */}
         {pagination.totalPages > 1 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-white/[0.06]">
-            <p className="text-[12px] text-gray-500 dark:text-gray-400 font-medium">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 border-t border-gray-200 dark:border-white/[0.06]">
+            <p className="text-[12px] text-gray-500 dark:text-gray-400 font-medium text-center sm:text-left">
               {t('admin.trips.pageMeta', { page: pagination.page, pages: pagination.totalPages, count: pagination.total })}
             </p>
-            <div className="flex gap-1">
+            <div className="flex gap-1 justify-center sm:justify-end">
               <button
                 onClick={() => fetchTrips(pagination.page - 1, search)}
                 disabled={pagination.page <= 1}
@@ -314,7 +314,7 @@ const AdminTrips = () => {
                 className="relative w-full max-w-xl bg-white dark:bg-[#111113] border-l border-gray-200 dark:border-white/[0.08] h-full overflow-y-auto z-10 custom-scrollbar shadow-2xl shadow-black/50 focus:outline-none"
               >
                 {detailLoading || selectedTrip?.loading ? (
-                  <div className="p-8 space-y-6">
+                  <div className="p-5 sm:p-8 space-y-6">
                     <Skeleton className="h-8 w-2/3" />
                     <Skeleton className="h-4 w-1/2" />
                     <div className="grid grid-cols-2 gap-4">
@@ -328,19 +328,19 @@ const AdminTrips = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="p-8 space-y-6">
+                  <div className="p-5 sm:p-8 pb-[max(2rem,env(safe-area-inset-bottom))] sm:pb-8 space-y-6">
                     {/* Close button */}
                     <button
                       onClick={() => setSelectedTrip(null)}
                       aria-label={t('admin.close')}
-                      className="absolute top-6 right-6 p-2.5 rounded-full bg-gray-100 dark:bg-white/[0.06] hover:bg-gray-200 dark:hover:bg-white/[0.12] transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                      className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2.5 rounded-full bg-gray-100 dark:bg-white/[0.06] hover:bg-gray-200 dark:hover:bg-white/[0.12] transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
                     >
                       <X size={16} className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
                     </button>
 
                     {/* Trip Header */}
                     <div className="pt-2">
-                      <h2 className="text-2xl font-bold tracking-tight pr-12">{selectedTrip.title}</h2>
+                      <h2 className="text-2xl font-bold tracking-tight pr-12 break-words">{selectedTrip.title}</h2>
                       <div className="flex items-center gap-3 mt-3 flex-wrap">
                         <span className="text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5 bg-gray-100 dark:bg-white/[0.04] px-3 py-1.5 rounded-lg">
                           <Calendar size={13} /> {selectedTrip.startDate} → {selectedTrip.endDate}
@@ -355,17 +355,17 @@ const AdminTrips = () => {
                       {/* Owner */}
                       <div className="flex items-center gap-3 mt-4 p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <UserAvatar user={{ first_name: selectedTrip.user?.firstName, last_name: selectedTrip.user?.lastName, avatar_url: selectedTrip.user?.avatarUrl }} size="sm" />
-                        <div>
-                          <p className="text-[12px] font-semibold">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[12px] font-semibold truncate">
                             {selectedTrip.user?.firstName ? `${selectedTrip.user.firstName} ${selectedTrip.user.lastName || ''}` : selectedTrip.user?.email}
                           </p>
-                          <p className="text-[11px] text-gray-500 dark:text-gray-400">{selectedTrip.user?.email}</p>
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{selectedTrip.user?.email}</p>
                         </div>
                       </div>
                     </div>
 
                     {/* Stats row */}
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <p className="text-lg font-bold tabular-nums">{selectedTrip.activities?.length || 0}</p>
                         <p className="text-[9px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">{t('admin.trips.detail.daysLabel')}</p>
@@ -403,8 +403,8 @@ const AdminTrips = () => {
                                     <span className="text-[10px] text-gray-500 dark:text-gray-400 shrink-0">{a.date}</span>
                                   </div>
                                   {a.location && (
-                                    <p className="text-[11px] text-blue-600 dark:text-blue-400 mt-0.5 flex items-center gap-1">
-                                      <MapPin size={10} /> {a.location}
+                                    <p className="text-[11px] text-blue-600 dark:text-blue-400 mt-0.5 flex items-center gap-1 min-w-0">
+                                      <MapPin size={10} className="shrink-0" /> <span className="truncate">{a.location}</span>
                                     </p>
                                   )}
                                   {a.plan && (
@@ -471,8 +471,8 @@ const AdminTrips = () => {
                         <div className="space-y-2">
                           {selectedTrip.documents.map(d => (
                             <div key={d.id} className="p-4 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
-                              <p className="text-[13px] font-semibold mb-2">{d.title}</p>
-                              <p className="text-[12px] text-gray-500 dark:text-gray-400 leading-relaxed whitespace-pre-wrap">{d.content}</p>
+                              <p className="text-[13px] font-semibold mb-2 break-words">{d.title}</p>
+                              <p className="text-[12px] text-gray-500 dark:text-gray-400 leading-relaxed whitespace-pre-wrap break-words">{d.content}</p>
                             </div>
                           ))}
                         </div>

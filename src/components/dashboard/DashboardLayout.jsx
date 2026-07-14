@@ -67,7 +67,7 @@ const ThemeToggle = () => {
         <button
           key={value}
           onClick={() => setTheme(value)}
-          className={`flex-1 flex items-center justify-center p-2 rounded-lg transition-all duration-300 ${
+          className={`flex-1 flex items-center justify-center p-2.5 rounded-lg transition-all duration-300 ${
             theme === value
               ? 'bg-white dark:bg-[#2c2c2e] text-blue-600 dark:text-blue-400 shadow-sm'
               : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
@@ -211,7 +211,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
       {ModalPortal}
       <Toaster
         position="top-right"
-        containerStyle={{ zIndex: 99999 }}
+        containerStyle={{ zIndex: 99999, top: 'max(1rem, calc(env(safe-area-inset-top) + 0.5rem))' }}
         toastOptions={{
           style: {
             background: isDark ? '#1C1C1E' : '#fff',
@@ -232,7 +232,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
             rotate: [0, 5, -5, 0]
           }}
           transition={shouldReduceMotion ? {} : { duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute w-[800px] h-[800px] rounded-[100%] bg-blue-500/10 dark:bg-blue-500/15 blur-[120px]"
+          className="absolute w-[420px] h-[420px] md:w-[800px] md:h-[800px] rounded-[100%] bg-blue-500/10 dark:bg-blue-500/15 blur-[70px] md:blur-[120px]"
         />
         <motion.div
           animate={shouldReduceMotion ? { opacity: 0.2 } : {
@@ -242,7 +242,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
             y: [0, -50, 50, 0]
           }}
           transition={shouldReduceMotion ? {} : { duration: 25, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute w-[600px] h-[600px] rounded-[100%] bg-purple-500/10 dark:bg-purple-500/15 blur-[100px] right-[-100px] top-[-100px]"
+          className="absolute w-[320px] h-[320px] md:w-[600px] md:h-[600px] rounded-[100%] bg-purple-500/10 dark:bg-purple-500/15 blur-[60px] md:blur-[100px] right-[-100px] top-[-100px]"
         />
       </div>
 
@@ -320,20 +320,20 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
 
       {/* ── Mobile bottom navigation (Floating Pill) ── */}
       {!isTripDetail && (
-        <div className="md:hidden fixed bottom-6 left-6 right-6 z-50 flex justify-center pointer-events-none">
-          <nav className="glass-panel w-full max-w-sm rounded-[2rem] flex justify-around items-center px-2 py-3 pointer-events-auto">
+        <div className="md:hidden fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-4 right-4 z-50 flex justify-center pointer-events-none">
+          <nav className="glass-panel w-full max-w-sm rounded-[2rem] flex justify-around items-center px-1.5 py-2 pointer-events-auto">
             {navItems.map(({ icon: Icon, label, path }) => (
               <Link
                 key={path}
                 to={path}
                 onClick={(e) => handleNavigation(path, e)}
                 aria-current={location.pathname === path ? 'page' : undefined}
-                className={`flex flex-col items-center gap-1 flex-1 transition-all duration-300 py-1 ${
-                  location.pathname === path ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                className={`flex flex-col items-center justify-center gap-1 flex-1 min-w-0 min-h-[48px] rounded-2xl transition-all duration-300 py-1.5 ${
+                  location.pathname === path ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 active:text-gray-700 dark:active:text-gray-300'
                 } cursor-pointer disabled:cursor-not-allowed`}
               >
-                <Icon size={20} strokeWidth={location.pathname === path ? 2.5 : 2} aria-hidden="true" />
-                <span className={`text-[9px] font-semibold transition-colors ${location.pathname === path ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>{label.split(' ')[0]}</span>
+                <Icon size={21} strokeWidth={location.pathname === path ? 2.5 : 2} aria-hidden="true" />
+                <span className={`text-[10px] font-semibold max-w-full truncate px-0.5 transition-colors ${location.pathname === path ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>{label.split(' ')[0]}</span>
               </Link>
             ))}
           </nav>
@@ -359,7 +359,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
               transition={shouldReduceMotion ? { duration: 0.15 } : { type: "spring", bounce: 0, duration: 0.4 }}
               className="absolute right-0 top-0 bottom-0 w-[85%] max-w-[320px] bg-white dark:bg-[#1C1C1E] flex flex-col h-full z-10 rounded-l-[2rem] shadow-2xl"
             >
-              <div className="p-6 flex items-center justify-between">
+              <div className="px-6 pb-6 pt-[max(1.5rem,env(safe-area-inset-top))] flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <img
                     src={isDark ? JourneoLogo : JourneoLogoDark}
@@ -422,7 +422,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
                 </div>
               </div>
 
-              <div className="p-6">
+              <div className="px-6 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
                 <button
                   onClick={() => { closeMobile(); handleLogout(); }}
                   className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors duration-300 font-bold cursor-pointer disabled:cursor-not-allowed"
@@ -437,9 +437,9 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
       </AnimatePresence>
 
       {/* ── Main content ── */}
-      <main className="flex-1 min-w-0 pb-28 md:pb-0 h-full flex flex-col relative z-10">
+      <main className={`flex-1 min-w-0 ${isTripDetail ? 'pb-[env(safe-area-inset-bottom)]' : 'pb-[calc(max(1.25rem,env(safe-area-inset-bottom))+5.75rem)]'} md:pb-0 h-full flex flex-col relative z-10`}>
         {/* Mobile top bar */}
-        <div className="md:hidden flex items-center justify-between p-4 glass sticky top-0 z-30 shrink-0">
+        <div className="md:hidden flex items-center justify-between px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] glass sticky top-0 z-30 shrink-0">
           <div className="flex items-center gap-2">
             <img
               src={isDark ? JourneoLogo : JourneoLogoDark}
@@ -484,7 +484,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
           <NotificationBell />
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 sm:p-8 md:p-10 max-w-[1400px] mx-auto w-full flex flex-col min-h-0 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-8 md:p-10 max-w-[1400px] mx-auto w-full flex flex-col min-h-0 custom-scrollbar">
           {children}
         </div>
 
@@ -493,7 +493,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
           <button
             onClick={handleOpenCreateModal}
             aria-label={t('dashboardLayout.nav.createTrip')}
-            className="md:hidden fixed bottom-24 right-6 z-[100] w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(37,99,235,0.4)] active:scale-90 transition-transform cursor-pointer"
+            className="md:hidden fixed bottom-[calc(max(1.25rem,env(safe-area-inset-bottom))+5rem)] right-4 z-[100] w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(37,99,235,0.4)] active:scale-90 transition-transform cursor-pointer"
           >
             <Plus size={28} strokeWidth={2.5} />
           </button>

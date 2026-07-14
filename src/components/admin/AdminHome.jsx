@@ -32,7 +32,7 @@ const AdminHome = () => {
     <AdminLayout>
       <Toaster
         position="top-right"
-        containerStyle={{ zIndex: 99999 }}
+        containerStyle={{ zIndex: 99999, top: 'max(1rem, calc(env(safe-area-inset-top) + 0.5rem))' }}
         toastOptions={{
           style: {
             background: isDark ? '#1C1C1E' : '#fff',
