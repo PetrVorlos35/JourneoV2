@@ -10,6 +10,19 @@
     "current": "Aktuální verze",
     "empty": "Zatím tu nejsou žádné novinky.",
     "releases": {
+      "v1_3": {
+        "title": "Mapa míst",
+        "summary": "Vaše cesty teď mají svou mapu. Ukládejte si navštívená i vysněná místa, přiřazujte je ke dnům výletu a mějte celou cestu i všechna svá místa pohromadě na jednom plátně — stejně přehledně na počítači i na mobilu.",
+        "highlights": [
+          "Osobní mapa všech vašich míst napříč výlety",
+          "Mapa přímo v každém výletu, s trasou mezi místy podle dnů",
+          "Přidání místa zaměřovačem nebo vyhledáním adresy",
+          "Rozlište navštívená a vysněná místa a filtrujte podle kategorie či výletu",
+          "Načtení míst přímo z itineráře výletu jedním klikem",
+          "Sjednocené immerzivní ovládání na desktopu i mobilu",
+          "Světlý i tmavý motiv mapy"
+        ]
+      },
       "v1_2": {
         "title": "Export výletu do PDF",
         "summary": "Vezměte si své plány s sebou i offline. Každý výlet teď můžete exportovat do elegantního PDF dokumentu v nezaměnitelném stylu Journeo — ideální k vytištění, sdílení se spolucestovateli nebo do kapsy na cesty.",
@@ -64,7 +77,11 @@
     "float": {
       "packing": {
         "progress": "Sbaleno 7 z 10",
-        "items": ["Pas", "Foťák", "Žabky"]
+        "items": [
+          "Pas",
+          "Foťák",
+          "Žabky"
+        ]
       },
       "ticket": {
         "label": "Palubní vstupenka",
@@ -175,6 +192,10 @@
     "features": {
       "title": "Vše, co potřebujete pro své cesty.",
       "subtitle": "Journeo není jen deník. Je to komplexní nástroj pro plánování, zaznamenávání a sdílení vašich dobrodružství.",
+      "map": {
+        "title": "Vaše místa na mapě",
+        "description": "Připínejte si navštívená i vysněná místa — na osobní mapě nebo přímo ve výletu, s trasou mezi zastávkami. Stejně immerzivní na počítači i na mobilu."
+      },
       "budget": {
         "title": "Chytrý rozpočet",
         "description": "Mějte své výdaje pod kontrolou. Sledujte útraty za letenky, ubytování, jídlo i aktivity přímo během cesty a vyhněte se nepříjemným překvapením.",
@@ -405,6 +426,7 @@
     "nav": {
       "overview": "Přehled",
       "myTrips": "Moje výlety",
+      "map": "Mapa",
       "statistics": "Statistiky",
       "friends": "Přátelé",
       "budget": "Výdaje",
@@ -613,7 +635,8 @@
       "packing": "Balící seznam",
       "documents": "Odkazy a poznámky",
       "diary": "Deník a Galerie",
-      "budget": "Rozpočet"
+      "budget": "Rozpočet",
+      "map": "Mapa"
     },
     "info": {
       "title": "Přehled výletu",
@@ -630,7 +653,9 @@
       "links": "Odkazy",
       "records": "záznamů",
       "budget": "Rozpočet",
-      "budgetEmpty": "Zatím žádné výdaje"
+      "budgetEmpty": "Zatím žádné výdaje",
+      "map": "Mapa výletu",
+      "mapHint": "Místa a trasa na mapě"
     },
     "packing": {
       "title": "Balící seznam",
@@ -740,6 +765,120 @@
       "title": "Smazat výlet"
     },
     "trash": "Koš"
+  },
+  "map": {
+    "title": "Moje mapa",
+    "subtitle_one": "{{count}} uložené místo",
+    "subtitle_few": "{{count}} uložená místa",
+    "subtitle_other": "{{count}} uložených míst",
+    "loading": "Načítám místa…",
+    "categories": {
+      "sight": "Památka",
+      "food": "Jídlo",
+      "stay": "Ubytování",
+      "nature": "Příroda",
+      "activity": "Zážitek",
+      "transport": "Doprava",
+      "other": "Ostatní"
+    },
+    "statuses": {
+      "visited": "Navštíveno",
+      "wishlist": "Chci navštívit"
+    },
+    "filters": {
+      "searchPlaceholder": "Najít místo na mapě…",
+      "locate": "Moje poloha",
+      "toggle": "Filtry",
+      "all": "Vše",
+      "allTrips": "Všechny výlety",
+      "tripLabel": "Filtrovat podle výletu"
+    },
+    "list": {
+      "toggle": "Seznam míst",
+      "edit": "Upravit místo {{name}}"
+    },
+    "sheet": {
+      "newTitle": "Nové místo",
+      "editTitle": "Upravit místo",
+      "nameLabel": "Název",
+      "namePlaceholder": "Např. Vyhlídka nad zátokou",
+      "statusLabel": "Stav",
+      "categoryLabel": "Kategorie",
+      "tripLabel": "Výlet",
+      "noTrip": "Bez výletu (jen moje mapa)",
+      "dayLabel": "Den výletu",
+      "noDay": "Bez konkrétního dne",
+      "dayOption": "Den {{number}}",
+      "noteLabel": "Poznámka",
+      "notePlaceholder": "Co si o tom místě chceš pamatovat?",
+      "save": "Uložit změny",
+      "create": "Uložit místo",
+      "delete": "Smazat místo",
+      "locationLabel": "Poloha",
+      "move": "Přesunout",
+      "moveCancel": "Hotovo",
+      "moveHint": "Klepni do mapy nebo přetáhni špendlík na nové místo.",
+      "draftMoveHint": "Klepnutím do mapy špendlík přesuneš."
+    },
+    "empty": {
+      "title": "Zatím žádná místa",
+      "filtered": "Filtru neodpovídá žádné místo.",
+      "hint": "Klikni kamkoli do mapy a ulož si první místo."
+    },
+    "confirmDelete": {
+      "title": "Smazat místo?",
+      "message": "Místo „{{name}}“ se z mapy odstraní. Tuhle akci nelze vrátit.",
+      "confirm": "Smazat"
+    },
+    "toasts": {
+      "created": "Místo uloženo.",
+      "updated": "Změny uloženy.",
+      "deleted": "Místo smazáno.",
+      "moved": "Poloha upravena — ještě ulož změny."
+    },
+    "errors": {
+      "load": "Nepodařilo se načíst místa.",
+      "save": "Místo se nepodařilo uložit.",
+      "delete": "Místo se nepodařilo smazat.",
+      "geolocationUnsupported": "Tvůj prohlížeč neumí zjistit polohu.",
+      "geolocationDenied": "Polohu se nepodařilo zjistit."
+    },
+    "trip": {
+      "routeSummary": "Trasa přes {{count}} míst · {{distance}}",
+      "noRoute": "Přiřaď místa ke dnům a uvidíš trasu výletu.",
+      "import": "Načíst z itineráře",
+      "importDone_one": "Načteno {{count}} místo z itineráře.",
+      "importDone_few": "Načtena {{count}} místa z itineráře.",
+      "importDone_other": "Načteno {{count}} míst z itineráře.",
+      "importFailed": "Žádnou z lokací se nepodařilo najít na mapě.",
+      "importNothing": "Z itineráře není co načíst.",
+      "importError": "Načtení míst z itineráře se nezdařilo.",
+      "empty": "K tomuhle výletu zatím nejsou žádná místa.",
+      "emptyHint": "Klikni do mapy nebo načti místa z itineráře.",
+      "canvasLabel": "Mapa výletu {{title}}"
+    },
+    "stats": {
+      "countries": "Navštívené země",
+      "cities": "Navštívená města",
+      "places": "Uložená místa",
+      "wishlist": "Na seznamu přání",
+      "empty": "Ulož si první místa na mapě a uvidíš tu svoje země.",
+      "open": "Otevřít mapu"
+    },
+    "mobile": {
+      "back": "Zpět",
+      "addPlace": "Přidat",
+      "placeHere": "Umístit sem",
+      "cancel": "Zrušit",
+      "edit": "Upravit",
+      "move": "Přesunout",
+      "delete": "Smazat místo",
+      "placingHint": "Posuň mapou pod křížek"
+    },
+    "panel": {
+      "collapse": "Sbalit panel",
+      "expand": "Rozbalit panel"
+    }
   },
   "budget": {
     "subtitle": "Rozpočet",

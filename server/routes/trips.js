@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { randomBytes } from 'crypto';
 import { waitUntil } from '@vercel/functions';
 import pool from '../config/db.js';
+import { getTripRole } from '../lib/tripAccess.js';
 import { calculateBalances } from '../lib/balances.js';
 import { sendSettlementEmail } from '../lib/mailer.js';
 
@@ -84,25 +85,6 @@ const validateTripDates = (startDate, endDate) => {
     return { status: 400, error: 'Výlet nemůže být delší než 100 dní.' };
   }
   return null;
-};
-
-// Returns 'owner' | 'editor' | 'viewer' | null (no access).
-// Trips sitting in the trash (deleted_at set) count as not found for
-// everyone — they're only reachable via the trash endpoints below.
-const getTripRole = async (tripId, userId) => {
-  const [[owned]] = await pool.query(
-    'SELECT id FROM trips WHERE id = ? AND user_id = ? AND deleted_at IS NULL',
-    [tripId, userId]
-  );
-  if (owned) return 'owner';
-
-  const [[collab]] = await pool.query(
-    `SELECT tc.role FROM trip_collaborators tc
-     JOIN trips t ON t.id = tc.trip_id AND t.deleted_at IS NULL
-     WHERE tc.trip_id = ? AND tc.user_id = ?`,
-    [tripId, userId]
-  );
-  return collab ? collab.role : null;
 };
 
 // ── GET /api/trips ──────────────────────────────────────────

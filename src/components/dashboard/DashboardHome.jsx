@@ -21,6 +21,7 @@ import {
   FriendProfileSkeleton,
   TripViewSkeleton,
   ContentSkeleton,
+  MapSkeleton,
 } from '../ui/Skeletons';
 
 // Lazy load dashboard sub-components
@@ -35,6 +36,8 @@ const FriendProfile = lazy(() => import('./FriendProfile'));
 const AddFriendInvite = lazy(() => import('./AddFriendInvite'));
 const ReadOnlyTripView = lazy(() => import('./ReadOnlyTripView'));
 const Trash = lazy(() => import('./Trash'));
+// Leaflet i jeho CSS jedou až s tímhle chunkem — na ostatní stránky se nestáhnou.
+const MapPage = lazy(() => import('./MapPage'));
 
 // Wrap a lazy route element in its own Suspense boundary with a matching
 // skeleton fallback. Because each matched route mounts a *new* boundary,
@@ -248,6 +251,10 @@ const DashboardHome = () => {
         <Route
           path="/trip/:id"
           element={withSuspense(<TripDetail trips={trips} onUpdateTrip={handleUpdateTrip} />, <TripDetailSkeleton />)}
+        />
+        <Route
+          path="/map"
+          element={withSuspense(<MapPage trips={trips} />, <MapSkeleton />)}
         />
         <Route
           path="/trash"

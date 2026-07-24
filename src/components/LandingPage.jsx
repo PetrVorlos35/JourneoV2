@@ -670,6 +670,52 @@ const BudgetVignette = () => {
   );
 };
 
+const MapVignette = () => {
+  // Stylizovaná mini-mapa: jemná uliční mřížka, přerušovaná trasa a tři
+  // špendlíky v barvách kategorií — evokuje mapu míst, ne reálný Leaflet.
+  const pins = [
+    { c: 'bg-blue-600', left: '15%', top: '78%' },
+    { c: 'bg-emerald-500', left: '47%', top: '47%' },
+    { c: 'bg-amber-500', left: '78%', top: '25%' },
+  ];
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-gray-100 bg-[#eef1f6]">
+      <div
+        className="absolute inset-0 opacity-70"
+        style={{
+          backgroundImage:
+            'linear-gradient(rgba(37,99,235,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(37,99,235,0.07) 1px, transparent 1px)',
+          backgroundSize: '22px 22px',
+        }}
+        aria-hidden="true"
+      />
+      <svg viewBox="0 0 320 176" className="relative w-full h-auto" aria-hidden="true">
+        <path d="M-10 132 Q 70 112 140 130 T 330 122 L 330 190 L -10 190 Z" fill="rgba(37,99,235,0.05)" />
+        <path
+          d="M48 137 C 96 120 118 92 150 83 S 214 62 250 44"
+          fill="none"
+          stroke="#2563eb"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeDasharray="4 8"
+          opacity="0.8"
+        />
+      </svg>
+      {pins.map((p, i) => (
+        <span
+          key={i}
+          className="absolute -translate-x-1/2 -translate-y-1/2"
+          style={{ left: p.left, top: p.top }}
+        >
+          <span className={`flex w-6 h-6 items-center justify-center rounded-full ${p.c} text-white ring-2 ring-white shadow-md`}>
+            <MapPin size={12} strokeWidth={2.5} />
+          </span>
+        </span>
+      ))}
+    </div>
+  );
+};
+
 // ── What's new — inline changelog built from the same data as the modal ─────
 const formatReleaseDate = (iso, lng) => {
   try {
@@ -1070,6 +1116,19 @@ const LandingPage = () => {
                     <p className="text-gray-600 leading-relaxed text-[15px]">{t('landing.features.budget.description')}</p>
                   </div>
                   <BudgetVignette />
+                </div>
+              </Reveal>
+
+              {/* Map — full-width feature banner */}
+              <Reveal delay={0.1} className="lg:col-span-3">
+                <div className="h-full rounded-[2rem] border border-gray-200/70 bg-white/70 backdrop-blur-sm p-7 sm:p-9 transition-all duration-300 xl:hover:-translate-y-1 xl:hover:border-gray-300/80 xl:hover:shadow-[0_20px_48px_-24px_rgba(37,99,235,0.25)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 grid sm:grid-cols-2 gap-8 lg:gap-12 items-center">
+                  <div>
+                    <h3 className="text-xl font-bold tracking-tight mb-2.5">{t('landing.features.map.title')}</h3>
+                    <p className="text-gray-600 leading-relaxed text-[15px]">{t('landing.features.map.description')}</p>
+                  </div>
+                  <div className="w-full sm:max-w-md sm:ml-auto">
+                    <MapVignette />
+                  </div>
                 </div>
               </Reveal>
             </div>

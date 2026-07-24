@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { AlertCircle, Globe, CalendarDays, MapPin, Heart, Wallet, Backpack, Calendar, Crown, TrendingUp } from 'lucide-react';
+import { useState, useEffect, useCallback, useMemo, Suspense, lazy } from 'react';
+import { AlertCircle, Globe, CalendarDays, MapPin, Heart, Wallet, Backpack, Calendar, Crown, TrendingUp, MapPinned, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { eachDayOfInterval } from 'date-fns';
 import { motion, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +17,15 @@ const CATEGORY_CONFIG = {
 };
 
 const CURRENCY_SYMBOLS = { CZK: 'Kč', EUR: '€', USD: '$', GBP: '£' };
+
+// Náhled mapy se stahuje až s Leafletem — statistiky se otevírají i bez něj.
+const MapCanvas = lazy(() => import('../map/MapCanvas'));
+
+// ISO kód země → vlajka (regional indicator symbols).
+const countryFlag = (code) =>
+  code && code.length === 2
+    ? String.fromCodePoint(...[...code.toUpperCase()].map((c) => 127397 + c.charCodeAt(0)))
+    : '🏳️';
 
 const AnimatedValue = ({ value, suffix = '', prefix = '', className = '' }) => {
   const [displayed, setDisplayed] = useState(0);
@@ -165,6 +175,8 @@ const Statistics = ({ trips }) => {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const [stats, setStats] = useState(null);
+  const [placeStats, setPlaceStats] = useState(null);
+  const [visitedPlaces, setVisitedPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
@@ -186,6 +198,23 @@ const Statistics = ({ trips }) => {
         if (!cancelled) setLoading(false);
       }
     };
+
+    // Mapová sekce je bonus — když selže, zbytek statistik zůstane.
+    const fetchPlaces = async () => {
+      try {
+        const [summary, places] = await Promise.all([
+          api.places.stats(),
+          api.places.getAll({ status: 'visited' }),
+        ]);
+        if (cancelled) return;
+        setPlaceStats(summary);
+        setVisitedPlaces(places.places || []);
+      } catch {
+        if (!cancelled) setPlaceStats(null);
+      }
+    };
+
+    fetchPlaces();
     fetchStats();
     return () => { cancelled = true; };
   }, [retryCount]);
@@ -199,6 +228,22 @@ const Statistics = ({ trips }) => {
   }, 0), [trips]);
 
   const currencySymbol = CURRENCY_SYMBOLS[currency] || currency;
+
+  // Názvy zemí bere prohlížeč z ICU dat — žádné vlastní překladové tabulky.
+  const regionName = useMemo(() => {
+    try {
+      const display = new Intl.DisplayNames([i18n.language], { type: 'region' });
+      return (code) => {
+        try {
+          return display.of(code) || code;
+        } catch {
+          return code;
+        }
+      };
+    } catch {
+      return (code) => code;
+    }
+  }, [i18n.language]);
 
   if (loading) {
     return <StatisticsSkeleton />;
@@ -260,6 +305,80 @@ const Statistics = ({ trips }) => {
         <MetricCard icon={MapPin} label={t('statistics.metrics.places')} value={stats?.travelHabits?.uniqueLocations ?? 0} glowColor="#10b981" delay={0.1} />
         <MetricCard icon={Heart} label={t('statistics.metrics.likes')} value={stats?.social?.communityScore ?? 0} glowColor="#ef4444" delay={0.15} />
       </div>
+
+      {/* Mapa cest — jen když už si uživatel nějaká místa uložil. */}
+      {placeStats?.placeCount > 0 && (
+        <motion.div
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.55, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+          className="glass-card p-6 sm:p-8"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+              style={{ backgroundColor: 'rgba(16, 185, 129, 0.12)', boxShadow: '0 0 20px rgba(16, 185, 129, 0.15)' }}
+            >
+              <MapPinned size={18} strokeWidth={2} className="text-emerald-500" aria-hidden="true" />
+            </div>
+            <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium">{t('map.title')}</p>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+            {[
+              { label: t('map.stats.countries'), value: placeStats.countryCount },
+              { label: t('map.stats.cities'), value: placeStats.cityCount },
+              { label: t('map.stats.places'), value: placeStats.visitedCount },
+              { label: t('map.stats.wishlist'), value: placeStats.wishlistCount },
+            ].map(({ label, value }) => (
+              <div key={label}>
+                <AnimatedValue
+                  value={value}
+                  className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tighter leading-none"
+                />
+                <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-1">{label}</p>
+              </div>
+            ))}
+          </div>
+
+          {visitedPlaces.length > 0 && (
+            <div className="relative h-[220px] sm:h-[280px] rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 mb-5">
+              <Suspense fallback={<div className="w-full h-full skeleton" />}>
+                <MapCanvas
+                  places={visitedPlaces}
+                  interactive={false}
+                  fitKey="stats"
+                  ariaLabel={t('map.title')}
+                />
+              </Suspense>
+              {/* Náhled je záměrně neinteraktivní — kdo si chce mapu projít,
+                  potřebuje odsud cestu na plnou verzi. */}
+              <Link
+                to="/dashboard/map"
+                className="absolute top-3 right-3 z-[500] inline-flex items-center gap-1.5 min-h-[36px] px-3.5 rounded-full glass-card border border-gray-200 dark:border-white/10 text-[12px] font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+              >
+                {t('map.stats.open')}
+                <ArrowRight size={13} strokeWidth={2.5} aria-hidden="true" />
+              </Link>
+            </div>
+          )}
+
+          {placeStats.countries.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {placeStats.countries.map(({ code, count }) => (
+                <span
+                  key={code}
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-100 dark:bg-white/5 text-[12px] font-semibold text-gray-700 dark:text-gray-200"
+                >
+                  <span aria-hidden="true">{countryFlag(code)}</span>
+                  {regionName(code)}
+                  <span className="text-gray-400 dark:text-gray-500 tabular-nums">{count}</span>
+                </span>
+              ))}
+            </div>
+          )}
+        </motion.div>
+      )}
 
       <motion.div
         initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}

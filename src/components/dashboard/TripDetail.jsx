@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Save, MapPin, Calendar, Pencil, Check, PackageOpen, Link as LinkIcon, Plus, Trash2, ExternalLink, Layout, Briefcase, Info, Users, Eye, Heart, Wallet, FileDown } from 'lucide-react';
+import { ArrowLeft, Save, MapPin, Calendar, Pencil, Check, PackageOpen, Link as LinkIcon, Plus, Trash2, ExternalLink, Layout, Briefcase, Info, Users, Eye, Heart, Wallet, FileDown, MapPinned } from 'lucide-react';
 import { format, eachDayOfInterval } from 'date-fns';
 import { cs } from 'date-fns/locale';
 import { enUS } from 'date-fns/locale';
@@ -16,6 +16,10 @@ import TripPdfExport from './TripPdfExport';
 import TripPdfOptionsModal from './TripPdfOptionsModal';
 import Budget from './Budget';
 import { useCurrency } from '../../contexts/CurrencyContext';
+
+// Mapa se stahuje až při otevření záložky — Leaflet a jeho CSS tak
+// nezatěžují detail výletu, který se otevírá mnohem častěji.
+const TripMap = lazy(() => import('./TripMap'));
 
 const TripDetail = ({ trips, onUpdateTrip }) => {
   const { id } = useParams();
@@ -414,6 +418,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
               {[
                 { id: 'packing', Icon: PackageOpen, label: t('tripDetail.tools.packing') },
                 { id: 'documents', Icon: LinkIcon, label: t('tripDetail.tools.documents') },
+                { id: 'map', Icon: MapPinned, label: t('tripDetail.tools.map') },
                 { id: 'budget', Icon: Wallet, label: t('tripDetail.tools.budget'), badge: trip.expenses?.length || null },
               ].map(({ id, Icon, label, badge }) => (
                 <button
@@ -518,6 +523,16 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                 <span className="text-[11px] font-medium">
                   {documents.length} {t('tripDetail.mobile.records')}
                 </span>
+              </button>
+              <button
+                onClick={() => setActiveView('map')}
+                className={`col-span-2 flex items-center gap-5 p-5 rounded-3xl border-2 transition-all duration-300 text-left ${activeView === 'map' ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'border-transparent glass-card text-gray-500 hover:text-gray-900'} cursor-pointer disabled:cursor-not-allowed`}
+              >
+                <MapPinned size={26} strokeWidth={2} className="shrink-0" />
+                <div>
+                  <span className="font-bold text-[15px] block mb-0.5 text-gray-900 dark:text-white leading-tight">{t('tripDetail.mobile.map')}</span>
+                  <span className="text-[11px] font-medium">{t('tripDetail.mobile.mapHint')}</span>
+                </div>
               </button>
               <button
                 onClick={() => setActiveView('budget')}
@@ -715,6 +730,23 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Mapa výletu — montuje se až po otevření, aby se Leaflet
+              neinicializoval do skrytého kontejneru s nulovou výškou.
+              Na mobilu si TripMap vykreslí vlastní celoobrazovkovou vrstvu
+              (portál), takže tenhle box je schválně jen pro md+. */}
+          <div className={`hidden ${activeView === 'map' ? 'lg:flex' : 'lg:hidden'} flex-col flex-1 lg:h-full lg:min-h-0 mb-6 lg:mb-0 relative overflow-hidden lg:rounded-3xl`}>
+            {activeView === 'map' && (
+              <Suspense fallback={<div className="glass-card flex-1 min-h-[320px] skeleton rounded-3xl" />}>
+                <TripMap
+                  trip={trip}
+                  dayCount={dailyPlans.length}
+                  canEdit={!isViewer}
+                  onExit={() => setActiveView(null)}
+                />
+              </Suspense>
+            )}
           </div>
 
           {/* Budget */}

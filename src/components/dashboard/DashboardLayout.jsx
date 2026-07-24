@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, PlusSquare, Plus, Settings, LogOut, BarChart2, Wallet, X, Sun, Moon, Monitor, Map, Menu, Users, Shield } from 'lucide-react';
+import { Home, PlusSquare, Plus, Settings, LogOut, BarChart2, Wallet, X, Sun, Moon, Monitor, Map, MapPinned, Menu, Users, Shield } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
@@ -94,10 +94,14 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
 
   const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   const isTripDetail = location.pathname.includes('/trip/');
+  // Globální mapa je immerzivní: vyplní obsahovou plochu edge-to-edge, bez
+  // paddingu a scrollu, aby ji plovoucí panel překrýval jako na mobilu.
+  const isMapRoute = location.pathname.includes('/dashboard/map');
 
   const navItems = [
     { icon: Home,     label: t('dashboardLayout.nav.overview'),   path: '/dashboard',            shortcut: 'H' },
     { icon: Map,      label: t('dashboardLayout.nav.myTrips'),    path: '/dashboard/all-trips',  shortcut: 'T' },
+    { icon: MapPinned,label: t('dashboardLayout.nav.map'),        path: '/dashboard/map',        shortcut: 'M' },
     { icon: BarChart2,label: t('dashboardLayout.nav.statistics'), path: '/dashboard/statistics', shortcut: 'S' },
     { icon: Users,    label: t('dashboardLayout.nav.friends'),    path: '/dashboard/friends',    shortcut: 'F' },
     { icon: Wallet,   label: t('dashboardLayout.nav.budget'),     path: '/dashboard/budget',     shortcut: 'B' },
@@ -177,6 +181,7 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
     const NAV_SHORTCUTS = {
       h: '/dashboard',
       t: '/dashboard/all-trips',
+      m: '/dashboard/map',
       s: '/dashboard/statistics',
       f: '/dashboard/friends',
       b: '/dashboard/budget',
@@ -484,12 +489,20 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
           <NotificationBell />
         </div>
 
-        <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-8 md:p-10 max-w-[1400px] mx-auto w-full flex flex-col min-h-0 custom-scrollbar">
+        <div
+          className={
+            isMapRoute
+              ? 'flex-1 min-h-0 relative overflow-hidden w-full'
+              : 'flex-1 overflow-y-auto overscroll-contain p-4 sm:p-8 md:p-10 max-w-[1400px] mx-auto w-full flex flex-col min-h-0 custom-scrollbar'
+          }
+        >
           {children}
         </div>
 
         {/* ── Global FAB for new trip (Mobile) ── */}
-        {!isTripDetail && !location.pathname.includes('/budget') && (
+        {/* Na mapě ne: kulaté „+“ nad mapou čte každý jako „přidat místo“,
+            ne „založit výlet“ — místa se přidávají klepnutím do mapy. */}
+        {!isTripDetail && !location.pathname.includes('/budget') && !location.pathname.includes('/map') && (
           <button
             onClick={handleOpenCreateModal}
             aria-label={t('dashboardLayout.nav.createTrip')}

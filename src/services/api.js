@@ -162,6 +162,52 @@ export const api = {
       request(`/trips/${id}/share-link`, { method: 'DELETE' }),
   },
 
+  // ── Places (mapa) ──────────────────────────────────────────
+  places: {
+    // filters: { tripId, status, category }
+    getAll: (filters = {}) => {
+      const params = new URLSearchParams(
+        Object.entries(filters).filter(([, v]) => v != null && v !== '')
+      );
+      const query = params.toString();
+      return request(`/places${query ? `?${query}` : ''}`);
+    },
+
+    create: (place) =>
+      request('/places', {
+        method: 'POST',
+        body: JSON.stringify(place),
+      }),
+
+    update: (id, place) =>
+      request(`/places/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(place),
+      }),
+
+    remove: (id) => request(`/places/${id}`, { method: 'DELETE' }),
+
+    // Geokóduje textové lokace u dnů výletu a založí z nich místa.
+    // Idempotentní; při dlouhém výletu vrací `remaining` > 0 a je
+    // potřeba zavolat znovu.
+    importItinerary: (tripId, lang) =>
+      request(`/places/import-itinerary/${tripId}`, {
+        method: 'POST',
+        body: JSON.stringify({ lang }),
+      }),
+
+    stats: () => request('/places/stats'),
+  },
+
+  // ── Geo (proxy na Nominatim s cache) ───────────────────────
+  geo: {
+    search: (query, lang) =>
+      request(`/geo/search?q=${encodeURIComponent(query)}&lang=${encodeURIComponent(lang || 'cs')}`),
+
+    reverse: (lat, lng, lang) =>
+      request(`/geo/reverse?lat=${lat}&lng=${lng}&lang=${encodeURIComponent(lang || 'cs')}`),
+  },
+
   // ── Public (no auth) ───────────────────────────────────────
   public: {
     getTrip: async (token) => {

@@ -47,7 +47,10 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
   return createPortal(
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-0 sm:p-6 overflow-hidden">
+        // Potvrzovací dialog je vždycky reakcí na akci v něčem, co už je
+        // otevřené (modál, panel), takže musí ležet nad vším ostatním —
+        // jen pod Toasterem (99999). Nižší z-index ho schoval za panely.
+        <div data-dialog-open="true" className="fixed inset-0 z-[10000] flex items-end sm:items-center justify-center p-0 sm:p-6 overflow-hidden">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}

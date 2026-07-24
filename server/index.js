@@ -15,6 +15,8 @@ import { testConnection } from './config/db.js';
 import auth from './middleware/auth.js';
 import authRoutes from './routes/auth.js';
 import tripRoutes from './routes/trips.js';
+import placeRoutes from './routes/places.js';
+import geoRoutes from './routes/geo.js';
 import settingsRoutes from './routes/settings.js';
 import friendRoutes from './routes/friends.js';
 import profileRoutes from './routes/profile.js';
@@ -25,7 +27,7 @@ import adminRoutes from './routes/admin.js';
 import adminAuth from './middleware/adminAuth.js';
 import publicRoutes from './routes/public.js';
 import cronRoutes from './routes/cron.js';
-import { globalLimiter, authLimiter } from './middleware/rateLimit.js';
+import { globalLimiter, authLimiter, geoLimiter } from './middleware/rateLimit.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -76,6 +78,10 @@ app.use('/api/cron', cronRoutes);
 // Přísnější limit na citlivé auth endpointy (login, register, reset…).
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/trips', auth, tripRoutes);
+app.use('/api/places', auth, placeRoutes);
+// Geokódování jde přes nás (cache + dodržení Nominatim policy), proto
+// vlastní limiter navázaný na uživatele — auth musí běžet před ním.
+app.use('/api/geo', auth, geoLimiter, geoRoutes);
 app.use('/api/settings', auth, settingsRoutes);
 app.use('/api/friends', auth, friendRoutes);
 app.use('/api/profile', auth, profileRoutes);

@@ -2,9 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { MapPin, Loader2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import api from '../../services/api';
 
+// `onChange` dostává (text, place | null). Druhý argument je vyplněný jen
+// při výběru ze seznamu a nese souřadnice — volající, který je nepotřebuje,
+// ho prostě ignoruje.
 const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLength }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [inputValue, setInputValue] = useState(value || '');
   const [suggestions, setSuggestions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,42 +41,20 @@ const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLeng
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&accept-language=cs`,
-        {
-          headers: {
-            'User-Agent': 'JourneoApp/1.0',
-          }
-        }
+      // Geokódování jde přes vlastní API (cache + dodržení Nominatim policy,
+      // viz server/lib/geocode.js), ne přímo z prohlížeče.
+      const { results } = await api.geo.search(query, i18n.language);
+
+      setSuggestions(
+        results.map((result) => ({
+          id: `${result.lat},${result.lng}`,
+          name: result.name,
+          // Z celé adresy zahodíme první část — ta už je v názvu.
+          detail: (result.address || '').split(', ').slice(1).join(', '),
+          fullName: result.address || result.name,
+          place: result,
+        }))
       );
-      
-      if (!response.ok) throw new Error('Network response was not ok');
-      
-      const data = await response.json();
-      
-      // Parse data into clean format
-      const formatted = data.map(item => {
-        const address = item.address;
-        const name = item.name || address.city || address.town || address.village || '';
-        const country = address.country || '';
-        const detail = [
-          address.city || address.town || address.village,
-          address.state,
-          country
-        ].filter(Boolean).filter(part => part !== name).join(', ');
-
-        return {
-          id: item.place_id,
-          name: name,
-          detail: detail,
-          fullName: detail ? `${name}, ${detail}` : name
-        };
-      });
-
-      // Filter out duplicates (Nominatim sometimes returns same place multiple times)
-      const unique = formatted.filter((v, i, a) => a.findIndex(t => (t.id === v.id || t.fullName === v.fullName)) === i);
-      
-      setSuggestions(unique);
     } catch (error) {
       console.error('Error fetching locations:', error);
       setSuggestions([]);
@@ -84,7 +66,7 @@ const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLeng
   const handleInputChange = (e) => {
     const val = e.target.value;
     setInputValue(val);
-    onChange(val); // Update parent immediately with typed text
+    onChange(val, null); // Update parent immediately with typed text (no coords yet)
     
     setShowSuggestions(true);
 
@@ -103,13 +85,13 @@ const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLeng
 
   const handleSelect = (suggestion) => {
     setInputValue(suggestion.fullName);
-    onChange(suggestion.fullName);
+    onChange(suggestion.fullName, suggestion.place);
     setShowSuggestions(false);
   };
 
   const clearInput = () => {
     setInputValue('');
-    onChange('');
+    onChange('', null);
     setSuggestions([]);
     setShowSuggestions(false);
   };

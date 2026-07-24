@@ -19,7 +19,14 @@ router.get('/purge-trash', async (req, res) => {
     const [result] = await pool.query(
       'DELETE FROM trips WHERE deleted_at IS NOT NULL AND deleted_at < NOW() - INTERVAL 30 DAY'
     );
-    res.json({ purged: result.affectedRows });
+
+    // Při té příležitosti vyhodíme i prošlé odpovědi Nominatimu
+    // (TTL 30 dní, viz lib/geocode.js) — jinak by tabulka jen rostla.
+    const [geocache] = await pool.query(
+      'DELETE FROM geocode_cache WHERE created_at < NOW() - INTERVAL 30 DAY'
+    );
+
+    res.json({ purged: result.affectedRows, geocachePurged: geocache.affectedRows });
   } catch (err) {
     console.error('Purge trash error:', err);
     res.status(500).json({ error: 'Purge failed' });

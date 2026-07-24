@@ -80,6 +80,29 @@ export const AllTripsSkeleton = () => (
   </div>
 );
 
+/** Map page skeleton — hlavička, filtry a plátno mapy se seznamem. */
+export const MapSkeleton = () => (
+  <div className="flex flex-col flex-1 min-h-0 gap-4">
+    <div className="space-y-2 shrink-0">
+      <Skeleton className="h-9 w-40" />
+      <Skeleton className="h-4 w-56" />
+    </div>
+    <div className="flex gap-2 shrink-0">
+      <Skeleton className="h-11 flex-1 rounded-2xl" />
+      <Skeleton className="h-11 w-11 rounded-2xl" />
+      <Skeleton className="h-11 w-11 rounded-2xl" />
+    </div>
+    <div className="flex-1 min-h-[320px] grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4">
+      <div className="hidden lg:block space-y-2">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-14 rounded-2xl" />
+        ))}
+      </div>
+      <Skeleton className="h-full min-h-[320px] rounded-3xl" />
+    </div>
+  </div>
+);
+
 /** Settings page skeleton. */
 export const SettingsSkeleton = () => (
   <div className="w-full space-y-12 pb-10">

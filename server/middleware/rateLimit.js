@@ -34,6 +34,20 @@ export const globalLimiter = rateLimit({
   message: { error: 'Příliš mnoho požadavků. Zkuste to prosím za chvíli.' },
 });
 
+// ── Limit na geokódování ────────────────────────────────────
+// /api/geo posílá dotazy dál na Nominatim, jehož usage policy je
+// férová jen dokud ji dodržujeme. Limit počítáme per uživatel (ne IP)
+// přes DB, ať ho jeden účet nevyčerpá napříč instancemi. Většina
+// dotazů stejně padne do `geocode_cache` a k Nominatimu se nedostane.
+export const geoLimiter = rateLimit({
+  ...common,
+  windowMs: 60 * 60 * 1000, // 1 hodina
+  max: 200, // max 200 dotazů / hodinu / uživatel
+  store: new DbRateStore('geo'),
+  keyGenerator: (req) => `u${req.userId}`,
+  message: { error: 'Příliš mnoho dotazů na mapu. Zkuste to prosím za chvíli.' },
+});
+
 // ── Přísnější limit pro citlivé auth endpointy ──────────────
 // Login / register / verify / resend / reset hesla. Chrání
 // před hádáním hesel, enumerací e-mailů a spamem.

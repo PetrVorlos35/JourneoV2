@@ -3,6 +3,39 @@
 All notable changes to Journeo are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] – 2026-07-24
+
+### Added — Places Map
+
+Journeo now has a map. Users can save places — visited or on their wishlist —
+on a personal global map spanning every trip, and on a per-trip map where places
+are pinned to itinerary days and connected by a route. The experience is a single
+immersive canvas, unified across desktop and mobile.
+
+- **Global map** (`/dashboard/map`) — every saved place across all trips on one
+  canvas, filterable by status (visited / wishlist), category, and trip.
+- **Trip map** — places bound to itinerary days, with a dashed route drawn
+  between them in day order and a total-distance summary.
+- **Add a place** — via a crosshair ("place here") flow so the pin never hides
+  under a finger or cursor, or by searching an address (Nominatim geocoding).
+- **Reverse geocoding** — clicking/placing a point fills in the address, city,
+  and country when available; the place still saves with bare coordinates if not.
+- **Import from itinerary** — pull the locations written into a trip's daily
+  plans onto the map in one action (server-side geocoding, batched).
+- **Unified immersive UI** — a full-bleed map with floating controls and an
+  information panel: a draggable bottom sheet on mobile, a collapsible floating
+  side panel on desktop (shared `MapWorkspaceView`).
+- **Light and dark map themes** — CARTO raster tiles matched to the app theme.
+
+### Changed
+
+- The global map and trip map desktop layouts were unified with the mobile
+  immersive view; the previous side-column-in-flow desktop layout was removed.
+
+### Database
+
+- Added the `places` table (migration `server/migrations/005_places.sql`).
+
 ## [1.2.0] – 2026-07-10
 
 ### Added — PDF Trip Export
@@ -109,6 +142,7 @@ notification to close the loop.
 - Travel statistics gathered in one place.
 - Light and dark mode, available in English and Czech.
 
+[1.3.0]: https://github.com/
 [1.2.0]: https://github.com/
 [1.1.0]: https://github.com/
 [1.0.0]: https://github.com/

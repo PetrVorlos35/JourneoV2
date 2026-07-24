@@ -10,6 +10,19 @@
     "current": "Current version",
     "empty": "There are no release notes yet.",
     "releases": {
+      "v1_3": {
+        "title": "Places map",
+        "summary": "Your travels now have a map. Save the places you've visited and the ones on your wishlist, pin them to the days of a trip, and keep your whole journey — and every place you love — together on one canvas, as clear on desktop as on your phone.",
+        "highlights": [
+          "A personal map of all your places across every trip",
+          "A map inside each trip, with a route drawn between places by day",
+          "Add a place with the crosshair or by searching an address",
+          "Tell visited from wishlist places and filter by category or trip",
+          "Pull places straight from a trip's itinerary in one click",
+          "One immersive experience, unified across desktop and mobile",
+          "Light and dark map themes"
+        ]
+      },
       "v1_2": {
         "title": "Export your trip as a PDF",
         "summary": "Take your plans offline. Any trip can now be exported as a polished PDF document in Journeo's signature look — perfect for printing, sharing with fellow travellers, or keeping in your pocket on the road.",
@@ -64,7 +77,11 @@
     "float": {
       "packing": {
         "progress": "7 of 10 packed",
-        "items": ["Passport", "Camera", "Flip flops"]
+        "items": [
+          "Passport",
+          "Camera",
+          "Flip flops"
+        ]
       },
       "ticket": {
         "label": "Boarding pass",
@@ -175,6 +192,10 @@
     "features": {
       "title": "Everything you need for your travels.",
       "subtitle": "Journeo isn't just a diary. It's a comprehensive tool for planning, recording, and sharing your adventures.",
+      "map": {
+        "title": "Your places on the map",
+        "description": "Pin the places you've visited and the ones you dream of, on a personal map or right inside a trip — with a route drawn between your stops, the same immersive way on desktop and mobile."
+      },
       "budget": {
         "title": "Smart budget",
         "description": "Keep your expenses under control. Track spending on flights, accommodation, food, and activities during your trip and avoid unpleasant surprises.",
@@ -405,6 +426,7 @@
     "nav": {
       "overview": "Overview",
       "myTrips": "My Trips",
+      "map": "Map",
       "statistics": "Statistics",
       "friends": "Friends",
       "budget": "Expenses",
@@ -613,7 +635,8 @@
       "packing": "Packing list",
       "documents": "Links & notes",
       "diary": "Diary & Gallery",
-      "budget": "Budget"
+      "budget": "Budget",
+      "map": "Map"
     },
     "info": {
       "title": "Trip overview",
@@ -630,7 +653,9 @@
       "links": "Links",
       "records": "records",
       "budget": "Budget",
-      "budgetEmpty": "No expenses yet"
+      "budgetEmpty": "No expenses yet",
+      "map": "Trip map",
+      "mapHint": "Places and route on a map"
     },
     "packing": {
       "title": "Packing list",
@@ -740,6 +765,118 @@
       "title": "Delete trip"
     },
     "trash": "Trash"
+  },
+  "map": {
+    "title": "My map",
+    "subtitle_one": "{{count}} saved place",
+    "subtitle_other": "{{count}} saved places",
+    "loading": "Loading places…",
+    "categories": {
+      "sight": "Sight",
+      "food": "Food",
+      "stay": "Stay",
+      "nature": "Nature",
+      "activity": "Activity",
+      "transport": "Transport",
+      "other": "Other"
+    },
+    "statuses": {
+      "visited": "Visited",
+      "wishlist": "Want to go"
+    },
+    "filters": {
+      "searchPlaceholder": "Find a place on the map…",
+      "locate": "My location",
+      "toggle": "Filters",
+      "all": "All",
+      "allTrips": "All trips",
+      "tripLabel": "Filter by trip"
+    },
+    "list": {
+      "toggle": "Place list",
+      "edit": "Edit place {{name}}"
+    },
+    "sheet": {
+      "newTitle": "New place",
+      "editTitle": "Edit place",
+      "nameLabel": "Name",
+      "namePlaceholder": "e.g. Viewpoint over the bay",
+      "statusLabel": "Status",
+      "categoryLabel": "Category",
+      "tripLabel": "Trip",
+      "noTrip": "No trip (my map only)",
+      "dayLabel": "Trip day",
+      "noDay": "No specific day",
+      "dayOption": "Day {{number}}",
+      "noteLabel": "Note",
+      "notePlaceholder": "What do you want to remember about this place?",
+      "save": "Save changes",
+      "create": "Save place",
+      "delete": "Delete place",
+      "locationLabel": "Location",
+      "move": "Move",
+      "moveCancel": "Done",
+      "moveHint": "Tap the map or drag the pin to a new spot.",
+      "draftMoveHint": "Tap the map to move the pin."
+    },
+    "empty": {
+      "title": "No places yet",
+      "filtered": "No place matches the filter.",
+      "hint": "Click anywhere on the map to save your first place."
+    },
+    "confirmDelete": {
+      "title": "Delete place?",
+      "message": "“{{name}}” will be removed from your map. This can't be undone.",
+      "confirm": "Delete"
+    },
+    "toasts": {
+      "created": "Place saved.",
+      "updated": "Changes saved.",
+      "deleted": "Place deleted.",
+      "moved": "Location updated — save to keep it."
+    },
+    "errors": {
+      "load": "Couldn't load your places.",
+      "save": "Couldn't save the place.",
+      "delete": "Couldn't delete the place.",
+      "geolocationUnsupported": "Your browser can't determine your location.",
+      "geolocationDenied": "Couldn't determine your location."
+    },
+    "trip": {
+      "routeSummary": "Route across {{count}} places · {{distance}}",
+      "noRoute": "Assign places to days to see the trip route.",
+      "import": "Import from itinerary",
+      "importDone_one": "Imported {{count}} place from the itinerary.",
+      "importDone_other": "Imported {{count}} places from the itinerary.",
+      "importFailed": "None of the locations could be found on the map.",
+      "importNothing": "Nothing to import from the itinerary.",
+      "importError": "Importing places from the itinerary failed.",
+      "empty": "This trip has no places yet.",
+      "emptyHint": "Click the map or import places from the itinerary.",
+      "canvasLabel": "Map of trip {{title}}"
+    },
+    "stats": {
+      "countries": "Countries visited",
+      "cities": "Cities visited",
+      "places": "Saved places",
+      "wishlist": "On the wishlist",
+      "empty": "Save your first places on the map and your countries show up here.",
+      "open": "Open map"
+    },
+    "mobile": {
+      "back": "Back",
+      "addPlace": "Add",
+      "placeHere": "Place here",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "move": "Move",
+      "delete": "Delete place",
+      "placingHint": "Drag the map under the crosshair"
+    },
+    "panel": {
+      "collapse": "Collapse panel",
+      "expand": "Expand panel"
+    }
   },
   "budget": {
     "subtitle": "Budget",
