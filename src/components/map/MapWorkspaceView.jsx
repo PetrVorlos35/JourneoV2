@@ -59,6 +59,7 @@ const MapWorkspaceView = ({
     handleLocate,
     isLocating,
     setIsMoving,
+    setSelectedId,
     handleSave,
     handleDelete,
     closeDraft,
@@ -67,6 +68,9 @@ const MapWorkspaceView = ({
   const [isPlacing, setIsPlacing] = useState(false);
   const [snap, setSnap] = useState('peek');
   const [collapsed, setCollapsed] = useState(false);
+  // Bumpnutím se změní fitKey a mapa znovu doladí výřez na všechna místa —
+  // používá se při návratu z detailu zpět na přehled (mapa se oddálí).
+  const [fitNonce, setFitNonce] = useState(0);
   const mapRef = useRef(null);
   // Kam se vrátit po zrušení umisťování — podle toho, odkud se spustilo.
   const placingReturnRef = useRef('list');
@@ -106,10 +110,29 @@ const MapWorkspaceView = ({
     if (placingReturnRef.current === 'peek') closeDraft();
   }, [setIsMoving, closeDraft]);
 
+  // Návrat na přehled: odznačí místo a mapu oddálí zpět na všechna místa.
+  const backToOverview = useCallback(() => {
+    setSelectedId(null);
+    setFitNonce((n) => n + 1);
+  }, [setSelectedId]);
+
+  // Šipka zpět couvá po úrovních v rámci mapy: umisťování → zpět na předchozí
+  // obsah, formulář → detail/seznam, detail → přehled (a mapa se oddálí na
+  // všechna místa). Mapu nezavírá — z přehledu odejdeš navigací dashboardu
+  // nebo záložkami výletu. Výjimkou je mobil, kde mapa překrývá celou
+  // obrazovku, takže z přehledu je šipka jediná cesta ven.
+  const handleBack = useCallback(() => {
+    if (isPlacing) cancelPlacing();
+    else if (draft) closeDraft();
+    else if (selectedPlace) backToOverview();
+    else if (!isDesktop) onBack?.();
+  }, [isPlacing, cancelPlacing, draft, closeDraft, selectedPlace, backToOverview, isDesktop, onBack]);
+
   // Rozbalený panel na desktopu ukusuje z levé strany mapy — o tuhle šířku
   // se posouvá střed (křížek, přelet, doladění výřezu), ať cíl zůstane vpravo
-  // od panelu. Během umisťování je panel vždy rozbalený.
-  const panelInset = isDesktop && (mode === 'placing' || !collapsed) ? DESKTOP_PANEL_WIDTH : 0;
+  // od panelu. Při umisťování panel ustoupí kompaktní liště dole, takže se
+  // střed nikam neposouvá a křížek míří doprostřed celé mapy.
+  const panelInset = isDesktop && mode !== 'placing' && !collapsed ? DESKTOP_PANEL_WIDTH : 0;
 
   // Zaměřovač míří do středu *viditelné* části mapy: na mobilu nad pruh sheetu,
   // na desktopu vpravo od bočního panelu.
@@ -155,7 +178,7 @@ const MapWorkspaceView = ({
   if (mode === 'placing') {
     snapPoints = ['bar'];
     header = (
-      <div className="px-4 pt-4 pb-2 flex items-center gap-2">
+      <div className="px-4 py-3 flex items-center gap-2">
         <button type="button" onClick={cancelPlacing} className={`${actionButton} flex-1 bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-200`}>
           {t('map.mobile.cancel')}
         </button>
@@ -177,7 +200,7 @@ const MapWorkspaceView = ({
           lockedTripId={tripId}
           dayCount={dayCount}
           isSaving={saving}
-          onToggleMove={draft?.id ? startMovingFromForm : undefined}
+          onToggleMove={startMovingFromForm}
           onSave={handleSave}
           onDelete={handleDelete}
           onClose={closeDraft}
@@ -192,7 +215,7 @@ const MapWorkspaceView = ({
           lockedTripId={tripId}
           dayCount={dayCount}
           isSaving={saving}
-          onToggleMove={draft?.id ? startMovingFromForm : undefined}
+          onToggleMove={startMovingFromForm}
           onSave={handleSave}
           onDelete={handleDelete}
           onClose={closeDraft}
@@ -335,7 +358,7 @@ const MapWorkspaceView = ({
       fitPaddingBottom={isDesktop ? 0 : SNAP_HEIGHTS.peek()}
       focusOffsetX={panelInset}
       fitPaddingLeft={panelInset}
-      fitKey={tripId ?? 'global'}
+      fitKey={`${tripId ?? 'global'}:${fitNonce}`}
       showDayLabels={Boolean(tripId)}
       ariaLabel={title}
     />
@@ -362,6 +385,11 @@ const MapWorkspaceView = ({
       : 16 + 44 + 12
     : undefined;
 
+  // Na desktopu je šipka jen pro couvání v rámci mapy — na přehledu, odkud by
+  // musela mapu zavřít, se skryje (odejdeš navigací). Na mobilu je vždy, tam
+  // slouží i jako východ z celoobrazovkové mapy.
+  const showBack = !isDesktop || mode !== 'list';
+
   const controls = (
     // Lišta je průhledná a na desktopu překrývá horní část panelu — proto
     // pointer-events-none na obalu a auto jen na vlastních prvcích, ať se
@@ -370,14 +398,16 @@ const MapWorkspaceView = ({
       className="pointer-events-none absolute inset-x-0 top-0 z-[30] flex items-start gap-2 p-3 pt-[max(0.75rem,env(safe-area-inset-top))]"
       style={isDesktop ? { paddingLeft: controlsLeftPad } : undefined}
     >
-      <button
-        type="button"
-        onClick={onBack}
-        aria-label={t('map.mobile.back')}
-        className="pointer-events-auto w-11 h-11 shrink-0 rounded-2xl glass-card border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-700 dark:text-gray-200 cursor-pointer"
-      >
-        <ArrowLeft size={18} strokeWidth={2.5} />
-      </button>
+      {showBack && (
+        <button
+          type="button"
+          onClick={handleBack}
+          aria-label={t('map.mobile.back')}
+          className="pointer-events-auto w-11 h-11 shrink-0 rounded-2xl glass-card border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-700 dark:text-gray-200 cursor-pointer"
+        >
+          <ArrowLeft size={18} strokeWidth={2.5} />
+        </button>
+      )}
       <div className="pointer-events-auto flex-1 min-w-0 lg:max-w-xl">
         <MapFilters
           filters={filters}
@@ -399,17 +429,24 @@ const MapWorkspaceView = ({
         <div className="absolute inset-0">{canvas}</div>
         {crosshair}
         {controls}
-        <SidePanel
-          collapsed={collapsed && mode !== 'placing'}
-          onToggle={() => setCollapsed((prev) => !prev)}
-          canCollapse={mode !== 'placing'}
-          width={DESKTOP_PANEL_WIDTH}
-          header={header}
-          bodyScroll={bodyScroll}
-          ariaLabel={title}
-        >
-          {body}
-        </SidePanel>
+        {mode === 'placing' ? (
+          // Umisťování: místo celé výšky panelu jen kompaktní lišta dole,
+          // ať zůstane vidět co nejvíc mapy pod křížkem.
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[30] w-[min(360px,calc(100%-2rem))] glass-card rounded-2xl border border-gray-200 dark:border-white/10 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]">
+            {header}
+          </div>
+        ) : (
+          <SidePanel
+            collapsed={collapsed}
+            onToggle={() => setCollapsed((prev) => !prev)}
+            width={DESKTOP_PANEL_WIDTH}
+            header={header}
+            bodyScroll={bodyScroll}
+            ariaLabel={title}
+          >
+            {body}
+          </SidePanel>
+        )}
       </div>
     );
   }

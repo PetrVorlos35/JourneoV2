@@ -157,8 +157,8 @@ const PlaceForm = ({
           </div>
         </div>
 
-        {/* Poloha — u uloženého místa se dá změnit, u rozepsaného ji stačí
-            překlepnout do mapy (proto jen nápověda, ne přepínač). */}
+        {/* Poloha — u uloženého i rozepsaného místa ji lze znovu zaměřit
+            křížkem, aniž bys musel místo napřed uložit nebo zahodit. */}
         <div>
           <span className="block text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">
             {t('map.sheet.locationLabel')}
@@ -167,7 +167,7 @@ const PlaceForm = ({
             <p className="flex-1 min-w-0 text-[12px] font-semibold text-gray-600 dark:text-gray-300 tabular-nums truncate">
               {place.lat.toFixed(5)}, {place.lng.toFixed(5)}
             </p>
-            {isExisting && onToggleMove && (
+            {onToggleMove && (
               <button
                 type="button"
                 onClick={onToggleMove}
@@ -183,9 +183,9 @@ const PlaceForm = ({
               </button>
             )}
           </div>
-          {(isMoving || !isExisting) && (
+          {isMoving && (
             <p className="mt-2 text-[11px] font-medium text-blue-600 dark:text-blue-400">
-              {t(isExisting ? 'map.sheet.moveHint' : 'map.sheet.draftMoveHint')}
+              {t('map.sheet.moveHint')}
             </p>
           )}
         </div>
