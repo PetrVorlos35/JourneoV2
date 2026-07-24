@@ -252,7 +252,9 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
       </div>
 
       {/* ── Desktop Sidebar (Floating Glass Panel) ── */}
-      <div className="hidden md:flex flex-col p-6 z-20 shrink-0 w-[280px]">
+      {/* Na globální mapě sidebar plave nad mapou (absolutní), ať se mapa
+          protáhne edge-to-edge i pod něj; jinde ukusuje z layoutu jako sloupec. */}
+      <div className={`hidden md:flex flex-col p-6 z-20 shrink-0 w-[280px] ${isMapRoute ? 'absolute inset-y-0 left-0' : ''}`}>
         <aside className="w-full h-full flex flex-col overflow-hidden bg-gray-50/60 dark:bg-white/[0.03] border border-gray-200/60 dark:border-white/[0.06] rounded-[2rem] backdrop-blur-sm">
           <div className="px-8 py-8 flex items-center gap-3">
             <img

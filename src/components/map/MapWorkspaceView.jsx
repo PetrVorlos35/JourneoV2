@@ -36,9 +36,15 @@ const MapWorkspaceView = ({
   title,
   onBack,
   listExtra = null,
+  // Kolik pixelů zleva mapy překrývá vnější prvek (na globální mapě plovoucí
+  // navigační sidebar dashboardu). Mapa se pod něj protáhne edge-to-edge, ale
+  // panel, ovládání i centrování se o tuhle šířku posunou doprava, ať nic
+  // nezmizí pod sidebarem. V detailu výletu je 0.
+  leftInset = 0,
 }) => {
   const { t } = useTranslation();
   const isDesktop = useMediaQuery('(min-width: 1024px)');
+  const sidebarInset = isDesktop ? leftInset : 0;
   const {
     places,
     visiblePlaces,
@@ -63,6 +69,7 @@ const MapWorkspaceView = ({
     handleSave,
     handleDelete,
     closeDraft,
+    updateDraft,
   } = workspace;
 
   const [isPlacing, setIsPlacing] = useState(false);
@@ -142,12 +149,12 @@ const MapWorkspaceView = ({
 
     const size = map.getSize();
     const point = isDesktop
-      ? [(panelInset + size.x) / 2, size.y / 2]
+      ? [(sidebarInset + panelInset + size.x) / 2, size.y / 2]
       : [size.x / 2, (size.y - BAR_HEIGHT) / 2];
     const target = map.containerPointToLatLng(point);
     setIsPlacing(false);
     placeAt(target.lat, target.lng);
-  }, [placeAt, isDesktop, panelInset]);
+  }, [placeAt, isDesktop, sidebarInset, panelInset]);
 
   const startMovingSelected = useCallback(
     (place) => {
@@ -201,6 +208,7 @@ const MapWorkspaceView = ({
           dayCount={dayCount}
           isSaving={saving}
           onToggleMove={startMovingFromForm}
+          onPreview={updateDraft}
           onSave={handleSave}
           onDelete={handleDelete}
           onClose={closeDraft}
@@ -216,6 +224,7 @@ const MapWorkspaceView = ({
           dayCount={dayCount}
           isSaving={saving}
           onToggleMove={startMovingFromForm}
+          onPreview={updateDraft}
           onSave={handleSave}
           onDelete={handleDelete}
           onClose={closeDraft}
@@ -356,8 +365,8 @@ const MapWorkspaceView = ({
       // vpravo od panelu).
       focusOffsetY={isDesktop ? 0 : SNAP_HEIGHTS.peek()}
       fitPaddingBottom={isDesktop ? 0 : SNAP_HEIGHTS.peek()}
-      focusOffsetX={panelInset}
-      fitPaddingLeft={panelInset}
+      focusOffsetX={sidebarInset + panelInset}
+      fitPaddingLeft={sidebarInset + panelInset}
       fitKey={`${tripId ?? 'global'}:${fitNonce}`}
       showDayLabels={Boolean(tripId)}
       ariaLabel={title}
@@ -367,7 +376,7 @@ const MapWorkspaceView = ({
   const crosshair = isPlacing && (
     <div
       className="pointer-events-none absolute inset-0 z-[25] flex items-center justify-center"
-      style={isDesktop ? { paddingLeft: panelInset } : { paddingBottom: BAR_HEIGHT }}
+      style={isDesktop ? { paddingLeft: sidebarInset + panelInset } : { paddingBottom: BAR_HEIGHT }}
     >
       <div className="jn-crosshair" aria-hidden="true" />
       <p className="absolute top-[calc(50%+2.5rem)] px-3 py-1.5 rounded-full bg-black/70 text-white text-[12px] font-semibold">
@@ -381,8 +390,8 @@ const MapWorkspaceView = ({
   // 44px = šířka sbaleného railu, 12px = mezera.
   const controlsLeftPad = isDesktop
     ? panelInset
-      ? 16 + panelInset + 12
-      : 16 + 44 + 12
+      ? 16 + sidebarInset + panelInset + 12
+      : 16 + sidebarInset + 44 + 12
     : undefined;
 
   // Na desktopu je šipka jen pro couvání v rámci mapy — na přehledu, odkud by
@@ -432,7 +441,10 @@ const MapWorkspaceView = ({
         {mode === 'placing' ? (
           // Umisťování: místo celé výšky panelu jen kompaktní lišta dole,
           // ať zůstane vidět co nejvíc mapy pod křížkem.
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[30] w-[min(360px,calc(100%-2rem))] glass-card rounded-2xl border border-gray-200 dark:border-white/10 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]">
+          <div
+            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[30] w-[min(360px,calc(100%-2rem))] glass-card rounded-2xl border border-gray-200 dark:border-white/10 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]"
+            style={sidebarInset ? { marginLeft: sidebarInset / 2 } : undefined}
+          >
             {header}
           </div>
         ) : (
@@ -440,6 +452,7 @@ const MapWorkspaceView = ({
             collapsed={collapsed}
             onToggle={() => setCollapsed((prev) => !prev)}
             width={DESKTOP_PANEL_WIDTH}
+            leftOffset={sidebarInset}
             header={header}
             bodyScroll={bodyScroll}
             ariaLabel={title}

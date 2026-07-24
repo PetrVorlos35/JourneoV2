@@ -54,7 +54,17 @@ export default function useMapWorkspace({ tripId = null, canEdit = true } = {}) 
     if (!draft) return visiblePlaces;
     if (draft.id) {
       return visiblePlaces.map((place) =>
-        String(place.id) === String(draft.id) ? { ...place, lat: draft.lat, lng: draft.lng } : place
+        String(place.id) === String(draft.id)
+          ? {
+              ...place,
+              lat: draft.lat,
+              lng: draft.lng,
+              // Živý náhled: kategorie/stav z rozpracované editace, ať špendlík
+              // mění vzhled hned při ťuknutí ve formuláři, ne až po uložení.
+              category: draft.category ?? place.category,
+              status: draft.status ?? place.status,
+            }
+          : place
       );
     }
     return [
@@ -113,6 +123,13 @@ export default function useMapWorkspace({ tripId = null, canEdit = true } = {}) 
   const closeDraft = useCallback(() => {
     setDraft(null);
     setIsMoving(false);
+  }, []);
+
+  // Živá aktualizace rozpracovaného místa z formuláře (kategorie, stav) —
+  // přepíše jen předaná pole, identitu draftu (id / draftKey / souřadnice)
+  // nechá být, takže se formulář pod rukama neresetuje.
+  const updateDraft = useCallback((patch) => {
+    setDraft((prev) => (prev ? { ...prev, ...patch } : prev));
   }, []);
 
   // Založení nového místa na daných souřadnicích.
@@ -319,6 +336,7 @@ export default function useMapWorkspace({ tripId = null, canEdit = true } = {}) 
     handleSave,
     handleDelete,
     closeDraft,
+    updateDraft,
     // potvrzovací dialog patřící k mazání
     ModalPortal,
   };

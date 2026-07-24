@@ -22,6 +22,9 @@ const MapPage = ({ trips = [] }) => {
         trips={editableTrips}
         title={t('map.title')}
         onBack={() => navigate('/dashboard')}
+        // Mapa se protahuje pod plovoucí navigační sidebar (šířka 280px) —
+        // panel a centrování se o tuhle šířku posunou, ať nic nezmizí pod ním.
+        leftInset={280}
       />
     </>
   );

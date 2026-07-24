@@ -90,7 +90,9 @@ const MapFilters = ({
             size={16}
             strokeWidth={2.5}
             aria-hidden="true"
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+            // z-10 + pointer-events-none: glass-card input má backdrop-blur
+            // (vlastní stacking context) a jinak by lupu překreslil svým pozadím.
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none text-gray-400"
           />
           <input
             value={query}

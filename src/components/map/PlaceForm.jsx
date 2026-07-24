@@ -33,6 +33,7 @@ const PlaceForm = ({
   variant = 'sheet',
   isMoving = false,
   onToggleMove,
+  onPreview,
   onSave,
   onDelete,
   onClose,
@@ -86,6 +87,13 @@ const PlaceForm = ({
   if (!place) return null;
 
   const update = (patch) => setForm((prev) => ({ ...prev, ...patch }));
+
+  // Změny, které mají hned proměnit vzhled špendlíku na mapě (kategorie, stav):
+  // kromě lokálního formuláře je promítneme i do rozpracovaného místa.
+  const updateWithPreview = (patch) => {
+    update(patch);
+    onPreview?.(patch);
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -204,7 +212,7 @@ const PlaceForm = ({
               <button
                 key={value}
                 type="button"
-                onClick={() => update({ status: value })}
+                onClick={() => updateWithPreview({ status: value })}
                 aria-pressed={form.status === value}
                 className={`min-h-[44px] px-3 rounded-2xl flex items-center justify-center gap-2 text-[13px] font-semibold border transition-colors cursor-pointer ${
                   form.status === value
@@ -230,7 +238,7 @@ const PlaceForm = ({
               <button
                 key={key}
                 type="button"
-                onClick={() => update({ category: key })}
+                onClick={() => updateWithPreview({ category: key })}
                 aria-pressed={form.category === key}
                 style={form.category === key ? { borderColor: color, color } : undefined}
                 className={`min-h-[44px] px-3.5 rounded-2xl flex items-center gap-2 text-[13px] font-semibold border transition-colors cursor-pointer ${
