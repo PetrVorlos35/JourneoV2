@@ -5,11 +5,27 @@
   },
   "changelog": {
     "open": "Zobrazit novinky",
+    "newBadge": "Nová verze",
     "title": "Novinky",
     "subtitle": "Co je nového v Journeo",
     "current": "Aktuální verze",
     "empty": "Zatím tu nejsou žádné novinky.",
     "releases": {
+      "v1_4": {
+        "title": "Rychlé hledání a nový přehled",
+        "summary": "Přehled teď začíná odpovědí na otázku „co teď?“ — jedna velká karta podle toho, jestli je cesta rozjetá, teprve nadchází, nebo už skončila, k tomu připravenost výletu a klíčová čísla na jeden pohled. A odkudkoli v aplikaci vám stačí ⌘K: najdete výlet, den programu, výdaj, věc v balení, poznámku, místo na mapě i přítele.",
+        "highlights": [
+          "Rychlé hledání přes ⌘K (Ctrl+K) — výlety, dny, výdaje, balení, poznámky, místa i přátelé na jednom místě",
+          "Hledá bez ohledu na diakritiku a odpustí i překlep — „londyn“ najde Londýn",
+          "Výsledek vás pošle přesně tam, kam patří: místo se zaměří na mapě, den se otevře v itineráři",
+          "Rychlé akce rovnou z hledání — nový výlet, přepnutí vzhledu i jazyka",
+          "Naposledy otevřené položky čekají hned po otevření, bez psaní",
+          "Nový přehled s kartou „co teď?“ — probíhající cesta s dnešním plánem, odpočet do odjezdu, nebo připomínka té poslední",
+          "Připravenost výletu: kolik dní je naplánováno, co je sbaleno, místa na mapě a poznámky — každá položka odkazuje tam, kde ji doplníte",
+          "Dlaždice s klíčovými čísly — rozpočet, vyrovnání, navštívené země a počet cest",
+          "Vyrovnání dluhů se teď počítá napříč všemi výlety a zahrnuje i už zaznamenané platby"
+        ]
+      },
       "v1_3": {
         "title": "Mapa míst",
         "summary": "Vaše cesty teď mají svou mapu. Ukládejte si navštívená i vysněná místa, přiřazujte je ke dnům výletu a mějte celou cestu i všechna svá místa pohromadě na jednom plátně — stejně přehledně na počítači i na mobilu.",

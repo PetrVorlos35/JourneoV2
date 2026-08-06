@@ -3,6 +3,70 @@
 All notable changes to Journeo are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [1.4.0] – 2026-08-06
+
+### Added — Spotlight search (⌘K)
+
+A command palette over the whole dashboard that searches *content*, not just
+navigation. It indexes trips, itinerary days, expenses, packing items, notes,
+saved places and friends alongside pages and actions, and every result is a
+deep link into the exact spot it describes.
+
+- **⌘K / Ctrl+K from anywhere**, including from inside a text field, plus a
+  visible trigger in the sidebar and a search icon in the mobile top bar.
+- **Diacritics-insensitive fuzzy matching** (`src/utils/fuzzy.js`) — "londyn"
+  matches "Londýn"; per-token scoring across title, subtitle and keywords, so
+  "praha 890" finds an expense by trip and amount. Matched characters are
+  highlighted in the result title.
+- **Deep links** — places focus and open on the map (`?place=<id>`), itinerary
+  days open on that day (`?day=<n>`, 1-based), expenses / packing / notes open
+  the matching trip tool (`?view=`).
+- **Actions** — create a trip, switch appearance, switch language, log out.
+- **Recents** — the last five opened items, kept in `localStorage`, shown
+  before anything is typed alongside active trips and quick starts.
+- **Keyboard** — arrows/Tab to move, Enter to open, Escape to close; grouped
+  results ordered by best match, with the active row scrolled into view.
+- Loaded as its own lazy chunk, so it costs nothing until first use. Places and
+  friends are fetched once, on first open.
+
+### Added — Dashboard overview
+
+The overview was rebuilt around one question — "what now?" — instead of a
+generic list of trips.
+
+- **Hero card** (`overview/HeroCard`) adapts to the user's actual situation:
+  the trip under way (today's day and plan, jump-in actions), a countdown for
+  an upcoming trip, the last trip as a memory, or a first-run invitation.
+- **Readiness card** (`overview/ReadinessCard`) — a weighted score (itinerary
+  40, packing 30, places 15, documents 15) shown as a ring, with all four
+  pillars listed and each linking to the tool that completes it, so the
+  percentage is never a number taken on faith.
+- **Metric tiles** (`overview/OverviewTiles`) — budget, cross-trip settle-up,
+  countries visited and trip count. A four-column grid on desktop, a full-bleed
+  horizontal snap rail on mobile.
+- **Side data** (`overview/useOverviewData`) loads places, the settle-up rollup
+  and pending friend requests independently; each failure degrades one tile to
+  "—" rather than taking the overview down.
+
+### Changed
+
+- The overview no longer carries its own search box and status tabs. Filtering
+  and sorting trips lives in **My trips**; finding anything specific is now
+  ⌘K's job.
+- `TripDetail` accepts `?day=<n>`; an explicit deep link now wins over the
+  default "jump to today" behaviour. `MapPage` accepts `?place=<id>` and
+  consumes the parameter after focusing.
+- Helpers that had been copy-pasted across pages were extracted and shared:
+  `utils/trip`, `utils/tripColor`, `utils/country`, `utils/currency`, and the
+  `AnimatedValue` / `MetricCard` components (previously duplicated in
+  Statistics and AllTrips).
+
+### API
+
+- Added `GET /api/trips/balances-summary` — a settle-up rollup across every
+  trip the user takes part in, including recorded settlements. It can't be
+  derived from `GET /api/trips`, which doesn't carry them.
+
 ## [1.3.0] – 2026-07-24
 
 ### Added — Places Map

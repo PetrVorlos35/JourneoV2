@@ -5,11 +5,27 @@
   },
   "changelog": {
     "open": "What's new",
+    "newBadge": "New release",
     "title": "What's new",
     "subtitle": "What's new in Journeo",
     "current": "Current version",
     "empty": "There are no release notes yet.",
     "releases": {
+      "v1_4": {
+        "title": "Quick search and a new overview",
+        "summary": "The overview now opens with an answer to “what now?” — one card that adapts to whether a trip is under way, still coming, or already behind you, plus how ready it is and your key numbers at a glance. And anywhere in the app, ⌘K finds a trip, a day of the itinerary, an expense, a packing item, a note, a place on the map, or a friend.",
+        "highlights": [
+          "Quick search with ⌘K (Ctrl+K) — trips, days, expenses, packing, notes, places and friends in one place",
+          "Accents don't matter and typos are forgiven — “londyn” finds Londýn",
+          "Every result lands where it belongs: a place is focused on the map, a day opens in the itinerary",
+          "Quick actions straight from search — new trip, appearance and language",
+          "Recently opened items are waiting the moment you open it, before you type",
+          "A new overview built around “what now?” — the trip under way with today's plan, a countdown to departure, or a look back at the last one",
+          "Trip readiness: days planned, what's packed, places pinned and notes written — each one links to where you finish it",
+          "Metric tiles for your key numbers — budget, settle-up, countries visited and trip count",
+          "Settle-up is now calculated across every trip and accounts for payments already recorded"
+        ]
+      },
       "v1_3": {
         "title": "Places map",
         "summary": "Your travels now have a map. Save the places you've visited and the ones on your wishlist, pin them to the days of a trip, and keep your whole journey — and every place you love — together on one canvas, as clear on desktop as on your phone.",
