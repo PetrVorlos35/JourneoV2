@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, lazy, Suspense } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, PlusSquare, Plus, Settings, LogOut, BarChart2, Wallet, X, Sun, Moon, Monitor, Map, MapPinned, Menu, Users, Shield } from 'lucide-react';
+import { Home, PlusSquare, Plus, Settings, LogOut, BarChart2, Wallet, X, Sun, Moon, Monitor, Map, MapPinned, Menu, Users, Shield, Search } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
@@ -15,6 +15,10 @@ import JourneoLogo from '../../assets/Journeo_whitelogo.png';
 import JourneoLogoDark from '../../assets/Journeo_blacklogo.png';
 import UserAvatar from '../ui/UserAvatar';
 import VersionBadge from '../ui/VersionBadge';
+
+// Paleta se stahuje až při prvním ⌘K — do prvního vykreslení dashboardu
+// nepatří nic, co uživatel možná nikdy neotevře.
+const Spotlight = lazy(() => import('../spotlight/Spotlight'));
 
 // eslint-disable-next-line no-unused-vars
 const SidebarItem = ({ icon: Icon, label, path, active, onClick, className, layoutId = "sidebar-active-pill", shortcut }) => {
@@ -81,7 +85,7 @@ const ThemeToggle = () => {
   );
 };
 
-const DashboardLayout = ({ children, onOpenCreateModal }) => {
+const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user, isAdmin } = useAuth();
@@ -90,7 +94,16 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
   const { confirmDialog, ModalPortal } = useDialog();
   const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [spotlightOpen, setSpotlightOpen] = useState(false);
+  // Chunk palety se stáhne až po prvním otevření; `mounted` ho pak nechá
+  // v paměti, ať je druhé ⌘K okamžité.
+  const [spotlightMounted, setSpotlightMounted] = useState(false);
   const shouldReduceMotion = useReducedMotion();
+
+  const openSpotlight = () => {
+    setSpotlightMounted(true);
+    setSpotlightOpen(true);
+  };
 
   const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
   const isTripDetail = location.pathname.includes('/trip/');
@@ -169,13 +182,17 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
       if (!ok) return;
       setHasUnsavedChanges(false);
     }
-    onOpenCreateModal();
+    onOpenCreateModal?.();
   };
 
   const handleOpenCreateModalRef = useRef(null);
   handleOpenCreateModalRef.current = handleOpenCreateModal;
   const handleNavigationRef = useRef(null);
   handleNavigationRef.current = (path) => handleNavigation(path);
+  const toggleSpotlightRef = useRef(null);
+  toggleSpotlightRef.current = () => (spotlightOpen ? setSpotlightOpen(false) : openSpotlight());
+  const spotlightOpenRef = useRef(false);
+  spotlightOpenRef.current = spotlightOpen;
 
   useEffect(() => {
     const NAV_SHORTCUTS = {
@@ -188,6 +205,16 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
       ...(isAdmin ? { a: '/admin' } : {}),
     };
     const onKey = (e) => {
+      // Cmd/Ctrl+K řešíme jako první a bez ohledu na fokus — paleta musí jít
+      // vyvolat i uprostřed psaní v poli, na to si na ni člověk zvykl jinde.
+      if ((e.metaKey || e.ctrlKey) && !e.altKey && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        toggleSpotlightRef.current?.();
+        return;
+      }
+      // Nad otevřenou paletou žádné globální zkratky — než stihne naskočit
+      // fokus v jejím poli, jinak by první písmeno dotazu odnavigovalo pryč.
+      if (spotlightOpenRef.current) return;
       // Inside text fields nothing fires app-side — the browser's native
       // text-undo must keep working for Cmd/Ctrl+Z.
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
@@ -214,6 +241,17 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
   return (
     <div className="h-[100dvh] overflow-hidden bg-[#fbfbfd] dark:bg-black text-gray-900 dark:text-[#f5f5f7] flex selection:bg-blue-500/30 font-sans relative transition-colors duration-500">
       {ModalPortal}
+      {spotlightMounted && (
+        <Suspense fallback={null}>
+          <Spotlight
+            isOpen={spotlightOpen}
+            onClose={() => setSpotlightOpen(false)}
+            trips={trips}
+            onCreateTrip={handleOpenCreateModal}
+            onLogout={handleLogout}
+          />
+        </Suspense>
+      )}
       <Toaster
         position="top-right"
         containerStyle={{ zIndex: 99999, top: 'max(1rem, calc(env(safe-area-inset-top) + 0.5rem))' }}
@@ -274,6 +312,17 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
               <Plus size={20} strokeWidth={2.5} />
               <span>{t('dashboardLayout.nav.createTrip')}</span>
               <kbd className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/20 text-white/70 opacity-0 group-hover:opacity-100 transition-opacity">N</kbd>
+            </button>
+
+            {/* Vstup do Spotlightu — zkratka je vidět rovnou, ať se ⌘K dá
+                objevit i bez toho, aby ji člověk musel uhodnout. */}
+            <button
+              onClick={openSpotlight}
+              className="flex w-full items-center gap-3 mt-3 px-4 py-2.5 rounded-2xl bg-gray-100/70 dark:bg-white/[0.05] border border-transparent hover:border-gray-200 dark:hover:border-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-all duration-300 active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+            >
+              <Search size={18} strokeWidth={2.25} />
+              <span className="text-[13px] font-semibold">{t('spotlight.trigger')}</span>
+              <kbd className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-200/70 dark:bg-white/[0.07] text-gray-400 dark:text-gray-500">⌘K</kbd>
             </button>
 
             <div className="space-y-2 mt-4">
@@ -456,6 +505,13 @@ const DashboardLayout = ({ children, onOpenCreateModal }) => {
             <span className="font-bold text-lg tracking-tight mt-0.5">Journeo</span>
           </div>
           <div className="flex items-center gap-1">
+            <button
+              onClick={openSpotlight}
+              aria-label={t('spotlight.title')}
+              className="w-10 h-10 flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors text-gray-900 dark:text-white cursor-pointer"
+            >
+              <Search size={20} strokeWidth={2.25} />
+            </button>
             {isAdmin && (
               <Link
                 to="/admin"

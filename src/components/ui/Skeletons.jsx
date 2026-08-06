@@ -35,27 +35,29 @@ const TripCardSkeleton = () => (
 
 /** Dashboard home / trips overview skeleton. */
 export const TripsOverviewSkeleton = () => (
-  <div className="space-y-6 sm:space-y-10 w-full pb-10">
-    <Skeleton className="h-9 sm:h-10 w-56" />
-
-    {/* Widgets */}
-    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-      <Skeleton className="md:col-span-6 lg:col-span-5 h-[160px] sm:h-[220px] rounded-[2rem]" />
-      <Skeleton className="md:col-span-6 lg:col-span-4 h-[160px] sm:h-[220px] rounded-[2rem]" />
-      <Skeleton className="md:col-span-12 lg:col-span-3 h-[100px] lg:h-[220px] rounded-[2rem]" />
+  <div className="space-y-6 sm:space-y-8 w-full pb-10">
+    <div className="space-y-2">
+      <Skeleton className="h-9 sm:h-10 w-56" />
+      <Skeleton className="h-4 w-40" />
     </div>
 
-    {/* Filters */}
-    <div className="flex flex-col sm:flex-row gap-4 mt-8">
-      <Skeleton className="h-10 flex-1" />
-      <Skeleton className="h-10 w-full sm:w-40" />
+    {/* Hero + readiness */}
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6">
+      <Skeleton className="md:col-span-8 h-[220px] sm:h-[280px] rounded-[2rem]" />
+      <Skeleton className="md:col-span-4 h-[220px] sm:h-[280px] rounded-[2rem]" />
     </div>
 
-    {/* Tabs */}
-    <div className="flex gap-8 border-b border-gray-200 dark:border-white/10 pb-1">
-      <Skeleton className="h-5 w-20 mb-3" />
-      <Skeleton className="h-5 w-20 mb-3" />
-      <Skeleton className="h-5 w-16 mb-3" />
+    {/* Metric tiles — mirrors the mobile snap rail / desktop 4-up grid */}
+    <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 overflow-hidden">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Skeleton key={i} className="shrink-0 min-w-[158px] md:min-w-0 h-[112px] rounded-[1.5rem]" />
+      ))}
+    </div>
+
+    {/* Section header */}
+    <div className="flex items-center justify-between md:pt-2">
+      <Skeleton className="h-5 w-32" />
+      <Skeleton className="h-4 w-24" />
     </div>
 
     {/* Cards */}

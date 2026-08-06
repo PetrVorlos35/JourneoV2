@@ -134,6 +134,11 @@ export const api = {
 
     getBalances: (id) => request(`/trips/${id}/balances`),
 
+    // Settle-up rollup across every trip the user takes part in — used by
+    // the dashboard overview. Can't be derived from getAll(), which doesn't
+    // carry recorded settlements.
+    balancesSummary: () => request('/trips/balances-summary'),
+
     settle: (id, payload) =>
       request(`/trips/${id}/settle`, {
         method: 'POST',

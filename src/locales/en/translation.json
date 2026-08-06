@@ -459,48 +459,129 @@
       }
     }
   },
+  "spotlight": {
+    "title": "Quick search",
+    "trigger": "Search…",
+    "placeholder": "Search trips, days, places, expenses…",
+    "day": "Day",
+    "packed": "Packed",
+    "pages": {
+      "trash": "Trash"
+    },
+    "groups": {
+      "recent": "Recent",
+      "suggested": "Quick start",
+      "trip": "Trips",
+      "day": "Itinerary",
+      "place": "Places",
+      "expense": "Expenses",
+      "packing": "Packing",
+      "document": "Notes",
+      "friend": "Friends",
+      "page": "Pages",
+      "action": "Actions"
+    },
+    "phase": {
+      "upcoming": "Upcoming",
+      "ongoing": "Right now",
+      "past": "Past"
+    },
+    "actions": {
+      "themeLight": "Switch to light appearance",
+      "themeDark": "Switch to dark appearance",
+      "themeSystem": "Match system appearance",
+      "language": "Switch language"
+    },
+    "empty": {
+      "title": "Nothing found",
+      "hint": "Try another word — accents don't matter."
+    },
+    "hints": {
+      "move": "navigate",
+      "open": "open",
+      "count": "{{count}} results"
+    }
+  },
   "tripsOverview": {
-    "subtitle": "Overview of your journeys",
-    "title": "Smart dashboard",
+    "subtitle": "An overview of your journeys",
+    "title": "Overview",
     "countdown": {
       "label": "Next trip in",
       "today": "Today",
       "days": "days"
     },
     "noTrip": {
-      "title": "No plan",
-      "subtitle": "Where will you go next?"
+      "title": "No trips yet",
+      "subtitle": "Create your first trip and start planning."
     },
-    "stats": {
-      "label": "Quick data",
+    "hero": {
+      "inProgress": "In progress",
+      "dayOf": "day {{day}} of {{total}}",
+      "today": "Today",
+      "noPlanToday": "Nothing planned for today yet.",
+      "openItinerary": "Itinerary",
+      "map": "Map",
+      "expenses": "Expenses",
+      "lastTrip": "Last trip",
+      "planNextPrompt": "Where are you heading next?",
+      "dayCount_one": "{{count}} day",
+      "dayCount_other": "{{count}} days",
+      "placeCount_one": "{{count}} place",
+      "placeCount_other": "{{count}} places"
+    },
+    "readiness": {
+      "label": "Readiness",
+      "itinerary": "{{planned}} of {{total}} days planned",
+      "packing": "{{packed}} of {{total}} packed",
+      "packingEmpty": "No packing list yet",
+      "places_one": "{{count}} place pinned",
+      "places_other": "{{count}} places pinned",
+      "placesEmpty": "No places pinned",
+      "documents_one": "{{count}} document",
+      "documents_other": "{{count}} documents",
+      "documentsEmpty": "No documents or links"
+    },
+    "tiles": {
+      "budget": "Budget",
+      "budgetOf": "of {{target}} · {{pct}}%",
+      "budgetTotal": "Spent in total",
+      "budgetEmpty": "No expenses yet",
+      "balance": "Settle up",
+      "balanceSettled": "All settled",
+      "balanceSettledSub": "You owe nobody",
+      "balanceIOwe_one": "You owe {{count}} person",
+      "balanceIOwe_other": "You owe {{count}} people",
+      "balanceOwedToMe_one": "{{count}} person owes you",
+      "balanceOwedToMe_other": "{{count}} people owe you",
+      "balanceUnknown": "Couldn't load",
+      "countries": "Countries",
+      "countriesEmpty": "No places yet",
+      "placesVisited": "{{visited}} of {{total}} visited",
       "trips": "Trips",
-      "places": "Places",
-      "link": "All statistics"
+      "tripsUpcoming_one": "{{count}} upcoming",
+      "tripsUpcoming_other": "{{count}} upcoming"
     },
-    "actions": {
-      "newTrip": "New trip",
-      "budget": "Expenses"
-    },
-    "search": {
-      "placeholder": "Search trip by name..."
-    },
-    "filter": {
-      "reset": "Reset"
-    },
-    "tabs": {
-      "ongoing": "Ongoing",
-      "upcoming": "Upcoming",
-      "past": "Past"
-    },
+    "friendRequests_one": "{{count}} new friend request",
+    "friendRequests_other": "{{count}} new friend requests",
+    "yourTrips": "Your trips",
+    "allTrips": "All trips",
     "activities": "Activities:",
     "open": "Open",
     "continuePlanning": "Continue planning",
-    "empty": {
-      "title": "Nothing here yet",
-      "description": "You have no trips in this category yet. Try planning one."
+    "actions": {
+      "newTrip": "New trip"
+    },
+    "error": {
+      "title": "Couldn't load your trips",
+      "description": "Check your internet connection and please try again.",
+      "retry": "Try again"
     },
     "delete": {
       "title": "Delete trip"
+    },
+    "stats": {
+      "trips": "Trips",
+      "places": "Places"
     }
   },
   "createTripModal": {

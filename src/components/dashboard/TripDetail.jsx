@@ -34,8 +34,19 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   const backHref = fromParam === 'all' ? '/dashboard/all-trips' : '/dashboard';
   const backText = t(fromParam === 'all' ? 'tripDetail.backToAll' : 'tripDetail.backToDashboard');
 
-  const [activeView, setActiveView] = useState(0);
-  const [mobileTab, setMobileTab] = useState('itinerary');
+  // ?view=packing|documents|map|budget deep-links straight to a tool — the
+  // dashboard readiness card links here so "3 dny bez plánu" is one tap away
+  // from the thing it's talking about.
+  const viewParam = searchParams.get('view');
+  // ?day=3 otevře konkrétní den programu (1-based, jak je vidět v UI) —
+  // odsud míří výsledky Spotlightu na jednotlivé dny.
+  const dayParam = parseInt(searchParams.get('day'), 10);
+  const deepLinkedDay = Number.isInteger(dayParam) && dayParam > 0 ? dayParam - 1 : null;
+  const isToolView = ['packing', 'documents', 'map', 'budget'].includes(viewParam);
+  const initialView = isToolView ? viewParam : (deepLinkedDay ?? 0);
+
+  const [activeView, setActiveView] = useState(initialView);
+  const [mobileTab, setMobileTab] = useState(typeof initialView === 'number' ? 'itinerary' : 'tools');
   const [dailyPlans, setDailyPlans] = useState([]);
   const [packingList, setPackingList] = useState(trip?.packingList || []);
   const [documents, setDocuments] = useState(trip?.documents || []);
@@ -96,9 +107,23 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
         d.setHours(0, 0, 0, 0);
         return d.getTime() === today.getTime();
       });
-      if (todayIndex !== -1) setActiveView(todayIndex);
+      // Skok na dnešek je jen výchozí chování — když odkaz cílí na konkrétní
+      // den nebo nástroj, má přednost, jinak by deep-link nikam nevedl.
+      if (todayIndex !== -1 && !isToolView && deepLinkedDay === null) setActiveView(todayIndex);
     }
   }, [trip?.id]);
+
+  // Deep-link se může změnit i bez přemontování (ze Spotlightu skočíš ze dne
+  // 2 na den 5 téhož výletu), takže na parametry reagujeme zvlášť.
+  useEffect(() => {
+    if (isToolView) {
+      setActiveView(viewParam);
+      setMobileTab('tools');
+    } else if (deepLinkedDay !== null) {
+      setActiveView(deepLinkedDay);
+      setMobileTab('itinerary');
+    }
+  }, [trip?.id, viewParam, deepLinkedDay, isToolView]);
 
   if (!trip) {
     return (

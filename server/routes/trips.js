@@ -454,6 +454,162 @@ router.get('/trash', async (req, res) => {
   }
 });
 
+// ── GET /api/trips/balances-summary ─────────────────────────
+// Cross-trip settle-up rollup for the dashboard overview: how much the
+// caller is owed, how much they owe, and by/to whom — across every trip
+// they take part in. GET /api/trips deliberately doesn't carry recorded
+// settlements, so this can't be derived on the client without showing
+// debts that have already been paid off.
+// Registered before /:id/* routes; 'balances-summary' is a single segment
+// so it can't be swallowed by them either way.
+router.get('/balances-summary', async (req, res) => {
+  try {
+    const userId = req.userId;
+
+    const [tripRows] = await pool.query(
+      `SELECT t.id, t.title FROM trips t
+       WHERE t.user_id = ? AND t.deleted_at IS NULL
+       UNION
+       SELECT t.id, t.title FROM trips t
+       JOIN trip_collaborators tc ON tc.trip_id = t.id AND tc.user_id = ?
+       WHERE t.deleted_at IS NULL`,
+      [userId, userId]
+    );
+
+    const empty = { owedToMe: 0, iOwe: 0, net: 0, counterparties: [], trips: [] };
+    if (tripRows.length === 0) return res.json(empty);
+
+    const tripIds = tripRows.map((t) => t.id);
+
+    // Same batched IN (?) shape as GET / — one query per sub-resource
+    // instead of a per-trip fan-out that would saturate the pool.
+    const [[expenseRows], [splitRows], [settlementRows]] = await Promise.all([
+      pool.query(
+        'SELECT id, trip_id AS tripId, amount, paid_by AS paidBy FROM trip_expenses WHERE trip_id IN (?)',
+        [tripIds]
+      ),
+      pool.query(
+        `SELECT te.trip_id AS tripId, es.expense_id AS expenseId, es.user_id AS userId, es.amount
+         FROM expense_splits es
+         JOIN trip_expenses te ON te.id = es.expense_id
+         WHERE te.trip_id IN (?)`,
+        [tripIds]
+      ),
+      pool.query(
+        'SELECT trip_id AS tripId, from_user_id AS fromUserId, to_user_id AS toUserId, amount FROM trip_settlements WHERE trip_id IN (?)',
+        [tripIds]
+      ),
+    ]);
+
+    const splitsByExpense = new Map();
+    for (const s of splitRows) {
+      if (!splitsByExpense.has(s.expenseId)) splitsByExpense.set(s.expenseId, []);
+      splitsByExpense.get(s.expenseId).push({ userId: s.userId, amount: parseFloat(s.amount) });
+    }
+
+    const expensesByTrip = new Map();
+    for (const e of expenseRows) {
+      if (!expensesByTrip.has(e.tripId)) expensesByTrip.set(e.tripId, []);
+      expensesByTrip.get(e.tripId).push({
+        amount: parseFloat(e.amount),
+        paidBy: e.paidBy != null ? e.paidBy : null,
+        splits: splitsByExpense.get(e.id) || [],
+      });
+    }
+
+    const settlementsByTrip = new Map();
+    for (const s of settlementRows) {
+      if (!settlementsByTrip.has(s.tripId)) settlementsByTrip.set(s.tripId, []);
+      settlementsByTrip.get(s.tripId).push({
+        fromUserId: s.fromUserId,
+        toUserId: s.toUserId,
+        amount: parseFloat(s.amount),
+      });
+    }
+
+    // Cents everywhere until the response, so summing a dozen trips can't drift.
+    const toCents = (v) => Math.round(Number(v || 0) * 100);
+    const me = Number(userId);
+
+    let owedCents = 0;
+    let owingCents = 0;
+    const byCounterparty = new Map(); // otherUserId → cents (positive = owes me)
+    const tripBreakdown = [];
+
+    for (const trip of tripRows) {
+      const expenses = expensesByTrip.get(trip.id) || [];
+      if (expenses.length === 0) continue;
+
+      const { balances, settlements } = calculateBalances(
+        expenses,
+        settlementsByTrip.get(trip.id) || []
+      );
+
+      const myNet = balances.find((b) => Number(b.userId) === me);
+      const myNetCents = myNet ? toCents(myNet.net) : 0;
+      if (myNetCents === 0) continue;
+
+      if (myNetCents > 0) owedCents += myNetCents;
+      else owingCents += -myNetCents;
+
+      tripBreakdown.push({
+        tripId: trip.id.toString(),
+        title: trip.title,
+        net: myNetCents / 100,
+      });
+
+      // The simplified ledger already says who pays whom; keep only the
+      // legs the caller is on and roll them up per person.
+      for (const s of settlements) {
+        const cents = toCents(s.amount);
+        if (Number(s.to) === me) {
+          const other = Number(s.from);
+          byCounterparty.set(other, (byCounterparty.get(other) || 0) + cents);
+        } else if (Number(s.from) === me) {
+          const other = Number(s.to);
+          byCounterparty.set(other, (byCounterparty.get(other) || 0) - cents);
+        }
+      }
+    }
+
+    const counterpartyIds = [...byCounterparty.keys()].filter((id) => byCounterparty.get(id) !== 0);
+    let userById = new Map();
+    if (counterpartyIds.length > 0) {
+      const [users] = await pool.query(
+        'SELECT id, first_name AS firstName, last_name AS lastName, avatar_url AS avatarUrl FROM users WHERE id IN (?)',
+        [counterpartyIds]
+      );
+      userById = new Map(users.map((u) => [Number(u.id), u]));
+    }
+
+    const counterparties = counterpartyIds
+      .map((id) => {
+        const cents = byCounterparty.get(id);
+        const user = userById.get(id);
+        return {
+          userId: id,
+          firstName: user?.firstName ?? null,
+          lastName: user?.lastName ?? null,
+          avatarUrl: user?.avatarUrl ?? null,
+          amount: Math.abs(cents) / 100,
+          direction: cents > 0 ? 'owedToMe' : 'iOwe',
+        };
+      })
+      .sort((a, b) => b.amount - a.amount);
+
+    res.json({
+      owedToMe: owedCents / 100,
+      iOwe: owingCents / 100,
+      net: (owedCents - owingCents) / 100,
+      counterparties,
+      trips: tripBreakdown.sort((a, b) => Math.abs(b.net) - Math.abs(a.net)),
+    });
+  } catch (err) {
+    console.error('Get balances summary error:', err);
+    res.status(500).json({ error: 'Chyba při výpočtu vyrovnání.' });
+  }
+});
+
 // ── DELETE /api/trips/trash ─────────────────────────────────
 // Empties the caller's trash (hard-deletes every soft-deleted trip).
 // Must be registered before DELETE /:id so 'trash' isn't parsed as an id.

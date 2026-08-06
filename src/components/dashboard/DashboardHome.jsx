@@ -51,15 +51,21 @@ const DashboardHome = () => {
   const { t } = useTranslation();
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  // Load trips from API on mount
-  const fetchTrips = useCallback(async () => {
+  // Load trips from API on mount. A failure is tracked in state, not just
+  // toasted — otherwise the overview renders an empty dashboard and reads as
+  // "you have no trips" when the truth is "we couldn't load them".
+  const fetchTrips = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const data = await api.trips.getAll();
       setTrips(data.trips);
+      setLoadError(false);
     } catch (err) {
       console.error('Failed to fetch trips:', err);
+      setLoadError(true);
       toast.error(t('dashboardHome.loadError'));
     } finally {
       setLoading(false);
@@ -223,14 +229,14 @@ const DashboardHome = () => {
 
   if (loading) {
     return (
-      <DashboardLayout>
+      <DashboardLayout trips={trips}>
         <TripsOverviewSkeleton />
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout onOpenCreateModal={() => setIsCreateModalOpen(true)}>
+    <DashboardLayout trips={trips} onOpenCreateModal={() => setIsCreateModalOpen(true)}>
       <CreateTripModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
@@ -242,7 +248,16 @@ const DashboardHome = () => {
       <Routes>
         <Route
           path="/"
-          element={withSuspense(<TripsOverview trips={trips} onDeleteTrip={handleDeleteTrip} onOpenCreateModal={() => setIsCreateModalOpen(true)} />, <TripsOverviewSkeleton />)}
+          element={withSuspense(
+            <TripsOverview
+              trips={trips}
+              onDeleteTrip={handleDeleteTrip}
+              onOpenCreateModal={() => setIsCreateModalOpen(true)}
+              error={loadError}
+              onRetry={() => fetchTrips()}
+            />,
+            <TripsOverviewSkeleton />
+          )}
         />
         <Route
           path="/all-trips"
@@ -258,7 +273,7 @@ const DashboardHome = () => {
         />
         <Route
           path="/trash"
-          element={withSuspense(<Trash onTripsChanged={fetchTrips} />, <ContentSkeleton />)}
+          element={withSuspense(<Trash onTripsChanged={() => fetchTrips(true)} />, <ContentSkeleton />)}
         />
         <Route
           path="/statistics"

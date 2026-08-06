@@ -7,6 +7,9 @@ import { useTranslation } from 'react-i18next';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import api from '../../services/api';
 import { StatisticsSkeleton } from '../ui/Skeletons';
+import AnimatedValue from '../ui/AnimatedValue';
+import MetricCard from '../ui/MetricCard';
+import { countryFlag } from '../../utils/country';
 
 const CATEGORY_CONFIG = {
   accommodation: { color: '#818cf8' },
@@ -21,79 +24,7 @@ const CURRENCY_SYMBOLS = { CZK: 'Kč', EUR: '€', USD: '$', GBP: '£' };
 // Náhled mapy se stahuje až s Leafletem — statistiky se otevírají i bez něj.
 const MapCanvas = lazy(() => import('../map/MapCanvas'));
 
-// ISO kód země → vlajka (regional indicator symbols).
-const countryFlag = (code) =>
-  code && code.length === 2
-    ? String.fromCodePoint(...[...code.toUpperCase()].map((c) => 127397 + c.charCodeAt(0)))
-    : '🏳️';
-
-const AnimatedValue = ({ value, suffix = '', prefix = '', className = '' }) => {
-  const [displayed, setDisplayed] = useState(0);
-  const shouldReduceMotion = useReducedMotion();
-  const { i18n } = useTranslation();
-  const finalValue = typeof value === 'number' ? value : 0;
-
-  useEffect(() => {
-    if (finalValue === 0) { setDisplayed(0); return; }
-
-    if (shouldReduceMotion) {
-      setDisplayed(finalValue);
-      return;
-    }
-
-    const duration = 700;
-    const startTime = performance.now();
-    let rafId;
-
-    const animate = (now) => {
-      const progress = Math.min((now - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplayed(Math.round(eased * finalValue));
-      if (progress < 1) rafId = requestAnimationFrame(animate);
-    };
-
-    rafId = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafId);
-  }, [finalValue, shouldReduceMotion]);
-
-  return (
-    <>
-      <span className={className} aria-hidden="true">
-        {prefix}{displayed.toLocaleString(i18n.language)}{suffix}
-      </span>
-      <span className="sr-only">{prefix}{finalValue.toLocaleString(i18n.language)}{suffix}</span>
-    </>
-  );
-};
-
-const MetricCard = ({ icon: Icon, label, value, suffix = '', glowColor, delay = 0 }) => {
-  const shouldReduceMotion = useReducedMotion();
-  return (
-    <motion.div
-      initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}
-      className="rounded-[2rem] border border-gray-200/60 dark:border-white/[0.07] p-5 sm:p-6 flex items-center gap-4 sm:gap-5"
-    >
-      <div
-        className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0"
-        style={{ backgroundColor: `${glowColor}15`, boxShadow: `0 0 20px ${glowColor}20` }}
-      >
-        <Icon size={22} strokeWidth={2} style={{ color: glowColor }} aria-hidden="true" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium mb-0.5">{label}</p>
-        <AnimatedValue
-          value={value}
-          suffix={suffix}
-          className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tighter leading-none"
-        />
-      </div>
-    </motion.div>
-  );
-};
-
-const HighlightCard = ({ icon: Icon, label, mainValue, subValue, glowColor, delay = 0, emptyText = '—' }) => {
+const HighlightCard =({ icon: Icon, label, mainValue, subValue, glowColor, delay = 0, emptyText = '—' }) => {
   const shouldReduceMotion = useReducedMotion();
   return (
     <motion.div

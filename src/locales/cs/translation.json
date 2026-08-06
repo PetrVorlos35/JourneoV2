@@ -459,48 +459,137 @@
       }
     }
   },
+  "spotlight": {
+    "title": "Rychlé hledání",
+    "trigger": "Hledat…",
+    "placeholder": "Hledej výlety, dny, místa, výdaje…",
+    "day": "Den",
+    "packed": "Sbaleno",
+    "pages": {
+      "trash": "Koš"
+    },
+    "groups": {
+      "recent": "Naposledy",
+      "suggested": "Rychlý start",
+      "trip": "Výlety",
+      "day": "Program",
+      "place": "Místa",
+      "expense": "Výdaje",
+      "packing": "Balení",
+      "document": "Poznámky",
+      "friend": "Přátelé",
+      "page": "Stránky",
+      "action": "Akce"
+    },
+    "phase": {
+      "upcoming": "Nadchází",
+      "ongoing": "Právě teď",
+      "past": "Proběhlo"
+    },
+    "actions": {
+      "themeLight": "Přepnout na světlý vzhled",
+      "themeDark": "Přepnout na tmavý vzhled",
+      "themeSystem": "Vzhled podle systému",
+      "language": "Přepnout jazyk"
+    },
+    "empty": {
+      "title": "Nic jsme nenašli",
+      "hint": "Zkus jiné slovo — hledá se i bez diakritiky."
+    },
+    "hints": {
+      "move": "procházet",
+      "open": "otevřít",
+      "count": "{{count}} výsledků"
+    }
+  },
   "tripsOverview": {
     "subtitle": "Přehled vašich cest",
-    "title": "Chytrá nástěnka",
+    "title": "Přehled",
     "countdown": {
       "label": "Další cesta za",
       "today": "Dnes",
       "days": "dní"
     },
     "noTrip": {
-      "title": "Žádný plán",
-      "subtitle": "Kam vyrazíte příště?"
+      "title": "Zatím žádná cesta",
+      "subtitle": "Vytvořte první výlet a začněte plánovat."
     },
-    "stats": {
-      "label": "Rychlá data",
-      "trips": "Výletů",
-      "places": "Míst",
-      "link": "Všechny statistiky"
+    "hero": {
+      "inProgress": "Právě probíhá",
+      "dayOf": "den {{day}} z {{total}}",
+      "today": "Dnes",
+      "noPlanToday": "Na dnešek zatím nemáte žádný plán.",
+      "openItinerary": "Itinerář",
+      "map": "Mapa",
+      "expenses": "Výdaje",
+      "lastTrip": "Poslední cesta",
+      "planNextPrompt": "Kam vyrazíte příště?",
+      "dayCount_one": "{{count}} den",
+      "dayCount_few": "{{count}} dny",
+      "dayCount_other": "{{count}} dní",
+      "placeCount_one": "{{count}} místo",
+      "placeCount_few": "{{count}} místa",
+      "placeCount_other": "{{count}} míst"
     },
-    "actions": {
-      "newTrip": "Nový výlet",
-      "budget": "Výdaje"
+    "readiness": {
+      "label": "Připravenost",
+      "itinerary": "Naplánováno {{planned}} z {{total}} dní",
+      "packing": "Sbaleno {{packed}} z {{total}}",
+      "packingEmpty": "Zatím žádný seznam věcí",
+      "places_one": "{{count}} místo na mapě",
+      "places_few": "{{count}} místa na mapě",
+      "places_other": "{{count}} míst na mapě",
+      "placesEmpty": "Žádná místa na mapě",
+      "documents_one": "{{count}} dokument",
+      "documents_few": "{{count}} dokumenty",
+      "documents_other": "{{count}} dokumentů",
+      "documentsEmpty": "Žádné dokumenty ani odkazy"
     },
-    "search": {
-      "placeholder": "Hledat výlet podle názvu..."
+    "tiles": {
+      "budget": "Rozpočet",
+      "budgetOf": "z {{target}} · {{pct}} %",
+      "budgetTotal": "Utraceno celkem",
+      "budgetEmpty": "Zatím žádné výdaje",
+      "balance": "Vyrovnání",
+      "balanceSettled": "Vyrovnáno",
+      "balanceSettledSub": "Nikomu nic nedlužíte",
+      "balanceIOwe_one": "Dlužíte {{count}} člověku",
+      "balanceIOwe_few": "Dlužíte {{count}} lidem",
+      "balanceIOwe_other": "Dlužíte {{count}} lidem",
+      "balanceOwedToMe_one": "Dluží vám {{count}} člověk",
+      "balanceOwedToMe_few": "Dluží vám {{count}} lidé",
+      "balanceOwedToMe_other": "Dluží vám {{count}} lidí",
+      "balanceUnknown": "Nelze načíst",
+      "countries": "Země",
+      "countriesEmpty": "Zatím žádná místa",
+      "placesVisited": "{{visited}} navštíveno z {{total}}",
+      "trips": "Cesty",
+      "tripsUpcoming_one": "{{count}} plánovaná",
+      "tripsUpcoming_few": "{{count}} plánované",
+      "tripsUpcoming_other": "{{count}} plánovaných"
     },
-    "filter": {
-      "reset": "Resetovat"
-    },
-    "tabs": {
-      "ongoing": "Probíhající",
-      "upcoming": "Plánované",
-      "past": "Minulé"
-    },
+    "friendRequests_one": "{{count}} nová žádost o přátelství",
+    "friendRequests_few": "{{count}} nové žádosti o přátelství",
+    "friendRequests_other": "{{count}} nových žádostí o přátelství",
+    "yourTrips": "Vaše cesty",
+    "allTrips": "Všechny výlety",
     "activities": "Aktivit:",
     "open": "Otevřít",
     "continuePlanning": "Pokračovat v plánování",
-    "empty": {
-      "title": "Zatím prázdno",
-      "description": "V této kategorii nemáte zatím žádné výlety. Zkuste si nějaký naplánovat."
+    "actions": {
+      "newTrip": "Nový výlet"
+    },
+    "error": {
+      "title": "Cesty se nepodařilo načíst",
+      "description": "Zkontrolujte připojení k internetu a zkuste to prosím znovu.",
+      "retry": "Zkusit znovu"
     },
     "delete": {
       "title": "Smazat výlet"
+    },
+    "stats": {
+      "trips": "Výletů",
+      "places": "Míst"
     }
   },
   "createTripModal": {

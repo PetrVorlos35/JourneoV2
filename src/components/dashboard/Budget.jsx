@@ -19,12 +19,7 @@ import { useCurrency } from '../../contexts/CurrencyContext';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import UserAvatar from '../ui/UserAvatar';
-
-const formatCurrency = (amount, currency, locale = 'en') => {
-  const symbols = { CZK: 'Kč', EUR: '€', USD: '$', GBP: '£' };
-  const symbol = symbols[currency] || currency;
-  return `${amount.toLocaleString(locale)} ${symbol}`;
-};
+import { formatCurrency } from '../../utils/currency';
 
 const CATEGORIES = [
   { id: 'transport',      icon: Car,          colorClass: 'bg-blue-500',    lightBgClass: 'bg-blue-50 dark:bg-blue-500/10',     textClass: 'text-blue-600 dark:text-blue-400' },
