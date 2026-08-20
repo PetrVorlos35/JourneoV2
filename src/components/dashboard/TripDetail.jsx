@@ -812,7 +812,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                             }}
                             placeholder={t('tripDetail.itinerary.locationPlaceholder')}
                             maxLength={255}
-                            className="glass-input !py-3 sm:!py-4 !px-4 sm:!px-5 font-bold text-base sm:text-lg w-full"
+                            className="glass-input !py-3 sm:!py-4 !pl-4 sm:!pl-5 font-bold text-base sm:text-lg w-full"
                           />
                           <div className="flex justify-end mt-1.5 pr-1">
                             <CharCount value={day.location} max={255} />

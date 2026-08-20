@@ -255,6 +255,11 @@
         "documents": "Documents"
       }
     },
+    "story": {
+      "quote": "I started building Journeo because my own trips lived scattered across spreadsheets, notes, and group chats — and I could never tell what was actually up to date.",
+      "signature": "Petr",
+      "role": "Journeo's creator"
+    },
     "cta": {
       "title": "Ready to go?",
       "subtitle": "Join and start building your personal world map. No commitments, no clutter.",

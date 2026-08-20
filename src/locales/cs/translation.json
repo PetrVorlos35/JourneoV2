@@ -255,6 +255,11 @@
         "documents": "Dokumenty"
       }
     },
+    "story": {
+      "quote": "Journeo jsem začal stavět, protože moje vlastní cesty žily rozházené po tabulkách, poznámkách a chatových vláknech — a nikdy jsem si nebyl jistý, co je aktuální.",
+      "signature": "Petr",
+      "role": "tvůrce Journeo"
+    },
     "cta": {
       "title": "Jste připraveni vyrazit?",
       "subtitle": "Připojte se a začněte tvořit svou osobní mapu světa. Bez závazků, bez zbytečností.",

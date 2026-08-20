@@ -390,6 +390,29 @@ const DestinationMarquee = () => {
   );
 };
 
+// Counts up from 0 to `to` once on mount; freezes at the target value when
+// the user prefers reduced motion.
+const CountUp = ({ to, duration = 1.4 }) => {
+  const reduce = useReducedMotion();
+  const [value, setValue] = React.useState(reduce ? to : 0);
+
+  React.useEffect(() => {
+    if (reduce) return;
+    let raf;
+    const start = performance.now();
+    const tick = (now) => {
+      const progress = Math.min((now - start) / (duration * 1000), 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setValue(Math.round(eased * to));
+      if (progress < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [to, duration, reduce]);
+
+  return value;
+};
+
 // ── Light dashboard replica shown in the hero ────────────────────────────────
 const DashboardMock = () => {
   const { t } = useTranslation();
@@ -446,7 +469,9 @@ const DashboardMock = () => {
               {t('tripsOverview.countdown.label')}
             </p>
             <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-gray-900 font-bold text-4xl sm:text-5xl leading-none tracking-tighter">121</span>
+              <span className="text-gray-900 font-bold text-4xl sm:text-5xl leading-none tracking-tighter">
+                <CountUp to={121} />
+              </span>
               <span className="text-gray-500 text-xs uppercase tracking-widest font-semibold">
                 {t('tripsOverview.countdown.days')}
               </span>
@@ -1053,6 +1078,22 @@ const LandingPage = () => {
               <SpreadsheetMock />
             </Reveal>
           </div>
+        </section>
+
+        {/* ── Founder note ── */}
+        <section className="relative px-6 pb-20 sm:pb-28">
+          <Reveal className="max-w-2xl mx-auto text-center">
+            <p className="text-gray-700 leading-relaxed text-lg sm:text-xl" style={{ textWrap: 'pretty' }}>
+              {t('landing.story.quote')}
+            </p>
+            <p
+              className="mt-6 text-blue-600 text-2xl sm:text-3xl rotate-[-2deg] select-none"
+              style={{ fontFamily: "'Caveat', cursive" }}
+            >
+              {t('landing.story.signature')}
+            </p>
+            <p className="text-gray-400 text-sm mt-0.5">{t('landing.story.role')}</p>
+          </Reveal>
         </section>
 
         {/* ── Features ── */}
