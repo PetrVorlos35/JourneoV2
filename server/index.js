@@ -95,6 +95,16 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Poslední záchranná síť. Každá routa má vlastní try/catch a posílá
+// { error } sama, takže sem se běžně nechodí — jen když něco proklouzne
+// mimo (např. chyba v middlewaru). Bez tohohle by Express poslal svoji
+// vlastní HTML odpověď místo JSON ve tvaru, který čeká zbytek API.
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  if (res.headersSent) return next(err);
+  res.status(500).json({ error: 'Něco se pokazilo. Zkuste to prosím znovu.' });
+});
+
 async function start() {
   console.log('Volám testConnection()...');
   await testConnection();

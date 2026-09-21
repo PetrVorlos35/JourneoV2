@@ -476,6 +476,13 @@
   background: #101012;
 }
 
+/* CARTO dark_all má skoro černé pozadí (~#090909) — trochu ho zesvětlíme,
+   ať tolik nebije do očí. Filtr sedí jen na dlaždicích, markery a ovládání
+   nechceme ztlumit. */
+.dark .jn-map .leaflet-tile-pane {
+  filter: contrast(0.65);
+}
+
 .jn-map--pinning {
   cursor: crosshair;
 }

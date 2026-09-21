@@ -4,12 +4,15 @@ import 'leaflet/dist/leaflet.css';
 import { buildMarkerIcon, escapeHtml } from './markerIcon';
 import useIsDark from '../../hooks/useIsDark';
 
-// Rastrové dlaždice CARTO nad daty OSM — zdarma, bez API klíče a
-// se světlou i tmavou variantou, takže mapa sedí k motivu appky.
+// Rastrové dlaždice CARTO nad daty OSM, se světlou i tmavou variantou.
+// CARTO od 28. 8. 2026 vyžaduje i pro tenhle bezplatný raster tier API
+// klíč (do 5 mil. požadavků/měsíc zdarma) — bez klíče vrací dlaždici
+// s nápisem "API KEY REQUIRED" místo mapy. Klíč: carto.com/basemaps/apikey.
 // Načítají se jako <img>, což prochází i přísnou CSP (img-src https:).
+const CARTO_API_KEY = import.meta.env.VITE_CARTO_API_KEY;
 const TILE_URLS = {
-  light: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-  dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  light: `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`,
+  dark: `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`,
 };
 const ATTRIBUTION =
   '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
