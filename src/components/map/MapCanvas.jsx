@@ -1,21 +1,35 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { maplibreGL } from '@maplibre/maplibre-gl-leaflet';
 import { buildMarkerIcon, escapeHtml } from './markerIcon';
 import useIsDark from '../../hooks/useIsDark';
 
-// Rastrové dlaždice CARTO nad daty OSM, se světlou i tmavou variantou.
-// CARTO od 28. 8. 2026 vyžaduje i pro tenhle bezplatný raster tier API
-// klíč (do 5 mil. požadavků/měsíc zdarma) — bez klíče vrací dlaždici
-// s nápisem "API KEY REQUIRED" místo mapy. Klíč: carto.com/basemaps/apikey.
-// Načítají se jako <img>, což prochází i přísnou CSP (img-src https:).
+// Světlá mapa: CARTO Voyager, rastrové PNG dlaždice přes <img> (bezpečné
+// i s přísnou CSP img-src). CARTO od 28. 8. 2026 vyžaduje API klíč i pro
+// tenhle bezplatný raster tier (do 5 mil. požadavků/měsíc) — bez klíče
+// vrací dlaždici s nápisem "API KEY REQUIRED". Klíč: carto.com/basemaps/apikey.
+//
+// Tmavá mapa: stejná CARTO rodina, ale jejich vlastní vektorový styl
+// "Dark Matter" (basemaps.cartocdn.com/gl/...) — na rozdíl od staré
+// rastrové varianty dark_all vypadá jako tmavý sourozenec Voyageru a
+// žádný API klíč nechce (klíč vyžaduje jen legacy raster CDN výše).
+// Renderuje se přes MapLibre GL zapojený jako vrstva do Leafletu
+// (@maplibre/maplibre-gl-leaflet), zbytek mapy (markery, trasa, klikání)
+// zůstává beze změny na Leafletu. Vyžaduje rozšíření CSP connect-src/
+// worker-src o *.basemaps.cartocdn.com, viz vercel.json.
 const CARTO_API_KEY = import.meta.env.VITE_CARTO_API_KEY;
 const TILE_URLS = {
   light: `https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`,
-  dark: `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?key=${CARTO_API_KEY}`,
+  darkStyle: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
 };
-const ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>';
+const ATTRIBUTIONS = {
+  light:
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  dark:
+    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+};
 
 const DEFAULT_CENTER = [49.8, 15.5]; // střed Česka, než dorazí data
 const DEFAULT_ZOOM = 5;
@@ -126,13 +140,16 @@ const MapCanvas = ({
     const map = mapRef.current;
     if (!map) return;
 
-    const layer = L.tileLayer(isDark ? TILE_URLS.dark : TILE_URLS.light, {
-      attribution: ATTRIBUTION,
-      maxZoom: 19,
-      subdomains: 'abcd',
-      detectRetina: true,
-    }).addTo(map);
-    layer.setZIndex(1);
+    const layer = isDark
+      ? maplibreGL({ style: TILE_URLS.darkStyle, attribution: ATTRIBUTIONS.dark })
+      : L.tileLayer(TILE_URLS.light, {
+          attribution: ATTRIBUTIONS.light,
+          maxZoom: 19,
+          subdomains: 'abcd',
+          detectRetina: true,
+        });
+    layer.addTo(map);
+    layer.setZIndex?.(1);
 
     if (tileRef.current) map.removeLayer(tileRef.current);
     tileRef.current = layer;

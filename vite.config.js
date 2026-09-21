@@ -6,6 +6,14 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {},
+  // maplibre-gl dodává svého web workera jako samostatný .mjs entrypoint;
+  // Vite ho v optimizeDeps krokem přebaluje a rozbíjí mu import.meta.url
+  // (worker pak "neexistuje" a mapa tiše zůstane bez dlaždic). Vyloučením
+  // z pre-bundlingu se načte tak, jak je publikovaný — funguje v dev
+  // i v produkčním buildu.
+  optimizeDeps: {
+    exclude: ['maplibre-gl'],
+  },
   build: {
     rollupOptions: {
       output: {
