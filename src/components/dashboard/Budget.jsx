@@ -1460,7 +1460,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false }) => {
         <button
           onClick={() => setIsAddModalOpen(true)}
           aria-label={t('budget.addExpense')}
-          className="sm:hidden fixed bottom-[calc(6rem+env(safe-area-inset-bottom))] right-6 z-[100] w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(37,99,235,0.4)] active:scale-90 transition-transform cursor-pointer"
+          className="sm:hidden fixed bottom-[calc(max(1.25rem,env(safe-area-inset-bottom))+5rem)] right-4 z-[100] w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(37,99,235,0.4)] active:scale-90 transition-transform cursor-pointer"
         >
           <Plus size={28} strokeWidth={2.5} />
         </button>

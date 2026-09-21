@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowLeft, Plus, Pencil, Move, Trash2, Crosshair, MapPin } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Move, Trash2, Crosshair, MapPin, Menu } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import useMediaQuery from '../../hooks/useMediaQuery';
 import useSlideOverA11y from '../../hooks/useSlideOverA11y';
@@ -35,6 +35,16 @@ const MapWorkspaceView = ({
   canEdit = true,
   title,
   onBack,
+  // Mobile-only: opens the dashboard's hamburger slide-over from on top of
+  // the fullscreen map, so Statistiky/Přátelé/Nastavení stay reachable
+  // without backing out of the map first. Omitted (e.g. per-trip map)
+  // simply renders no menu button.
+  onOpenMenu = null,
+  // Mobile-only: reports the bottom sheet's snap position so the caller can
+  // hide its floating nav whenever the sheet is dragged past its compact
+  // 'peek' height — otherwise the pill would float in the middle of the
+  // place list instead of above it.
+  onSnapChange = null,
   listExtra = null,
   // Kolik pixelů zleva mapy překrývá vnější prvek (na globální mapě plovoucí
   // navigační sidebar dashboardu). Mapa se pod něj protáhne edge-to-edge, ale
@@ -83,6 +93,10 @@ const MapWorkspaceView = ({
   const placingReturnRef = useRef('list');
 
   const mode = isPlacing ? 'placing' : draft ? 'form' : selectedPlace ? 'place' : 'list';
+
+  useEffect(() => {
+    onSnapChange?.(snap);
+  }, [snap, onSnapChange]);
 
   // Callback musí mít stálou identitu: useSlideOverA11y na jeho změnu
   // znovu přebírá fokus, a s inline arrow funkcí od rodiče by tak fokus
@@ -428,6 +442,16 @@ const MapWorkspaceView = ({
           isLocating={isLocating}
         />
       </div>
+      {!isDesktop && onOpenMenu && (
+        <button
+          type="button"
+          onClick={onOpenMenu}
+          aria-label={t('map.mobile.menu')}
+          className="pointer-events-auto w-11 h-11 shrink-0 rounded-2xl glass-card border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-700 dark:text-gray-200 cursor-pointer"
+        >
+          <Menu size={18} strokeWidth={2.5} />
+        </button>
+      )}
     </div>
   );
 

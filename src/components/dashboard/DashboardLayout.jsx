@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, lazy, Suspense } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, PlusSquare, Plus, Settings, LogOut, BarChart2, Wallet, X, Sun, Moon, Monitor, Map, MapPinned, Menu, Users, Shield, Search } from 'lucide-react';
+import { PlusSquare, Plus, Settings, LogOut, X, Sun, Moon, Monitor, Menu, Shield, Search } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
@@ -15,6 +16,9 @@ import JourneoLogo from '../../assets/Journeo_whitelogo.png';
 import JourneoLogoDark from '../../assets/Journeo_blacklogo.png';
 import UserAvatar from '../ui/UserAvatar';
 import VersionBadge from '../ui/VersionBadge';
+import MobileTabBar from './MobileTabBar';
+import { getDashboardNavItems, MOBILE_PRIMARY_PATHS } from './navItems';
+import { MobileMenuContext } from '../../contexts/MobileMenuContext';
 
 // Paleta se stahuje až při prvním ⌘K — do prvního vykreslení dashboardu
 // nepatří nic, co uživatel možná nikdy neotevře.
@@ -111,14 +115,13 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
   // paddingu a scrollu, aby ji plovoucí panel překrýval jako na mobilu.
   const isMapRoute = location.pathname.includes('/dashboard/map');
 
-  const navItems = [
-    { icon: Home,     label: t('dashboardLayout.nav.overview'),   path: '/dashboard',            shortcut: 'H' },
-    { icon: Map,      label: t('dashboardLayout.nav.myTrips'),    path: '/dashboard/all-trips',  shortcut: 'T' },
-    { icon: MapPinned,label: t('dashboardLayout.nav.map'),        path: '/dashboard/map',        shortcut: 'M' },
-    { icon: BarChart2,label: t('dashboardLayout.nav.statistics'), path: '/dashboard/statistics', shortcut: 'S' },
-    { icon: Users,    label: t('dashboardLayout.nav.friends'),    path: '/dashboard/friends',    shortcut: 'F' },
-    { icon: Wallet,   label: t('dashboardLayout.nav.budget'),     path: '/dashboard/budget',     shortcut: 'B' },
-  ];
+  const navItems = getDashboardNavItems(t);
+
+  // Mobile bottom nav gets only the four everyday destinations; Statistiky
+  // and Přátelé move into the hamburger menu so the floating pill doesn't
+  // cram six icons into one hand's reach.
+  const mobileNavItems = navItems.filter(item => MOBILE_PRIMARY_PATHS.includes(item.path));
+  const mobileSecondaryItems = navItems.filter(item => !MOBILE_PRIMARY_PATHS.includes(item.path));
 
   const handleNavigation = async (path, e, onClickCallback) => {
     if (e) {
@@ -376,30 +379,22 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
 
       {/* ── Mobile bottom navigation (Floating Pill) ── */}
       {!isTripDetail && (
-        <div className="md:hidden fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] left-4 right-4 z-50 flex justify-center pointer-events-none">
-          <nav className="glass-panel w-full max-w-sm rounded-[2rem] flex justify-around items-center px-1.5 py-2 pointer-events-auto">
-            {navItems.map(({ icon: Icon, label, path }) => (
-              <Link
-                key={path}
-                to={path}
-                onClick={(e) => handleNavigation(path, e)}
-                aria-current={location.pathname === path ? 'page' : undefined}
-                className={`flex flex-col items-center justify-center gap-1 flex-1 min-w-0 min-h-[48px] rounded-2xl transition-all duration-300 py-1.5 ${
-                  location.pathname === path ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 active:text-gray-700 dark:active:text-gray-300'
-                } cursor-pointer disabled:cursor-not-allowed`}
-              >
-                <Icon size={21} strokeWidth={location.pathname === path ? 2.5 : 2} aria-hidden="true" />
-                <span className={`text-[10px] font-semibold max-w-full truncate px-0.5 transition-colors ${location.pathname === path ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}`}>{label.split(' ')[0]}</span>
-              </Link>
-            ))}
-          </nav>
-        </div>
+        <MobileTabBar
+          items={mobileNavItems}
+          activePath={location.pathname}
+          onNavigate={(path, e) => handleNavigation(path, e)}
+        />
       )}
 
       {/* ── Mobile slide-over (for Settings/Logout) ── */}
-      <AnimatePresence>
+      {/* Portaled to <body>: it must be able to show above the fullscreen
+          mobile map, which is itself a <body>-level portal — nested here it
+          would be trapped under `<main>`'s own stacking context and could
+          never out-rank a sibling portal no matter its z-index. */}
+      {createPortal(
+        <AnimatePresence>
         {mobileOpen && (
-          <div className="fixed inset-0 z-[60] flex md:hidden">
+          <div className="fixed inset-0 z-[140] flex md:hidden">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -459,14 +454,16 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
                       <span className="font-semibold">{t('dashboardLayout.nav.createTrip')}</span>
                     </div>
                   </button>
-                  <SidebarItem
-                    icon={BarChart2}
-                    label={t('dashboardLayout.nav.statistics')}
-                    path="/dashboard/statistics"
-                    active={location.pathname === '/dashboard/statistics'}
-                    onClick={(path, e) => handleNavigation(path, e, closeMobile)}
-                    layoutId="mobile-sidebar-active-pill"
-                   className="cursor-pointer disabled:cursor-not-allowed"/>
+                  {mobileSecondaryItems.map(item => (
+                    <SidebarItem
+                      key={item.path}
+                      {...item}
+                      active={location.pathname === item.path}
+                      onClick={(path, e) => handleNavigation(path, e, closeMobile)}
+                      layoutId="mobile-sidebar-active-pill"
+                      className="cursor-pointer disabled:cursor-not-allowed"
+                    />
+                  ))}
                   <SidebarItem
                     icon={Settings}
                     label={t('dashboardLayout.nav.settings')}
@@ -490,7 +487,9 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
             </motion.aside>
           </div>
         )}
-      </AnimatePresence>
+        </AnimatePresence>,
+        document.body
+      )}
 
       {/* ── Main content ── */}
       <main className={`flex-1 min-w-0 ${isTripDetail ? 'pb-[env(safe-area-inset-bottom)]' : 'pb-[calc(max(1.25rem,env(safe-area-inset-bottom))+5.75rem)]'} md:pb-0 h-full flex flex-col relative z-10`}>
@@ -554,7 +553,9 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
               : 'flex-1 overflow-y-auto overscroll-contain p-4 sm:p-8 md:p-10 max-w-[1400px] mx-auto w-full flex flex-col min-h-0 custom-scrollbar'
           }
         >
-          {children}
+          <MobileMenuContext.Provider value={() => setMobileOpen(true)}>
+            {children}
+          </MobileMenuContext.Provider>
         </div>
 
         {/* ── Global FAB for new trip (Mobile) ── */}

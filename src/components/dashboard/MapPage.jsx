@@ -1,8 +1,12 @@
-import { useEffect, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import useMapWorkspace from '../../hooks/useMapWorkspace';
+import useMediaQuery from '../../hooks/useMediaQuery';
+import { useOpenMobileMenu } from '../../contexts/MobileMenuContext';
 import MapWorkspaceView from '../map/MapWorkspaceView';
+import MobileTabBar from './MobileTabBar';
+import { getDashboardNavItems, MOBILE_PRIMARY_PATHS } from './navItems';
 
 // Globální mapa: všechna místa uživatele napříč výlety na jednom plátně.
 // Immerzivní plocha (MapWorkspaceView) je stejná na mobilu i desktopu — jen
@@ -10,8 +14,15 @@ import MapWorkspaceView from '../map/MapWorkspaceView';
 const MapPage = ({ trips = [] }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const workspace = useMapWorkspace();
   const [searchParams, setSearchParams] = useSearchParams();
+  const openMobileMenu = useOpenMobileMenu();
+  // Stejná hranice jako MapWorkspaceView používá interně pro přepnutí na
+  // celoobrazovkový mobilní portál — jen tehdy dává smysl nad mapu kreslit
+  // vlastní plovoucí navigaci navíc.
+  const isDesktop = useMediaQuery('(min-width: 1024px)');
+  const [mapSheetSnap, setMapSheetSnap] = useState('peek');
 
   const editableTrips = useMemo(() => trips.filter((trip) => trip.role !== 'viewer'), [trips]);
 
@@ -27,6 +38,11 @@ const MapPage = ({ trips = [] }) => {
     setSearchParams({}, { replace: true });
   }, [placeParam, loading, places, focusPlace, setSearchParams]);
 
+  const mobileNavItems = useMemo(
+    () => getDashboardNavItems(t).filter((item) => MOBILE_PRIMARY_PATHS.includes(item.path)),
+    [t]
+  );
+
   return (
     <>
       {workspace.ModalPortal}
@@ -34,11 +50,30 @@ const MapPage = ({ trips = [] }) => {
         workspace={workspace}
         trips={editableTrips}
         title={t('map.title')}
-        onBack={() => navigate('/dashboard')}
+        // Šipka couvá tam, odkud uživatel přišel (Výdaje, Přehled, …), ne
+        // natvrdo na Přehled — `location.key === 'default'` značí vstup bez
+        // vlastní historie (přímý odkaz/refresh), kde je Přehled jediná
+        // rozumná záloha.
+        onBack={() => (location.key === 'default' ? navigate('/dashboard') : navigate(-1))}
+        onOpenMenu={openMobileMenu}
+        onSnapChange={setMapSheetSnap}
         // Mapa se protahuje pod plovoucí navigační sidebar (šířka 280px) —
         // panel a centrování se o tuhle šířku posunou, ať nic nezmizí pod ním.
         leftInset={280}
       />
+      {/* Immerzivní mapa jinak nemá spodní navigaci vůbec — plave nad
+          vlastním fullscreen portálem s vyšším z-indexem, jen nad kompaktní
+          "peek" výškou sheetu. Jakmile uživatel sheet vytáhne výš (seznam
+          míst, formulář, umisťování), lišta zmizí — jinak by plavala uprostřed
+          obsahu místo nad ním. */}
+      {!isDesktop && mapSheetSnap === 'peek' && (
+        <MobileTabBar
+          items={mobileNavItems}
+          activePath="/dashboard/map"
+          onNavigate={(path) => navigate(path)}
+          elevated
+        />
+      )}
     </>
   );
 };

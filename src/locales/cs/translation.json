@@ -972,6 +972,7 @@
     },
     "mobile": {
       "back": "Zpět",
+      "menu": "Menu",
       "addPlace": "Přidat",
       "placeHere": "Umístit sem",
       "cancel": "Zrušit",

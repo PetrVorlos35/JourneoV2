@@ -962,6 +962,7 @@
     },
     "mobile": {
       "back": "Back",
+      "menu": "Menu",
       "addPlace": "Add",
       "placeHere": "Place here",
       "cancel": "Cancel",
