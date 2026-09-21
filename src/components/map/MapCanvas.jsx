@@ -2,9 +2,23 @@ import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import { setWorkerUrl } from 'maplibre-gl';
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url';
 import { maplibreGL } from '@maplibre/maplibre-gl-leaflet';
 import { buildMarkerIcon, escapeHtml } from './markerIcon';
 import useIsDark from '../../hooks/useIsDark';
+
+// MapLibre si svého web workera za běhu skládá z relativní cesty vůči
+// import.meta.url vlastního balíčku. To funguje v dev módu (Vite servíruje
+// node_modules soubory 1:1, worker leží hned vedle), ale v produkčním
+// buildu Rollup tenhle dynamický pattern nerozpozná a worker soubor se
+// do dist/assets vůbec nezkopíruje → 404 na workera → MapLibre (tmavá
+// mapa) tiše nenaběhne, zatímco světlá rastrová mapa běží dál beze
+// změny. `?worker&url` donutí Vite worker skutečně sbalit (včetně jeho
+// vlastního importu maplibre-gl-shared.mjs, ne jen slepě zkopírovat
+// soubor tak, jak je — to by nechalo nevyřešený vnitřní import a worker
+// by na 404 padal tiše znovu) a vrátí správnou hashovanou URL.
+setWorkerUrl(maplibreWorkerUrl);
 
 // Světlá mapa: CARTO Voyager, rastrové PNG dlaždice přes <img> (bezpečné
 // i s přísnou CSP img-src). CARTO od 28. 8. 2026 vyžaduje API klíč i pro
