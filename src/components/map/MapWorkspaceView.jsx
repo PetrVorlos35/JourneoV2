@@ -4,6 +4,7 @@ import { ArrowLeft, Plus, Pencil, Move, Trash2, Crosshair, MapPin, Menu } from '
 import { useTranslation } from 'react-i18next';
 import useMediaQuery from '../../hooks/useMediaQuery';
 import useSlideOverA11y from '../../hooks/useSlideOverA11y';
+import MobileTabBar from '../dashboard/MobileTabBar';
 import MapCanvas from './MapCanvas';
 import MapFilters from './MapFilters';
 import PlaceList from './PlaceList';
@@ -40,10 +41,14 @@ const MapWorkspaceView = ({
   // without backing out of the map first. Omitted (e.g. per-trip map)
   // simply renders no menu button.
   onOpenMenu = null,
-  // Mobile-only: reports the bottom sheet's snap position so the caller can
-  // hide its floating nav whenever the sheet is dragged past its compact
-  // 'peek' height — otherwise the pill would float in the middle of the
-  // place list instead of above it.
+  // Mobile-only, global map only: { items, activePath, onNavigate } for
+  // MobileTabBar. Rendered inside this component's own fullscreen portal
+  // (not passed down from outside) so it always floats above the sheet at
+  // its usual position, blurred glass over whatever scrolls underneath —
+  // in every mode except 'placing'/'form', which have their own bottom
+  // action bar occupying the same space. Omitted (e.g. per-trip map, which
+  // isn't the dashboard's own bottom-nav screen) renders no nav at all.
+  mobileNav = null,
   onSnapChange = null,
   listExtra = null,
   // Kolik pixelů zleva mapy překrývá vnější prvek (na globální mapě plovoucí
@@ -93,6 +98,7 @@ const MapWorkspaceView = ({
   const placingReturnRef = useRef('list');
 
   const mode = isPlacing ? 'placing' : draft ? 'form' : selectedPlace ? 'place' : 'list';
+  const showMobileNav = mode === 'list' || mode === 'place';
 
   useEffect(() => {
     onSnapChange?.(snap);
@@ -114,6 +120,7 @@ const MapWorkspaceView = ({
   useEffect(() => {
     if (mode === 'placing') setSnap('bar');
     else if (mode === 'form') setSnap('full');
+    else if (mode === 'place') setSnap('detail');
     else setSnap('peek');
     if (mode !== 'list') setCollapsed(false);
   }, [mode]);
@@ -246,6 +253,10 @@ const MapWorkspaceView = ({
       </div>
     );
   } else if (mode === 'place') {
+    // Jediný, netažitelný snap bod (viz BottomSheet.canDrag) — dost vysoký,
+    // aby se vešly ikona/název/tlačítka i adresa se souřadnicemi kousek nad
+    // plovoucím navbarem, ale ne tak vysoký, aby zbytečně zakrýval mapu.
+    snapPoints = ['detail'];
     const { icon: Icon, color } = getCategory(selectedPlace.category);
     header = (
       <div className="px-4 pt-1 pb-3">
@@ -508,10 +519,25 @@ const MapWorkspaceView = ({
         snapPoints={snapPoints}
         header={header}
         bodyScroll={bodyScroll}
+        // Scrollable content needs enough bottom clearance to scroll clear
+        // of the floating nav pill (it's not reserved space, just room to
+        // reach past it) — only while the pill is actually shown.
+        navClearance={Boolean(mobileNav) && showMobileNav}
         ariaLabel={title}
       >
         {body}
       </BottomSheet>
+
+      {/* Placing/form modes have their own bottom action bar (crosshair
+          confirm, save/cancel) in the same screen area — the nav would
+          collide with it, so it only shows for list/place. */}
+      {mobileNav && showMobileNav && (
+        <MobileTabBar
+          items={mobileNav.items}
+          activePath={mobileNav.activePath}
+          onNavigate={mobileNav.onNavigate}
+        />
+      )}
     </div>,
     document.body
   );

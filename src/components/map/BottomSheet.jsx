@@ -3,13 +3,25 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion, animate, useDragControls, useMotionValue, useReducedMotion } from 'framer-motion';
 
 // Výšky jednotlivých poloh sheetu. `bar` je úzký pruh pro režim umisťování,
-// `peek` náhled s vybraným místem, `half` a `full` pro seznam a formulář.
+// `peek` úvodní náhled seznamu, `detail` náhled vybraného místa (dost na
+// ikonu/název/tlačítka/adresu/souřadnice, bez dalšího tažení výš — jediný
+// snap bod, viz `canDrag`), `half` a `full` pro rozbalený seznam a formulář.
 const SNAP_HEIGHTS = {
   bar: () => 92,
-  peek: () => 150,
+  peek: () => 220,
+  detail: () => 300,
   half: (vh) => Math.round(vh * 0.5),
   full: (vh) => Math.round(vh * 0.88),
 };
+
+// Kolik místa dole navíc potřebuje scrollovatelný obsah, aby šlo poslední
+// položky odscrollovat zpod plovoucího MobileTabBaru (viz MapWorkspaceView) —
+// pilulka nad obsahem jen pluje (blurovaná skrz glass-panel), nic pro ni
+// není natrvalo vyhrazené, ale musí se dát pod ní "prolistovat".
+// Pozor: v inline stylu musí mít `+` v calc() mezery, jinak je celá hodnota
+// neplatná a prohlížeč padding tiše zahodí.
+const NAV_CLEARANCE = 'max(1.25rem, env(safe-area-inset-bottom)) + 6rem';
+const BASE_CLEARANCE = 'max(1rem, env(safe-area-inset-bottom))';
 
 const useViewportHeight = () => {
   const [height, setHeight] = useState(() => (typeof window === 'undefined' ? 800 : window.innerHeight));
@@ -32,12 +44,13 @@ const useViewportHeight = () => {
  * ho pointer na úchytu), takže scrollování obsahu uvnitř sheet neposouvá.
  *
  * Props:
- *  - snap        aktuální poloha ('bar' | 'peek' | 'half' | 'full')
+ *  - snap        aktuální poloha ('bar' | 'peek' | 'detail' | 'half' | 'full')
  *  - onSnapChange(next)  změna polohy tažením
  *  - snapPoints  povolené polohy, odspodu nahoru
  *  - header      obsah viditelný i v náhledu (součást úchytu)
  *  - children    obsah viditelný po roztažení
  *  - bodyScroll  false = scrollování si řídí obsah sám (formulář místa)
+ *  - navClearance  true = přidá dole prostor na odscrollování zpod pilulky
  */
 const BottomSheet = ({
   snap = 'peek',
@@ -46,6 +59,7 @@ const BottomSheet = ({
   header,
   children,
   bodyScroll = true,
+  navClearance = false,
   ariaLabel,
 }) => {
   const viewportHeight = useViewportHeight();
@@ -129,10 +143,18 @@ const BottomSheet = ({
 
       <div
         className={`flex-1 min-h-0 px-4 ${
-          bodyScroll
-            ? 'overflow-y-auto overscroll-contain custom-scrollbar pb-[max(1rem,env(safe-area-inset-bottom))]'
-            : 'overflow-hidden'
+          bodyScroll ? 'overflow-y-auto overscroll-contain custom-scrollbar' : 'overflow-hidden'
         }`}
+        style={
+          bodyScroll
+            ? {
+                // + currentOffset: sheet má vždy plnou výšku a nižší polohy ho
+                // jen posouvají dolů, takže spodek obsahu je mimo obrazovku —
+                // bez toho by v polovině nešlo doscrollovat k posledním místům.
+                paddingBottom: `calc(${currentOffset}px + ${navClearance ? NAV_CLEARANCE : BASE_CLEARANCE})`,
+              }
+            : undefined
+        }
       >
         {children}
       </div>
