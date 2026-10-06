@@ -1,14 +1,5 @@
 import React from 'react';
-import { Mountain, Palmtree, Compass, Map, Plane, Camera } from 'lucide-react';
-
-const avatarPresets = {
-  mountain: Mountain,
-  beach: Palmtree,
-  city: Compass,
-  forest: Map,
-  travel: Plane,
-  photography: Camera,
-};
+import { avatarPresets } from './avatarPresets';
 
 const UserAvatar = ({ user, size = "md", className = "" }) => {
   const getInitials = () => {

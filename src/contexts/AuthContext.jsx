@@ -38,8 +38,18 @@ export const AuthProvider = ({ children }) => {
     return data; // No auto-login
   };
 
+  const checkEmail = async (email) => {
+    return await api.auth.checkEmail(email);
+  };
+
+  // Ověření kódu z registrace rovnou přihlašuje (server vrací token).
   const verify = async (email, code) => {
-    return await api.auth.verify(email, code);
+    const data = await api.auth.verify(email, code);
+    if (data.token) {
+      localStorage.setItem('journeo_token', data.token);
+      setUser(data.user);
+    }
+    return data;
   };
 
   const resendOtp = async (email) => {
@@ -85,7 +95,7 @@ export const AuthProvider = ({ children }) => {
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, verify, resendOtp, forgotPassword, resetPassword, changePassword, loginWithGoogle, logout, updateProfile, isAdmin }}>
+    <AuthContext.Provider value={{ user, loading, login, register, checkEmail, verify, resendOtp, forgotPassword, resetPassword, changePassword, loginWithGoogle, logout, updateProfile, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

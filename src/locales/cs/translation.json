@@ -1,7 +1,7 @@
 {
   "nav": {
-    "login": "Přihlásit se",
-    "getStarted": "Začít zdarma"
+    "open": "Otevřít Journeo",
+    "dashboard": "Přejít na přehled"
   },
   "changelog": {
     "open": "Zobrazit novinky",
@@ -340,29 +340,29 @@
   "auth": {
     "backHome": "Zpět domů",
     "title": {
-      "login": "Vítejte zpět",
-      "register": "Začněte psát",
+      "email": "Vítejte v Journeo",
+      "password": "Vítejte zpět",
+      "create": "Vytvořte si účet",
+      "profile": "Jak vám máme říkat?",
       "forgot": "Zapomenuté heslo",
       "reset": "Nové heslo"
     },
     "subtitle": {
-      "login": "Přihlaste se ke svému deníku.",
-      "register": "Vytvořte si účet pro další cestu.",
+      "email": "Přihlaste se, nebo si založte účet. Stačí e-mail.",
+      "password": "Zadejte heslo k účtu",
+      "create": "Zatím tu účet nemáte. Nastavte si heslo k",
+      "profile": "Ostatní cestovatelé vás uvidí pod tímto jménem.",
       "forgot": "Zadejte e-mail pro obnovu hesla.",
       "reset": "Zadejte kód z e-mailu a nastavte si nové heslo."
-    },
-    "tab": {
-      "login": "Přihlásit",
-      "register": "Zaregistrovat"
     },
     "otp": {
       "checkEmail": "Zkontrolujte si e-mail",
       "description": "Zadejte 6-místný kód, který jsme zaslali na",
-      "verify": "Ověřit účet",
+      "verify": "Ověřit e-mail",
       "verifying": "Ověřuji...",
       "resend": "Znovu odeslat kód",
       "resendWait": "Odeslat znovu lze za {{seconds}} s",
-      "backToLogin": "Vrátit se na přihlášení",
+      "backToLogin": "Použít jiný e-mail",
       "codeMustBe6": "Kód musí mít 6 číslic."
     },
     "forgot": {
@@ -385,13 +385,14 @@
       "firstName": "Jméno",
       "lastName": "Příjmení",
       "email": "E-mail",
-      "password": "Heslo",
-      "confirmPassword": "Potvrdit heslo"
+      "password": "Heslo"
     },
     "forgotPassword": "Zapomněli jste heslo?",
     "submit": {
+      "continue": "Pokračovat",
       "login": "Přihlásit se",
-      "register": "Vytvořit účet",
+      "create": "Vytvořit účet",
+      "profile": "Hotovo",
       "loading": "Zpracovávám..."
     },
     "or": "Nebo",
@@ -407,8 +408,6 @@
       "digit": "Obsahuje číslici"
     },
     "errors": {
-      "mismatch": "Hesla se neshodují",
-      "mismatchOtp": "Hesla se neshodují",
       "weak": "Heslo nesplňuje bezpečnostní požadavky",
       "loginError": "Chyba při přihlášení.",
       "registerError": "Chyba při registraci.",
@@ -417,25 +416,28 @@
       "forgotError": "Chyba při žádosti o obnovu.",
       "resetError": "Chyba při změně hesla.",
       "googleError": "Chyba při přihlášení přes Google.",
-      "googleFailed": "Přihlášení přes Google se nezdařilo."
+      "googleFailed": "Přihlášení přes Google se nezdařilo.",
+      "checkError": "Nepodařilo se ověřit e-mail. Zkuste to znovu.",
+      "profileError": "Profil se nepodařilo uložit."
     },
     "toasts": {
       "loginSuccess": "Vítejte zpět!",
-      "registerSuccess": "Registrace úspěšná! Zkontrolujte e-mail pro ověřovací kód.",
-      "verifySuccess": "E-mail ověřen! Nyní se můžete přihlásit.",
+      "registerSuccess": "Poslali jsme vám ověřovací kód.",
+      "verifySuccess": "E-mail ověřen!",
       "resendSuccess": "Nový kód byl úspěšně odeslán.",
-      "googleRegisterSuccess": "Registrace úspěšná! Vítejte v Journeo.",
-      "resetSuccess": "Heslo bylo úspěšně změněno."
+      "resetSuccess": "Heslo bylo úspěšně změněno.",
+      "codeSent": "Účet ještě není ověřený. Poslali jsme vám nový kód."
     },
     "scene": {
       "quote": "Ty nejlepší příběhy se píší na cestách.",
       "tagline": "Váš itinerář, seznamy na balení a plány — na jednom klidném místě."
     },
-    "switch": {
-      "noAccount": "Ještě nemáte účet?",
-      "createOne": "Vytvořit účet",
-      "haveAccount": "Už máte účet?",
-      "logIn": "Přihlásit se"
+    "changeEmail": "Změnit",
+    "profile": {
+      "avatarLabel": "Profilovka",
+      "avatarDefault": "Použít iniciály",
+      "skip": "Teď ne, doplním později",
+      "saved": "Vítejte v Journeo!"
     }
   },
   "dashboardLayout": {

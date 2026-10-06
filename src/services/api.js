@@ -33,6 +33,7 @@ async function request(endpoint, options = {}) {
     // 429 = rate limit; preferuj retryAfter z těla, jinak hlavičku Retry-After
     const headerRetry = Number(response.headers.get('Retry-After')) || null;
     error.retryAfter = data.retryAfter ?? headerRetry;
+    error.needsVerification = !!data.needsVerification;
     throw error;
   }
 
@@ -42,6 +43,12 @@ async function request(endpoint, options = {}) {
 // ── Auth ────────────────────────────────────────────────────
 export const api = {
   auth: {
+    checkEmail: (email) =>
+      request('/auth/check-email', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+      }),
+
     register: (firstName, lastName, email, password) =>
       request('/auth/register', {
         method: 'POST',

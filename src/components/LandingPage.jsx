@@ -33,7 +33,6 @@ const Reveal = ({ children, delay = 0, className = '' }) => {
 const PrimaryCta = ({ children, className = '' }) => (
   <Link
     to="/auth"
-    state={{ mode: 'register' }}
     className={`group inline-flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold rounded-full px-8 py-4 shadow-lg shadow-blue-600/25 hover:bg-blue-700 active:scale-[0.98] transition-all duration-300 ${className}`}
   >
     {children}
@@ -1169,7 +1168,6 @@ const LandingPage = () => {
                 </p>
                 <Link
                   to="/auth"
-                  state={{ mode: 'register' }}
                   className="inline-flex items-center gap-2.5 bg-white text-blue-700 font-bold rounded-full text-base px-9 py-4 shadow-lg hover:scale-[1.03] active:scale-[0.98] transition-transform duration-300"
                 >
                   {t('landing.cta.button')}

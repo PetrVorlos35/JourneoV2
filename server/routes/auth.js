@@ -9,6 +9,25 @@ import { waitUntil } from '@vercel/functions';
 
 const router = Router();
 
+// ── POST /api/auth/check-email ──────────────────────────────
+// První krok sjednoceného přihlášení/registrace: podle e-mailu se frontend
+// rozhodne, jestli ukáže pole pro heslo (existující účet), nebo formulář
+// pro vytvoření účtu. Neověřený účet bereme jako nový — registraci lze
+// dokončit znovu (viz /register). Login existenci e-mailu prozrazoval
+// i dřív, a celé /api/auth hlídá authLimiter.
+router.post('/check-email', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'E-mail je povinný.' });
+
+    const [users] = await pool.query('SELECT is_verified FROM users WHERE email = ?', [email]);
+    res.json({ exists: users.length > 0 && !!users[0].is_verified });
+  } catch (err) {
+    console.error('Check email error:', err);
+    res.status(500).json({ error: 'Chyba serveru.' });
+  }
+});
+
 // ── POST /api/auth/register ─────────────────────────────────
 router.post('/register', async (req, res) => {
   try {
@@ -25,8 +44,8 @@ router.post('/register', async (req, res) => {
     }
 
     // Check if user already exists
-    const [existing] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
-    if (existing.length > 0) {
+    const [existing] = await pool.query('SELECT id, is_verified FROM users WHERE email = ?', [email]);
+    if (existing.length > 0 && existing[0].is_verified) {
       return res.status(409).json({ error: 'Tento e-mail je již zaregistrovaný, zkuste se přihlásit.' });
     }
 
@@ -34,27 +53,41 @@ router.post('/register', async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Insert user — catch duplicate email from concurrent requests
-    let result;
-    try {
-      [result] = await pool.query(
-        'INSERT INTO users (email, password_hash, first_name, last_name) VALUES (?, ?, ?, ?)',
-        [email, passwordHash, first_name || null, last_name || null]
-      );
-    } catch (insertErr) {
-      if (insertErr.code === 'ER_DUP_ENTRY') {
-        return res.status(409).json({ error: 'Tento e-mail je již zaregistrovaný, zkuste se přihlásit.' });
+    if (existing.length > 0) {
+      // Neověřený účet (registrace nedokončená, nebo ji založil někdo, kdo
+      // k e-mailu nemá přístup) — přepíšeme heslo a pošleme nový kód.
+      // Účet bez ověření se nikdy nepřihlásil, takže nic nepřepisujeme.
+      const cooldown = await getCodeCooldownRemaining(email, 'REGISTER');
+      if (cooldown > 0) {
+        res.set('Retry-After', String(cooldown));
+        return res.status(429).json({
+          error: `Nový kód můžete poslat až za ${cooldown} s.`,
+          retryAfter: cooldown,
+        });
       }
-      throw insertErr;
+      await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [passwordHash, existing[0].id]);
+      await pool.query('DELETE FROM verification_tokens WHERE email = ? AND type = "REGISTER"', [email]);
+    } else {
+      // Insert user — catch duplicate email from concurrent requests
+      let result;
+      try {
+        [result] = await pool.query(
+          'INSERT INTO users (email, password_hash, first_name, last_name) VALUES (?, ?, ?, ?)',
+          [email, passwordHash, first_name || null, last_name || null]
+        );
+      } catch (insertErr) {
+        if (insertErr.code === 'ER_DUP_ENTRY') {
+          return res.status(409).json({ error: 'Tento e-mail je již zaregistrovaný, zkuste se přihlásit.' });
+        }
+        throw insertErr;
+      }
+
+      // Create default settings
+      await pool.query(
+        'INSERT INTO user_settings (user_id, theme, currency) VALUES (?, ?, ?)',
+        [result.insertId, 'dark', 'CZK']
+      );
     }
-
-    const userId = result.insertId;
-
-    // Create default settings
-    await pool.query(
-      'INSERT INTO user_settings (user_id, theme, currency) VALUES (?, ?, ?)',
-      [userId, 'dark', 'CZK']
-    );
 
     // Generate OTP
     const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
@@ -110,7 +143,21 @@ router.post('/verify', async (req, res) => {
     // Delete used token
     await pool.query('DELETE FROM verification_tokens WHERE id = ?', [tokenRecord.id]);
 
-    res.json({ message: 'E-mail byl úspěšně ověřen. Nyní se můžete přihlásit.' });
+    // Ověřením kódu uživatel prokázal vlastnictví e-mailu i znalost hesla
+    // (zadal ho o krok dřív), takže ho rovnou přihlásíme a onboarding
+    // pokračuje bez dalšího zadávání hesla.
+    const [users] = await pool.query(
+      'SELECT id, email, first_name, last_name, avatar_url, bio, bank_account, role, token_version FROM users WHERE email = ?',
+      [email]
+    );
+    const { token_version, ...user } = users[0];
+    const token = jwt.sign({ userId: user.id, tv: token_version }, process.env.JWT_SECRET, { expiresIn: '30d' });
+
+    res.json({
+      message: 'E-mail byl úspěšně ověřen.',
+      token,
+      user: { ...user, role: user.role || 'user' },
+    });
   } catch (err) {
     console.error('Verify error:', err);
     res.status(500).json({ error: 'Chyba serveru při ověřování.' });
@@ -278,6 +325,7 @@ router.post('/google', async (req, res) => {
     let userId;
     let finalUser;
     let tokenVersion = 0;
+    let isNew = false;
 
     // Check if user already exists
     const [users] = await pool.query(
@@ -293,6 +341,10 @@ router.post('/google', async (req, res) => {
       delete user.token_version;
       finalUser = user;
       
+      // Google ručí za vlastnictví e-mailu — účet tím považujeme za ověřený
+      // (jinak by ho /check-email bral jako nedokončenou registraci).
+      await pool.query('UPDATE users SET is_verified = 1 WHERE id = ? AND is_verified = 0', [userId]);
+
       // Optionally update their avatar if they didn't have one
       if (!user.avatar_url && avatarUrl) {
         await pool.query('UPDATE users SET avatar_url = ? WHERE id = ?', [avatarUrl, userId]);
@@ -307,10 +359,11 @@ router.post('/google', async (req, res) => {
       const passwordHash = await bcrypt.hash(randomPassword, salt);
 
       const [result] = await pool.query(
-        'INSERT INTO users (email, password_hash, first_name, last_name, avatar_url) VALUES (?, ?, ?, ?, ?)',
+        'INSERT INTO users (email, password_hash, first_name, last_name, avatar_url, is_verified) VALUES (?, ?, ?, ?, ?, 1)',
         [email, passwordHash, firstName, lastName, avatarUrl]
       );
       userId = result.insertId;
+      isNew = true;
 
       await pool.query(
         'INSERT INTO user_settings (user_id, theme, currency) VALUES (?, ?, ?)',
@@ -333,7 +386,8 @@ router.post('/google', async (req, res) => {
 
     res.json({
       token,
-      user: finalUser
+      user: finalUser,
+      isNew
     });
   } catch (err) {
     console.error('Google auth error:', err);

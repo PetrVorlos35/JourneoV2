@@ -4,9 +4,11 @@ import { useTranslation } from 'react-i18next';
 import JourneoLogo from '../assets/Journeo_whitelogo.png';
 import JourneoLogoDark from '../assets/Journeo_blacklogo.png';
 import LandingLanguageSwitcher from './LandingLanguageSwitcher';
+import { useAuth } from '../contexts/AuthContext';
 
 const Navbar = ({ variant = 'dark' }) => {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const isLight = variant === 'light';
 
   return (
@@ -30,30 +32,19 @@ const Navbar = ({ variant = 'dark' }) => {
         </Link>
         <div className="pr-1 flex items-center gap-2 sm:gap-3">
           <LandingLanguageSwitcher isDark={!isLight} />
-          {isLight ? (
-            <>
-              <Link
-                to="/auth"
-                className="hidden sm:inline-block text-[13px] font-semibold text-gray-600 hover:text-gray-900 px-3 py-2.5 rounded-full transition-colors"
-              >
-                {t('nav.login')}
-              </Link>
-              <Link
-                to="/auth"
-                state={{ mode: 'register' }}
-                className="inline-block text-[13px] font-semibold bg-blue-600 text-white px-5 py-2.5 rounded-full hover:bg-blue-700 active:scale-[0.97] transition-all duration-300 shadow-md shadow-blue-600/25"
-              >
-                {t('nav.getStarted')}
-              </Link>
-            </>
-          ) : (
-            <Link
-              to="/auth"
-              className="inline-block text-[13px] font-medium bg-white text-black px-5 py-2.5 rounded-full hover:scale-105 transition-transform duration-300 shadow-lg"
-            >
-              {t('nav.login')}
-            </Link>
-          )}
+          {/* Jedno CTA pro nové i vracející se uživatele — na /auth se podle
+              e-mailu rozhodne, jestli jde o přihlášení, nebo registraci.
+              Přihlášený uživatel jde rovnou na přehled. */}
+          <Link
+            to={user ? '/dashboard' : '/auth'}
+            className={
+              isLight
+                ? 'inline-block text-[13px] font-semibold bg-blue-600 text-white px-5 py-2.5 rounded-full hover:bg-blue-700 active:scale-[0.97] transition-all duration-300 shadow-md shadow-blue-600/25'
+                : 'inline-block text-[13px] font-medium bg-white text-black px-5 py-2.5 rounded-full hover:scale-105 transition-transform duration-300 shadow-lg'
+            }
+          >
+            {user ? t('nav.dashboard') : t('nav.open')}
+          </Link>
         </div>
       </div>
     </nav>
