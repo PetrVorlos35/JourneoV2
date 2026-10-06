@@ -185,7 +185,7 @@ const AdminTrips = () => {
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-white/[0.06]">
+                  <tr className="text-left text-[12px] font-semibold text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-white/[0.06]">
                     <th scope="col" className="px-6 py-4">{t('admin.trips.table.trip')}</th>
                     <th scope="col" className="px-4 py-4">{t('admin.trips.table.user')}</th>
                     <th scope="col" className="px-4 py-4">{t('admin.trips.table.period')}</th>
@@ -368,26 +368,26 @@ const AdminTrips = () => {
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                       <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <p className="text-lg font-bold tabular-nums">{selectedTrip.activities?.length || 0}</p>
-                        <p className="text-[9px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">{t('admin.trips.detail.daysLabel')}</p>
+                        <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 mt-0.5">{t('admin.trips.detail.daysLabel')}</p>
                       </div>
                       <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <p className="text-lg font-bold tabular-nums text-blue-600 dark:text-blue-400">{totalTripExpenses(selectedTrip).toLocaleString(i18n.language)}</p>
-                        <p className="text-[9px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">Kč</p>
+                        <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 mt-0.5">Kč</p>
                       </div>
                       <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <p className="text-lg font-bold tabular-nums">{selectedTrip.packingList?.length || 0}</p>
-                        <p className="text-[9px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">{t('admin.trips.detail.packingLabel')}</p>
+                        <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 mt-0.5">{t('admin.trips.detail.packingLabel')}</p>
                       </div>
                       <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <p className="text-lg font-bold tabular-nums">{selectedTrip.documents?.length || 0}</p>
-                        <p className="text-[9px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">{t('admin.trips.detail.notesLabel')}</p>
+                        <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 mt-0.5">{t('admin.trips.detail.notesLabel')}</p>
                       </div>
                     </div>
 
                     {/* Itinerary / Activities */}
                     {selectedTrip.activities?.length > 0 && (
                       <div>
-                        <h3 className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <h3 className="text-[12px] font-semibold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
                           <MapPin size={13} /> {t('tripDetail.tabs.itinerary')} ({selectedTrip.activities.length} {t('admin.trips.detail.daysLabel')})
                         </h3>
                         <div className="space-y-2">
@@ -421,7 +421,7 @@ const AdminTrips = () => {
                     {/* Expenses */}
                     {selectedTrip.expenses?.length > 0 && (
                       <div>
-                        <h3 className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <h3 className="text-[12px] font-semibold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
                           <DollarSign size={13} /> {t('budget.title')} ({selectedTrip.expenses.length} {t('budget.items')} · {totalTripExpenses(selectedTrip).toLocaleString(i18n.language)} Kč)
                         </h3>
                         <div className="space-y-1.5">
@@ -446,7 +446,7 @@ const AdminTrips = () => {
                     {/* Packing List */}
                     {selectedTrip.packingList?.length > 0 && (
                       <div>
-                        <h3 className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <h3 className="text-[12px] font-semibold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
                           <Package size={13} /> {t('admin.trips.detail.packingLabel')} ({selectedTrip.packingList.filter(p => p.checked).length}/{selectedTrip.packingList.length})
                         </h3>
                         <div className="grid grid-cols-2 gap-1.5">
@@ -465,7 +465,7 @@ const AdminTrips = () => {
                     {/* Documents */}
                     {selectedTrip.documents?.length > 0 && (
                       <div>
-                        <h3 className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <h3 className="text-[12px] font-semibold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
                           <FileText size={13} /> {t('admin.trips.detail.notesLabel')} ({selectedTrip.documents.length})
                         </h3>
                         <div className="space-y-2">

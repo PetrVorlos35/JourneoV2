@@ -89,7 +89,7 @@ const ChangelogModal = ({ isOpen, onClose }) => {
                         v{release.version}
                       </span>
                       {isLatest && (
-                        <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-300">
+                        <span className="text-[12px] font-semibold px-2 py-1 rounded-md bg-emerald-50 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-300">
                           {t('changelog.current')}
                         </span>
                       )}

@@ -159,7 +159,7 @@ const SettleUpModal = ({ isOpen, onClose, creditor, amount, currency, locale, tr
             {/* Send money to */}
             {bankAccount ? (
               <div className="rounded-2xl bg-gray-50 dark:bg-white/[0.04] border border-gray-100 dark:border-white/10 p-4 mb-7">
-                <p className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">{t('budget.settle.sendMoneyTo')}</p>
+                <p className="text-[13px] font-semibold text-gray-500 dark:text-gray-400 mb-2">{t('budget.settle.sendMoneyTo')}</p>
                 <div className="flex items-center gap-3">
                   <span className="flex-1 font-mono text-[15px] sm:text-[16px] font-semibold text-gray-900 dark:text-white tracking-tight break-all select-all">
                     {bankAccount}
@@ -203,7 +203,7 @@ const SettleUpModal = ({ isOpen, onClose, creditor, amount, currency, locale, tr
 };
 
 /* ─── Balances Overview ─── */
-const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSharedExpenses, onSettled, t }) => {
+const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSharedExpenses, onSettled, t, embedded = false }) => {
   const [settleTarget, setSettleTarget] = useState(null);
   const members = balanceData?.members || [];
   if (members.length <= 1) return null;
@@ -213,7 +213,13 @@ const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSha
   const settlements = balanceData?.settlements || [];
 
   return (
-    <div className="glass-card p-6 sm:p-8">
+    <div className={embedded ? 'pt-10' : 'glass-card p-6 sm:p-8'}>
+      {embedded ? (
+        <div>
+          <h3 className="text-[18px] font-bold tracking-tight text-gray-900 dark:text-white">{t('budget.balances.title')}</h3>
+          <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium mt-0.5">{t('budget.balances.subtitle')}</p>
+        </div>
+      ) : (
       <div className="flex items-center gap-3 mb-1.5">
         <div className="w-9 h-9 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center shrink-0">
           <Scale size={16} strokeWidth={2} />
@@ -223,6 +229,7 @@ const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSha
           <p className="text-[11px] sm:text-[12px] text-gray-500 dark:text-gray-400 font-medium">{t('budget.balances.subtitle')}</p>
         </div>
       </div>
+      )}
 
       {!hasSharedExpenses ? (
         <div className="mt-5 flex flex-col items-center justify-center text-center py-6">
@@ -231,7 +238,7 @@ const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSha
       ) : (
         <>
           {/* Per-member net chips */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-5">
+          <div className={embedded ? 'mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-8' : 'grid grid-cols-1 sm:grid-cols-2 gap-2 mt-5'}>
             {balances.map((b) => {
               const m = memberById(b.userId);
               const isMe = Number(b.userId) === Number(currentUserId);
@@ -251,14 +258,16 @@ const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSha
               return (
                 <div
                   key={b.userId}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-gray-50/70 dark:bg-white/[0.03] border border-gray-100 dark:border-white/[0.06]"
+                  className={embedded
+                    ? 'flex items-center gap-3 py-3 border-b border-gray-100 dark:border-white/[0.06]'
+                    : 'flex items-center gap-3 p-3 rounded-xl bg-gray-50/70 dark:bg-white/[0.03] border border-gray-100 dark:border-white/[0.06]'}
                 >
                   <UserAvatar user={toAvatarUser(m)} size="sm" />
                   <div className="min-w-0 flex-1">
                     <p className="text-[13px] font-bold text-gray-900 dark:text-white truncate leading-tight">
                       {isMe ? t('budget.balances.you') : getMemberName(m)}
                     </p>
-                    <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide leading-tight mt-0.5">{label}</p>
+                    <p className="text-[12px] font-medium text-gray-500 dark:text-gray-400 leading-tight mt-0.5">{label}</p>
                   </div>
                   <span className={`font-bold text-[14px] tracking-tight tabular-nums shrink-0 ${amountClass}`}>
                     {settled ? '—' : formatCurrency(Math.abs(net), currency, locale)}
@@ -276,8 +285,8 @@ const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSha
             </div>
           ) : (
             <div className="mt-6">
-              <p className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">{t('budget.balances.toSettle')}</p>
-              <div className="space-y-2">
+              <p className="text-[13px] font-semibold text-gray-500 dark:text-gray-400 mb-3">{t('budget.balances.toSettle')}</p>
+              <div className={embedded ? '' : 'space-y-2'}>
                 {settlements.map((s, i) => {
                   const from = memberById(s.from);
                   const to = memberById(s.to);
@@ -286,7 +295,9 @@ const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSha
                   return (
                     <div
                       key={i}
-                      className="flex flex-wrap items-center gap-x-3 gap-y-2 p-3 rounded-xl bg-white/60 dark:bg-white/[0.04] border border-gray-100 dark:border-white/[0.06]"
+                      className={embedded
+                        ? 'flex flex-wrap items-center gap-x-3 gap-y-2 py-3 border-b border-gray-100 dark:border-white/[0.06] last:border-b-0'
+                        : 'flex flex-wrap items-center gap-x-3 gap-y-2 p-3 rounded-xl bg-white/60 dark:bg-white/[0.04] border border-gray-100 dark:border-white/[0.06]'}
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <UserAvatar user={toAvatarUser(from)} size="sm" />
@@ -342,7 +353,7 @@ const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSha
 };
 
 /* ─── Expense Row ─── */
-const ExpenseRow = ({ expense, compact = false, currency, locale, isViewer, shouldReduceMotion, t, dateLocale, onEdit, onDelete }) => {
+const ExpenseRow = ({ expense, compact = false, flush = false, currency, locale, isViewer, shouldReduceMotion, t, dateLocale, onEdit, onDelete }) => {
   const cat = catInfo(expense.category);
   const Icon = cat.icon;
 
@@ -351,25 +362,26 @@ const ExpenseRow = ({ expense, compact = false, currency, locale, isViewer, shou
       <motion.div
         initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3.5 border-b border-gray-100/70 dark:border-white/[0.05] last:border-0 hover:bg-gray-50/60 dark:hover:bg-white/[0.02] transition-colors group"
+        onClick={flush && !isViewer ? (e) => { if (!e.target.closest('button')) onEdit(expense); } : undefined}
+        className={`flex items-center gap-3 sm:gap-4 ${flush ? `px-0 ${isViewer ? '' : 'cursor-pointer md:cursor-default'}` : 'px-4 sm:px-5'} py-3.5 border-b border-gray-100/70 dark:border-white/[0.05] last:border-0 ${flush ? '' : 'hover:bg-gray-50/60 dark:hover:bg-white/[0.02]'} transition-colors group`}
       >
         <div className={`w-8 h-8 sm:w-9 sm:h-9 ${cat.lightBgClass} ${cat.textClass} rounded-[0.65rem] flex items-center justify-center shrink-0`}>
           <Icon size={14} strokeWidth={2.5} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-0.5 leading-none">{t('budget.categories.' + expense.category)}</p>
-          <p className="text-[14px] font-semibold text-gray-900 dark:text-white truncate leading-tight">{expense.description}</p>
+          <p className="text-[12px] font-medium text-gray-500 dark:text-gray-400 mb-0.5 leading-none">{t('budget.categories.' + expense.category)}</p>
+          <p className={`text-[14px] font-semibold text-gray-900 dark:text-white leading-tight ${flush ? 'line-clamp-2 break-words' : 'truncate'}`}>{expense.description}</p>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <p className="font-bold text-[15px] tracking-tight tabular-nums text-gray-900 dark:text-white">
             {formatCurrency(expense.amount, currency, locale)}
           </p>
           {!isViewer && (
-            <div className="flex items-center gap-0.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+            <div className={`flex items-center gap-0.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity ${flush ? 'order-first' : ''}`}>
               <button
                 onClick={() => onEdit(expense)}
                 aria-label={t('budget.expenseEdit')}
-                className="w-10 h-10 md:w-7 md:h-7 flex items-center justify-center text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-blue-500/10 cursor-pointer"
+                className={`${flush ? 'hidden md:flex' : 'flex'} w-10 h-10 md:w-7 md:h-7 items-center justify-center text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-blue-500/10 cursor-pointer`}
               >
                 <Pencil size={13} strokeWidth={2.5} />
               </button>
@@ -926,7 +938,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
 };
 
 /* ─── Budget ─── */
-const Budget = ({ trips, onUpdateTrip, hideHeader = false }) => {
+const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
@@ -1072,6 +1084,12 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false }) => {
     setEditingTarget(false);
   };
 
+  // Detail výletu otevírá přidání výdaje zvenku (rychlé „+ Výdaj“ na mobilu):
+  // každé zvýšení čítače = jedno otevření formuláře.
+  useEffect(() => {
+    if (addRequest > 0 && !isViewer) setIsAddModalOpen(true);
+  }, [addRequest]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const modalOpen = isAddModalOpen || !!editingExpense;
   const closeModal = () => { setIsAddModalOpen(false); setEditingExpense(null); };
 
@@ -1086,8 +1104,166 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false }) => {
     onDelete: handleDeleteExpense,
   };
 
+  // ── Vložený rozpočet (stránka výletu): jedna stránka s oddíly, žádné karty ──
+  const categoryRows = CATEGORIES
+    .map(c => ({ ...c, amount: expenses.filter(e => e.category === c.id).reduce((sum, e) => sum + e.amount, 0) }))
+    .filter(c => c.amount > 0)
+    .sort((a, b) => b.amount - a.amount);
+  const maxCategory = categoryRows[0]?.amount || 1;
+  const dayNumberOf = (dateStr) => {
+    if (!trip?.startDate) return null;
+    const n = differenceInDays(parseISO(dateStr), parseISO(trip.startDate)) + 1;
+    return n >= 1 && n <= tripDays ? n : null;
+  };
+  const sectionTitle = 'text-[18px] font-bold tracking-tight text-gray-900 dark:text-white';
+  const ledgerControl = 'h-10 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/40 transition-colors font-medium text-base sm:text-[14px] text-gray-900 dark:text-white';
+
+  const embeddedSections = (
+    <>
+      {categoryRows.length > 0 && (
+        <section className="pt-10">
+          <h3 className={sectionTitle}>{t('budget.breakdown')}</h3>
+          <ul className="mt-3">
+            {categoryRows.map((c) => {
+              const CatIcon = c.icon;
+              const isActive = categoryFilter === c.id;
+              const isDimmed = categoryFilter !== 'all' && !isActive;
+              return (
+                <li key={c.id}>
+                  <button
+                    type="button"
+                    aria-pressed={isActive}
+                    onClick={() => setCategoryFilter(isActive ? 'all' : c.id)}
+                    className={`w-full grid grid-cols-[minmax(0,8.5rem)_1fr_auto] sm:grid-cols-[11rem_1fr_7.5rem_3rem] items-center gap-3 sm:gap-5 py-2.5 px-3 -mx-3 rounded-xl text-left transition-[background-color,opacity] cursor-pointer ${
+                      isActive ? 'bg-gray-100 dark:bg-white/10' : 'hover:bg-gray-50 dark:hover:bg-white/5'
+                    } ${isDimmed ? 'opacity-45' : ''}`}
+                  >
+                    <span className="flex items-center gap-2.5 min-w-0 text-[14px] font-medium text-gray-700 dark:text-gray-200">
+                      <CatIcon size={16} strokeWidth={2.25} className={`shrink-0 ${c.textClass}`} aria-hidden="true" />
+                      <span className="truncate">{t('budget.categories.' + c.id)}</span>
+                    </span>
+                    <span className="h-2 rounded-full bg-gray-100 dark:bg-white/10 overflow-hidden" aria-hidden="true">
+                      <span className={`block h-full rounded-full ${c.colorClass}`} style={{ width: `${(c.amount / maxCategory) * 100}%` }} />
+                    </span>
+                    <span className="text-right text-[14px] font-semibold tabular-nums text-gray-900 dark:text-white whitespace-nowrap">
+                      {formatCurrency(c.amount, currency, i18n.language)}
+                    </span>
+                    <span className="hidden sm:block text-right text-[13px] font-medium tabular-nums text-gray-500 dark:text-gray-400">
+                      {Math.round((c.amount / total) * 100)} %
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      <Balances
+        balanceData={balanceData}
+        currency={currency}
+        locale={i18n.language}
+        currentUserId={currentUserId}
+        tripId={selectedTripId}
+        hasSharedExpenses={hasSharedExpenses}
+        onSettled={refreshBalances}
+        t={t}
+        embedded
+      />
+
+      <section className="pt-10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <h3 className={sectionTitle}>
+            {t('budget.history')}
+            {filteredExpenses.length > 0 && <span className="ml-2 text-gray-500 dark:text-gray-400 font-medium tabular-nums">· {filteredExpenses.length}</span>}
+          </h3>
+          {expenses.length > 0 && (
+            <div className="flex gap-2 w-full sm:w-auto">
+              <div className="relative flex-1 sm:w-56">
+                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" aria-hidden="true" />
+                <input
+                  type="text"
+                  aria-label={t('budget.search.placeholder')}
+                  placeholder={t('tripDetail.notebook.searchExpenses')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={`${ledgerControl} w-full pl-9 pr-3 placeholder:text-gray-500`}
+                />
+              </div>
+              <div className="relative shrink-0">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  aria-label={t('budget.sort.dateDesc')}
+                  className={`${ledgerControl} pl-3 pr-9 appearance-none cursor-pointer dark:bg-[#1C1C1E]`}
+                >
+                  <option value="date-desc">{t('budget.sort.dateDesc')}</option>
+                  <option value="date-asc">{t('budget.sort.dateAsc')}</option>
+                  <option value="amount-desc">{t('budget.sort.amountDesc')}</option>
+                  <option value="amount-asc">{t('budget.sort.amountAsc')}</option>
+                </select>
+                <ChevronRight size={14} strokeWidth={2.5} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-gray-500 pointer-events-none" aria-hidden="true" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {(categoryFilter !== 'all' || searchQuery) && (
+          <button
+            onClick={() => { setSearchQuery(''); setCategoryFilter('all'); }}
+            className="mt-3 inline-flex items-center gap-1.5 pl-3 pr-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-white/10 text-[13px] font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-white/15 transition-colors cursor-pointer"
+          >
+            {categoryFilter !== 'all' ? t('budget.categories.' + categoryFilter) : `„${searchQuery}“`}
+            <X size={14} strokeWidth={2.5} aria-label={t('budget.filter.reset')} />
+          </button>
+        )}
+
+        {sortedExpenses.length > 0 ? (
+          isDateSort && dateGroupData ? (
+            <div className="mt-4 space-y-7">
+              {dateGroupData.keys.map(dateKey => {
+                const dayExpenses = dateGroupData.groups[dateKey];
+                const dayTotal = dayExpenses.reduce((sum, e) => sum + e.amount, 0);
+                const dayNo = dayNumberOf(dateKey);
+                return (
+                  <div key={dateKey}>
+                    <div className="flex items-baseline justify-between gap-3 pb-2 border-b border-gray-200 dark:border-white/10">
+                      <span className="text-[14px] font-semibold text-gray-900 dark:text-white first-letter:uppercase">
+                        {formatGroupDate(dateKey)}
+                        {dayNo && <span className="ml-2 font-medium text-gray-500 dark:text-gray-400">· {t('tripDetail.notebook.dayTitlePlaceholder', { n: dayNo })}</span>}
+                      </span>
+                      <span className="text-[14px] font-semibold tabular-nums text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                        {formatCurrency(dayTotal, currency, i18n.language)}
+                      </span>
+                    </div>
+                    {dayExpenses.map(expense => (
+                      <ExpenseRow key={expense.id} expense={expense} compact flush {...rowProps} />
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="mt-4 border-t border-gray-200 dark:border-white/10">
+              {sortedExpenses.map(expense => (
+                <ExpenseRow key={expense.id} expense={expense} compact flush {...rowProps} />
+              ))}
+            </div>
+          )
+        ) : expenses.length > 0 ? (
+          <p className="py-10 text-center text-[15px] font-medium text-gray-500 dark:text-gray-400">{t('budget.empty.noResults')}</p>
+        ) : (
+          <div className="py-10 text-center">
+            <p className="text-[16px] font-semibold text-gray-900 dark:text-white">{t('budget.empty.noExpenses')}</p>
+            <p className="mt-1 text-[14px] text-gray-500 dark:text-gray-400 max-w-xs mx-auto">{t('budget.empty.noExpensesDesc')}</p>
+          </div>
+        )}
+      </section>
+    </>
+  );
+
   return (
-    <div className={`space-y-5 sm:space-y-6 w-full ${hideHeader ? '' : 'pb-10'}`}>
+    <div className={`w-full ${hideHeader ? 'budget-embedded' : 'space-y-5 sm:space-y-6 pb-10'}`}>
       {ModalPortal}
 
       <AddExpenseModal
@@ -1144,14 +1320,84 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false }) => {
         </div>
       ) : trip ? (
         <>
-          {/* ── Budget Hero Card ── */}
+          {/* ── Shrnutí (vložené do stránky výletu): věta, ne metrikový panel ── */}
+          {hideHeader ? (
+            <div className="pb-2">
+              <p className="text-[20px] sm:text-[22px] font-medium text-gray-600 dark:text-gray-300 leading-snug">
+                {t('tripDetail.notebook.spent')}{' '}
+                <span className="font-bold text-gray-900 dark:text-white tabular-nums whitespace-nowrap">{formatCurrency(total, currency, i18n.language)}</span>
+                {budgetTarget && (
+                  <> {t('tripDetail.notebook.of')} <span className="tabular-nums whitespace-nowrap">{formatCurrency(budgetTarget, currency, i18n.language)}</span></>
+                )}
+              </p>
+              {budgetTarget && (
+                <div className="mt-3 max-w-xl">
+                  <div className="h-2 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full ${progressColor} transition-[width] duration-700 ease-out`} style={{ width: `${progress}%` }} />
+                  </div>
+                  <p className={`mt-2 text-[13px] font-medium ${remaining !== null && remaining < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}`}>
+                    {Math.round(progress)} % · {remaining !== null && remaining >= 0
+                      ? t('budget.summary.remainingAmount', { amount: formatCurrency(remaining, currency, i18n.language) })
+                      : t('budget.target.over')}
+                  </p>
+                </div>
+              )}
+              <dl className="mt-5 flex flex-wrap gap-x-8 gap-y-3 text-[14px]">
+                <div>
+                  <dt className="text-gray-500 dark:text-gray-400">{t('budget.summary.avgPerDay')}</dt>
+                  <dd className="font-semibold text-gray-900 dark:text-white tabular-nums">{avgPerDay > 0 ? formatCurrency(Math.round(avgPerDay), currency, i18n.language) : '—'}</dd>
+                </div>
+                <div>
+                  <dt className="text-gray-500 dark:text-gray-400">{t('budget.summary.daysLeft')}</dt>
+                  <dd className="font-semibold text-gray-900 dark:text-white tabular-nums">{daysRemaining}</dd>
+                </div>
+                {projectedTotal !== null && budgetTarget && (
+                  <div>
+                    <dt className="text-gray-500 dark:text-gray-400">{t('budget.summary.projected')}</dt>
+                    <dd className={`font-semibold tabular-nums ${projectedTotal > budgetTarget ? 'text-red-600 dark:text-red-400' : 'text-emerald-700 dark:text-emerald-400'}`}>{formatCurrency(projectedTotal, currency, i18n.language)}</dd>
+                  </div>
+                )}
+              </dl>
+              {!isViewer && (
+                editingTarget ? (
+                  <div className="flex items-center gap-2 mt-4 max-w-sm">
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      value={targetInput}
+                      onChange={e => setTargetInput(e.target.value)}
+                      placeholder={t('budget.target.placeholder')}
+                      onKeyDown={e => { if (e.key === 'Enter') handleSaveTarget(); if (e.key === 'Escape') setEditingTarget(false); }}
+                      className="flex-1 min-w-0 glass-input py-2.5 text-base sm:text-sm"
+                      autoFocus
+                    />
+                    <button onClick={handleSaveTarget} aria-label={t('budget.target.save')} className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-500 transition-colors cursor-pointer shrink-0">
+                      <Check size={15} strokeWidth={2.5} />
+                    </button>
+                    <button onClick={() => setEditingTarget(false)} aria-label={t('budget.addModal.close')} className="w-10 h-10 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 rounded-xl flex items-center justify-center hover:bg-gray-200 dark:hover:bg-white/20 transition-colors cursor-pointer shrink-0">
+                      <X size={15} strokeWidth={2.5} />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => { setTargetInput(budgetTarget ? String(budgetTarget) : ''); setEditingTarget(true); }}
+                    className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer mt-4 min-h-[40px] sm:min-h-0"
+                  >
+                    <Target size={14} strokeWidth={2} />
+                    {budgetTarget ? t('budget.target.edit') : t('budget.target.set')}
+                  </button>
+                )
+              )}
+            </div>
+          ) : (
           <div className="glass-card p-6 sm:p-8 lg:p-10">
             <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
 
               {/* Left: total + progress + target */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between mb-3 sm:mb-4 gap-3">
-                  <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">
+                  <p className="text-[13px] font-semibold text-gray-500 dark:text-gray-400 mt-0.5">
                     {t('budget.summary.total')}
                   </p>
                   <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
@@ -1179,14 +1425,6 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false }) => {
                         </motion.span>
                       )}
                     </AnimatePresence>
-                    {hideHeader && trip && !isViewer && (
-                      <button
-                        onClick={() => setIsAddModalOpen(true)}
-                        className="flex items-center gap-1.5 px-4 py-2.5 sm:py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-500 transition-colors shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer text-[12px] shrink-0"
-                      >
-                        <Plus size={14} strokeWidth={2.5} /> {t('budget.addExpense')}
-                      </button>
-                    )}
                   </div>
                 </div>
 
@@ -1269,7 +1507,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false }) => {
               {/* Right: stats */}
               <div className="flex flex-row lg:flex-col gap-6 sm:gap-8 border-t lg:border-t-0 lg:border-l border-gray-100 dark:border-white/10 pt-5 lg:pt-0 lg:pl-10 flex-wrap sm:flex-nowrap lg:shrink-0">
                 <div>
-                  <p className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold mb-1 uppercase tracking-wide">
+                  <p className="text-[12px] text-gray-500 dark:text-gray-400 font-medium mb-1">
                     {t('budget.summary.avgPerDay')}
                   </p>
                   <p className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -1281,7 +1519,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false }) => {
                 </div>
 
                 <div>
-                  <p className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold mb-1 uppercase tracking-wide">
+                  <p className="text-[12px] text-gray-500 dark:text-gray-400 font-medium mb-1">
                     {t('budget.summary.daysLeft')}
                   </p>
                   <p className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -1291,7 +1529,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false }) => {
 
                 {projectedTotal !== null && budgetTarget && (
                   <div>
-                    <p className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold mb-1 uppercase tracking-wide">
+                    <p className="text-[12px] text-gray-500 dark:text-gray-400 font-medium mb-1">
                       {t('budget.summary.projected')}
                     </p>
                     <p className={`text-xl sm:text-2xl font-bold tracking-tight ${projectedTotal > budgetTarget ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
@@ -1302,7 +1540,10 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false }) => {
               </div>
             </div>
           </div>
+          )}
 
+          {hideHeader ? embeddedSections : (
+          <>
           {/* ── Balances (shared expense splitting) ── */}
           <Balances
             balanceData={balanceData}
@@ -1452,6 +1693,8 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false }) => {
               </div>
             )}
           </div>
+          </>
+          )}
         </>
       ) : null}
 

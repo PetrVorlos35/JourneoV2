@@ -49,7 +49,7 @@ const ReadOnlyTripView = () => {
       <div className="text-center py-20 text-gray-500 dark:text-gray-400 font-bold text-xl">
         {t('readOnlyTrip.notFound')}
         <br />
-        <Link to={`/dashboard/profile/${userId}`} className="text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors mt-4 inline-block text-[13px] uppercase tracking-widest font-bold">
+        <Link to={`/dashboard/profile/${userId}`} className="text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors mt-4 inline-block text-[13px] font-semibold">
           {t('readOnlyTrip.backToProfile')}
         </Link>
       </div>
@@ -117,7 +117,7 @@ const ReadOnlyTripView = () => {
         <div className="min-w-0">
           <Link
             to={`/dashboard/profile/${userId}`}
-            className="inline-flex items-center py-2 -my-2 text-[12px] uppercase tracking-widest font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 transition-colors duration-300"
+            className="inline-flex items-center py-2 -my-2 text-[12px] font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 transition-colors duration-300"
           >
             <ArrowLeft size={16} className="mr-2 shrink-0" strokeWidth={2.5} /> {t('readOnlyTrip.backToProfile')} {ownerName}
           </Link>
@@ -127,12 +127,12 @@ const ReadOnlyTripView = () => {
               {trip.title}
             </h1>
             {/* Read-only badge */}
-            <span className="px-3 py-1.5 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest rounded-full shrink-0">
+            <span className="px-3 py-1.5 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-[12px] font-semibold rounded-full shrink-0">
               {t('readOnlyTrip.readOnly')}
             </span>
           </div>
 
-          <p className="text-gray-500 flex items-center flex-wrap gap-2 text-[13px] font-bold tracking-widest uppercase">
+          <p className="text-gray-500 flex items-center flex-wrap gap-2 text-[13px] font-semibold">
             <Calendar size={16} strokeWidth={2.5} className="shrink-0" />
             {format(new Date(trip.startDate), 'dd.MM.yyyy')} — {format(new Date(trip.endDate), 'dd.MM.yyyy')}
           </p>
@@ -158,7 +158,7 @@ const ReadOnlyTripView = () => {
         <div className="hidden lg:flex lg:col-span-3 flex-col space-y-6 h-full min-h-0">
 
           <div className="glass-card p-6 space-y-2">
-            <h3 className="font-bold text-gray-400 uppercase tracking-widest text-[11px] mb-4 ml-2">{t('readOnlyTrip.tabs.tools')}</h3>
+            <h3 className="font-semibold text-gray-500 text-[12px] mb-4 ml-2">{t('readOnlyTrip.tabs.tools')}</h3>
 
             <button
               onClick={() => setActiveView('packing')}
@@ -184,7 +184,7 @@ const ReadOnlyTripView = () => {
           </div>
 
           <div className="glass-card p-6 space-y-2 flex-1 flex flex-col min-h-0">
-            <h3 className="font-bold text-gray-400 uppercase tracking-widest text-[11px] mb-4 ml-2">{t('readOnlyTrip.tabs.itinerary')}</h3>
+            <h3 className="font-semibold text-gray-500 text-[12px] mb-4 ml-2">{t('readOnlyTrip.tabs.itinerary')}</h3>
             <div className="space-y-2 overflow-y-auto pr-2 custom-scrollbar flex-1">
               {dailyPlans.map((day, index) => (
                 <button
@@ -198,7 +198,7 @@ const ReadOnlyTripView = () => {
                 >
                   <div className="min-w-0">
                     <div className="font-bold truncate text-[15px]">{day.title}</div>
-                    <div className={`text-[11px] uppercase tracking-widest mt-1 font-bold ${activeView === index ? 'text-blue-200' : 'text-gray-400'}`}>
+                    <div className={`text-[12px] mt-1 font-semibold ${activeView === index ? 'text-blue-200' : 'text-gray-400'}`}>
                       {format(new Date(day.date), 'EEE, dd.MM.', { locale: cs })}
                     </div>
                   </div>
@@ -222,25 +222,25 @@ const ReadOnlyTripView = () => {
               </h2>
               <div className="space-y-6">
                 <div className="flex justify-between items-center gap-3 flex-wrap pb-4 border-b border-gray-100 dark:border-white/10">
-                  <span className="text-gray-500 text-[11px] font-bold uppercase tracking-widest">{t('readOnlyTrip.info.author')}</span>
+                  <span className="text-gray-500 text-[12px] font-semibold">{t('readOnlyTrip.info.author')}</span>
                   <div className="flex items-center gap-2 min-w-0">
                     <UserAvatar user={owner} size="sm" className="w-6 h-6 md:w-6 md:h-6 text-[9px]" />
                     <span className="font-bold text-gray-900 dark:text-white text-[15px] truncate">{ownerName}</span>
                   </div>
                 </div>
                 <div className="flex justify-between items-center gap-3 flex-wrap pb-4 border-b border-gray-100 dark:border-white/10">
-                  <span className="text-gray-500 text-[11px] font-bold uppercase tracking-widest">{t('readOnlyTrip.info.date')}</span>
+                  <span className="text-gray-500 text-[12px] font-semibold">{t('readOnlyTrip.info.date')}</span>
                   <span className="font-bold text-gray-900 dark:text-white text-[15px] text-right">
                     {format(new Date(trip.startDate), 'd. M. yyyy')} — {format(new Date(trip.endDate), 'd. M. yyyy')}
                   </span>
                 </div>
                 <div className="flex justify-between items-center pb-4 border-b border-gray-100 dark:border-white/10">
-                  <span className="text-gray-500 text-[11px] font-bold uppercase tracking-widest">{t('readOnlyTrip.info.days')}</span>
+                  <span className="text-gray-500 text-[12px] font-semibold">{t('readOnlyTrip.info.days')}</span>
                   <span className="font-bold text-gray-900 dark:text-white text-[15px]">{dailyPlans.length} {t('readOnlyTrip.info.daysValue')}</span>
                 </div>
                 <div className="flex justify-between items-center pt-2">
-                  <span className="text-gray-500 text-[11px] font-bold uppercase tracking-widest">{t('readOnlyTrip.info.mode')}</span>
-                  <span className="px-3 py-1 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest rounded-full">{t('readOnlyTrip.readOnly')}</span>
+                  <span className="text-gray-500 text-[12px] font-semibold">{t('readOnlyTrip.info.mode')}</span>
+                  <span className="px-3 py-1 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-[12px] font-semibold rounded-full">{t('readOnlyTrip.readOnly')}</span>
                 </div>
               </div>
             </div>
@@ -259,7 +259,7 @@ const ReadOnlyTripView = () => {
               >
                 <PackageOpen size={28} strokeWidth={2} className="mb-4" />
                 <span className="font-bold text-[15px] block mb-1 text-gray-900 dark:text-white leading-tight">{t('tripDetail.mobile.packing')}</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest">
+                <span className="text-[12px] font-semibold">
                   {packingList.length} {t('tripDetail.mobile.items')}
                 </span>
               </button>
@@ -273,7 +273,7 @@ const ReadOnlyTripView = () => {
               >
                 <LinkIcon size={28} strokeWidth={2} className="mb-4" />
                 <span className="font-bold text-[15px] block mb-1 text-gray-900 dark:text-white leading-tight">{t('tripDetail.mobile.links')}</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest">
+                <span className="text-[12px] font-semibold">
                   {documents.length} {t('tripDetail.mobile.records')}
                 </span>
               </button>
@@ -293,7 +293,7 @@ const ReadOnlyTripView = () => {
                       : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400'
                   }`}
                 >
-                  <div className="text-[10px] font-bold uppercase tracking-widest mb-1">
+                  <div className="text-[12px] font-semibold mb-1">
                     {format(new Date(day.date), 'EEE', { locale: cs })}
                   </div>
                   <div className="text-3xl font-bold tracking-tighter leading-none mb-2">{format(new Date(day.date), 'd.')}</div>
@@ -393,7 +393,7 @@ const ReadOnlyTripView = () => {
                   <div className="p-5 sm:p-10 border-b border-gray-100 dark:border-white/10 shrink-0">
                     <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 mb-5 sm:mb-8">
                       <h2 className="font-bold text-2xl sm:text-4xl tracking-tight text-gray-900 dark:text-white">{day.title}</h2>
-                      <span className="text-[13px] font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest bg-blue-50 dark:bg-blue-500/10 px-3 py-1 rounded-full w-fit">
+                      <span className="text-[13px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-3 py-1 rounded-full w-fit">
                         {format(new Date(day.date), 'EEEE, d. M.', { locale: cs })}
                       </span>
                     </div>
@@ -407,7 +407,7 @@ const ReadOnlyTripView = () => {
                   </div>
 
                   <div className="p-5 sm:p-10 flex-1 flex flex-col min-h-[300px] lg:min-h-0">
-                    <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-2 sm:mb-4 uppercase tracking-widest">
+                    <label className="block text-[12px] font-semibold text-gray-500 dark:text-gray-400 mb-2 sm:mb-4">
                       {t('readOnlyTrip.dayPlan')}
                     </label>
                     {day.plan ? (

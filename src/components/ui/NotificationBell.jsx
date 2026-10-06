@@ -155,7 +155,7 @@ const NotificationBell = () => {
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
-                  className="p-2 -m-2 text-[11px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors uppercase tracking-widest cursor-pointer"
+                  className="p-2 -m-2 text-[12px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors cursor-pointer"
                 >
                   {t('notifications.markAllRead')}
                 </button>

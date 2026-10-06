@@ -9,6 +9,11 @@
 //   3. Add the matching `changelog.releases.<key>` block to both locale files.
 export const CHANGELOG = [
   {
+    version: '1.5',
+    date: '2026-10-06',
+    key: 'v1_5',
+  },
+  {
     version: '1.4',
     date: '2026-08-06',
     key: 'v1_4',

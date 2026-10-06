@@ -158,7 +158,7 @@ const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLeng
                 </li>
               ))}
             </ul>
-            <div className="text-[9px] uppercase tracking-widest font-bold text-gray-400 text-right pr-4 pb-2 pt-2 border-t border-gray-100 dark:border-white/5 mt-2 opacity-50">
+            <div className="text-[11px] font-semibold text-gray-500 text-right pr-4 pb-2 pt-2 border-t border-gray-100 dark:border-white/5 mt-2 opacity-50">
               Data © OpenStreetMap
             </div>
           </motion.div>

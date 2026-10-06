@@ -674,3 +674,58 @@
   .jn-pin { width: 38px; height: 38px; margin: -3px; }
   .jn-pin svg { width: 19px; height: 19px; }
 }
+
+/* ===== Trip notebook ===== */
+/* Linkovaný papír pro plán dne — linky sedí na řádkování textu (2rem),
+   background-attachment: local je posouvá spolu s obsahem textarey. */
+.ruled-paper {
+  --rule: rgba(17, 24, 39, 0.07);
+  line-height: 2rem;
+  background-image: linear-gradient(to bottom, transparent calc(2rem - 1px), var(--rule) calc(2rem - 1px));
+  background-size: 100% 2rem;
+  background-attachment: local;
+}
+.dark .ruled-paper {
+  --rule: rgba(255, 255, 255, 0.07);
+}
+
+/* Rozpočet uvnitř stránky výletu: sekce jsou jen orámované oblasti
+   stránky, ne další plovoucí karty na kartě. */
+.budget-embedded .glass-card {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+  border-color: rgb(229 231 235);
+  border-radius: 1.25rem;
+}
+.dark .budget-embedded .glass-card {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+.budget-embedded .glass-card.group:hover {
+  translate: none;
+}
+/* …a to na všech šířkách: sekce rozpočtu jsou části stránky oddělené
+   linkou, ne rámečky uvnitř rámečku. */
+.budget-embedded .glass-card {
+  border-width: 1px 0 0 0;
+  border-radius: 0;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Řádek metadat v hlavičce výletu: tečka před každou položkou, ale ta na
+   začátku řádku se schová za okraj (rodič má overflow-hidden, seznam -ml-5). */
+.meta-dots > * {
+  display: inline-flex;
+  align-items: center;
+}
+.meta-dots > *::before {
+  content: '·';
+  width: 1.25rem;
+  text-align: center;
+  color: rgb(209 213 219);
+}
+.dark .meta-dots > *::before {
+  color: rgb(75 85 99);
+}

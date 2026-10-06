@@ -3,6 +3,41 @@
 All notable changes to Journeo are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [1.5.0] – 2026-10-06
+
+### Changed — Trip detail redesigned as a notebook
+
+The trip page was rebuilt around one day at a time, with the tools filed as
+divider tabs on the page edge instead of competing with the day list for one
+sidebar column.
+
+- **Day pages** (`trip/DayPage`) — editable day title, place and plan on ruled
+  paper (`.ruled-paper`); the plan textarea grows with its content. Prev/next
+  links in the page footer, ←/→ keys and a horizontal swipe flip days.
+- **Date strip** (`trip/DayStrip`) — weekday, numeral and place per day, today
+  marked, auto-scrolls the selected day into view; edge fades only where the
+  strip continues.
+- **Divider tabs** (desktop) — Program, Balení, Odkazy a poznámky, Mapa and
+  Rozpočet with live status; the active tab merges with the page. On mobile a
+  bottom bar Program · Balení · [+ Výdaj] · Odkazy · Rozpočet, map in the
+  header.
+- **Autosave** replaces the manual "Uložit plán" button and the unsaved-changes
+  dialog: edits save ~0.8 s after typing stops, saves are serialized, a
+  pending change is flushed on leave, and the header shows Saving / Saved /
+  retry on error.
+- **Packing** (`trip/PackingTool`) — progress, "still to pack" and a
+  collapsible "packed" group. **Links & notes** (`trip/NotesTool`) — compact
+  composer; entries split into links (with hostname) and notes.
+- **Budget inside a trip** — `Budget` takes `addRequest` (open the add-expense
+  form from outside, used by "+ Výdaj") and renders an embedded ledger when
+  `hideHeader`: a one-sentence summary, a category ledger that doubles as a
+  filter, a hairline balances section, and history grouped by date with the
+  trip day number.
+- Share modal is light-first with `dark:` variants.
+- Uppercase, widely tracked micro-labels were replaced with sentence-case
+  labels across the dashboard, admin and public share view.
+- `DESIGN.md` added; `PRODUCT.md` now records light as the primary register.
+
 ## [1.4.0] – 2026-08-06
 
 ### Added — Spotlight search (⌘K)

@@ -1,25 +1,53 @@
-import { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense, lazy } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Save, MapPin, Calendar, Pencil, Check, PackageOpen, Link as LinkIcon, Plus, Trash2, ExternalLink, Layout, Briefcase, Info, Users, Eye, Heart, Wallet, FileDown, MapPinned } from 'lucide-react';
-import { format, eachDayOfInterval } from 'date-fns';
-import { cs } from 'date-fns/locale';
-import { enUS } from 'date-fns/locale';
-import toast from 'react-hot-toast';
+import { ArrowLeft, Pencil, PackageOpen, Link as LinkIcon, Users, Eye, Heart, Wallet, FileDown, MapPinned, NotebookText, Plus, X, Check, Loader2, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { format, eachDayOfInterval, differenceInCalendarDays, startOfDay } from 'date-fns';
+import { cs, enUS } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 import { useDialog } from '../ui/DialogModal';
-import LocationAutocomplete from '../ui/LocationAutocomplete';
 import CharCount from '../ui/CharCount';
-import { useUnsavedChanges } from '../../contexts/UnsavedChangesContext';
 import LikeButton from '../ui/LikeButton';
 import ShareTripModal from './ShareTripModal';
 import TripPdfExport from './TripPdfExport';
 import TripPdfOptionsModal from './TripPdfOptionsModal';
 import Budget from './Budget';
+import DayStrip from './trip/DayStrip';
+import DayPage from './trip/DayPage';
+import PackingTool from './trip/PackingTool';
+import NotesTool from './trip/NotesTool';
 import { useCurrency } from '../../contexts/CurrencyContext';
+import { formatCurrency } from '../../utils/currency';
 
 // Mapa se stahuje až při otevření záložky — Leaflet a jeho CSS tak
 // nezatěžují detail výletu, který se otevírá mnohem častěji.
 const TripMap = lazy(() => import('./TripMap'));
+
+const TOOL_VIEWS = ['packing', 'documents', 'map', 'budget'];
+const AUTOSAVE_DELAY = 800;
+
+const isEditableTarget = (el) =>
+  el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
+
+const SaveStatus = ({ state, onRetry, t }) => {
+  if (state === 'idle') return null;
+  if (state === 'error') {
+    return (
+      <button onClick={onRetry} className="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400 font-semibold hover:underline underline-offset-2 cursor-pointer">
+        <AlertCircle size={14} strokeWidth={2.5} aria-hidden="true" /> {t('tripDetail.notebook.saveError')}
+      </button>
+    );
+  }
+  const busy = state === 'pending' || state === 'saving';
+  return (
+    <span role="status" className="inline-flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
+      {busy
+        ? <Loader2 size={13} strokeWidth={2.5} className="animate-spin" aria-hidden="true" />
+        : <Check size={14} strokeWidth={2.5} className="text-emerald-600 dark:text-emerald-400" aria-hidden="true" />}
+      {busy ? t('tripDetail.notebook.saving') : t('tripDetail.notebook.saved')}
+    </span>
+  );
+};
 
 const TripDetail = ({ trips, onUpdateTrip }) => {
   const { id } = useParams();
@@ -28,102 +56,172 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   const fromParam = searchParams.get('from');
   const { confirmDialog, ModalPortal } = useDialog();
   const { t, i18n } = useTranslation();
+  const reduceMotion = useReducedMotion();
   const trip = trips.find(tr => tr.id === id);
 
   const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
   const backHref = fromParam === 'all' ? '/dashboard/all-trips' : '/dashboard';
   const backText = t(fromParam === 'all' ? 'tripDetail.backToAll' : 'tripDetail.backToDashboard');
 
-  // ?view=packing|documents|map|budget deep-links straight to a tool — the
-  // dashboard readiness card links here so "3 dny bez plánu" is one tap away
-  // from the thing it's talking about.
+  // ?view=packing|documents|map|budget otevře rovnou nástroj (odkazuje sem
+  // karta připravenosti na přehledu), ?day=3 konkrétní den (1-based, ze
+  // Spotlightu).
   const viewParam = searchParams.get('view');
-  // ?day=3 otevře konkrétní den programu (1-based, jak je vidět v UI) —
-  // odsud míří výsledky Spotlightu na jednotlivé dny.
   const dayParam = parseInt(searchParams.get('day'), 10);
   const deepLinkedDay = Number.isInteger(dayParam) && dayParam > 0 ? dayParam - 1 : null;
-  const isToolView = ['packing', 'documents', 'map', 'budget'].includes(viewParam);
-  const initialView = isToolView ? viewParam : (deepLinkedDay ?? 0);
+  const isToolView = TOOL_VIEWS.includes(viewParam);
 
-  const [activeView, setActiveView] = useState(initialView);
-  const [mobileTab, setMobileTab] = useState(typeof initialView === 'number' ? 'itinerary' : 'tools');
+  const [view, setView] = useState(isToolView ? viewParam : 'program');
+  const [dayIndex, setDayIndex] = useState(deepLinkedDay ?? 0);
+  const [flipDir, setFlipDir] = useState(1);
+  const lastNonMapView = useRef('program');
+
   const [dailyPlans, setDailyPlans] = useState([]);
   const [packingList, setPackingList] = useState(trip?.packingList || []);
   const [documents, setDocuments] = useState(trip?.documents || []);
-  const [newPackingItem, setNewPackingItem] = useState('');
-  const [docTitle, setDocTitle] = useState('');
-  const [docContent, setDocContent] = useState('');
-  const [editingTitle, setEditingTitle] = useState(false);
   const [tripTitle, setTripTitle] = useState(trip?.title || '');
-  const { hasUnsavedChanges, setHasUnsavedChanges } = useUnsavedChanges();
-  const titleInputRef = useRef(null);
+  const [editingTitle, setEditingTitle] = useState(false);
+
   const [showShareModal, setShowShareModal] = useState(false);
   const [showPdfOptions, setShowPdfOptions] = useState(false);
   const [pdfSections, setPdfSections] = useState(null);
+  const [addExpenseRequest, setAddExpenseRequest] = useState(0);
   const { currency } = useCurrency();
-  const currSymbols = { CZK: 'Kč', EUR: '€', USD: '$', GBP: '£' };
-  const currSymbol = currSymbols[currency] || currency;
+
+  // ── Autosave ────────────────────────────────────────────────────────────
+  // Každá úprava zvýší verzi; po krátké pauze v psaní se uloží poslední stav.
+  // Ukládání běží za sebou (řetěz promisů), aby starší požadavek nepřepsal
+  // novější. Při odchodu ze stránky se rozepsaná změna dopíše hned.
+  const [editVersion, setEditVersion] = useState(0);
+  const [saveState, setSaveState] = useState('idle');
+  const pendingRef = useRef(false);
+  const chainRef = useRef(Promise.resolve());
+  const latestRef = useRef(null);
+  latestRef.current = { trip, tripTitle, dailyPlans, packingList, documents };
+
+  // Rodič předává onUpdateTrip jako novou funkci při každém renderu; přes ref
+  // zůstane flushSave stabilní a debounce/flush při odchodu se neresetují.
+  const onUpdateTripRef = useRef(onUpdateTrip);
+  onUpdateTripRef.current = onUpdateTrip;
+
+  const markDirty = () => setEditVersion(v => v + 1);
+
+  const flushSave = useCallback(() => {
+    pendingRef.current = false;
+    setSaveState('saving');
+    chainRef.current = chainRef.current.then(async () => {
+      const s = latestRef.current;
+      if (!s?.trip) return;
+      try {
+        await onUpdateTripRef.current({
+          ...s.trip,
+          title: s.tripTitle,
+          activities: s.dailyPlans,
+          packingList: s.packingList,
+          documents: s.documents,
+        });
+        if (!pendingRef.current) setSaveState('saved');
+      } catch {
+        setSaveState('error');
+      }
+    });
+  }, []);
 
   useEffect(() => {
-    return () => {
-      setHasUnsavedChanges(false);
-    };
-  }, [setHasUnsavedChanges]);
+    if (!editVersion) return;
+    pendingRef.current = true;
+    setSaveState('pending');
+    const timer = setTimeout(flushSave, AUTOSAVE_DELAY);
+    return () => clearTimeout(timer);
+  }, [editVersion, flushSave]);
 
+  useEffect(() => {
+    const onBeforeUnload = (e) => {
+      if (pendingRef.current) { e.preventDefault(); e.returnValue = ''; }
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
+      if (pendingRef.current) flushSave();
+    };
+  }, [flushSave]);
+
+  // ── Data výletu ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (trip) setTripTitle(trip.title);
   }, [trip?.id]);
 
   useEffect(() => {
-    if (window.innerWidth < 768) {
-      if (mobileTab === 'itinerary' && typeof activeView !== 'number') {
-        setActiveView(0);
-      }
-    }
-  }, [mobileTab, activeView]);
+    if (!trip) return;
+    const days = eachDayOfInterval({ start: new Date(trip.startDate), end: new Date(trip.endDate) });
+    const existing = trip.activities || [];
+    const plans = days.map((date, index) => ({
+      date,
+      title: existing[index]?.title || `Den ${index + 1}`,
+      plan: existing[index]?.plan || '',
+      location: existing[index]?.location || '',
+    }));
+    setDailyPlans(plans);
+    setPackingList(trip.packingList || []);
+    setDocuments(trip.documents || []);
 
-  useEffect(() => {
-    if (trip) {
-      const days = eachDayOfInterval({
-        start: new Date(trip.startDate),
-        end: new Date(trip.endDate)
-      });
-      const existingActivities = trip.activities || [];
-      const initialPlans = days.map((date, index) => {
-        const existing = existingActivities[index];
-        return {
-          date,
-          title: existing?.title || `Den ${index + 1}`,
-          plan: existing?.plan || '',
-          location: existing?.location || ''
-        };
-      });
-      setDailyPlans(initialPlans);
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const todayIndex = initialPlans.findIndex(day => {
-        const d = new Date(day.date);
-        d.setHours(0, 0, 0, 0);
-        return d.getTime() === today.getTime();
-      });
-      // Skok na dnešek je jen výchozí chování — když odkaz cílí na konkrétní
-      // den nebo nástroj, má přednost, jinak by deep-link nikam nevedl.
-      if (todayIndex !== -1 && !isToolView && deepLinkedDay === null) setActiveView(todayIndex);
-    }
+    // Bez deep-linku otevři dnešek, pokud výlet právě probíhá.
+    const today = startOfDay(new Date()).getTime();
+    const todayIndex = plans.findIndex(d => startOfDay(new Date(d.date)).getTime() === today);
+    if (todayIndex !== -1 && !isToolView && deepLinkedDay === null) setDayIndex(todayIndex);
   }, [trip?.id]);
 
-  // Deep-link se může změnit i bez přemontování (ze Spotlightu skočíš ze dne
-  // 2 na den 5 téhož výletu), takže na parametry reagujeme zvlášť.
+  // Deep-link se může změnit i bez přemontování (Spotlight skočí ze dne 2
+  // na den 5 téhož výletu).
   useEffect(() => {
-    if (isToolView) {
-      setActiveView(viewParam);
-      setMobileTab('tools');
-    } else if (deepLinkedDay !== null) {
-      setActiveView(deepLinkedDay);
-      setMobileTab('itinerary');
-    }
+    if (isToolView) setView(viewParam);
+    else if (deepLinkedDay !== null) { setDayIndex(deepLinkedDay); setView('program'); }
   }, [trip?.id, viewParam, deepLinkedDay, isToolView]);
+
+  // ── Navigace ve stránkách ───────────────────────────────────────────────
+  const goToDay = useCallback((index) => {
+    if (index < 0 || index >= dailyPlans.length) return;
+    setFlipDir(index >= dayIndex ? 1 : -1);
+    setDayIndex(index);
+    setView('program');
+  }, [dailyPlans.length, dayIndex]);
+
+  const openView = (next) => {
+    if (next !== 'map') lastNonMapView.current = next;
+    setFlipDir(1);
+    setView(next);
+  };
+
+  // Šipky ←/→ listují dny, pokud se zrovna nepíše do pole.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (view !== 'program' || e.altKey || e.ctrlKey || e.metaKey || isEditableTarget(document.activeElement)) return;
+      if (e.key === 'ArrowLeft') goToDay(dayIndex - 1);
+      if (e.key === 'ArrowRight') goToDay(dayIndex + 1);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [view, dayIndex, goToDay]);
+
+  // Swipe mezi dny na dotykových zařízeních — jen jasně vodorovné a rychlé
+  // gesto, aby nekolidovalo se scrollováním a výběrem textu.
+  const touchRef = useRef(null);
+  const onTouchStart = (e) => {
+    if (view !== 'program' || e.target.tagName === 'INPUT') { touchRef.current = null; return; }
+    const p = e.touches[0];
+    touchRef.current = { x: p.clientX, y: p.clientY, time: Date.now() };
+  };
+  const onTouchEnd = (e) => {
+    const start = touchRef.current;
+    touchRef.current = null;
+    if (!start) return;
+    const p = e.changedTouches[0];
+    const dx = p.clientX - start.x;
+    const dy = p.clientY - start.y;
+    if (Math.abs(dx) > 70 && Math.abs(dy) < 45 && Date.now() - start.time < 600) {
+      goToDay(dayIndex + (dx < 0 ? 1 : -1));
+    }
+  };
 
   if (!trip) {
     return (
@@ -138,22 +236,22 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   }
 
   const isViewer = trip.role === 'viewer';
+  const isOwner = trip.role === 'owner';
 
-  const handleSave = () => {
-    onUpdateTrip({
-      ...trip,
-      title: tripTitle,
-      activities: dailyPlans,
-      packingList,
-      documents
-    });
-    setHasUnsavedChanges(false);
-    toast.success(t('tripDetail.save.success'));
+  // ── Úpravy ──────────────────────────────────────────────────────────────
+  const updateDay = (index, patch) => {
+    setDailyPlans(prev => prev.map((d, i) => (i === index ? { ...d, ...patch } : d)));
+    markDirty();
+  };
+
+  const addPackingItem = (text) => {
+    setPackingList(prev => [...prev, { id: Date.now().toString(), text, checked: false }]);
+    markDirty();
   };
 
   const togglePackingItem = (itemId) => {
-    setPackingList(prev => prev.map(item => item.id === itemId ? { ...item, checked: !item.checked } : item));
-    setHasUnsavedChanges(true);
+    setPackingList(prev => prev.map(item => (item.id === itemId ? { ...item, checked: !item.checked } : item)));
+    markDirty();
   };
 
   const deletePackingItem = async (itemId) => {
@@ -161,21 +259,16 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
       title: t('tripDetail.packing.delete.title'),
       message: t('tripDetail.packing.delete.message'),
       confirmLabel: t('tripDetail.packing.delete.confirm'),
-      variant: 'danger'
+      variant: 'danger',
     });
-    if (ok) {
-      setPackingList(prev => prev.filter(item => item.id !== itemId));
-      setHasUnsavedChanges(true);
-    }
+    if (!ok) return;
+    setPackingList(prev => prev.filter(item => item.id !== itemId));
+    markDirty();
   };
 
-  const addPackingItem = (e) => {
-    if (e.key === 'Enter' && newPackingItem.trim()) {
-      e.preventDefault();
-      setPackingList([...packingList, { id: Date.now().toString(), text: newPackingItem.trim(), checked: false }]);
-      setHasUnsavedChanges(true);
-      setNewPackingItem('');
-    }
+  const addDocument = (title, content) => {
+    setDocuments(prev => [...prev, { id: Date.now().toString(), title, content }]);
+    markDirty();
   };
 
   const deleteDocument = async (docId) => {
@@ -183,37 +276,38 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
       title: t('tripDetail.documents.delete.title'),
       message: t('tripDetail.documents.delete.message'),
       confirmLabel: t('tripDetail.documents.delete.confirm'),
-      variant: 'danger'
+      variant: 'danger',
     });
-    if (ok) {
-      setDocuments(prev => prev.filter(doc => doc.id !== docId));
-      setHasUnsavedChanges(true);
-    }
+    if (!ok) return;
+    setDocuments(prev => prev.filter(doc => doc.id !== docId));
+    markDirty();
   };
 
-  const addDocument = (e) => {
-    e.preventDefault();
-    const title = docTitle.trim();
-    const content = docContent.trim();
-    if (!title || !content) return;
-    setDocuments([...documents, { id: Date.now().toString(), title, content }]);
-    setHasUnsavedChanges(true);
-    setDocTitle('');
-    setDocContent('');
-  };
+  // ── Odvozené údaje ──────────────────────────────────────────────────────
+  const start = startOfDay(new Date(trip.startDate));
+  const end = startOfDay(new Date(trip.endDate));
+  const today = startOfDay(new Date());
+  const tripLength = differenceInCalendarDays(end, start) + 1;
+  const untilStart = differenceInCalendarDays(start, today);
+  const timing = untilStart > 0
+    ? t('tripDetail.notebook.countdown', { count: untilStart })
+    : untilStart === 0
+      ? t('tripDetail.notebook.departsToday')
+      : today > end
+        ? t('tripDetail.notebook.ended')
+        : t('tripDetail.notebook.traveling', { n: differenceInCalendarDays(today, start) + 1 });
 
-  const handleBack = async () => {
-    if (hasUnsavedChanges) {
-      const ok = await confirmDialog({
-        title: t('tripDetail.unsaved.title'),
-        message: t('tripDetail.unsaved.message'),
-        confirmLabel: t('tripDetail.unsaved.confirm'),
-        variant: 'danger'
-      });
-      if (!ok) return;
-    }
-    navigate(backHref);
-  };
+  const expensesTotal = (trip.expenses || []).reduce((s, e) => s + e.amount, 0);
+  const packedCount = packingList.filter(i => i.checked).length;
+
+  const tabs = [
+    { id: 'program', Icon: NotebookText, label: t('tripDetail.notebook.program'), short: t('tripDetail.notebook.program'), status: dailyPlans.length ? t('tripDetail.notebook.programStatus', { n: dayIndex + 1, total: dailyPlans.length }) : '' },
+    { id: 'packing', Icon: PackageOpen, label: t('tripDetail.notebook.packing'), short: t('tripDetail.notebook.packing'), status: packingList.length ? `${packedCount}/${packingList.length}` : '—' },
+    { id: 'documents', Icon: LinkIcon, label: t('tripDetail.tools.documents'), short: t('tripDetail.mobile.links'), status: documents.length ? String(documents.length) : '—' },
+    { id: 'map', Icon: MapPinned, label: t('tripDetail.tools.map'), short: t('tripDetail.tools.map'), status: t('tripDetail.notebook.mapStatus') },
+    { id: 'budget', Icon: Wallet, label: t('tripDetail.tools.budget'), short: t('tripDetail.mobile.budget'), status: expensesTotal > 0 ? formatCurrency(expensesTotal, currency, i18n.language) : t('tripDetail.notebook.noExpenses') },
+  ];
+  const activeTab = tabs.find(tab => tab.id === view);
 
   const pdfAvailability = {
     itinerary: dailyPlans.length > 0,
@@ -223,15 +317,70 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   };
   const pdfCounts = {
     itinerary: `${dailyPlans.length} ${t('pdf.days')}`,
-    packing: `${packingList.filter(i => i.checked).length}/${packingList.length} ${t('tripDetail.mobile.items')}`,
+    packing: `${packedCount}/${packingList.length} ${t('tripDetail.mobile.items')}`,
     documents: `${documents.length} ${t('tripDetail.mobile.records')}`,
-    budget: trip.expenses?.length > 0
-      ? `${trip.expenses.reduce((s, e) => s + e.amount, 0).toLocaleString(i18n.language)} ${currSymbol}`
-      : t('tripDetail.mobile.budgetEmpty'),
+    budget: expensesTotal > 0 ? formatCurrency(expensesTotal, currency, i18n.language) : t('tripDetail.mobile.budgetEmpty'),
   };
 
+  const pageKey = view === 'program' ? `day-${dayIndex}` : view;
+  const flip = reduceMotion
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0, transition: { duration: 0.05 } } }
+    : {
+        // Odchozí stránka zmizí skoro hned — rozpočet je namontovaný mimo
+        // animaci, takže pomalý odchod by se s ním na chvíli překrýval.
+        initial: { opacity: 0, x: 28 * flipDir },
+        animate: { opacity: 1, x: 0 },
+        exit: { opacity: 0, transition: { duration: 0.05 } },
+      };
+
+  const iconButton = 'w-11 h-11 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-200/80 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0';
+
+  const day = dailyPlans[dayIndex];
+
+  const headerActions = (
+    <>
+            <div className="hidden sm:flex items-center mr-2">
+              {isOwner ? (
+                <span className="flex items-center gap-1.5 text-gray-400 dark:text-white/30 select-none">
+                  <Heart size={16} strokeWidth={2} />
+                  <span className="text-[13px] font-semibold tabular-nums">{trip.likes || 0}</span>
+                </span>
+              ) : (
+                <LikeButton tripId={trip.id} initialLikes={trip.likes || 0} initialIsLiked={trip.isLiked || false} />
+              )}
+            </div>
+            <button
+              onClick={() => openView('map')}
+              className={`${iconButton} lg:hidden`}
+              title={t('tripDetail.tools.map')}
+              aria-label={t('tripDetail.tools.map')}
+            >
+              <MapPinned size={18} strokeWidth={2.25} />
+            </button>
+            <button
+              onClick={() => setShowPdfOptions(true)}
+              disabled={!!pdfSections}
+              className={iconButton}
+              title={t('tripDetail.exportPdf')}
+              aria-label={t('tripDetail.exportPdf')}
+            >
+              <FileDown size={18} strokeWidth={2.25} />
+            </button>
+            {isOwner && (
+              <button
+                onClick={() => setShowShareModal(true)}
+                aria-label={t('shareModal.shareButton')}
+                className="h-11 w-11 sm:w-auto sm:px-5 flex items-center justify-center gap-2 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[14px] font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 active:scale-95 transition-all cursor-pointer shrink-0"
+              >
+                <Users size={17} strokeWidth={2.5} />
+                <span className="hidden sm:inline">{t('shareModal.shareButton')}</span>
+              </button>
+            )}
+    </>
+  );
+
   return (
-    <div className="w-full h-full flex flex-col min-h-0 pb-10 md:pb-28 lg:pb-10">
+    <div className="w-full flex flex-col pb-40 lg:pb-12">
       {ModalPortal}
       <ShareTripModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} trip={trip} />
       <TripPdfOptionsModal
@@ -252,610 +401,236 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
         />
       )}
 
-      {/* Mobile Bottom Nav */}
-      <div className="lg:hidden fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-6 right-6 z-50 flex justify-center pointer-events-none">
-        <div className="glass-panel w-full max-w-sm rounded-[2rem] flex justify-around items-center px-2 py-3 pointer-events-auto border border-gray-200 dark:border-white/10 shadow-2xl">
-          <button
-            onClick={() => setMobileTab('itinerary')}
-            className={`flex flex-col items-center gap-1 flex-1 transition-all duration-300 py-1 ${mobileTab === 'itinerary' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'} cursor-pointer disabled:cursor-not-allowed`}
-          >
-            <Layout size={20} strokeWidth={mobileTab === 'itinerary' ? 2.5 : 2} aria-hidden="true" />
-            <span className="text-[11px] font-semibold">{t('tripDetail.tabs.itinerary')}</span>
-          </button>
-          <button
-            onClick={() => setMobileTab('tools')}
-            className={`flex flex-col items-center gap-1 flex-1 transition-all duration-300 py-1 ${mobileTab === 'tools' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'} cursor-pointer disabled:cursor-not-allowed`}
-          >
-            <Briefcase size={20} strokeWidth={mobileTab === 'tools' ? 2.5 : 2} aria-hidden="true" />
-            <span className="text-[11px] font-semibold">{t('tripDetail.tabs.tools')}</span>
-          </button>
-          <button
-            onClick={() => setMobileTab('info')}
-            className={`flex flex-col items-center gap-1 flex-1 transition-all duration-300 py-1 ${mobileTab === 'info' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'} cursor-pointer disabled:cursor-not-allowed`}
-          >
-            <Info size={20} strokeWidth={mobileTab === 'info' ? 2.5 : 2} aria-hidden="true" />
-            <span className="text-[11px] font-semibold">{t('tripDetail.tabs.details')}</span>
-          </button>
-          {!isViewer && (
-            <button
-              onClick={handleSave}
-              disabled={!hasUnsavedChanges}
-              className={`flex flex-col items-center gap-1 flex-1 transition-all duration-300 py-1 ${hasUnsavedChanges ? 'text-red-500 cursor-pointer' : 'text-gray-400 dark:text-gray-500 opacity-50 cursor-not-allowed'}`}
-            >
-              <Save size={20} strokeWidth={hasUnsavedChanges ? 2.5 : 2} aria-hidden="true" />
-              <span className="text-[11px] font-semibold">{t('tripDetail.tabs.save')}</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 md:mb-12">
-        <div className="flex-1 min-w-0">
-          <button onClick={handleBack} className="inline-flex items-center py-2 -my-2 text-[13px] font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-6 transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed">
+      {/* ── Hlavička ── */}
+      <header className="mb-5 sm:mb-8">
+        <div className="flex items-center justify-between gap-3">
+          <button onClick={() => navigate(backHref)} className="inline-flex items-center py-2 -my-2 text-[13px] font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors cursor-pointer">
             <ArrowLeft size={16} className="mr-2" strokeWidth={2.5} /> {backText}
           </button>
+          {/* Na mobilu akce v řádku se zpětným odkazem, aby měl název celou šířku */}
+          <div className="flex sm:hidden items-center gap-2">{headerActions}</div>
+        </div>
 
-          <div className="flex items-center gap-4 mb-3">
+        <div className="mt-3 sm:mt-5 flex items-start justify-between gap-3 sm:gap-4">
+          <div className="min-w-0 flex-1">
             {!isViewer && editingTitle ? (
-              <div className="flex flex-col gap-1 w-full max-w-md">
-                <div className="flex items-center gap-3">
-                  <input
-                    ref={titleInputRef}
-                    value={tripTitle}
-                    maxLength={255}
-                    aria-label={t('tripDetail.rename')}
-                    onChange={e => {
-                      setTripTitle(e.target.value);
-                      setHasUnsavedChanges(true);
-                    }}
-                    onKeyDown={e => { if (e.key === 'Enter') setEditingTitle(false); }}
-                    className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight bg-transparent border-b-2 border-blue-600 text-gray-900 dark:text-white focus:outline-none w-full min-w-0 pb-1"
-                    autoFocus
-                  />
-                  <button onClick={() => setEditingTitle(false)} aria-label={t('tripDetail.rename')} className="text-gray-400 hover:text-blue-600 transition-colors p-2.5 shrink-0 bg-gray-100 dark:bg-white/10 rounded-full cursor-pointer disabled:cursor-not-allowed">
-                    <Check size={20} strokeWidth={2.5} />
-                  </button>
-                </div>
-                <div className="flex justify-end pr-12">
-                  <CharCount value={tripTitle} max={255} />
-                </div>
+              <div>
+                <input
+                  value={tripTitle}
+                  maxLength={255}
+                  autoFocus
+                  aria-label={t('tripDetail.rename')}
+                  onChange={e => { setTripTitle(e.target.value); markDirty(); }}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setEditingTitle(false); }}
+                  onBlur={() => setEditingTitle(false)}
+                  className="w-full -mx-2 px-2 py-0.5 rounded-2xl bg-white dark:bg-white/5 border border-blue-500/40 ring-4 ring-blue-500/10 text-[26px] sm:text-5xl font-bold tracking-tight text-gray-900 dark:text-white focus:outline-none"
+                />
+                {tripTitle.length >= 200 && <div className="mt-1"><CharCount value={tripTitle} max={255} /></div>}
               </div>
             ) : (
-              <div className="flex items-center gap-3 sm:gap-4 group min-w-0">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight min-w-0 break-words" style={{ textWrap: 'balance' }}>{tripTitle}</h1>
-                {!isViewer && (
-                  <button onClick={() => setEditingTitle(true)} className="text-gray-400 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity p-2.5 shrink-0 bg-gray-100 dark:bg-white/5 rounded-full hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 cursor-pointer disabled:cursor-not-allowed" title={t('tripDetail.rename')} aria-label={t('tripDetail.rename')}>
-                    <Pencil size={18} strokeWidth={2} />
+              <h1 className="text-[26px] sm:text-5xl font-bold tracking-tight leading-[1.1] text-gray-900 dark:text-white break-words" style={{ textWrap: 'balance' }}>
+                {isViewer ? tripTitle : (
+                  <button
+                    onClick={() => setEditingTitle(true)}
+                    title={t('tripDetail.rename')}
+                    className="group text-left -mx-2 px-2 rounded-2xl hover:bg-gray-100/70 dark:hover:bg-white/5 transition-colors cursor-text"
+                  >
+                    {tripTitle}
+                    <Pencil size={20} strokeWidth={2} className="inline-block ml-3 -mt-1 align-middle text-gray-300 dark:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                   </button>
                 )}
-              </div>
+              </h1>
             )}
+
+            <div className="mt-2.5 sm:mt-3 overflow-hidden">
+            <p className="meta-dots -ml-5 flex flex-wrap items-center gap-y-1 text-[14px] font-medium text-gray-500 dark:text-gray-400">
+              <span className="text-gray-900 dark:text-white font-semibold">
+                {format(start, 'd. MMM', { locale: dateLocale })} – {format(end, 'd. MMM yyyy', { locale: dateLocale })}
+              </span>
+              <span className="whitespace-nowrap">{t('tripDetail.notebook.days', { count: tripLength })}</span>
+              <span className="whitespace-nowrap">{timing}</span>
+              {trip.role && !isOwner && (
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[12px] font-semibold ${
+                  isViewer ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400' : 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400'
+                }`}>
+                  {isViewer ? <Eye size={12} strokeWidth={2.5} /> : <Pencil size={12} strokeWidth={2.5} />}
+                  {t(`tripDetail.roles.${trip.role}`)}
+                </span>
+              )}
+              {!isViewer && saveState !== 'idle' && (
+                <span className="whitespace-nowrap inline-flex items-center">
+                  <SaveStatus state={saveState} onRetry={flushSave} t={t} />
+                </span>
+              )}
+            </p>
+            </div>
           </div>
 
-          <p className="text-gray-500 flex items-center flex-wrap gap-2 text-[13px] font-medium">
-            <Calendar size={16} strokeWidth={2.5} />
-            {format(new Date(trip.startDate), 'dd.MM.yyyy')} — {format(new Date(trip.endDate), 'dd.MM.yyyy')}
-            {(trip.expenses?.length > 0 || trip.budgetTarget) && (
-              <button
-                onClick={() => { setMobileTab('tools'); setActiveView('budget'); }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors cursor-pointer"
-              >
-                <Wallet size={10} strokeWidth={2.5} />
-                {trip.expenses?.length > 0
-                  ? `${(trip.expenses.reduce((s, e) => s + e.amount, 0)).toLocaleString(i18n.language)} ${currSymbol}${trip.budgetTarget ? ` / ${trip.budgetTarget.toLocaleString(i18n.language)} ${currSymbol}` : ''}`
-                  : t('tripDetail.tools.budget')
-                }
-              </button>
-            )}
-            {trip.role && trip.role !== 'owner' && (
-              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ${
-                isViewer
-                  ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20'
-                  : 'bg-violet-50 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-200 dark:border-violet-500/20'
-              }`}>
-                {isViewer ? <Eye size={10} strokeWidth={2.5} /> : <Pencil size={10} strokeWidth={2.5} />}
-                {t(`tripDetail.roles.${trip.role}`)}
-              </span>
-            )}
-          </p>
+          <div className="hidden sm:flex items-center gap-2 shrink-0 pt-1">{headerActions}</div>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
-          {trip.role === 'owner' ? (
-            <div className="flex items-center gap-1.5 text-gray-400 dark:text-white/30 select-none">
-              <Heart size={16} strokeWidth={2} />
-              <span className="text-[13px] font-semibold tabular-nums">{trip.likes || 0}</span>
-            </div>
-          ) : (
-            <LikeButton
-              tripId={trip.id}
-              initialLikes={trip.likes || 0}
-              initialIsLiked={trip.isLiked || false}
-            />
-          )}
-          <button
-            onClick={() => setShowPdfOptions(true)}
-            disabled={!!pdfSections}
-            className="md:hidden w-11 h-11 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-95 transition-all duration-300 cursor-pointer disabled:opacity-50 shrink-0"
-            title={t('tripDetail.exportPdf')}
-            aria-label={t('tripDetail.exportPdf')}
-          >
-            <FileDown size={18} strokeWidth={2.5} />
-          </button>
-          <button
-            onClick={() => setShowPdfOptions(true)}
-            disabled={!!pdfSections}
-            className="hidden md:flex items-center justify-center w-[52px] h-[52px] rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-95 transition-all duration-300 cursor-pointer disabled:opacity-50 shrink-0"
-            title={t('tripDetail.exportPdf')}
-          >
-            <FileDown size={18} strokeWidth={2.5} />
-          </button>
-          {trip.role === 'owner' && (
-            <>
-              <button
-                onClick={() => setShowShareModal(true)}
-                className="md:hidden w-11 h-11 flex items-center justify-center rounded-full bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-95 transition-all duration-300 cursor-pointer shrink-0"
-                title={t('shareModal.shareButton')}
-                aria-label={t('shareModal.shareButton')}
-              >
-                <Users size={18} strokeWidth={2.5} />
-              </button>
-              <button
-                onClick={() => setShowShareModal(true)}
-                className="hidden md:flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl font-bold transition-all duration-300 shrink-0 bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/10 active:scale-95 cursor-pointer"
-              >
-                <Users size={18} strokeWidth={2.5} /> {t('shareModal.shareButton')}
-              </button>
-            </>
-          )}
-          {!isViewer && (
-            <button
-              onClick={handleSave}
-              disabled={!hasUnsavedChanges}
-              className={`hidden md:flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-bold transition-all duration-300 shrink-0 ${
-                hasUnsavedChanges
-                  ? 'bg-red-500 text-white shadow-md shadow-red-500/20 active:scale-95 hover:bg-red-600'
-                  : 'bg-gray-100 text-gray-500 dark:bg-white/5 dark:text-gray-400 cursor-default'
-              } cursor-pointer disabled:cursor-not-allowed`}
-            >
-              <Save size={18} strokeWidth={2.5} /> {hasUnsavedChanges ? t('tripDetail.save.unsaved') : t('tripDetail.save.saved')}
-            </button>
-          )}
-        </div>
+        {isViewer && (
+          <p className="mt-5 inline-flex items-center gap-2.5 px-4 py-2.5 bg-amber-50 dark:bg-amber-500/10 rounded-2xl text-[13px] font-semibold text-amber-800 dark:text-amber-300">
+            <Eye size={15} strokeWidth={2.5} className="shrink-0" />
+            {t('tripDetail.viewerBanner')}
+          </p>
+        )}
+      </header>
+
+      {/* ── Pás dnů ── */}
+      <div className="mb-4 sm:mb-5 lg:pr-[176px]">
+        <DayStrip days={dailyPlans} activeIndex={dayIndex} dimmed={view !== 'program'} onSelect={goToDay} dateLocale={dateLocale} />
       </div>
 
-      {isViewer && (
-        <div className="mb-8 flex items-center gap-3 px-4 sm:px-5 py-3.5 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-2xl text-amber-700 dark:text-amber-400">
-          <Eye size={16} strokeWidth={2.5} className="shrink-0" />
-          <span className="text-[13px] font-bold">{t('tripDetail.viewerBanner')}</span>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1 min-h-0">
-
-        {/* Desktop Sidebar */}
-        <div className="hidden lg:flex lg:col-span-3 flex-col h-full min-h-0">
-          <div className="glass-card p-5 flex flex-col h-full min-h-0">
-
-            {/* Tool strip */}
-            <div className="flex gap-2 mb-5 shrink-0">
-              {[
-                { id: 'packing', Icon: PackageOpen, label: t('tripDetail.tools.packing') },
-                { id: 'documents', Icon: LinkIcon, label: t('tripDetail.tools.documents') },
-                { id: 'map', Icon: MapPinned, label: t('tripDetail.tools.map') },
-                { id: 'budget', Icon: Wallet, label: t('tripDetail.tools.budget'), badge: trip.expenses?.length || null },
-              ].map(({ id, Icon, label, badge }) => (
-                <button
-                  key={id}
-                  onClick={() => setActiveView(id)}
-                  className={`relative flex-1 flex flex-col items-center gap-1.5 py-3 rounded-xl text-[10px] font-semibold transition-all duration-200 cursor-pointer ${
-                    activeView === id
-                      ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                      : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white'
-                  }`}
-                >
-                  <Icon size={18} strokeWidth={2.5} />
-                  {label}
-                  {badge > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-4 h-4 flex items-center justify-center text-[9px] font-bold rounded-full bg-blue-600 text-white">
-                      {badge > 9 ? '9+' : badge}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            {/* Divider */}
-            <div className="h-px bg-gray-100 dark:bg-white/10 -mx-5 mb-5 shrink-0" />
-
-            {/* Itinerary days */}
-            <p className="text-[11px] font-semibold text-gray-400 mb-3 shrink-0">{t('tripDetail.itinerary.label')}</p>
-            <div className="space-y-1.5 overflow-y-auto flex-1 custom-scrollbar pr-1">
-              {dailyPlans.map((day, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveView(index)}
-                  className={`w-full flex items-center justify-between text-left px-4 py-3.5 rounded-xl transition-all duration-200 ${
-                    activeView === index
-                      ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
-                      : 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-white/5'
-                  } cursor-pointer`}
-                >
-                  <div className="min-w-0">
-                    <div className="font-bold truncate text-[14px]">{day.title}</div>
-                    <div className={`text-[11px] mt-0.5 font-medium ${activeView === index ? 'text-blue-200' : 'text-gray-400'}`}>
-                      {format(new Date(day.date), 'EEE, dd.MM.', { locale: dateLocale })}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="lg:col-span-9 h-full flex flex-col min-h-0">
-
-          {/* Mobile Info View */}
-          <div className={`${mobileTab === 'info' ? 'block' : 'hidden'} md:hidden space-y-6 animate-in fade-in duration-300`}>
-            <div className="glass-card p-6 sm:p-8">
-              <h2 className="font-bold text-2xl mb-8 flex items-center gap-3 text-gray-900 dark:text-white tracking-tight">
-                <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
-                  <Info size={20} strokeWidth={2.5} />
-                </div>
-                {t('tripDetail.info.title')}
-              </h2>
-              <div className="space-y-6">
-                <div className="flex justify-between items-center gap-3 flex-wrap pb-4 border-b border-gray-100 dark:border-white/10">
-                  <span className="text-gray-600 dark:text-gray-400 text-[13px] font-medium">{t('tripDetail.info.date')}</span>
-                  <span className="font-bold text-gray-900 dark:text-white text-[15px] text-right">
-                    {format(new Date(trip.startDate), 'd. M. yyyy')} — {format(new Date(trip.endDate), 'd. M. yyyy')}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center pb-4 border-b border-gray-100 dark:border-white/10">
-                  <span className="text-gray-600 dark:text-gray-400 text-[13px] font-medium">{t('tripDetail.info.days')}</span>
-                  <span className="font-bold text-gray-900 dark:text-white text-[15px]">{dailyPlans.length} {t('tripDetail.info.daysValue')}</span>
-                </div>
-                <div className="flex justify-between items-center pt-2">
-                  <span className="text-gray-600 dark:text-gray-400 text-[13px] font-medium">{t('tripDetail.info.status')}</span>
-                  <span className="px-3 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[11px] font-semibold rounded-full">{t('tripDetail.info.statusValue')}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile Tools Selection */}
-          <div className={`${mobileTab === 'tools' ? 'block' : 'hidden'} md:hidden animate-in fade-in duration-300`}>
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <button
-                onClick={() => setActiveView('packing')}
-                className={`flex flex-col p-6 rounded-3xl border-2 transition-all duration-300 text-left ${activeView === 'packing' ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'border-transparent glass-card text-gray-500 hover:text-gray-900'} cursor-pointer disabled:cursor-not-allowed`}
-              >
-                <PackageOpen size={28} strokeWidth={2} className="mb-4" />
-                <span className="font-bold text-[15px] block mb-1 text-gray-900 dark:text-white leading-tight">{t('tripDetail.mobile.packing')}</span>
-                <span className="text-[11px] font-medium">
-                  {packingList.length} {t('tripDetail.mobile.items')}
-                </span>
-              </button>
-              <button
-                onClick={() => setActiveView('documents')}
-                className={`flex flex-col p-6 rounded-3xl border-2 transition-all duration-300 text-left ${activeView === 'documents' ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'border-transparent glass-card text-gray-500 hover:text-gray-900'} cursor-pointer disabled:cursor-not-allowed`}
-              >
-                <LinkIcon size={28} strokeWidth={2} className="mb-4" />
-                <span className="font-bold text-[15px] block mb-1 text-gray-900 dark:text-white leading-tight">{t('tripDetail.mobile.links')}</span>
-                <span className="text-[11px] font-medium">
-                  {documents.length} {t('tripDetail.mobile.records')}
-                </span>
-              </button>
-              <button
-                onClick={() => setActiveView('map')}
-                className={`col-span-2 flex items-center gap-5 p-5 rounded-3xl border-2 transition-all duration-300 text-left ${activeView === 'map' ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'border-transparent glass-card text-gray-500 hover:text-gray-900'} cursor-pointer disabled:cursor-not-allowed`}
-              >
-                <MapPinned size={26} strokeWidth={2} className="shrink-0" />
-                <div>
-                  <span className="font-bold text-[15px] block mb-0.5 text-gray-900 dark:text-white leading-tight">{t('tripDetail.mobile.map')}</span>
-                  <span className="text-[11px] font-medium">{t('tripDetail.mobile.mapHint')}</span>
-                </div>
-              </button>
-              <button
-                onClick={() => setActiveView('budget')}
-                className={`col-span-2 flex items-center gap-5 p-5 rounded-3xl border-2 transition-all duration-300 text-left ${activeView === 'budget' ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'border-transparent glass-card text-gray-500 hover:text-gray-900'} cursor-pointer disabled:cursor-not-allowed`}
-              >
-                <Wallet size={26} strokeWidth={2} className="shrink-0" />
-                <div>
-                  <span className="font-bold text-[15px] block mb-0.5 text-gray-900 dark:text-white leading-tight">{t('tripDetail.mobile.budget')}</span>
-                  <span className="text-[11px] font-medium">
-                    {trip.expenses?.length > 0
-                      ? `${(trip.expenses.reduce((s, e) => s + e.amount, 0)).toLocaleString(i18n.language)} ${currSymbol}`
-                      : t('tripDetail.mobile.budgetEmpty')
-                    }
-                  </span>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Itinerary Day Scroller */}
-          <div className={`${mobileTab === 'itinerary' && typeof activeView === 'number' ? 'block' : 'hidden'} md:block shrink-0`}>
-            <div className="flex gap-4 overflow-x-auto pb-4 mb-8 no-scrollbar -mx-4 sm:-mx-8 px-4 sm:px-8 md:hidden">
-              {dailyPlans.map((day, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveView(index)}
-                  className={`flex-shrink-0 w-[120px] text-left p-4 rounded-3xl transition-all duration-300 border-2 ${
-                    activeView === index
-                      ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 shadow-md shadow-blue-500/10'
-                      : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-gray-400'
-                  } cursor-pointer disabled:cursor-not-allowed`}
-                >
-                  <div className="text-[10px] font-semibold mb-1">
-                    {format(new Date(day.date), 'EEE', { locale: dateLocale })}
-                  </div>
-                  <div className="text-3xl font-bold tracking-tighter leading-none mb-2">{format(new Date(day.date), 'd.')}</div>
-                  <div className="text-[11px] w-full truncate opacity-70 font-medium">{day.location || t('tripDetail.itinerary.noLocation')}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Packing List */}
-          <div className={`${activeView === 'packing' ? 'flex' : 'hidden'} ${mobileTab === 'tools' || mobileTab === 'itinerary' ? '' : 'max-md:hidden'} flex-col flex-1 lg:h-full lg:min-h-0`}>
-            <div className="glass-card flex flex-col flex-1 lg:h-full lg:min-h-0 mb-6 lg:mb-0">
-              <div className="p-5 sm:p-10 border-b border-gray-100 dark:border-white/10 shrink-0">
-                <h2 className="font-bold text-3xl tracking-tight text-gray-900 dark:text-white flex items-center gap-4 mb-8">
-                  <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center">
-                    <PackageOpen size={24} strokeWidth={2} />
-                  </div>
-                  {t('tripDetail.packing.title')}
-                </h2>
-                {!isViewer && (
-                  <>
-                    <div className="relative">
-                      <label htmlFor="new-packing-item" className="sr-only">{t('tripDetail.packing.placeholder')}</label>
-                      <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                        <Plus size={20} className="text-blue-600 dark:text-blue-400" strokeWidth={2.5} />
-                      </div>
-                      <input
-                        id="new-packing-item"
-                        type="text"
-                        value={newPackingItem}
-                        onChange={(e) => setNewPackingItem(e.target.value)}
-                        onKeyDown={addPackingItem}
-                        maxLength={255}
-                        placeholder={t('tripDetail.packing.placeholder')}
-                        className="glass-input !py-3 sm:!py-4 !pl-12 sm:!pl-14 text-base w-full"
-                      />
-                    </div>
-                    <div className="flex justify-end mt-1.5 pr-1">
-                      <CharCount value={newPackingItem} max={255} />
-                    </div>
-                  </>
-                )}
-              </div>
-              <div className="p-5 sm:p-10 flex-1 overflow-y-auto custom-scrollbar">
-                <div className="space-y-3">
-                  {packingList.length === 0 ? (
-                    <p className="text-gray-500 font-bold text-center py-12">{t('tripDetail.packing.empty')}</p>
-                  ) : (
-                    packingList.map(item => (
-                      <div key={item.id} className="group flex items-center gap-4 py-4 px-5 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
-                        <input
-                          id={`packing-check-${item.id}`}
-                          type="checkbox"
-                          aria-labelledby={`packing-item-${item.id}`}
-                          checked={item.checked}
-                          onChange={isViewer ? () => {} : () => togglePackingItem(item.id)}
-                          disabled={isViewer}
-                          className={`w-6 h-6 shrink-0 rounded-md border-2 border-gray-300 dark:border-gray-600 text-blue-600 bg-transparent focus:ring-blue-500 ${isViewer ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
-                        />
-                        <label htmlFor={`packing-check-${item.id}`} id={`packing-item-${item.id}`} className={`flex-1 min-w-0 break-words py-1 -my-1 text-[15px] font-bold transition-colors ${item.checked ? 'text-gray-400 line-through' : 'text-gray-900 dark:text-white'} ${isViewer ? '' : 'cursor-pointer'}`}>
-                          {item.text}
-                        </label>
-                        {!isViewer && (
-                          <button
-                            onClick={() => deletePackingItem(item.id)}
-                            aria-label={t('tripDetail.packing.delete.title')}
-                            className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer disabled:cursor-not-allowed"
-                          >
-                            <Trash2 size={18} strokeWidth={2} />
-                          </button>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Documents */}
-          <div className={`${activeView === 'documents' ? 'flex' : 'hidden'} ${mobileTab === 'tools' || mobileTab === 'itinerary' ? '' : 'max-md:hidden'} flex-col flex-1 lg:h-full lg:min-h-0`}>
-            <div className="glass-card flex flex-col flex-1 lg:h-full lg:min-h-0 mb-6 lg:mb-0">
-              <div className="p-5 sm:p-10 border-b border-gray-100 dark:border-white/10 shrink-0">
-                <h2 className="font-bold text-3xl tracking-tight text-gray-900 dark:text-white flex items-center gap-4">
-                  <div className="w-12 h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center">
-                    <LinkIcon size={24} strokeWidth={2} />
-                  </div>
-                  {t('tripDetail.documents.title')}
-                </h2>
-              </div>
-              <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col p-5 sm:p-10 gap-8">
-                {!isViewer && (
-                  <form onSubmit={addDocument} className="p-6 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-3xl space-y-4 shrink-0">
-                    <div>
-                      <label htmlFor="doc-title" className="sr-only">{t('tripDetail.documents.titlePlaceholder')}</label>
-                      <input
-                        id="doc-title"
-                        type="text"
-                        required
-                        maxLength={255}
-                        placeholder={t('tripDetail.documents.titlePlaceholder')}
-                        value={docTitle}
-                        onChange={e => setDocTitle(e.target.value)}
-                        className="glass-input border-none bg-white dark:bg-black/50 !py-3 sm:!py-4 shadow-sm text-base w-full"
-                      />
-                      <div className="flex justify-end mt-1.5 pr-1">
-                        <CharCount value={docTitle} max={255} />
-                      </div>
-                    </div>
-                    <div>
-                      <label htmlFor="doc-content" className="sr-only">{t('tripDetail.documents.contentPlaceholder')}</label>
-                      <textarea
-                        id="doc-content"
-                        required
-                        maxLength={2000}
-                        placeholder={t('tripDetail.documents.contentPlaceholder')}
-                        rows="2"
-                        value={docContent}
-                        onChange={e => setDocContent(e.target.value)}
-                        className="glass-input border-none bg-white dark:bg-black/50 !py-3 sm:!py-4 resize-y shadow-sm text-base min-h-[100px] w-full"
-                      />
-                      <div className="flex justify-end mt-1.5 pr-1">
-                        <CharCount value={docContent} max={2000} />
-                      </div>
-                    </div>
-                    <button type="submit" className="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 transition-colors duration-300 cursor-pointer disabled:cursor-not-allowed">
-                      {t('tripDetail.documents.save')}
-                    </button>
-                  </form>
-                )}
-                <div className="grid grid-cols-1 gap-4">
-                  {documents.length === 0 ? (
-                    <div className="py-12 text-center text-gray-500 font-bold border-2 border-dashed border-gray-200 dark:border-white/10 rounded-3xl">
-                      {t('tripDetail.documents.empty')}
-                    </div>
-                  ) : (
-                    documents.map(doc => {
-                      const isUrl = doc.content.startsWith('http://') || doc.content.startsWith('https://');
-                      return (
-                        <div key={doc.id} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-6 rounded-3xl group relative">
-                          {!isViewer && (
-                            <button
-                              onClick={() => deleteDocument(doc.id)}
-                              aria-label={t('tripDetail.documents.delete.title')}
-                              className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer disabled:cursor-not-allowed"
-                            >
-                              <Trash2 size={16} strokeWidth={2} />
-                            </button>
-                          )}
-                          <h4 className={`font-bold text-lg text-gray-900 dark:text-white mb-3 tracking-tight ${!isViewer ? 'pr-10' : ''}`}>{doc.title}</h4>
-                          {isUrl ? (
-                            <a href={doc.content} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-black text-[13px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors break-all rounded-xl shadow-sm border border-gray-100 dark:border-white/5 cursor-pointer disabled:cursor-not-allowed">
-                              <ExternalLink size={16} strokeWidth={2} /> {t('tripDetail.documents.open')}
-                            </a>
-                          ) : (
-                            <p className="text-[14px] text-gray-500 dark:text-gray-400 whitespace-pre-wrap font-medium">{doc.content}</p>
-                          )}
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Mapa výletu — montuje se až po otevření, aby se Leaflet
-              neinicializoval do skrytého kontejneru s nulovou výškou.
-              Na mobilu si TripMap vykreslí vlastní celoobrazovkovou vrstvu
-              (portál), takže tenhle box je schválně jen pro md+. */}
-          <div className={`hidden ${activeView === 'map' ? 'lg:flex' : 'lg:hidden'} flex-col flex-1 lg:h-full lg:min-h-0 mb-6 lg:mb-0 relative overflow-hidden lg:rounded-3xl`}>
-            {activeView === 'map' && (
-              <Suspense fallback={<div className="glass-card flex-1 min-h-[320px] skeleton rounded-3xl" />}>
-                <TripMap
-                  trip={trip}
-                  dayCount={dailyPlans.length}
-                  canEdit={!isViewer}
-                  onExit={() => setActiveView(null)}
+      {/* ── Stránka + záložky ── */}
+      <div className="flex items-start">
+        <section
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+          aria-label={activeTab?.label}
+          className={`relative flex flex-col flex-1 min-w-0 bg-white dark:bg-[#1C1C1E] border border-gray-200/80 dark:border-white/10 rounded-[1.75rem] shadow-[0_1px_2px_rgba(17,24,39,0.04),0_12px_32px_-16px_rgba(17,24,39,0.12)] min-h-[calc(100dvh-22rem)] lg:min-h-[calc(100dvh-22rem)] ${view === 'map' ? 'overflow-hidden' : ''}`}
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={pageKey}
+              {...flip}
+              transition={{ duration: reduceMotion ? 0.12 : 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className="flex-1 flex flex-col"
+            >
+              {view === 'program' && day && (
+                <DayPage
+                  day={day}
+                  index={dayIndex}
+                  days={dailyPlans}
+                  isViewer={isViewer}
+                  onChange={(patch) => updateDay(dayIndex, patch)}
+                  onNavigate={goToDay}
+                  dateLocale={dateLocale}
                 />
-              </Suspense>
-            )}
-          </div>
+              )}
 
-          {/* Budget */}
-          <div className={`${activeView === 'budget' ? 'block' : 'hidden'} ${mobileTab === 'tools' ? '' : 'max-md:hidden'} mb-6 lg:mb-0`}>
-            <Budget trips={[trip]} onUpdateTrip={onUpdateTrip} hideHeader />
-          </div>
-
-          {/* Itinerary Editor */}
-          <div className={`${typeof activeView === 'number' ? 'flex' : 'hidden'} ${mobileTab === 'itinerary' ? '' : 'max-md:hidden'} flex-col flex-1 lg:h-full lg:min-h-0`}>
-            {dailyPlans.map((day, idx) => {
-              if (activeView !== idx) return null;
-              return (
-                <div key={idx} className="glass-card flex flex-col flex-1 lg:h-full lg:min-h-0 mb-6 lg:mb-0">
-                  <div className="p-5 sm:p-10 border-b border-gray-100 dark:border-white/10 shrink-0">
-                    <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 mb-5 sm:mb-8">
-                      <h2 className="font-bold text-2xl sm:text-4xl tracking-tight text-gray-900 dark:text-white">{day.title}</h2>
-                      <span className="text-[13px] font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-3 py-1 rounded-full w-fit">
-                        {format(new Date(day.date), 'EEEE, d. M.', { locale: dateLocale })}
-                      </span>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="flex items-center gap-2 text-[11px] font-medium text-gray-500 dark:text-gray-400">
-                        <MapPin size={16} strokeWidth={2.5} /> {t('tripDetail.itinerary.locationLabel')}
-                      </label>
-                      {isViewer ? (
-                        <p className="py-3 sm:py-4 px-4 sm:px-5 font-bold text-base sm:text-lg text-gray-900 dark:text-white min-h-[52px]">
-                          {day.location || <span className="text-gray-400 dark:text-gray-500 font-normal italic">{t('tripDetail.itinerary.noLocation')}</span>}
-                        </p>
-                      ) : (
-                        <>
-                          <LocationAutocomplete
-                            value={day.location}
-                            onChange={(value) => {
-                              const updated = [...dailyPlans];
-                              updated[idx].location = value;
-                              setDailyPlans(updated);
-                              setHasUnsavedChanges(true);
-                            }}
-                            placeholder={t('tripDetail.itinerary.locationPlaceholder')}
-                            maxLength={255}
-                            className="glass-input !py-3 sm:!py-4 !pl-4 sm:!pl-5 font-bold text-base sm:text-lg w-full"
-                          />
-                          <div className="flex justify-end mt-1.5 pr-1">
-                            <CharCount value={day.location} max={255} />
-                          </div>
-                        </>
-                      )}
-                    </div>
+              {(view === 'packing' || view === 'documents' || view === 'budget') && (
+                <div>
+                  <div className="flex items-center justify-between gap-4 px-5 sm:px-10 pt-6 sm:pt-9 pb-6">
+                    <h2 className="text-[28px] sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">{activeTab.label}</h2>
+                    <button
+                      onClick={() => setView('program')}
+                      aria-label={t('tripDetail.notebook.backToProgram')}
+                      title={t('tripDetail.notebook.backToProgram')}
+                      className="hidden lg:flex w-10 h-10 items-center justify-center rounded-xl text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                    >
+                      <X size={20} strokeWidth={2.25} />
+                    </button>
                   </div>
-                  <div className="p-5 sm:p-10 flex-1 flex flex-col min-h-[300px] lg:min-h-0">
-                    <label className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-2 sm:mb-4">
-                      {t('tripDetail.itinerary.planLabel')}
-                    </label>
-                    {isViewer ? (
-                      <div className="flex-1 min-h-[250px] lg:min-h-0 py-3 sm:py-4 px-4 sm:px-5 text-[15px] sm:text-base font-medium leading-relaxed text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                        {day.plan || <span className="text-gray-400 dark:text-gray-500 italic">{t('tripDetail.itinerary.planPlaceholder')}</span>}
-                      </div>
-                    ) : (
-                      <>
-                        <textarea
-                          value={day.plan}
-                          maxLength={2000}
-                          onChange={(e) => {
-                            const updated = [...dailyPlans];
-                            updated[idx].plan = e.target.value;
-                            setDailyPlans(updated);
-                            setHasUnsavedChanges(true);
-                          }}
-                          placeholder={t('tripDetail.itinerary.planPlaceholder')}
-                          className="glass-input flex-1 min-h-[250px] lg:min-h-0 resize-y font-medium text-base leading-relaxed"
-                        />
-                        <div className="flex justify-end mt-1.5 pr-1">
-                          <CharCount value={day.plan} max={2000} />
-                        </div>
-                      </>
+                  <div className="px-5 sm:px-10 pb-8 sm:pb-10">
+                    {view === 'packing' && (
+                      <PackingTool items={packingList} isViewer={isViewer} onAdd={addPackingItem} onToggle={togglePackingItem} onDelete={deletePackingItem} />
+                    )}
+                    {view === 'documents' && (
+                      <NotesTool documents={documents} isViewer={isViewer} onAdd={addDocument} onDelete={deleteDocument} />
                     )}
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              )}
 
-        </div>
+              {/* Mapa — montuje se až po otevření, aby se Leaflet neinicializoval
+                  do skrytého kontejneru. Na mobilu si TripMap vykreslí vlastní
+                  celoobrazovkovou vrstvu (portál), proto je box jen pro lg+. */}
+              {view === 'map' && (
+                <div className="hidden lg:flex flex-col h-[calc(100dvh-17rem)] min-h-[560px]">
+                  <Suspense fallback={<div className="flex-1 skeleton" />}>
+                    <TripMap
+                      trip={trip}
+                      dayCount={dailyPlans.length}
+                      canEdit={!isViewer}
+                      onExit={() => setView(lastNonMapView.current)}
+                    />
+                  </Suspense>
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Rozpočet zůstává namontovaný, aby šlo „+ Výdaj“ otevřít odkudkoli. */}
+          <div className={view === 'budget' ? 'px-5 sm:px-10 pb-8 sm:pb-10 -mt-2' : 'hidden'}>
+            <Budget trips={[trip]} onUpdateTrip={onUpdateTrip} hideHeader addRequest={addExpenseRequest} />
+          </div>
+        </section>
+
+        {/* Záložky na hraně stránky (desktop) */}
+        <nav aria-label={t('tripDetail.tabs.tools')} className="hidden lg:flex flex-col w-[176px] shrink-0 sticky top-6 pt-8">
+          {tabs.map(({ id: tabId, Icon, label, status }) => {
+            const active = view === tabId;
+            return (
+              <button
+                key={tabId}
+                onClick={() => (tabId === 'program' ? setView('program') : openView(tabId))}
+                aria-current={active ? 'page' : undefined}
+                className={`relative -mt-px first:mt-0 flex items-start gap-3 text-left pr-3 py-3.5 rounded-r-xl border border-l-0 transition-[background-color,color,margin,padding] duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 ${
+                  active
+                    ? '-ml-px pl-[17px] mr-0 z-10 bg-white dark:bg-[#1C1C1E] border-gray-200 dark:border-white/10 text-gray-900 dark:text-white shadow-[6px_4px_14px_-8px_rgba(17,24,39,0.16)]'
+                    : 'pl-4 mr-3 bg-[#f1f1f4] dark:bg-[#151517] border-gray-200 dark:border-white/[0.08] text-gray-600 dark:text-gray-400 hover:mr-1.5 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                <Icon size={18} strokeWidth={2.25} className={`mt-0.5 shrink-0 ${active ? 'text-blue-600 dark:text-blue-400' : ''}`} aria-hidden="true" />
+                <span className="min-w-0">
+                  <span className="block text-[14px] font-semibold leading-tight">{label}</span>
+                  <span className="block text-[12px] font-medium mt-0.5 truncate tabular-nums text-gray-600 dark:text-gray-400">{status}</span>
+                </span>
+              </button>
+            );
+          })}
+          {!isViewer && (
+            <button
+              onClick={() => setAddExpenseRequest(n => n + 1)}
+              className="mt-4 mr-3 h-11 flex items-center justify-center gap-2 rounded-2xl bg-blue-600 text-white text-[14px] font-semibold hover:bg-blue-500 active:scale-95 transition-all shadow-[0_6px_16px_-8px_rgba(37,99,235,0.7)] cursor-pointer"
+            >
+              <Plus size={17} strokeWidth={2.5} /> {t('tripDetail.notebook.addExpense')}
+            </button>
+          )}
+        </nav>
       </div>
+
+      {/* ── Mobilní spodní lišta: Program · Balení · [+ Výdaj] · Odkazy · Rozpočet ── */}
+      <nav
+        aria-label={t('tripDetail.tabs.tools')}
+        className="lg:hidden fixed inset-x-0 bottom-0 z-50 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-xl border-t border-gray-200/80 dark:border-white/10 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+      >
+        <div className="max-w-xl mx-auto grid grid-cols-5 items-end px-2 pt-1.5">
+          {['program', 'packing', 'add', 'documents', 'budget'].map((slot) => {
+            if (slot === 'add') {
+              return isViewer ? <span key="add" /> : (
+                <button
+                  key="add"
+                  onClick={() => setAddExpenseRequest(n => n + 1)}
+                  aria-label={t('budget.addExpense')}
+                  className="flex flex-col items-center gap-1 pb-1.5 cursor-pointer group"
+                >
+                  <span className="-mt-5 w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-[0_8px_20px_-8px_rgba(37,99,235,0.7)] group-active:scale-95 transition-transform">
+                    <Plus size={26} strokeWidth={2.5} aria-hidden="true" />
+                  </span>
+                  <span className="text-[11px] font-semibold text-blue-700 dark:text-blue-400">{t('tripDetail.notebook.addExpense')}</span>
+                </button>
+              );
+            }
+            const { Icon, short } = tabs.find(tab => tab.id === slot);
+            const active = view === slot;
+            return (
+              <button
+                key={slot}
+                onClick={() => (slot === 'program' ? setView('program') : openView(slot))}
+                aria-current={active ? 'page' : undefined}
+                className={`flex flex-col items-center gap-1 py-1.5 min-h-[52px] rounded-xl transition-colors cursor-pointer ${
+                  active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 active:bg-gray-100 dark:active:bg-white/5'
+                }`}
+              >
+                <Icon size={22} strokeWidth={active ? 2.5 : 2} aria-hidden="true" />
+                <span className="text-[11px] font-semibold">{short}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 };

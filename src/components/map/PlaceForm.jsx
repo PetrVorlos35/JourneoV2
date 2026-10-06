@@ -146,7 +146,7 @@ const PlaceForm = ({
       {/* Obsah */}
       <div className={`flex-1 min-h-0 overflow-y-auto custom-scrollbar py-5 space-y-5 ${isPanel ? 'px-1 pr-2' : 'px-5 sm:px-6'}`}>
         <div>
-          <label htmlFor={`${fieldId}-name`} className="block text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">
+          <label htmlFor={`${fieldId}-name`} className="block text-[12px] font-semibold text-gray-500 mb-2">
             {t('map.sheet.nameLabel')}
           </label>
           <input
@@ -168,7 +168,7 @@ const PlaceForm = ({
         {/* Poloha — u uloženého i rozepsaného místa ji lze znovu zaměřit
             křížkem, aniž bys musel místo napřed uložit nebo zahodit. */}
         <div>
-          <span className="block text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">
+          <span className="block text-[12px] font-semibold text-gray-500 mb-2">
             {t('map.sheet.locationLabel')}
           </span>
           <div className="flex items-center gap-2">
@@ -200,7 +200,7 @@ const PlaceForm = ({
 
         {/* Stav */}
         <div>
-          <span className="block text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">
+          <span className="block text-[12px] font-semibold text-gray-500 mb-2">
             {t('map.sheet.statusLabel')}
           </span>
           <div className="grid grid-cols-2 gap-2">
@@ -229,7 +229,7 @@ const PlaceForm = ({
 
         {/* Kategorie */}
         <div>
-          <span className="block text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">
+          <span className="block text-[12px] font-semibold text-gray-500 mb-2">
             {t('map.sheet.categoryLabel')}
           </span>
           <div className="flex flex-wrap gap-2">
@@ -257,7 +257,7 @@ const PlaceForm = ({
         {/* Výlet + den */}
         {!lockedTripId && trips.length > 0 && (
           <div>
-            <label htmlFor={`${fieldId}-trip`} className="block text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">
+            <label htmlFor={`${fieldId}-trip`} className="block text-[12px] font-semibold text-gray-500 mb-2">
               {t('map.sheet.tripLabel')}
             </label>
             <select
@@ -278,7 +278,7 @@ const PlaceForm = ({
 
         {lockedTripId && dayCount > 0 && (
           <div>
-            <label htmlFor={`${fieldId}-day`} className="block text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">
+            <label htmlFor={`${fieldId}-day`} className="block text-[12px] font-semibold text-gray-500 mb-2">
               {t('map.sheet.dayLabel')}
             </label>
             <select
@@ -299,7 +299,7 @@ const PlaceForm = ({
 
         {/* Poznámka */}
         <div>
-          <label htmlFor={`${fieldId}-note`} className="block text-[11px] uppercase tracking-widest font-bold text-gray-400 mb-2">
+          <label htmlFor={`${fieldId}-note`} className="block text-[12px] font-semibold text-gray-500 mb-2">
             {t('map.sheet.noteLabel')}
           </label>
           <textarea

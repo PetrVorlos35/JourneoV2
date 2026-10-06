@@ -101,7 +101,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
             {/* Prompt input */}
             {config?.type === 'prompt' && (
               <div className="mb-8">
-                <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-widest">
+                <label className="block text-[12px] font-semibold text-gray-500 dark:text-gray-400 mb-2">
                   {config.inputLabel || t('dialog.defaultInputLabel')}
                 </label>
                 <input
@@ -114,7 +114,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
                   className="glass-input"
                 />
                 {config.requiredPhrase && inputValue && inputValue !== config.requiredPhrase && (
-                  <p className="text-[11px] font-bold text-red-500 mt-3 uppercase tracking-wide flex items-center gap-1">
+                  <p className="text-[12px] font-semibold text-red-500 mt-3 flex items-center gap-1">
                     <AlertTriangle size={12} strokeWidth={3} />
                     {t('dialog.typeExactly')} <span className="italic">{config.requiredPhrase}</span>
                   </p>
@@ -126,7 +126,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
             <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end pt-2">
               <button
                 onClick={() => onCancel(false)}
-                className="w-full sm:w-auto px-6 py-4 rounded-2xl text-[13px] uppercase tracking-widest font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-6 py-4 rounded-2xl text-[13px] font-semibold text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer disabled:cursor-not-allowed"
               >
                 {config?.cancelLabel || t('dialog.cancel')}
               </button>

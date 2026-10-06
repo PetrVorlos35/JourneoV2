@@ -113,7 +113,7 @@ const HeroCard = ({ trip, state, placeCount, onCreate }) => {
 
         {todayActivity?.title || todayActivity?.plan ? (
           <div className="mb-6">
-            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">
+            <p className="text-[12px] font-semibold text-gray-500 dark:text-gray-500 mb-1">
               {t('tripsOverview.hero.today')}
             </p>
             {todayActivity.title && (
@@ -159,7 +159,7 @@ const HeroCard = ({ trip, state, placeCount, onCreate }) => {
           className="absolute inset-0 z-20 rounded-[2rem] outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-inset"
           aria-label={`${t('tripsOverview.continuePlanning')}: ${trip.title}`}
         />
-        <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
+        <p className="text-[12px] font-semibold text-gray-500 dark:text-gray-500 mb-2">
           {t('tripsOverview.countdown.label')}
         </p>
         <div className="flex items-baseline gap-2.5 mb-4 sm:mb-6">
@@ -193,7 +193,7 @@ const HeroCard = ({ trip, state, placeCount, onCreate }) => {
   // ── Only past trips left ─────────────────────────────────
   return (
     <motion.div {...animation} className={card}>
-      <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
+      <p className="text-[12px] font-semibold text-gray-500 dark:text-gray-500 mb-2">
         {t('tripsOverview.hero.lastTrip')}
       </p>
       <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight mb-1.5">

@@ -13,7 +13,7 @@ import Skeleton, { AdminTableSkeleton } from '../ui/Skeletons';
 import useSlideOverA11y from '../../hooks/useSlideOverA11y';
 
 const RoleChip = ({ role }) => (
-  <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+  <span className={`text-[12px] font-semibold px-2.5 py-1 rounded-full ${
     role === 'admin' ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400' : 'bg-gray-100 dark:bg-white/[0.06] text-gray-500 dark:text-gray-400'
   }`}>
     {role}
@@ -185,10 +185,10 @@ const AdminUsers = () => {
                             {u.firstName ? `${u.firstName} ${u.lastName || ''}` : u.email.split('@')[0]}
                           </p>
                           {u.role === 'admin' && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-amber-500/15 text-amber-600 dark:text-amber-400 rounded-full">admin</span>
+                            <span className="text-[11px] font-semibold px-1.5 py-0.5 bg-amber-500/15 text-amber-600 dark:text-amber-400 rounded-full">admin</span>
                           )}
                           {isSelf(u.id) && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-blue-500/15 text-blue-600 dark:text-blue-400 rounded-full">{t('admin.users.you')}</span>
+                            <span className="text-[11px] font-semibold px-1.5 py-0.5 bg-blue-500/15 text-blue-600 dark:text-blue-400 rounded-full">{t('admin.users.you')}</span>
                           )}
                         </div>
                         <p className="text-[12px] text-gray-500 dark:text-gray-400 truncate">{u.email}</p>
@@ -229,7 +229,7 @@ const AdminUsers = () => {
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-white/[0.06]">
+                  <tr className="text-left text-[12px] font-semibold text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-white/[0.06]">
                     <th scope="col" className="px-6 py-4">{t('admin.users.table.user')}</th>
                     <th scope="col" className="px-4 py-4">{t('admin.users.table.email')}</th>
                     <th scope="col" className="px-4 py-4">{t('admin.users.table.role')}</th>
@@ -254,7 +254,7 @@ const AdminUsers = () => {
                               {u.firstName ? `${u.firstName} ${u.lastName || ''}` : u.email.split('@')[0]}
                             </span>
                             {isSelf(u.id) && (
-                              <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 bg-blue-500/15 text-blue-600 dark:text-blue-400 rounded-full shrink-0">{t('admin.users.you')}</span>
+                              <span className="text-[11px] font-semibold px-1.5 py-0.5 bg-blue-500/15 text-blue-600 dark:text-blue-400 rounded-full shrink-0">{t('admin.users.you')}</span>
                             )}
                           </div>
                         </div>
@@ -437,23 +437,23 @@ const AdminUsers = () => {
                     <div className="grid grid-cols-3 gap-3">
                       <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <p className="text-xl font-bold tabular-nums">{selectedUser.trips?.length || 0}</p>
-                        <p className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">{t('admin.users.detail.trips')}</p>
+                        <p className="text-[12px] font-semibold text-gray-500 dark:text-gray-400 mt-0.5">{t('admin.users.detail.trips')}</p>
                       </div>
                       <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <p className="text-xl font-bold tabular-nums">{selectedUser.friends?.length || 0}</p>
-                        <p className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">{t('admin.users.detail.friends')}</p>
+                        <p className="text-[12px] font-semibold text-gray-500 dark:text-gray-400 mt-0.5">{t('admin.users.detail.friends')}</p>
                       </div>
                       <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
                         <p className="text-xl font-bold tabular-nums text-blue-600 dark:text-blue-400">
                           {selectedUser.trips?.reduce((sum, trip) => sum + trip.totalExpenses, 0).toLocaleString(i18n.language) || 0}
                         </p>
-                        <p className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-0.5">{t('admin.users.detail.totalCzk')}</p>
+                        <p className="text-[12px] font-semibold text-gray-500 dark:text-gray-400 mt-0.5">{t('admin.users.detail.totalCzk')}</p>
                       </div>
                     </div>
 
                     {/* User's Trips */}
                     <div>
-                      <h3 className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <h3 className="text-[12px] font-semibold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
                         <MapPin size={13} /> {t('admin.users.detail.trips')} ({selectedUser.trips?.length || 0})
                       </h3>
                       <div className="space-y-2">
@@ -480,7 +480,7 @@ const AdminUsers = () => {
 
                     {/* User's Friends */}
                     <div>
-                      <h3 className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <h3 className="text-[12px] font-semibold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
                         <Users size={13} /> {t('admin.users.detail.friends')} ({selectedUser.friends?.length || 0})
                       </h3>
                       <div className="space-y-1.5">

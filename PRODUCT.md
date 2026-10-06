@@ -28,7 +28,7 @@ Two recurring usage moments: heads-down planning at home or a café before a tri
 
 ## Capabilities and Constraints
 
-Confirmed functionality: per-trip itinerary/day planning, packing lists, document/file storage, an interactive map (MapLibre, CARTO tiles, light/dark styles) for saving and browsing trip places, budget tracking with multi-person expense settlement ("Vyrovnání"), friends/collaborators with trip sharing, a public read-only share link per trip, cross-trip statistics, and an admin panel for privileged accounts. Auth is email/password or Google OAuth. Theme is light/dark/system, dark is primary. This is a responsive web app (React + Vite), not native iOS/Android — mobile support means mobile web, optimized per the dashboard's mobile-UX conventions (44px touch targets, bottom-sheet modals, safe-area insets).
+Confirmed functionality: per-trip itinerary/day planning, packing lists, document/file storage, an interactive map (MapLibre, CARTO tiles, light/dark styles) for saving and browsing trip places, budget tracking with multi-person expense settlement ("Vyrovnání"), friends/collaborators with trip sharing, a public read-only share link per trip, cross-trip statistics, and an admin panel for privileged accounts. Auth is email/password or Google OAuth. Theme is light/dark/system, light is primary (the founder prefers it and the app is designed and verified in light first); dark must work everywhere. This is a responsive web app (React + Vite), not native iOS/Android — mobile support means mobile web, optimized per the dashboard's mobile-UX conventions (44px touch targets, bottom-sheet modals, safe-area insets).
 
 ## Brand Personality
 
@@ -58,4 +58,4 @@ Journeo is a real, personally-used product — the founder and a circle of frien
 
 ## Accessibility & Inclusion
 
-Target WCAG AA. Bilingual Czech/English (i18n already in place). Support for reduced motion via `prefers-reduced-motion`. Dark and light mode both supported — dark is the primary design register.
+Target WCAG AA. Bilingual Czech/English (i18n already in place). Support for reduced motion via `prefers-reduced-motion`. Light and dark mode both supported — light is the primary design register.

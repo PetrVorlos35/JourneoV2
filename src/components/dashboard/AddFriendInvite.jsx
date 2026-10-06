@@ -118,7 +118,7 @@ const AddFriendInvite = () => {
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-1 break-words" style={{ textWrap: 'balance' }}>
                 {`${inviter?.first_name || ''} ${inviter?.last_name || ''}`.trim() || t('friends.defaultName')}
               </h1>
-              <p className="text-[13px] font-semibold text-gray-400 uppercase tracking-widest">
+              <p className="text-[13px] font-semibold text-gray-500">
                 {t('addFriendInvite.subtitle')}
               </p>
               {inviter?.bio && (

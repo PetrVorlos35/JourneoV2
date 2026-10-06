@@ -54,7 +54,7 @@ const ReadinessCard = ({ trip, placeCount }) => {
       className="glass-card p-6 sm:p-8 rounded-[2rem] flex flex-row md:flex-col items-center md:items-start gap-6 md:gap-0 min-h-[220px] sm:min-h-[280px]"
     >
       <div className="shrink-0 md:mb-6">
-        <p className="hidden md:block text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-4">
+        <p className="hidden md:block text-[12px] font-semibold text-gray-500 dark:text-gray-500 mb-4">
           {t('tripsOverview.readiness.label')}
         </p>
         <div className="relative w-[88px] h-[88px]">
@@ -81,7 +81,7 @@ const ReadinessCard = ({ trip, placeCount }) => {
       </div>
 
       <ul className="flex-1 min-w-0 w-full space-y-1 md:mt-auto">
-        <li className="md:hidden text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
+        <li className="md:hidden text-[12px] font-semibold text-gray-500 dark:text-gray-500 mb-2">
           {t('tripsOverview.readiness.label')}
         </li>
         {items.map((item) => (

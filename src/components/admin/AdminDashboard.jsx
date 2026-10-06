@@ -118,7 +118,7 @@ const AdminDashboard = () => {
                   strokeWidth={2.5}
                   className={k.primary ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-500'}
                 />
-                <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <span className="text-[12px] font-semibold text-gray-500 dark:text-gray-400">
                   {k.label}
                 </span>
               </div>
@@ -161,7 +161,7 @@ const AdminDashboard = () => {
                       transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.45, delay: 0.15 + i * 0.05, ease: 'easeOut' }}
                       className="w-full min-h-[8px] rounded-lg bg-blue-600 dark:bg-blue-500"
                     />
-                    <span className="text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase">{getMonthLabel(monthKey)}</span>
+                    <span className="text-[12px] font-semibold text-gray-500 dark:text-gray-400">{getMonthLabel(monthKey)}</span>
                   </div>
                 );
               })}
@@ -216,7 +216,7 @@ const AdminDashboard = () => {
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-white/[0.06]">
+              <tr className="text-left text-[12px] font-semibold text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-white/[0.06]">
                 <th scope="col" className="pb-3 pr-4">{t('admin.dashboard.recentUsers.cols.user')}</th>
                 <th scope="col" className="pb-3 pr-4 hidden sm:table-cell">{t('admin.dashboard.recentUsers.cols.email')}</th>
                 <th scope="col" className="pb-3 pr-4 hidden md:table-cell">{t('admin.dashboard.recentUsers.cols.role')}</th>
@@ -239,7 +239,7 @@ const AdminDashboard = () => {
                     <span className="text-[13px] text-gray-500 dark:text-gray-400 truncate">{u.email}</span>
                   </td>
                   <td className="py-3 pr-4 hidden md:table-cell">
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${
+                    <span className={`text-[12px] font-semibold px-2 py-1 rounded-full ${
                       u.role === 'admin' ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400' : 'bg-gray-100 dark:bg-white/[0.06] text-gray-500 dark:text-gray-400'
                     }`}>
                       {u.role || 'user'}

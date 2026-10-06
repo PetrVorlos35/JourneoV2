@@ -1,0 +1,26 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "gray-on-color",
+        "value": "*",
+        "files": [
+          "src/components/dashboard/trip/PackingTool.jsx"
+        ],
+        "createdAt": "2026-10-06T14:55:09.120Z",
+        "reason": "model triage: gray text only pairs with gray disabled bg or turns red on red-50 hover; no gray-on-color state renders"
+      },
+      {
+        "rule": "gray-on-color",
+        "value": "*",
+        "files": [
+          "src/components/dashboard/trip/NotesTool.jsx"
+        ],
+        "createdAt": "2026-10-06T14:55:09.137Z",
+        "reason": "model triage: gray text only pairs with gray disabled bg or turns red on red-50 hover; no gray-on-color state renders"
+      }
+    ]
+  }
+}

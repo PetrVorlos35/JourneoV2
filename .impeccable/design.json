@@ -1,0 +1,569 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-06T15:16:30+00:00",
+  "title": "Design System: Journeo",
+  "extensions": {
+    "colorMeta": {
+      "accent-blue": {
+        "role": "primary",
+        "displayName": "Notebook Blue",
+        "tonalRamp": [
+          "#1e3a8a",
+          "#1e40af",
+          "#1d4ed8",
+          "#2563eb",
+          "#3b82f6",
+          "#60a5fa",
+          "#93c5fd",
+          "#dbeafe"
+        ]
+      },
+      "accent-blue-hover": {
+        "role": "primary",
+        "displayName": "Bright Blue",
+        "tonalRamp": [
+          "#1e3a8a",
+          "#1e40af",
+          "#1d4ed8",
+          "#2563eb",
+          "#3b82f6",
+          "#60a5fa",
+          "#93c5fd",
+          "#dbeafe"
+        ]
+      },
+      "accent-blue-night": {
+        "role": "primary",
+        "displayName": "Night Blue",
+        "tonalRamp": [
+          "#1e3a8a",
+          "#1e40af",
+          "#1d4ed8",
+          "#2563eb",
+          "#3b82f6",
+          "#60a5fa",
+          "#93c5fd",
+          "#dbeafe"
+        ]
+      },
+      "desk": {
+        "role": "neutral",
+        "displayName": "Desk",
+        "tonalRamp": [
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#4b5563",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "page": {
+        "role": "neutral",
+        "displayName": "Page White",
+        "tonalRamp": [
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#4b5563",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "field": {
+        "role": "neutral",
+        "displayName": "Field Gray",
+        "tonalRamp": [
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#4b5563",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "tab-recess": {
+        "role": "neutral",
+        "displayName": "Tab Recess",
+        "tonalRamp": [
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#4b5563",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "tonalRamp": [
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#4b5563",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "ink-plan": {
+        "role": "neutral",
+        "displayName": "Plan Ink",
+        "tonalRamp": [
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#4b5563",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Soft Ink",
+        "tonalRamp": [
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#4b5563",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "muted-strong": {
+        "role": "neutral",
+        "displayName": "Muted Strong",
+        "tonalRamp": [
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#4b5563",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "tonalRamp": [
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#4b5563",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "placeholder": {
+        "role": "neutral",
+        "displayName": "Placeholder",
+        "tonalRamp": [
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#4b5563",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline",
+        "tonalRamp": [
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#4b5563",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "rule-soft": {
+        "role": "neutral",
+        "displayName": "Soft Rule",
+        "tonalRamp": [
+          "#111827",
+          "#1f2937",
+          "#374151",
+          "#4b5563",
+          "#6b7280",
+          "#9ca3af",
+          "#e5e7eb",
+          "#f9fafb"
+        ]
+      },
+      "night-desk": {
+        "role": "neutral",
+        "displayName": "Night Desk",
+        "tonalRamp": [
+          "#000000",
+          "#101012",
+          "#151517",
+          "#1c1c1e",
+          "#2c2c2e",
+          "#3a3a3c",
+          "#e5e5ea",
+          "#f5f5f7"
+        ]
+      },
+      "night-page": {
+        "role": "neutral",
+        "displayName": "Night Page",
+        "tonalRamp": [
+          "#000000",
+          "#101012",
+          "#151517",
+          "#1c1c1e",
+          "#2c2c2e",
+          "#3a3a3c",
+          "#e5e5ea",
+          "#f5f5f7"
+        ]
+      },
+      "night-ink": {
+        "role": "neutral",
+        "displayName": "Night Ink",
+        "tonalRamp": [
+          "#000000",
+          "#101012",
+          "#151517",
+          "#1c1c1e",
+          "#2c2c2e",
+          "#3a3a3c",
+          "#e5e5ea",
+          "#f5f5f7"
+        ]
+      },
+      "success": {
+        "role": "semantic",
+        "displayName": "Saved Green",
+        "tonalRamp": [
+          "#064e3b",
+          "#065f46",
+          "#047857",
+          "#059669",
+          "#10b981",
+          "#34d399",
+          "#a7f3d0",
+          "#ecfdf5"
+        ]
+      },
+      "danger": {
+        "role": "semantic",
+        "displayName": "Alert Red",
+        "tonalRamp": [
+          "#7f1d1d",
+          "#991b1b",
+          "#b91c1c",
+          "#dc2626",
+          "#ef4444",
+          "#f87171",
+          "#fecaca",
+          "#fef2f2"
+        ]
+      },
+      "readonly-wash": {
+        "role": "semantic",
+        "displayName": "Read-only Amber Wash",
+        "tonalRamp": [
+          "#78350f",
+          "#92400e",
+          "#b45309",
+          "#d97706",
+          "#f59e0b",
+          "#fbbf24",
+          "#fde68a",
+          "#fffbeb"
+        ]
+      },
+      "readonly-ink": {
+        "role": "semantic",
+        "displayName": "Read-only Amber Ink",
+        "tonalRamp": [
+          "#78350f",
+          "#92400e",
+          "#b45309",
+          "#d97706",
+          "#f59e0b",
+          "#fbbf24",
+          "#fde68a",
+          "#fffbeb"
+        ]
+      },
+      "editor-ink": {
+        "role": "semantic",
+        "displayName": "Editor Violet",
+        "tonalRamp": [
+          "#4c1d95",
+          "#5b21b6",
+          "#6d28d9",
+          "#7c3aed",
+          "#8b5cf6",
+          "#a78bfa",
+          "#ddd6fe",
+          "#f5f3ff"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Trip title at the top of the notebook (26px on mobile)."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Page h1s, day title, tool titles on the page (28-30px on mobile)."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Dialog, sheet and card headings."
+      },
+      "numeral": {
+        "displayName": "Numeral",
+        "purpose": "Day-chip date numeral and large amounts; tabular."
+      },
+      "plan": {
+        "displayName": "Plan",
+        "purpose": "Day plan text on ruled lines (2rem rhythm)."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "List items, input values, locations, empty states."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Sentence-case section labels, buttons (14px), back link, save status."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Weekday/place in day chips, tab status lines, role chips."
+      }
+    },
+    "shadows": [
+      {
+        "name": "page-lift",
+        "value": "0 1px 2px rgba(17,24,39,0.04), 0 12px 32px -16px rgba(17,24,39,0.12)",
+        "purpose": "The notebook page above the desk."
+      },
+      {
+        "name": "card-ambient",
+        "value": "0 4px 24px rgba(0,0,0,0.04)",
+        "purpose": "Glass cards across the app (dark: rgba(0,0,0,0.15))."
+      },
+      {
+        "name": "tab-merge",
+        "value": "6px 4px 14px -8px rgba(17,24,39,0.16)",
+        "purpose": "Active divider tab joining the page edge."
+      },
+      {
+        "name": "blue-action",
+        "value": "0 6px 16px -8px rgba(37,99,235,0.7)",
+        "purpose": "Filled blue buttons and the selected day chip."
+      },
+      {
+        "name": "blue-action-raised",
+        "value": "0 8px 20px -8px rgba(37,99,235,0.7)",
+        "purpose": "Raised add button in the mobile tool bar."
+      },
+      {
+        "name": "overlay",
+        "value": "0 25px 50px -12px rgba(0,0,0,0.25)",
+        "purpose": "Dialogs, bottom sheets, mobile drawer (Tailwind shadow-2xl)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state",
+        "value": "150-200ms ease (Tailwind transition-colors)",
+        "purpose": "Hover/focus color changes on chips, tabs, inputs."
+      },
+      {
+        "name": "press",
+        "value": "scale(0.95)",
+        "purpose": "Active press on buttons and icon buttons."
+      },
+      {
+        "name": "page-flip",
+        "value": "opacity 0 to 1, x 28px * direction; exit 50ms fade",
+        "purpose": "Flipping between day pages (Framer Motion)."
+      },
+      {
+        "name": "theme",
+        "value": "500ms color transition on body",
+        "purpose": "Light/dark switch."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "prefers-reduced-motion disables shimmer, marquee, pin transitions",
+        "purpose": "Accessibility floor."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one filled blue action in view: add expense, add item, new trip.",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg> Add expense</button>",
+      "css": ".ds-btn-primary{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 20px;border:0;border-radius:16px;background:#2563eb;color:#fff;font-size:14px;font-weight:600;box-shadow:0 6px 16px -8px rgba(37,99,235,.7);cursor:pointer;transition:background-color .15s,transform .15s}.ds-btn-primary:hover{background:#3b82f6}.ds-btn-primary:active{transform:scale(.95)}.ds-btn-primary:focus-visible{outline:none;box-shadow:0 0 0 2px rgba(59,130,246,.5)}"
+    },
+    {
+      "name": "Ink Button",
+      "kind": "button",
+      "refersTo": "button-ink",
+      "description": "Strong neutral action (Share) beside icon buttons in the trip header.",
+      "html": "<button class=\"ds-btn-ink\">Share</button>",
+      "css": ".ds-btn-ink{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;height:44px;padding:0 20px;border:0;border-radius:16px;background:#111827;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:background-color .15s,transform .15s}.ds-btn-ink:hover{background:#1f2937}.ds-btn-ink:active{transform:scale(.95)}.ds-btn-ink:focus-visible{outline:none;box-shadow:0 0 0 2px rgba(59,130,246,.5)}"
+    },
+    {
+      "name": "Icon Button",
+      "kind": "button",
+      "refersTo": "icon-button",
+      "description": "44px square secondary action (PDF export, map).",
+      "html": "<button class=\"ds-icon-btn\" aria-label=\"Export PDF\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/><path d=\"M12 18v-6\"/><path d=\"m9 15 3 3 3-3\"/></svg></button>",
+      "css": ".ds-icon-btn{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:16px;background:#fff;border:1px solid rgba(229,231,235,.8);color:#374151;cursor:pointer;transition:background-color .15s,color .15s,transform .15s}.ds-icon-btn:hover{background:#f9fafb;color:#111827}.ds-icon-btn:active{transform:scale(.95)}.ds-icon-btn:focus-visible{outline:none;box-shadow:0 0 0 2px rgba(59,130,246,.5)}"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Field-gray input that turns white with a soft blue ring on focus.",
+      "html": "<input class=\"ds-input\" placeholder=\"Add an item to pack\" />",
+      "css": ".ds-input{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;width:100%;height:48px;padding:0 16px;border-radius:16px;background:#f9fafb;border:1px solid #e5e7eb;color:#111827;font-size:15px;font-weight:500;transition:background-color .15s,border-color .15s,box-shadow .15s}.ds-input::placeholder{color:#6b7280}.ds-input:focus{outline:none;background:#fff;border-color:rgba(59,130,246,.4);box-shadow:0 0 0 2px rgba(59,130,246,.2)}"
+    },
+    {
+      "name": "Day Chip",
+      "kind": "chip",
+      "refersTo": "day-chip",
+      "description": "Date strip item: weekday, numeral, place; selected day fills blue, today gets a dot.",
+      "html": "<div class=\"ds-strip\"><button class=\"ds-day\"><span class=\"ds-day-wd\">Mo</span><span class=\"ds-day-n\">12.</span><span class=\"ds-day-pl\">Lisbon</span></button><button class=\"ds-day ds-day--on\"><span class=\"ds-day-wd\">Tu <i class=\"ds-dot\"></i> Today</span><span class=\"ds-day-n\">13.</span><span class=\"ds-day-pl\">Sintra</span></button></div>",
+      "css": ".ds-strip{display:flex;gap:8px}.ds-day{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:block;min-width:104px;text-align:left;padding:10px 14px 12px;border-radius:16px;background:#fff;border:1px solid rgba(229,231,235,.8);color:#111827;cursor:pointer;transition:border-color .2s,background-color .2s}.ds-day:hover{border-color:#d1d5db}.ds-day:focus-visible{outline:none;box-shadow:0 0 0 2px rgba(59,130,246,.5)}.ds-day-wd{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:#6b7280}.ds-day-n{display:block;margin-top:4px;font-size:26px;font-weight:700;letter-spacing:-.025em;line-height:1;font-variant-numeric:tabular-nums}.ds-day-pl{display:block;margin-top:6px;font-size:12px;font-weight:500;color:#6b7280}.ds-day--on{background:#2563eb;border-color:#2563eb;color:#fff;box-shadow:0 6px 16px -8px rgba(37,99,235,.7)}.ds-day--on .ds-day-wd,.ds-day--on .ds-day-pl{color:#dbeafe}.ds-dot{width:6px;height:6px;border-radius:9999px;background:#fff;display:inline-block}"
+    },
+    {
+      "name": "Notebook Page with Divider Tabs",
+      "kind": "custom",
+      "refersTo": "notebook-page",
+      "description": "White day page on the desk with tool tabs attached to its right edge; active tab merges with the page.",
+      "html": "<div class=\"ds-desk\"><div class=\"ds-page\"><h2 class=\"ds-page-h\">Sintra and the palaces</h2><p class=\"ds-page-meta\">Day 2 of 7 · Tuesday 13 October</p><div class=\"ds-ruled\">Train from Rossio at 9:10\nPena Palace, then lunch in town\nBack for sunset at Cabo da Roca</div></div><nav class=\"ds-tabs\"><button class=\"ds-tab ds-tab--on\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 20a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2\"/><path d=\"M8 20v2\"/><path d=\"M16 20v2\"/><path d=\"M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2\"/><rect x=\"6\" y=\"6\" width=\"12\" height=\"14\" rx=\"2\"/></svg><span><b>Packing</b><small>8/12</small></span></button><button class=\"ds-tab\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\"/><path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\"/></svg><span><b>Budget</b><small>34 040 Kč</small></span></button></nav></div>",
+      "css": ".ds-desk{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:flex;align-items:flex-start;background:#fbfbfd;padding:24px}.ds-page{flex:1;background:#fff;border:1px solid rgba(229,231,235,.8);border-radius:28px;box-shadow:0 1px 2px rgba(17,24,39,.04),0 12px 32px -16px rgba(17,24,39,.12);padding:36px 40px}.ds-page-h{margin:0;font-size:36px;font-weight:700;letter-spacing:-.025em;color:#111827;line-height:1.25}.ds-page-meta{margin:8px 0 24px;font-size:14px;font-weight:500;color:#6b7280}.ds-ruled{white-space:pre-wrap;font-size:16px;line-height:2rem;color:#1f2937;background-image:linear-gradient(to bottom,transparent calc(2rem - 1px),rgba(17,24,39,.07) calc(2rem - 1px));background-size:100% 2rem;min-height:8rem}.ds-tabs{display:flex;flex-direction:column;width:176px;padding-top:32px}.ds-tab{display:flex;gap:12px;align-items:flex-start;text-align:left;margin:-1px 12px 0 0;padding:14px 12px 14px 16px;border:1px solid #e5e7eb;border-left:0;border-radius:0 12px 12px 0;background:#f1f1f4;color:#4b5563;cursor:pointer;transition:margin .2s,background-color .2s,color .2s}.ds-tab:hover{margin-right:6px;color:#111827}.ds-tab:focus-visible{outline:none;box-shadow:0 0 0 2px rgba(59,130,246,.4)}.ds-tab b{display:block;font-size:14px;font-weight:600}.ds-tab small{display:block;font-size:12px;font-weight:500;color:#4b5563;font-variant-numeric:tabular-nums}.ds-tab--on{margin-left:-1px;margin-right:0;padding-left:17px;position:relative;z-index:1;background:#fff;color:#111827;box-shadow:6px 4px 14px -8px rgba(17,24,39,.16)}.ds-tab--on svg{color:#2563eb}"
+    },
+    {
+      "name": "Glass Card",
+      "kind": "card",
+      "refersTo": "glass-card",
+      "description": "Translucent dashboard card over the desk (stats, trip tiles, settings blocks).",
+      "html": "<div class=\"ds-glass\"><p class=\"ds-glass-l\">Trips this year</p><p class=\"ds-glass-v\">7</p></div>",
+      "css": ".ds-glass{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:rgba(255,255,255,.7);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border:1px solid rgba(255,255,255,.5);border-radius:32px;box-shadow:0 4px 24px rgba(0,0,0,.04);padding:24px 32px;color:#111827}.ds-glass-l{margin:0;font-size:13px;font-weight:600;color:#6b7280}.ds-glass-v{margin:4px 0 0;font-size:36px;font-weight:700;letter-spacing:-.025em;font-variant-numeric:tabular-nums}"
+    },
+    {
+      "name": "Read-only Chip",
+      "kind": "chip",
+      "refersTo": "chip-readonly",
+      "description": "Role chip in the trip meta line; amber for viewer, violet for editor.",
+      "html": "<span class=\"ds-chip-ro\">Read-only</span> <span class=\"ds-chip-ed\">Editor</span>",
+      "css": ".ds-chip-ro,.ds-chip-ed{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:inline-flex;align-items:center;padding:2px 10px;border-radius:9999px;font-size:12px;font-weight:600}.ds-chip-ro{background:#fffbeb;color:#b45309}.ds-chip-ed{background:#f5f3ff;color:#6d28d9}"
+    },
+    {
+      "name": "Mobile Tool Bar",
+      "kind": "nav",
+      "refersTo": "",
+      "description": "Fixed bottom bar on the trip below lg: four tool slots and a raised blue add action.",
+      "html": "<nav class=\"ds-bar\"><button class=\"ds-slot ds-slot--on\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 20a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2\"/><path d=\"M8 20v2\"/><path d=\"M16 20v2\"/><path d=\"M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2\"/><rect x=\"6\" y=\"6\" width=\"12\" height=\"14\" rx=\"2\"/></svg><span>Program</span></button><button class=\"ds-slot\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 20a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2\"/><path d=\"M8 20v2\"/><path d=\"M16 20v2\"/><path d=\"M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2\"/><rect x=\"6\" y=\"6\" width=\"12\" height=\"14\" rx=\"2\"/></svg><span>Packing</span></button><button class=\"ds-add\"><i><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg></i><span>Expense</span></button><button class=\"ds-slot\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/><path d=\"M12 18v-6\"/><path d=\"m9 15 3 3 3-3\"/></svg><span>Links</span></button><button class=\"ds-slot\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\"/><path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\"/></svg><span>Budget</span></button></nav>",
+      "css": ".ds-bar{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;padding:6px 8px 8px;margin-top:24px;background:rgba(255,255,255,.95);backdrop-filter:blur(24px);border-top:1px solid rgba(229,231,235,.8)}.ds-slot,.ds-add{display:flex;flex-direction:column;align-items:center;gap:4px;min-height:52px;padding:6px 0;border:0;background:none;border-radius:12px;color:#4b5563;font-size:11px;font-weight:600;cursor:pointer}.ds-slot:active{background:#f3f4f6}.ds-slot--on{color:#2563eb}.ds-add{color:#1d4ed8;padding-top:0}.ds-add i{margin-top:-20px;width:56px;height:56px;border-radius:16px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px -8px rgba(37,99,235,.7);transition:transform .15s}.ds-add:active i{transform:scale(.95)}.ds-slot:focus-visible,.ds-add:focus-visible{outline:none;box-shadow:0 0 0 2px rgba(59,130,246,.5)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Travel Notebook on a Quiet Desk",
+    "overview": "Journeo is a white page lying on an almost-white desk. The desk (#fbfbfd) is the app ground; the work happens on pages and cards that sit a hair above it, edged by gray hairlines and the softest ambient shadow. One saturated voice, a confident blue, marks what is selected and what to do next; everything else is ink and grays. Type is Inter throughout: large, tight, bold titles over medium-weight 13 to 15px working text, with tabular numerals wherever counts and money appear.\n\nThe trip notebook (trip detail) is the system's most literal expression and its newest surface: one day per page, a strip of day chips above it, divider tabs attached to the page's right edge, and the day's plan written on faint ruled lines. Inside the page nothing floats a second time. Sections are separated by lines, not by more cards. The wider app (dashboard, statistics, friends, settings) carries the same world in a slightly glassier dialect: translucent white cards with backdrop blur and 32px corners over the desk.\n\nLight is the verified register: this build was designed and checked in light, and the user prefers it. Dark is fully supported through `dark:` class variants (black desk, #1c1c1e pages, #f5f5f7 ink, blue lifted to #60a5fa) and every new surface must ship both. PRODUCT.md still names dark as primary; that line is out of date relative to the build and the user's stated preference, and is not changed here.",
+    "keyCharacteristics": [
+      "Near-white desk, pure-white pages, hairline gray edges.",
+      "One accent: blue-600 for selection and the primary action only.",
+      "Inter only in the product UI; bold tight titles, medium working text, tabular numbers.",
+      "Generous rounding (12 / 16 / 28 / 32px), never sharp; dashboard buttons are rounded rectangles, not pills.",
+      "Ambient, low-contrast shadows; a page never nests a floating card inside itself.",
+      "Light and dark both shipped on every surface; light is the verified register."
+    ],
+    "rules": [
+      {
+        "name": "The One Blue Rule",
+        "body": "Blue means \"selected\" or \"do this\". It never decorates: no blue headings, no blue section labels, no blue borders at rest. A screen has one filled blue action in view (on mobile notebook, the raised add-expense button).",
+        "section": "colors"
+      },
+      {
+        "name": "The Two Registers Rule",
+        "body": "Every color assignment ships with its `dark:` counterpart in the same class string. A surface verified only in one register is unfinished.",
+        "section": "colors"
+      },
+      {
+        "name": "The Sentence-Case Label Rule",
+        "body": "Section and field labels are 13px semibold muted text in sentence case, optionally followed by a dot-separated count. New surfaces do not use 11px bold uppercase widely-tracked labels.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Numbers Rule",
+        "body": "Any count, date numeral, percentage or amount uses tabular figures.",
+        "section": "typography"
+      },
+      {
+        "name": "The No Card-in-Card Rule",
+        "body": "Inside a page, sections are divided by a top hairline, not wrapped in another bordered or shadowed card. Embedded tools (for example the budget inside the trip) drop their card chrome and become ruled sections of the page.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** set every new surface on the desk (#fbfbfd) with white pages and hairline edges, and ship its `dark:` variants in the same class strings.",
+      "**Do** keep blue-600 for selection and the primary action; one filled blue action in view.",
+      "**Do** use Inter at 700 with tight tracking for titles and 500 to 600 at 12 to 15px for working text; tabular figures for every number.",
+      "**Do** use 16px corners for buttons, inputs and chips, 28 to 32px for pages, cards and dialogs.",
+      "**Do** separate sections inside a page with a top hairline, as the embedded budget does.",
+      "**Do** edit in place and autosave, with a visible save status, instead of adding save buttons.",
+      "**Do** keep touch targets at 44px or more and respect safe-area insets on fixed bars and sheets."
+    ],
+    "donts": [
+      "**Don't** nest a bordered or shadowed card inside the notebook page or another card.",
+      "**Don't** use blue for decoration: headings, labels and resting borders stay ink and gray.",
+      "**Don't** add 11px bold uppercase, widely tracked labels to new surfaces; labels are sentence-case 13px semibold.",
+      "**Don't** use pill-shaped buttons inside the dashboard (full-round CTAs belong to the landing page), and don't use sharp corners anywhere.",
+      "**Don't** use hard or offset shadows; depth stays ambient.",
+      "**Don't** bring Caveat or any second family into the dashboard UI.",
+      "**Don't** design or verify in only one theme."
+    ]
+  }
+}

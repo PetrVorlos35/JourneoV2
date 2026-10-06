@@ -375,7 +375,7 @@ const Spotlight = ({ isOpen, onClose, trips = [], onCreateTrip, onLogout }) => {
               ) : (
                 groups.map((group) => (
                   <div key={group.type} className="mb-1 last:mb-0">
-                    <div className="flex items-center gap-1.5 px-3 pt-2 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+                    <div className="flex items-center gap-1.5 px-3 pt-2 pb-1.5 text-[12px] font-semibold text-gray-500 dark:text-gray-500">
                       {group.type === 'recent' && <Clock size={11} strokeWidth={2.5} aria-hidden="true" />}
                       {group.type === 'suggested' && <Sparkles size={11} strokeWidth={2.5} aria-hidden="true" />}
                       {groupLabel(group.type)}

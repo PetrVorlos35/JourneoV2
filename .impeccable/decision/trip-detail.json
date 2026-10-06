@@ -1,0 +1,58 @@
+{
+  "title": "Přehled výletu — struktura",
+  "question": "Vizuální styl Journea zůstává. Vyber, jak má být přehled výletu poskládaný (desktop; mobil vždy otevře dnešek a má rychlé „+ výdaj“).",
+  "options": [
+    {
+      "id": "notebook",
+      "label": "Zápisník po dnech",
+      "kicker": "THE ROLL",
+      "thesis": "Každý den je jedna stránka zápisníku; listuješ šipkami nebo swipem a nástroje visí jako záložky na hraně.",
+      "palette": ["#fbfbfd", "#111827", "#2563eb", "#e5e7eb"],
+      "materials": ["papírová stránka dne", "záložky na hraně stránky"],
+      "viewport": "Nahoře titul, data a pás dnů s datem a místem. Uprostřed velká stránka dne: místo, plán, šipky ← →. Vpravo svislé záložky Balení · Odkazy · Mapa · Rozpočet s živým stavem (8/12, 34 040 Kč); klik vysune nástroj jako panel přes stránku.",
+      "risk": "Nástroje jsou o krok dál než dnes; když je budeš používat stejně často jako program, bude panel otravovat.",
+      "wireframe": {"cols": 12, "rows": 10, "regions": [
+        {"label": "titul · data · sdílet", "x": 0, "y": 0, "w": 12, "h": 1},
+        {"label": "pás dnů (so 24 · ne 25 · po 26 …)", "x": 0, "y": 1, "w": 11, "h": 1, "accent": true},
+        {"label": "stránka dne: místo + plán, ← →", "x": 0, "y": 2, "w": 11, "h": 8},
+        {"label": "záložky nástrojů", "x": 11, "y": 1, "w": 1, "h": 9, "accent": true}
+      ]}
+    },
+    {
+      "id": "map-day",
+      "label": "Den s mapou",
+      "thesis": "Den a jeho místo patří k sobě: plán vlevo, mapa s místy dne vpravo, nástroje jako záložky nahoře.",
+      "palette": ["#fbfbfd", "#111827", "#2563eb", "#e5e7eb"],
+      "materials": ["živá mapa", "dělený pracovní prostor"],
+      "viewport": "Pod titulem záložky Program · Balení · Odkazy · Rozpočet. V Programu pás dnů, pod ním polovina plán dne, polovina mapa zaměřená na místo dne.",
+      "risk": "Mapa zabírá polovinu obrazovky i u dnů bez míst a na menších noteboocích tlačí plán do úzkého sloupce.",
+      "wireframe": {"cols": 12, "rows": 10, "regions": [
+        {"label": "titul · data · sdílet", "x": 0, "y": 0, "w": 12, "h": 1},
+        {"label": "Program · Balení · Odkazy · Rozpočet", "x": 0, "y": 1, "w": 12, "h": 1, "accent": true},
+        {"label": "pás dnů", "x": 0, "y": 2, "w": 12, "h": 1},
+        {"label": "plán dne", "x": 0, "y": 3, "w": 6, "h": 7},
+        {"label": "mapa dne", "x": 6, "y": 3, "w": 6, "h": 7, "accent": true}
+      ]}
+    },
+    {
+      "id": "agenda-inspector",
+      "label": "Agenda + panel výletu",
+      "thesis": "Program je hlavní plocha a vedle něj stále viditelný panel výletu se stavem balení, rozpočtu a odkazů — nic není schované.",
+      "palette": ["#fbfbfd", "#111827", "#2563eb", "#e5e7eb"],
+      "materials": ["seznam dnů s náhledem plánu", "postranní panel se stavy"],
+      "viewport": "Vlevo úzký seznam dnů s náhledem plánu, uprostřed editor vybraného dne, vpravo panel: rozpočet s ukazatelem a „+ výdaj“, balení s průběhem, odkazy. Každá karta panelu se rozbalí do plné verze.",
+      "risk": "Tři sloupce jsou hustší a pod ~1280 px se panel musí sklopit pod obsah.",
+      "wireframe": {"cols": 12, "rows": 10, "regions": [
+        {"label": "titul · data · sdílet", "x": 0, "y": 0, "w": 12, "h": 1},
+        {"label": "dny + náhled", "x": 0, "y": 1, "w": 3, "h": 9},
+        {"label": "editor dne", "x": 3, "y": 1, "w": 6, "h": 9},
+        {"label": "rozpočet + výdaj", "x": 9, "y": 1, "w": 3, "h": 3, "accent": true},
+        {"label": "balení 8/12", "x": 9, "y": 4, "w": 3, "h": 3},
+        {"label": "odkazy · mapa", "x": 9, "y": 7, "w": 3, "h": 3}
+      ]}
+    }
+  ],
+  "reroll": true,
+  "steer": true,
+  "buildPath": {"value": "code", "toggle": false}
+}
