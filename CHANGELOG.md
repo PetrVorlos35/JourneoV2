@@ -38,6 +38,23 @@ sidebar column.
   labels across the dashboard, admin and public share view.
 - `DESIGN.md` added; `PRODUCT.md` now records light as the primary register.
 
+### Changed — App shell: passport sidebar and unified mobile navigation
+
+- **Desktop sidebar** is a flush 264px column with a hairline instead of a
+  floating card. It opens with a "passport" (avatar, name, visited countries,
+  trips, days on the road, flag stamps) that toggles an account panel with
+  appearance, settings and logout; one filled "+ Vytvořit výlet", ⌘K search,
+  nav with a quiet blue-50 active state, and a next-trip countdown card
+  (hidden on the overview). The bell and Admin entry moved into the sidebar;
+  the floating top-right actions are gone.
+- **Mobile**: top bar logo · search · bell · avatar (44px targets); the
+  avatar replaces the hamburger everywhere, including the fullscreen map, and
+  opens the passport as a bottom sheet. `MobileTabBar` is now the same
+  full-width bar as in the trip detail — Přehled · Výlety · [+ Výlet] · Mapa ·
+  Výdaje (four slots on the map) — and the floating "+" FAB was removed.
+- `NotificationBell` takes `placement="sidebar"`; nav items carry short
+  labels (`dashboardLayout.navShort`).
+
 ## [1.4.0] – 2026-08-06
 
 ### Added — Spotlight search (⌘K)

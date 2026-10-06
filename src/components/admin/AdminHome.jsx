@@ -1,54 +1,57 @@
-import React, { Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import AdminLayout from './AdminLayout';
-import { Toaster } from 'react-hot-toast';
-import { useTheme } from '../../contexts/ThemeContext';
+import { Suspense, lazy } from 'react';
+import { Routes, Route, NavLink, Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AdminDashboardSkeleton, AdminTableSkeleton } from '../ui/Skeletons';
 
 const AdminDashboard = lazy(() => import('./AdminDashboard'));
 const AdminUsers = lazy(() => import('./AdminUsers'));
 const AdminTrips = lazy(() => import('./AdminTrips'));
 
-// Per-route Suspense so the matching skeleton appears instantly on navigation
-// instead of freezing on the previous page while the lazy chunk downloads.
-const withSuspense = (element, fallback) => (
-  <Suspense fallback={fallback}>{element}</Suspense>
-);
-
-const AdminTableLoading = () => (
-  <div className="space-y-8">
-    <div className="h-9 w-48 skeleton rounded-xl" aria-hidden="true" />
-    <div className="rounded-2xl border border-gray-200 dark:border-white/[0.06] p-4">
-      <AdminTableSkeleton rows={8} />
-    </div>
+const TableLoading = () => (
+  <div className="rounded-[1.75rem] border border-gray-200 dark:border-white/[0.08] p-4">
+    <AdminTableSkeleton rows={8} />
   </div>
 );
 
+// Admin žije uvnitř shellu aplikace (postranní panel, mobilní lišta) —
+// vlastní je jen nadpis a přepínač tří pohledů.
 const AdminHome = () => {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark' || (theme === 'system' && typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const { t } = useTranslation();
+  const tabs = [
+    { to: '/dashboard/admin', end: true, label: t('admin.nav.overview') },
+    { to: '/dashboard/admin/users', label: t('admin.nav.users') },
+    { to: '/dashboard/admin/trips', label: t('admin.nav.trips') },
+  ];
 
   return (
-    <AdminLayout>
-      <Toaster
-        position="top-right"
-        containerStyle={{ zIndex: 99999, top: 'max(1rem, calc(env(safe-area-inset-top) + 0.5rem))' }}
-        toastOptions={{
-          style: {
-            background: isDark ? '#1C1C1E' : '#fff',
-            color: isDark ? '#f5f5f7' : '#111827',
-            borderRadius: '1rem',
-            boxShadow: isDark ? '0 10px 15px -3px rgba(0,0,0,0.4)' : '0 10px 15px -3px rgba(0,0,0,0.1)',
-            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.05)',
-          },
-        }}
-      />
+    <div className="w-full pb-32 md:pb-12">
+      <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
+        <h1 className="text-[32px] sm:text-5xl font-bold tracking-tight leading-[1.1] text-gray-900 dark:text-white">{t('admin.v2.title')}</h1>
+        <nav aria-label={t('admin.v2.title')} className="flex p-1 rounded-2xl bg-gray-100 dark:bg-white/[0.06] self-start sm:self-auto">
+          {tabs.map((tab) => (
+            <NavLink
+              key={tab.to}
+              to={tab.to}
+              end={tab.end}
+              className={({ isActive }) => `px-4 h-10 inline-flex items-center rounded-xl text-[14px] font-semibold transition-colors ${
+                isActive
+                  ? 'bg-white dark:bg-[#2c2c2e] text-gray-900 dark:text-white shadow-[0_1px_2px_rgba(17,24,39,0.08)]'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              {tab.label}
+            </NavLink>
+          ))}
+        </nav>
+      </header>
+
       <Routes>
-        <Route path="/" element={withSuspense(<AdminDashboard />, <AdminDashboardSkeleton />)} />
-        <Route path="/users" element={withSuspense(<AdminUsers />, <AdminTableLoading />)} />
-        <Route path="/trips" element={withSuspense(<AdminTrips />, <AdminTableLoading />)} />
+        <Route index element={<Suspense fallback={<AdminDashboardSkeleton />}><AdminDashboard /></Suspense>} />
+        <Route path="users" element={<Suspense fallback={<TableLoading />}><AdminUsers /></Suspense>} />
+        <Route path="trips" element={<Suspense fallback={<TableLoading />}><AdminTrips /></Suspense>} />
+        <Route path="*" element={<Navigate to="/dashboard/admin" replace />} />
       </Routes>
-    </AdminLayout>
+    </div>
   );
 };
 

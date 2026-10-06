@@ -1,512 +1,238 @@
-import { useState, useEffect, useCallback } from 'react';
-import { createPortal } from 'react-dom';
-import { Search, Trash2, ChevronLeft, ChevronRight, Calendar, DollarSign, Heart, MapPin, Eye, X, Package, FileText, CheckSquare, Square, Clock } from 'lucide-react';
-// eslint-disable-next-line no-unused-vars
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import api from '../../services/api';
 import toast from 'react-hot-toast';
+import { ChevronRight, Loader2, MapPin, Trash2 } from 'lucide-react';
+import api from '../../services/api';
 import UserAvatar from '../ui/UserAvatar';
 import { useDialog } from '../ui/DialogModal';
-import useSlideOverA11y from '../../hooks/useSlideOverA11y';
-import Skeleton, { AdminTableSkeleton } from '../ui/Skeletons';
+import { AdminTableSkeleton } from '../ui/Skeletons';
+import {
+  MasterDetail, ListToolbar, ListRow, LoadMore, BackToList, DetailSection, Badge, EmptyDetail,
+  avatarUser, displayName, formatDate,
+} from './adminUi';
 
-const CATEGORY_EMOJIS = {
-  transport: '🚗',
-  accommodation: '🏨',
-  food: '🍽️',
-  activities: '🎯',
-  other: '📦',
-};
-
-const AdminTrips = () => {
+const TripDossier = ({ tripId, onDeleted, onBack }) => {
   const { t, i18n } = useTranslation();
-  const [trips, setTrips] = useState([]);
-  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 0 });
-  const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [selectedTrip, setSelectedTrip] = useState(null);
-  const [detailLoading, setDetailLoading] = useState(false);
   const { confirmDialog, ModalPortal } = useDialog();
-  const detailPanelRef = useSlideOverA11y(!!selectedTrip, () => setSelectedTrip(null));
-
-  const fetchTrips = useCallback(async (page = 1, searchQuery = search) => {
-    setLoading(true);
-    try {
-      const result = await api.admin.getTrips({ page, limit: 20, search: searchQuery });
-      setTrips(result.trips);
-      setPagination(result.pagination);
-    } catch (err) {
-      console.error('Failed to fetch trips:', err);
-      toast.error(t('admin.trips.toast.loadError'));
-    } finally {
-      setLoading(false);
-    }
-  }, [search]);
+  const [trip, setTrip] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchTrips(1, '');
-  }, []);
+    let alive = true;
+    setLoading(true);
+    api.admin.getTrip(tripId)
+      .then((r) => { if (alive) setTrip(r.trip); })
+      .catch(() => { if (alive) { setTrip(null); toast.error(t('admin.trips.toast.detailError')); } })
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
+  }, [tripId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    fetchTrips(1, search);
-  };
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-[420px]"><Loader2 className="animate-spin text-gray-400" size={22} /></div>;
+  }
+  if (!trip) return <EmptyDetail text={t('admin.trips.toast.detailError')} />;
 
-  const handleDeleteTrip = async (tripId, title) => {
+  const remove = async () => {
     const ok = await confirmDialog({
       title: t('admin.trips.dialog.deleteTitle'),
-      message: t('admin.trips.dialog.deleteMessage', { title }),
+      message: t('admin.trips.dialog.deleteMessage', { title: trip.title }),
       confirmLabel: t('admin.trips.dialog.deleteConfirm'),
       variant: 'danger',
     });
     if (!ok) return;
-
     try {
-      await api.admin.deleteTrip(tripId);
-      setTrips(prev => prev.filter(t => t.id !== tripId));
-      setPagination(prev => ({ ...prev, total: prev.total - 1 }));
+      await api.admin.deleteTrip(trip.id);
       toast.success(t('admin.trips.toast.deleted'));
-      if (selectedTrip?.id === tripId) setSelectedTrip(null);
+      onDeleted(trip.id);
     } catch (err) {
       toast.error(err.message || t('admin.trips.toast.deleteError'));
     }
   };
 
-  const handleViewTrip = async (tripId) => {
-    setDetailLoading(true);
-    setSelectedTrip({ loading: true });
-    try {
-      const result = await api.admin.getTrip(tripId);
-      setSelectedTrip(result.trip);
-    } catch (err) {
-      toast.error(t('admin.trips.toast.detailError'));
-      setSelectedTrip(null);
-    } finally {
-      setDetailLoading(false);
-    }
-  };
-
-  const totalTripExpenses = (trip) => trip.expenses?.reduce((sum, e) => sum + e.amount, 0) || 0;
+  const packed = trip.packingList.filter((p) => p.checked).length;
+  const facts = [
+    { label: t('admin.v2.days'), value: trip.activities.length },
+    { label: t('admin.v2.expenses'), value: trip.expenses.length },
+    { label: t('admin.v2.packing'), value: trip.packingList.length ? `${packed}/${trip.packingList.length}` : 0 },
+    { label: t('admin.v2.documents'), value: trip.documents.length },
+    { label: t('admin.v2.likes'), value: trip.likes },
+  ];
 
   return (
-    <div className="space-y-6">
+    <div className="pb-8">
       {ModalPortal}
+      <BackToList onClick={onBack} label={t('admin.v2.back')} />
 
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, ease: 'easeOut' }}
-        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-      >
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-            {t('admin.trips.title')}
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1.5 text-sm font-medium">{t('admin.trips.total', { count: pagination.total })}</p>
+      <header className="px-5 sm:px-8 pt-6 sm:pt-8">
+        <div className="flex flex-wrap items-center gap-2 mb-2">
+          {trip.inTrash && <Badge tone="red">{t('admin.v2.inTrash')}</Badge>}
         </div>
+        <h2 className="text-[24px] sm:text-[28px] font-bold tracking-tight leading-tight text-gray-900 dark:text-white break-words" style={{ textWrap: 'balance' }}>
+          {trip.title}
+        </h2>
+        <p className="mt-1 text-[14px] font-medium text-gray-600 dark:text-gray-300 tabular-nums">
+          {formatDate(trip.startDate, i18n.language)} – {formatDate(trip.endDate, i18n.language)}
+          <span className="mx-2 text-gray-300 dark:text-gray-600">·</span>
+          {t('tripDetail.notebook.days', { count: trip.durationDays + 1 })}
+        </p>
 
-        <form onSubmit={handleSearch} className="flex gap-2">
-          <div className="relative flex-1 sm:flex-none">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t('admin.trips.searchPlaceholder')}
-              aria-label={t('admin.trips.searchPlaceholder')}
-              className="pl-9 pr-4 py-3 sm:py-2.5 rounded-xl bg-white dark:bg-white/[0.05] border border-gray-200 dark:border-white/[0.08] text-base md:text-sm font-medium focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all w-full sm:w-64 placeholder:text-gray-500 dark:placeholder:text-gray-500"
-            />
-          </div>
-          <button
-            type="submit"
-            className="px-4 py-3 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-sm shadow-blue-500/20 transition-all active:scale-95 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
-          >
-            {t('admin.trips.searchButton')}
-          </button>
-        </form>
-      </motion.div>
+        <Link
+          to={`/dashboard/admin/users?user=${trip.user.id}`}
+          className="group mt-5 flex items-center gap-3 py-2"
+        >
+          <UserAvatar user={avatarUser(trip.user)} size="sm" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-[12px] font-medium text-gray-500 dark:text-gray-400">{t('admin.v2.owner')}</span>
+            <span className="block text-[14px] font-semibold text-gray-900 dark:text-white truncate group-hover:underline underline-offset-2">
+              {displayName(trip.user, trip.user.email)}
+            </span>
+          </span>
+          <ChevronRight size={16} className="text-gray-400" />
+        </Link>
 
-      {/* Trips Table */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, delay: 0.05, ease: 'easeOut' }}
-        className="rounded-2xl border border-gray-200 dark:border-white/[0.06] bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none overflow-hidden"
-      >
-        {loading ? (
-          <div className="p-4">
-            <AdminTableSkeleton rows={8} />
-          </div>
-        ) : trips.length === 0 ? (
-          <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400 text-sm">
-            {t('admin.trips.notFound')}
-          </div>
+        <dl className="mt-5 grid grid-cols-3 sm:grid-cols-5 gap-x-4 gap-y-4 pt-5 border-t border-dashed border-gray-300 dark:border-white/15">
+          {facts.map((f) => (
+            <div key={f.label} className="flex flex-col min-w-0">
+              <dt className="order-last mt-1 text-[12px] font-medium text-gray-500 dark:text-gray-400 truncate">{f.label}</dt>
+              <dd className="text-[22px] font-bold leading-none tabular-nums text-gray-900 dark:text-white">{f.value}</dd>
+            </div>
+          ))}
+        </dl>
+      </header>
+
+      <DetailSection title={t('admin.v2.itinerary')} count={trip.activities.length}>
+        {trip.activities.length === 0 ? (
+          <p className="py-3 text-[14px] text-gray-500 dark:text-gray-400">{t('admin.v2.noItinerary')}</p>
         ) : (
-          <>
-            {/* Mobile card layout */}
-            <div className="md:hidden divide-y divide-gray-100 dark:divide-white/[0.04]">
-              {trips.map((trip) => (
-                <div
-                  key={trip.id}
-                  onClick={() => handleViewTrip(trip.id)}
-                  className="p-4 hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors active:bg-gray-100 dark:active:bg-white/[0.04] cursor-pointer"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[14px] font-semibold truncate">{trip.title}</p>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <UserAvatar user={{ first_name: trip.user.firstName, last_name: trip.user.lastName, avatar_url: trip.user.avatarUrl }} size="xs" />
-                        <span className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{trip.user.firstName ? `${trip.user.firstName} ${trip.user.lastName || ''}` : trip.user.email}</span>
-                      </div>
-                      <div className="flex items-center gap-3 mt-2 text-[11px] text-gray-500 dark:text-gray-400">
-                        <span className="flex items-center gap-1"><Calendar size={12} /> {trip.durationDays}d</span>
-                        <span className="flex items-center gap-1"><DollarSign size={12} /> {trip.totalExpenses.toLocaleString(i18n.language)} Kč</span>
-                        <span className="flex items-center gap-1"><Heart size={12} /> {trip.likes}</span>
-                      </div>
-                    </div>
-                    {/* Tapping the card opens detail */}
-                    <div className="flex flex-col gap-2 shrink-0">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleDeleteTrip(trip.id, trip.title); }}
-                        aria-label={t('admin.trips.tooltips.deleteTrip')}
-                        className="w-11 h-11 rounded-full bg-red-500/10 text-red-500 flex items-center justify-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Desktop table */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="text-left text-[12px] font-semibold text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-white/[0.06]">
-                    <th scope="col" className="px-6 py-4">{t('admin.trips.table.trip')}</th>
-                    <th scope="col" className="px-4 py-4">{t('admin.trips.table.user')}</th>
-                    <th scope="col" className="px-4 py-4">{t('admin.trips.table.period')}</th>
-                    <th scope="col" className="px-4 py-4">{t('admin.trips.table.days')}</th>
-                    <th scope="col" className="px-4 py-4 hidden lg:table-cell">{t('admin.trips.table.activities')}</th>
-                    <th scope="col" className="px-4 py-4">{t('admin.trips.table.expenses')}</th>
-                    <th scope="col" className="px-4 py-4 hidden lg:table-cell">{t('admin.trips.table.likes')}</th>
-                    <th scope="col" className="px-4 py-4 text-right">{t('admin.trips.table.actions')}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 dark:divide-white/[0.04]">
-                  {trips.map((trip) => (
-                    <tr
-                      key={trip.id}
-                      className="hover:bg-gray-50 dark:hover:bg-white/[0.02] transition-colors group cursor-pointer"
-                      onClick={() => handleViewTrip(trip.id)}
-                    >
-                      <td className="px-6 py-4">
-                        <span className="text-[13px] font-semibold">{trip.title}</span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-2">
-                          <UserAvatar user={{ first_name: trip.user.firstName, last_name: trip.user.lastName, avatar_url: trip.user.avatarUrl }} size="xs" />
-                          <div>
-                            <p className="text-[12px] font-semibold truncate max-w-[120px]">
-                              {trip.user.firstName ? `${trip.user.firstName} ${trip.user.lastName || ''}` : trip.user.email.split('@')[0]}
-                            </p>
-                            <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate max-w-[120px]">{trip.user.email}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className="text-[12px] text-gray-500 dark:text-gray-400">{trip.startDate} → {trip.endDate}</span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className="text-[13px] font-semibold tabular-nums">{trip.durationDays}</span>
-                      </td>
-                      <td className="px-4 py-4 hidden lg:table-cell">
-                        <span className="text-[13px] font-semibold tabular-nums">{trip.activityCount}</span>
-                      </td>
-                      <td className="px-4 py-4">
-                        <span className="text-[13px] font-semibold tabular-nums">{trip.totalExpenses.toLocaleString(i18n.language)} Kč</span>
-                      </td>
-                      <td className="px-4 py-4 hidden lg:table-cell">
-                        <span className="text-[13px] font-semibold tabular-nums flex items-center gap-1"><Heart size={12} className="text-red-400" /> {trip.likes}</span>
-                      </td>
-                      <td className="px-4 py-4 text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => handleViewTrip(trip.id)}
-                            className="p-2 rounded-lg hover:bg-blue-500/10 text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
-                            title={t('admin.trips.tooltips.viewTrip')}
-                            aria-label={t('admin.trips.tooltips.viewTrip')}
-                          >
-                            <Eye size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteTrip(trip.id, trip.title)}
-                            className="p-2 rounded-lg hover:bg-red-500/10 text-gray-500 dark:text-gray-400 hover:text-red-500 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60"
-                            title={t('admin.trips.tooltips.deleteTrip')}
-                            aria-label={t('admin.trips.tooltips.deleteTrip')}
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
+          <ol>
+            {trip.activities.map((a, i) => (
+              <li key={a.id} className="flex gap-4 py-3 border-b border-gray-100 dark:border-white/[0.06] last:border-b-0">
+                <span className="w-12 shrink-0 text-[12px] font-semibold text-gray-500 dark:text-gray-400 pt-0.5 tabular-nums">
+                  {t('admin.v2.dayN', { n: (a.dayIndex ?? i) + 1 })}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[14px] font-semibold text-gray-900 dark:text-white">{a.title || '—'}</span>
+                  {a.location && (
+                    <span className="mt-0.5 inline-flex items-center gap-1 text-[12px] font-medium text-gray-500 dark:text-gray-400">
+                      <MapPin size={12} strokeWidth={2.25} /> {a.location}
+                    </span>
+                  )}
+                  {a.plan && <span className="mt-1 block text-[13px] text-gray-600 dark:text-gray-300 whitespace-pre-wrap line-clamp-3">{a.plan}</span>}
+                </span>
+              </li>
+            ))}
+          </ol>
         )}
+      </DetailSection>
 
-        {/* Pagination */}
-        {pagination.totalPages > 1 && (
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 border-t border-gray-200 dark:border-white/[0.06]">
-            <p className="text-[12px] text-gray-500 dark:text-gray-400 font-medium text-center sm:text-left">
-              {t('admin.trips.pageMeta', { page: pagination.page, pages: pagination.totalPages, count: pagination.total })}
-            </p>
-            <div className="flex gap-1 justify-center sm:justify-end">
-              <button
-                onClick={() => fetchTrips(pagination.page - 1, search)}
-                disabled={pagination.page <= 1}
-                aria-label={t('admin.trips.prevPage')}
-                className="inline-flex items-center gap-1 min-h-[44px] px-4 rounded-xl text-[12px] font-semibold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
-              >
-                <ChevronLeft size={15} /> {t('admin.trips.prevPage').replace('← ', '')}
-              </button>
-              <button
-                onClick={() => fetchTrips(pagination.page + 1, search)}
-                disabled={pagination.page >= pagination.totalPages}
-                aria-label={t('admin.trips.nextPage')}
-                className="inline-flex items-center gap-1 min-h-[44px] px-4 rounded-xl text-[12px] font-semibold hover:bg-gray-100 dark:hover:bg-white/10 text-gray-600 dark:text-gray-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
-              >
-                {t('admin.trips.nextPage').replace(' →', '')} <ChevronRight size={15} />
-              </button>
-            </div>
-          </div>
-        )}
-      </motion.div>
-
-      {/* Trip Detail Slide-over */}
-      {createPortal(
-        <AnimatePresence>
-          {selectedTrip && (
-            <div className="fixed inset-0 z-[100] flex justify-end">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="absolute inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-md"
-                onClick={() => setSelectedTrip(null)}
-              />
-              <motion.div
-                ref={detailPanelRef}
-                role="dialog"
-                aria-modal="true"
-                aria-label={t('admin.trips.detail.dialogLabel')}
-                tabIndex={-1}
-                initial={{ x: '100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '100%' }}
-                transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
-                className="relative w-full max-w-xl bg-white dark:bg-[#111113] border-l border-gray-200 dark:border-white/[0.08] h-full overflow-y-auto z-10 custom-scrollbar shadow-2xl shadow-black/50 focus:outline-none"
-              >
-                {detailLoading || selectedTrip?.loading ? (
-                  <div className="p-5 sm:p-8 space-y-6">
-                    <Skeleton className="h-8 w-2/3" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <div className="grid grid-cols-2 gap-4">
-                      <Skeleton className="h-20 rounded-2xl" />
-                      <Skeleton className="h-20 rounded-2xl" />
-                    </div>
-                    <div className="space-y-3">
-                      <Skeleton className="h-16 rounded-2xl" />
-                      <Skeleton className="h-16 rounded-2xl" />
-                      <Skeleton className="h-16 rounded-2xl" />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="p-5 sm:p-8 pb-[max(2rem,env(safe-area-inset-bottom))] sm:pb-8 space-y-6">
-                    {/* Close button */}
-                    <button
-                      onClick={() => setSelectedTrip(null)}
-                      aria-label={t('admin.close')}
-                      className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2.5 rounded-full bg-gray-100 dark:bg-white/[0.06] hover:bg-gray-200 dark:hover:bg-white/[0.12] transition-colors cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
-                    >
-                      <X size={16} className="text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
-                    </button>
-
-                    {/* Trip Header */}
-                    <div className="pt-2">
-                      <h2 className="text-2xl font-bold tracking-tight pr-12 break-words">{selectedTrip.title}</h2>
-                      <div className="flex items-center gap-3 mt-3 flex-wrap">
-                        <span className="text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5 bg-gray-100 dark:bg-white/[0.04] px-3 py-1.5 rounded-lg">
-                          <Calendar size={13} /> {selectedTrip.startDate} → {selectedTrip.endDate}
-                        </span>
-                        <span className="text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5 bg-gray-100 dark:bg-white/[0.04] px-3 py-1.5 rounded-lg">
-                          <Clock size={13} /> {selectedTrip.durationDays} {t('admin.trips.detail.daysLabel')}
-                        </span>
-                        <span className="text-[12px] text-red-500 dark:text-red-400 flex items-center gap-1.5 bg-red-500/10 px-3 py-1.5 rounded-lg font-semibold">
-                          <Heart size={13} /> {selectedTrip.likes}
-                        </span>
-                      </div>
-                      {/* Owner */}
-                      <div className="flex items-center gap-3 mt-4 p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
-                        <UserAvatar user={{ first_name: selectedTrip.user?.firstName, last_name: selectedTrip.user?.lastName, avatar_url: selectedTrip.user?.avatarUrl }} size="sm" />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[12px] font-semibold truncate">
-                            {selectedTrip.user?.firstName ? `${selectedTrip.user.firstName} ${selectedTrip.user.lastName || ''}` : selectedTrip.user?.email}
-                          </p>
-                          <p className="text-[11px] text-gray-500 dark:text-gray-400 truncate">{selectedTrip.user?.email}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Stats row */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                      <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
-                        <p className="text-lg font-bold tabular-nums">{selectedTrip.activities?.length || 0}</p>
-                        <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 mt-0.5">{t('admin.trips.detail.daysLabel')}</p>
-                      </div>
-                      <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
-                        <p className="text-lg font-bold tabular-nums text-blue-600 dark:text-blue-400">{totalTripExpenses(selectedTrip).toLocaleString(i18n.language)}</p>
-                        <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 mt-0.5">Kč</p>
-                      </div>
-                      <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
-                        <p className="text-lg font-bold tabular-nums">{selectedTrip.packingList?.length || 0}</p>
-                        <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 mt-0.5">{t('admin.trips.detail.packingLabel')}</p>
-                      </div>
-                      <div className="text-center p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
-                        <p className="text-lg font-bold tabular-nums">{selectedTrip.documents?.length || 0}</p>
-                        <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 mt-0.5">{t('admin.trips.detail.notesLabel')}</p>
-                      </div>
-                    </div>
-
-                    {/* Itinerary / Activities */}
-                    {selectedTrip.activities?.length > 0 && (
-                      <div>
-                        <h3 className="text-[12px] font-semibold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
-                          <MapPin size={13} /> {t('tripDetail.tabs.itinerary')} ({selectedTrip.activities.length} {t('admin.trips.detail.daysLabel')})
-                        </h3>
-                        <div className="space-y-2">
-                          {selectedTrip.activities.map((a, i) => (
-                            <div key={a.id} className="p-4 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
-                              <div className="flex items-start gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0 mt-0.5">
-                                  <span className="text-[11px] font-bold text-blue-600 dark:text-blue-400 tabular-nums">{i + 1}</span>
-                                </div>
-                                <div className="min-w-0 flex-1">
-                                  <div className="flex items-center justify-between gap-2">
-                                    <p className="text-[13px] font-semibold truncate">{a.title || `Den ${i + 1}`}</p>
-                                    <span className="text-[10px] text-gray-500 dark:text-gray-400 shrink-0">{a.date}</span>
-                                  </div>
-                                  {a.location && (
-                                    <p className="text-[11px] text-blue-600 dark:text-blue-400 mt-0.5 flex items-center gap-1 min-w-0">
-                                      <MapPin size={10} className="shrink-0" /> <span className="truncate">{a.location}</span>
-                                    </p>
-                                  )}
-                                  {a.plan && (
-                                    <p className="text-[12px] text-gray-500 dark:text-gray-400 mt-2 leading-relaxed whitespace-pre-wrap">{a.plan}</p>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Expenses */}
-                    {selectedTrip.expenses?.length > 0 && (
-                      <div>
-                        <h3 className="text-[12px] font-semibold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
-                          <DollarSign size={13} /> {t('budget.title')} ({selectedTrip.expenses.length} {t('budget.items')} · {totalTripExpenses(selectedTrip).toLocaleString(i18n.language)} Kč)
-                        </h3>
-                        <div className="space-y-1.5">
-                          {selectedTrip.expenses.map(e => {
-                            const catEmoji = CATEGORY_EMOJIS[e.category] || CATEGORY_EMOJIS.other;
-                            const catLabel = t(`budget.categories.${e.category}`) || t('budget.categories.other');
-                            return (
-                              <div key={e.id} className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
-                                <span className="text-lg">{catEmoji}</span>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-[12px] font-semibold truncate">{e.description}</p>
-                                  <p className="text-[10px] text-gray-500 dark:text-gray-400">{catLabel}{e.date ? ` · ${e.date}` : ''}</p>
-                                </div>
-                                <span className="text-[13px] font-semibold tabular-nums shrink-0">{e.amount.toLocaleString(i18n.language)} Kč</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Packing List */}
-                    {selectedTrip.packingList?.length > 0 && (
-                      <div>
-                        <h3 className="text-[12px] font-semibold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
-                          <Package size={13} /> {t('admin.trips.detail.packingLabel')} ({selectedTrip.packingList.filter(p => p.checked).length}/{selectedTrip.packingList.length})
-                        </h3>
-                        <div className="grid grid-cols-2 gap-1.5">
-                          {selectedTrip.packingList.map(p => (
-                            <div key={p.id} className={`flex items-center gap-2 p-2.5 rounded-lg text-[12px] ${
-                              p.checked ? 'text-gray-500 dark:text-gray-400 line-through bg-gray-50 dark:bg-white/[0.02]' : 'text-gray-600 dark:text-gray-300 bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none'
-                            }`}>
-                              {p.checked ? <CheckSquare size={14} className="text-green-500 shrink-0" /> : <Square size={14} className="text-gray-400 dark:text-gray-600 shrink-0" />}
-                              <span className="truncate">{p.text}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Documents */}
-                    {selectedTrip.documents?.length > 0 && (
-                      <div>
-                        <h3 className="text-[12px] font-semibold text-gray-500 dark:text-gray-400 mb-3 flex items-center gap-2">
-                          <FileText size={13} /> {t('admin.trips.detail.notesLabel')} ({selectedTrip.documents.length})
-                        </h3>
-                        <div className="space-y-2">
-                          {selectedTrip.documents.map(d => (
-                            <div key={d.id} className="p-4 rounded-xl bg-white dark:bg-white/[0.03] shadow-sm dark:shadow-none border border-gray-200 dark:border-white/[0.06]">
-                              <p className="text-[13px] font-semibold mb-2 break-words">{d.title}</p>
-                              <p className="text-[12px] text-gray-500 dark:text-gray-400 leading-relaxed whitespace-pre-wrap break-words">{d.content}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Empty state if nothing */}
-                    {!selectedTrip.activities?.length && !selectedTrip.expenses?.length && !selectedTrip.packingList?.length && !selectedTrip.documents?.length && (
-                      <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                        <MapPin size={32} className="mx-auto mb-3 opacity-50" />
-                        <p className="text-[13px]">{t('admin.trips.detail.empty')}</p>
-                      </div>
-                    )}
-
-                    {/* Delete button at bottom */}
-                    <div className="pt-4 border-t border-gray-200 dark:border-white/[0.06]">
-                      <button
-                        onClick={() => handleDeleteTrip(selectedTrip.id, selectedTrip.title)}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors font-semibold text-[13px] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/60"
-                      >
-                        <Trash2 size={16} />
-                        {t('admin.trips.detail.deleteButton')}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
+      <div className="px-5 sm:px-8 pt-8">
+        <button
+          type="button"
+          onClick={remove}
+          className="inline-flex items-center gap-2 h-10 px-3 -ml-3 rounded-xl text-[14px] font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer"
+        >
+          <Trash2 size={16} strokeWidth={2.25} /> {t('admin.v2.deleteTrip')}
+        </button>
+      </div>
     </div>
   );
+};
+
+const AdminTrips = () => {
+  const { t, i18n } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedId = searchParams.get('trip');
+  const [trips, setTrips] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const debounceRef = useRef(null);
+
+  const fetchPage = useCallback(async (nextPage, query, append) => {
+    append ? setLoadingMore(true) : setLoading(true);
+    try {
+      const r = await api.admin.getTrips({ page: nextPage, limit: 30, search: query });
+      setTrips((prev) => (append ? [...prev, ...r.trips] : r.trips));
+      setPage(r.pagination.page);
+      setTotalPages(r.pagination.totalPages);
+      setTotal(r.pagination.total);
+    } catch {
+      toast.error(t('admin.trips.toast.loadError'));
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  }, [t]);
+
+  useEffect(() => {
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => fetchPage(1, search, false), search ? 300 : 0);
+    return () => clearTimeout(debounceRef.current);
+  }, [search, fetchPage]);
+
+  const select = (id) => setSearchParams(id ? { trip: String(id) } : {});
+
+  useEffect(() => {
+    if (!selectedId && trips.length && window.matchMedia('(min-width: 1024px)').matches) {
+      setSearchParams({ trip: String(trips[0].id) }, { replace: true });
+    }
+  }, [selectedId, trips, setSearchParams]);
+
+  const list = (
+    <>
+      <ListToolbar value={search} onChange={setSearch} placeholder={t('admin.v2.searchTrips')} />
+      <p className="px-4 py-2 text-[13px] font-medium text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-white/10 tabular-nums">
+        {t('admin.trips.total', { count: total })}
+      </p>
+      {loading ? (
+        <div className="p-4"><AdminTableSkeleton rows={8} /></div>
+      ) : trips.length === 0 ? (
+        <p className="py-12 text-center text-[14px] text-gray-500 dark:text-gray-400">{t('admin.trips.notFound')}</p>
+      ) : (
+        <ul className="lg:max-h-[calc(100dvh-18rem)] lg:overflow-y-auto custom-scrollbar">
+          {trips.map((trip) => (
+            <ListRow key={trip.id} selected={String(trip.id) === selectedId} onClick={() => select(trip.id)}>
+              <UserAvatar user={avatarUser(trip.user)} size="sm" />
+              <span className="min-w-0 flex-1">
+                <span className="flex items-center gap-2">
+                  <span className="text-[14px] font-semibold text-gray-900 dark:text-white truncate">{trip.title}</span>
+                  {trip.inTrash && <Badge tone="red">{t('admin.v2.inTrash')}</Badge>}
+                </span>
+                <span className="block text-[12px] font-medium text-gray-500 dark:text-gray-400 truncate">
+                  {displayName(trip.user, trip.user.email)}
+                </span>
+              </span>
+              <span className="shrink-0 text-right text-[12px] font-medium tabular-nums text-gray-600 dark:text-gray-300">
+                {formatDate(trip.startDate, i18n.language)}
+              </span>
+            </ListRow>
+          ))}
+        </ul>
+      )}
+      <LoadMore visible={!loading && page < totalPages} loading={loadingMore} onClick={() => fetchPage(page + 1, search, true)} label={t('admin.v2.loadMore')} />
+    </>
+  );
+
+  const detail = selectedId ? (
+    <TripDossier
+      key={selectedId}
+      tripId={selectedId}
+      onBack={() => select(null)}
+      onDeleted={(id) => {
+        setTrips((prev) => prev.filter((tr) => tr.id !== id));
+        setTotal((n) => n - 1);
+        select(null);
+      }}
+    />
+  ) : (
+    <EmptyDetail text={t('admin.v2.selectTrip')} />
+  );
+
+  return <MasterDetail list={list} detail={detail} hasSelection={!!selectedId} />;
 };
 
 export default AdminTrips;

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-06T15:16:30+00:00",
+  "generatedAt": "2026-10-06T16:25:05+00:00",
   "title": "Design System: Journeo",
   "extensions": {
     "colorMeta": {
@@ -325,6 +325,48 @@
           "#ddd6fe",
           "#f5f3ff"
         ]
+      },
+      "night-sidebar": {
+        "role": "neutral",
+        "displayName": "Night Sidebar",
+        "tonalRamp": [
+          "#000000",
+          "#101012",
+          "#151517",
+          "#1c1c1e",
+          "#2c2c2e",
+          "#3a3a3c",
+          "#e5e5ea",
+          "#f5f5f7"
+        ]
+      },
+      "active-wash": {
+        "role": "primary",
+        "displayName": "Active Wash",
+        "tonalRamp": [
+          "#1e3a8a",
+          "#1e40af",
+          "#1d4ed8",
+          "#2563eb",
+          "#3b82f6",
+          "#60a5fa",
+          "#93c5fd",
+          "#eff6ff"
+        ]
+      },
+      "active-ink": {
+        "role": "primary",
+        "displayName": "Active Ink",
+        "tonalRamp": [
+          "#1e3a8a",
+          "#1e40af",
+          "#1d4ed8",
+          "#2563eb",
+          "#3b82f6",
+          "#60a5fa",
+          "#93c5fd",
+          "#dbeafe"
+        ]
       }
     },
     "typographyMeta": {
@@ -336,13 +378,17 @@
         "displayName": "Headline",
         "purpose": "Page h1s, day title, tool titles on the page (28-30px on mobile)."
       },
+      "subhead": {
+        "displayName": "Subhead",
+        "purpose": "Section and card headings on dashboard pages."
+      },
       "title": {
         "displayName": "Title",
         "purpose": "Dialog, sheet and card headings."
       },
       "numeral": {
         "displayName": "Numeral",
-        "purpose": "Day-chip date numeral and large amounts; tabular."
+        "purpose": "Day-chip date numeral, passport counts, next-trip countdown, large amounts; tabular."
       },
       "plan": {
         "displayName": "Plan",
@@ -352,13 +398,21 @@
         "displayName": "Body",
         "purpose": "List items, input values, locations, empty states."
       },
+      "control": {
+        "displayName": "Control",
+        "purpose": "Navigation items, row titles, menu rows, button text, next-trip title."
+      },
       "label": {
         "displayName": "Label",
-        "purpose": "Sentence-case section labels, buttons (14px), back link, save status."
+        "purpose": "Sentence-case section labels, back link, search trigger, save status."
       },
       "caption": {
         "displayName": "Caption",
-        "purpose": "Weekday/place in day chips, tab status lines, role chips."
+        "purpose": "Weekday/place in day chips, tab status lines, passport count labels and bio, role chips."
+      },
+      "micro": {
+        "displayName": "Micro",
+        "purpose": "Bottom-bar labels, shortcut chips, version badge, unit text under numerals; sentence case only."
       }
     },
     "shadows": [
@@ -385,12 +439,22 @@
       {
         "name": "blue-action-raised",
         "value": "0 8px 20px -8px rgba(37,99,235,0.7)",
-        "purpose": "Raised add button in the mobile tool bar."
+        "purpose": "Raised center action in the mobile bottom bar (app and trip)."
+      },
+      {
+        "name": "popover",
+        "value": "0 12px 32px -12px rgba(17,24,39,0.25)",
+        "purpose": "Account disclosure under the passport block."
+      },
+      {
+        "name": "sheet-lift",
+        "value": "0 -8px 40px -12px rgba(0,0,0,0.35)",
+        "purpose": "Mobile passport bottom sheet."
       },
       {
         "name": "overlay",
         "value": "0 25px 50px -12px rgba(0,0,0,0.25)",
-        "purpose": "Dialogs, bottom sheets, mobile drawer (Tailwind shadow-2xl)."
+        "purpose": "Dialogs and other bottom sheets (Tailwind shadow-2xl)."
       }
     ],
     "motion": [
@@ -403,6 +467,16 @@
         "name": "press",
         "value": "scale(0.95)",
         "purpose": "Active press on buttons and icon buttons."
+      },
+      {
+        "name": "nav-pill",
+        "value": "spring stiffness 350, damping 30 (instant under reduced motion)",
+        "purpose": "Active-wash pill gliding between sidebar rows."
+      },
+      {
+        "name": "sheet",
+        "value": "translateY 100% to 0, spring bounce 0, 0.4s; scrim fade 0.2s",
+        "purpose": "Mobile passport sheet."
       },
       {
         "name": "page-flip",
@@ -501,21 +575,30 @@
       "css": ".ds-chip-ro,.ds-chip-ed{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:inline-flex;align-items:center;padding:2px 10px;border-radius:9999px;font-size:12px;font-weight:600}.ds-chip-ro{background:#fffbeb;color:#b45309}.ds-chip-ed{background:#f5f3ff;color:#6d28d9}"
     },
     {
-      "name": "Mobile Tool Bar",
+      "name": "Passport Sidebar",
+      "kind": "nav",
+      "refersTo": "sidebar",
+      "description": "Flush 264px desktop shell: passport block, the one filled create action, ⌘K search, nav rows with the active-wash pill, next-trip countdown.",
+      "html": "<aside class=\"ds-side\"><div class=\"ds-pass\"><div class=\"ds-pass-id\"><span class=\"ds-av\">PV</span><span><b>Petr Vorlíček</b><small>Cestovatel</small></span></div><dl class=\"ds-pass-st\"><div><dd>14</dd><dt>Země</dt></div><div><dd>23</dd><dt>Výlety</dt></div><div><dd>131</dd><dt>Dny</dt></div></dl></div><button class=\"ds-create\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg><span>Vytvořit výlet</span></button><button class=\"ds-search\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.3-4.3\"/></svg><span>Hledat</span><kbd>⌘K</kbd></button><nav><a class=\"ds-nav ds-nav--on\"><svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8\"/><path d=\"M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/></svg><span>Přehled</span></a><a class=\"ds-nav\"><svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z\"/><path d=\"M15 5.764v15\"/><path d=\"M9 3.236v15\"/></svg><span>Výlety</span><kbd>T</kbd></a></nav><a class=\"ds-next\"><span class=\"ds-next-n\"><b>18</b><small>dní do odjezdu</small></span><span class=\"ds-next-t\">Lisabon a Sintra</span></a></aside>",
+      "css": ".ds-side{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;width:264px;display:flex;flex-direction:column;gap:12px;padding:20px 12px;background:#fff;border-right:1px solid rgba(229,231,235,.8);color:#111827}.ds-pass{padding:16px;border-radius:16px;background:rgba(249,250,251,.7);border:1px solid rgba(229,231,235,.8);cursor:pointer;transition:border-color .2s}.ds-pass:hover{border-color:#d1d5db}.ds-pass-id{display:flex;gap:12px;align-items:center}.ds-av{width:40px;height:40px;border-radius:9999px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}.ds-pass-id b{display:block;font-size:14px;font-weight:700}.ds-pass-id small{display:block;font-size:12px;font-weight:500;color:#6b7280}.ds-pass-st{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 0;padding-top:14px;border-top:1px dashed #d1d5db}.ds-pass-st div{display:flex;flex-direction:column}.ds-pass-st dd{margin:0;font-size:26px;font-weight:700;line-height:1;letter-spacing:-.025em;font-variant-numeric:tabular-nums}.ds-pass-st dt{margin-top:4px;font-size:12px;font-weight:500;color:#6b7280}.ds-create{display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;border:0;border-radius:12px;background:#2563eb;color:#fff;font:inherit;font-size:14px;font-weight:600;box-shadow:0 6px 16px -8px rgba(37,99,235,.7);cursor:pointer;transition:background-color .15s,transform .15s}.ds-create:hover{background:#3b82f6}.ds-create:active{transform:scale(.98)}.ds-search{display:flex;align-items:center;gap:10px;height:40px;padding:0 14px;border:0;border-radius:12px;background:rgba(243,244,246,.8);color:#4b5563;font:inherit;font-size:13px;font-weight:600;cursor:pointer}.ds-search:hover{color:#111827;background:#f3f4f6}.ds-side kbd{margin-left:auto;font-size:11px;padding:2px 6px;border-radius:4px;background:#fff;border:1px solid #e5e7eb;color:#6b7280}.ds-nav{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;color:#4b5563;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;transition:background-color .2s,color .2s}.ds-nav:hover{background:#f3f4f6;color:#111827}.ds-nav kbd{opacity:0;transition:opacity .15s}.ds-nav:hover kbd{opacity:1}.ds-nav--on,.ds-nav--on:hover{background:#eff6ff;color:#1d4ed8}.ds-next{display:flex;align-items:center;gap:14px;padding:14px;border-radius:16px;border:1px solid rgba(229,231,235,.8);cursor:pointer;text-decoration:none;color:#111827}.ds-next:hover{background:#f9fafb;border-color:#d1d5db}.ds-next-n{width:64px;text-align:center}.ds-next-n b{display:block;font-size:26px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}.ds-next-n small{display:block;margin-top:4px;font-size:11px;font-weight:500;color:#6b7280}.ds-next-t{font-size:14px;font-weight:600}.ds-side :focus-visible{outline:none;box-shadow:0 0 0 2px rgba(59,130,246,.6)}"
+    },
+    {
+      "name": "Mobile Bottom Bar",
       "kind": "nav",
       "refersTo": "",
-      "description": "Fixed bottom bar on the trip below lg: four tool slots and a raised blue add action.",
-      "html": "<nav class=\"ds-bar\"><button class=\"ds-slot ds-slot--on\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 20a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2\"/><path d=\"M8 20v2\"/><path d=\"M16 20v2\"/><path d=\"M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2\"/><rect x=\"6\" y=\"6\" width=\"12\" height=\"14\" rx=\"2\"/></svg><span>Program</span></button><button class=\"ds-slot\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 20a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2\"/><path d=\"M8 20v2\"/><path d=\"M16 20v2\"/><path d=\"M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2\"/><rect x=\"6\" y=\"6\" width=\"12\" height=\"14\" rx=\"2\"/></svg><span>Packing</span></button><button class=\"ds-add\"><i><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg></i><span>Expense</span></button><button class=\"ds-slot\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/><path d=\"M12 18v-6\"/><path d=\"m9 15 3 3 3-3\"/></svg><span>Links</span></button><button class=\"ds-slot\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\"/><path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\"/></svg><span>Budget</span></button></nav>",
+      "description": "Shared mobile bottom bar (app and trip): full width, 52px slots, 11px labels, raised blue center action.",
+      "html": "<nav class=\"ds-bar\"><button class=\"ds-slot ds-slot--on\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 20a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2\"/><path d=\"M8 20v2\"/><path d=\"M16 20v2\"/><path d=\"M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2\"/><rect x=\"6\" y=\"6\" width=\"12\" height=\"14\" rx=\"2\"/></svg><span>Přehled</span></button><button class=\"ds-slot\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 20a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2\"/><path d=\"M8 20v2\"/><path d=\"M16 20v2\"/><path d=\"M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2\"/><rect x=\"6\" y=\"6\" width=\"12\" height=\"14\" rx=\"2\"/></svg><span>Výlety</span></button><button class=\"ds-add\"><i><svg width=\"17\" height=\"17\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg></i><span>Výlet</span></button><button class=\"ds-slot\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/><path d=\"M12 18v-6\"/><path d=\"m9 15 3 3 3-3\"/></svg><span>Mapa</span></button><button class=\"ds-slot\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\"/><path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\"/></svg><span>Výdaje</span></button></nav>",
       "css": ".ds-bar{font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;padding:6px 8px 8px;margin-top:24px;background:rgba(255,255,255,.95);backdrop-filter:blur(24px);border-top:1px solid rgba(229,231,235,.8)}.ds-slot,.ds-add{display:flex;flex-direction:column;align-items:center;gap:4px;min-height:52px;padding:6px 0;border:0;background:none;border-radius:12px;color:#4b5563;font-size:11px;font-weight:600;cursor:pointer}.ds-slot:active{background:#f3f4f6}.ds-slot--on{color:#2563eb}.ds-add{color:#1d4ed8;padding-top:0}.ds-add i{margin-top:-20px;width:56px;height:56px;border-radius:16px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px -8px rgba(37,99,235,.7);transition:transform .15s}.ds-add:active i{transform:scale(.95)}.ds-slot:focus-visible,.ds-add:focus-visible{outline:none;box-shadow:0 0 0 2px rgba(59,130,246,.5)}"
     }
   ],
   "narrative": {
     "northStar": "The Travel Notebook on a Quiet Desk",
-    "overview": "Journeo is a white page lying on an almost-white desk. The desk (#fbfbfd) is the app ground; the work happens on pages and cards that sit a hair above it, edged by gray hairlines and the softest ambient shadow. One saturated voice, a confident blue, marks what is selected and what to do next; everything else is ink and grays. Type is Inter throughout: large, tight, bold titles over medium-weight 13 to 15px working text, with tabular numerals wherever counts and money appear.\n\nThe trip notebook (trip detail) is the system's most literal expression and its newest surface: one day per page, a strip of day chips above it, divider tabs attached to the page's right edge, and the day's plan written on faint ruled lines. Inside the page nothing floats a second time. Sections are separated by lines, not by more cards. The wider app (dashboard, statistics, friends, settings) carries the same world in a slightly glassier dialect: translucent white cards with backdrop blur and 32px corners over the desk.\n\nLight is the verified register: this build was designed and checked in light, and the user prefers it. Dark is fully supported through `dark:` class variants (black desk, #1c1c1e pages, #f5f5f7 ink, blue lifted to #60a5fa) and every new surface must ship both. PRODUCT.md still names dark as primary; that line is out of date relative to the build and the user's stated preference, and is not changed here.",
+    "overview": "Journeo is a white page lying on an almost-white desk. The desk (#fbfbfd) is the app ground; the work happens on pages and cards that sit a hair above it, edged by gray hairlines and the softest ambient shadow. One saturated voice, a confident blue, marks what is selected and what to do next; everything else is ink and grays. Type is Inter throughout: large, tight, bold titles over medium-weight 13 to 15px working text, with tabular numerals wherever counts and money appear.\n\nThe trip notebook (trip detail) is the system's most literal expression and its newest surface: one day per page, a strip of day chips above it, divider tabs attached to the page's right edge, and the day's plan written on faint ruled lines. Inside the page nothing floats a second time. Sections are separated by lines, not by more cards. The wider app (dashboard, statistics, friends, settings) carries the same world in a slightly glassier dialect: translucent white cards with backdrop blur and 32px corners over the desk. The app shell around it reads as a travel passport: a flush white sidebar whose top block is the traveler's identity, their counts (countries, trips, days) and the flags of countries they have visited, above plain navigation.\n\nLight is the verified register: this build was designed and checked in light, and the user prefers it. Dark is fully supported through `dark:` class variants (black desk, #1c1c1e pages, #f5f5f7 ink, blue lifted to #60a5fa) and every new surface must ship both. PRODUCT.md records light as the primary register.",
     "keyCharacteristics": [
       "Near-white desk, pure-white pages, hairline gray edges.",
       "One accent: blue-600 for selection and the primary action only.",
       "Inter only in the product UI; bold tight titles, medium working text, tabular numbers.",
+      "A flush passport sidebar on desktop; avatar, bottom sheet and a five-slot bottom bar on mobile.",
       "Generous rounding (12 / 16 / 28 / 32px), never sharp; dashboard buttons are rounded rectangles, not pills.",
       "Ambient, low-contrast shadows; a page never nests a floating card inside itself.",
       "Light and dark both shipped on every surface; light is the verified register."
@@ -533,7 +616,7 @@
       },
       {
         "name": "The Sentence-Case Label Rule",
-        "body": "Section and field labels are 13px semibold muted text in sentence case, optionally followed by a dot-separated count. New surfaces do not use 11px bold uppercase widely-tracked labels.",
+        "body": "Section and field labels are 13px semibold muted text in sentence case, optionally followed by a dot-separated count. The app does not use 11px bold uppercase widely-tracked labels; they were removed across the dashboard, admin and public share view; the 11px Micro size exists only for bar labels, shortcut chips and units, in sentence case (exceptions: calendar weekday heads, language codes, PDF print styles, and the landing page's own marketing style).",
         "section": "typography"
       },
       {
@@ -554,14 +637,17 @@
       "**Do** use 16px corners for buttons, inputs and chips, 28 to 32px for pages, cards and dialogs.",
       "**Do** separate sections inside a page with a top hairline, as the embedded budget does.",
       "**Do** edit in place and autosave, with a visible save status, instead of adding save buttons.",
-      "**Do** keep touch targets at 44px or more and respect safe-area insets on fixed bars and sheets."
+      "**Do** keep touch targets at 44px or more and respect safe-area insets on fixed bars and sheets.",
+      "**Do** mark the active destination with the active-wash pill and active-ink text; keep filled blue for the one create action.",
+      "**Do** give every mobile bottom bar the same grammar: full width, top hairline, 52px slots, 11px labels, one raised blue center action."
     ],
     "donts": [
       "**Don't** nest a bordered or shadowed card inside the notebook page or another card.",
       "**Don't** use blue for decoration: headings, labels and resting borders stay ink and gray.",
-      "**Don't** add 11px bold uppercase, widely tracked labels to new surfaces; labels are sentence-case 13px semibold.",
+      "**Don't** add 11px bold uppercase, widely tracked labels; labels are sentence-case 13px semibold.",
       "**Don't** use pill-shaped buttons inside the dashboard (full-round CTAs belong to the landing page), and don't use sharp corners anywhere.",
       "**Don't** use hard or offset shadows; depth stays ambient.",
+      "**Don't** float the app shell as a rounded card or add floating top-right action clusters; the sidebar is a flush column with a hairline edge.",
       "**Don't** bring Caveat or any second family into the dashboard UI.",
       "**Don't** design or verify in only one theme."
     ]

@@ -1,5 +1,6 @@
 import React, { Suspense, lazy, useState, useEffect, useCallback } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import DashboardLayout from './DashboardLayout';
 import DashboardNotFound from './DashboardNotFound';
@@ -27,6 +28,7 @@ import {
 // Lazy load dashboard sub-components
 const TripsOverview = lazy(() => import('./TripsOverview'));
 const TripDetail = lazy(() => import('./TripDetail'));
+const AdminHome = lazy(() => import('../admin/AdminHome'));
 const Statistics = lazy(() => import('./Statistics'));
 const Settings = lazy(() => import('./Settings'));
 const Budget = lazy(() => import('./Budget'));
@@ -48,6 +50,7 @@ const withSuspense = (element, fallback) => (
 );
 
 const DashboardHome = () => {
+  const { isAdmin } = useAuth();
   const { t } = useTranslation();
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -302,6 +305,10 @@ const DashboardHome = () => {
         <Route
           path="/profile/:userId/trip/:tripId"
           element={withSuspense(<ReadOnlyTripView />, <TripViewSkeleton />)}
+        />
+        <Route
+          path="/admin/*"
+          element={isAdmin ? withSuspense(<AdminHome />, <ContentSkeleton />) : <Navigate to="/dashboard" replace />}
         />
         <Route path="*" element={withSuspense(<DashboardNotFound />, <ContentSkeleton />)} />
       </Routes>

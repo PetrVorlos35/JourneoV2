@@ -1,0 +1,55 @@
+{
+  "title": "Admin panel — struktura",
+  "question": "Admin bude žít v novém postranním panelu aplikace (sekce Admin) se stejným vzhledem. Celkové výdaje zmizí. Vyber, jak má být admin poskládaný.",
+  "options": [
+    {
+      "id": "master-detail",
+      "label": "Seznam + karta uživatele",
+      "kicker": "THE ROLL",
+      "thesis": "Uživatelé jsou hlavní obrazovka: vlevo hledatelný seznam, vpravo vždy otevřená karta vybraného člověka s jeho výlety, přáteli a akcemi — podpora na dvě kliknutí.",
+      "palette": ["#fbfbfd", "#111827", "#2563eb", "#e5e7eb"],
+      "materials": ["seznam s linkami", "karta detailu vedle seznamu"],
+      "viewport": "Nahoře přepínač Přehled · Uživatelé · Výlety. V Uživatelích vlevo (~40 %) hledání a seznam (avatar, jméno, e-mail, počet výletů, registrace), vpravo karta vybraného: profil, role (přepínač), výlety se stavem a odkazem, přátelé, nebezpečné akce dole. Výlety stejně: seznam + detail výletu. Přehled zvlášť: noví uživatelé a výlety za týden/měsíc, graf registrací a výletů po týdnech. Mobil: seznam → klepnutí otevře kartu přes celou obrazovku.",
+      "risk": "Na Přehledu zůstává klasický dashboard; síla je hlavně v Uživatelích a Výletech.",
+      "wireframe": {"cols": 12, "rows": 10, "regions": [
+        {"label": "Přehled · Uživatelé · Výlety", "x": 0, "y": 0, "w": 12, "h": 1},
+        {"label": "hledání + seznam uživatelů", "x": 0, "y": 1, "w": 5, "h": 9},
+        {"label": "karta uživatele: profil · role · výlety · přátelé · akce", "x": 5, "y": 1, "w": 7, "h": 9, "accent": true}
+      ]}
+    },
+    {
+      "id": "search-console",
+      "label": "Konzole podpory",
+      "thesis": "Admin začíná jedním polem „Najít uživatele nebo výlet“; pod ním puls aplikace. Výsledek otevře celostránkový spis — člověk, jeho výlety a historie na jednom místě.",
+      "palette": ["#fbfbfd", "#111827", "#2563eb", "#f1f1f4"],
+      "materials": ["velké pole hledání", "spis jako stránka"],
+      "viewport": "Nahoře přes celou šířku pole „Najít uživatele, e-mail nebo výlet…“ s výsledky rovnou pod ním. Pod polem puls: tento týden +1 uživatel, +3 výlety, graf posledních 12 týdnů, a poslední registrace jako řádky. Klik na člověka otevře spis: hlavička s profilem a rolí, časová osa (registrace, výlety, přátelství), jeho výlety, akce. Seznamy všech uživatelů/výletů jsou o úroveň níž. Mobil: stejné pořadí pod sebou.",
+      "risk": "Procházení celého seznamu (bez konkrétního hledání) je o krok dál než dnes.",
+      "wireframe": {"cols": 12, "rows": 10, "regions": [
+        {"label": "Najít uživatele nebo výlet…", "x": 0, "y": 0, "w": 12, "h": 1, "accent": true},
+        {"label": "puls: tento týden · graf 12 týdnů", "x": 0, "y": 1, "w": 8, "h": 4},
+        {"label": "poslední registrace", "x": 8, "y": 1, "w": 4, "h": 4},
+        {"label": "spis / seznamy", "x": 0, "y": 5, "w": 12, "h": 5}
+      ]}
+    },
+    {
+      "id": "classic",
+      "label": "Klasický admin, pořádně",
+      "thesis": "Tři záložky jako dnes, ale udělané pořádně: čitelné tabulky s řazením a filtry, detail v bočním panelu, přehled s růstem místo součtů.",
+      "palette": ["#fbfbfd", "#111827", "#2563eb", "#e5e7eb"],
+      "materials": ["tabulky s linkami", "boční panel detailu"],
+      "viewport": "Přehled: řádek čísel (uživatelé, noví za 7/30 dní, výlety, přátelství), graf registrací a výletů po týdnech, nejnovější uživatelé a nejaktivnější. Uživatelé a Výlety: tabulka s hledáním, řazením kliknutím na sloupec a filtrem role; klik na řádek vysune detail zprava s akcemi. Mobil: tabulky se mění na seznam karet.",
+      "risk": "Nejznámější tvar — funguje, ale nic nového nepřinese.",
+      "wireframe": {"cols": 12, "rows": 10, "regions": [
+        {"label": "Přehled · Uživatelé · Výlety", "x": 0, "y": 0, "w": 12, "h": 1},
+        {"label": "čísla", "x": 0, "y": 1, "w": 12, "h": 2},
+        {"label": "graf růstu", "x": 0, "y": 3, "w": 8, "h": 4, "accent": true},
+        {"label": "noví uživatelé", "x": 8, "y": 3, "w": 4, "h": 4},
+        {"label": "tabulka", "x": 0, "y": 7, "w": 12, "h": 3}
+      ]}
+    }
+  ],
+  "reroll": true,
+  "steer": true,
+  "buildPath": {"value": "code", "toggle": false}
+}

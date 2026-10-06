@@ -5,14 +5,14 @@ import { Home, Map, MapPinned, BarChart2, Users, Wallet } from 'lucide-react';
 // top of the fullscreen mobile map all stay pixel-for-pixel identical
 // instead of drifting apart like the old duplicated FAB positions did.
 export const getDashboardNavItems = (t) => [
-  { icon: Home,     label: t('dashboardLayout.nav.overview'),   path: '/dashboard',            shortcut: 'H' },
-  { icon: Map,      label: t('dashboardLayout.nav.myTrips'),    path: '/dashboard/all-trips',  shortcut: 'T' },
-  { icon: MapPinned,label: t('dashboardLayout.nav.map'),        path: '/dashboard/map',        shortcut: 'M' },
-  { icon: BarChart2,label: t('dashboardLayout.nav.statistics'), path: '/dashboard/statistics', shortcut: 'S' },
-  { icon: Users,    label: t('dashboardLayout.nav.friends'),    path: '/dashboard/friends',    shortcut: 'F' },
-  { icon: Wallet,   label: t('dashboardLayout.nav.budget'),     path: '/dashboard/budget',     shortcut: 'B' },
+  { icon: Home,     label: t('dashboardLayout.nav.overview'), short: t('dashboardLayout.navShort.overview'),   path: '/dashboard',            shortcut: 'H' },
+  { icon: Map,      label: t('dashboardLayout.nav.myTrips'), short: t('dashboardLayout.navShort.myTrips'),    path: '/dashboard/all-trips',  shortcut: 'T' },
+  { icon: MapPinned,label: t('dashboardLayout.nav.map'), short: t('dashboardLayout.navShort.map'),        path: '/dashboard/map',        shortcut: 'M' },
+  { icon: BarChart2,label: t('dashboardLayout.nav.statistics'), short: t('dashboardLayout.navShort.statistics'), path: '/dashboard/statistics', shortcut: 'S' },
+  { icon: Users,    label: t('dashboardLayout.nav.friends'), short: t('dashboardLayout.navShort.friends'),    path: '/dashboard/friends',    shortcut: 'F' },
+  { icon: Wallet,   label: t('dashboardLayout.nav.budget'), short: t('dashboardLayout.navShort.budget'),     path: '/dashboard/budget',     shortcut: 'B' },
 ];
 
 // The four everyday destinations shown in the mobile bottom nav (and mirrored
-// above the fullscreen mobile map); the rest live in the hamburger menu.
+// in the fullscreen mobile map); the rest live in the avatar's passport sheet.
 export const MOBILE_PRIMARY_PATHS = ['/dashboard', '/dashboard/all-trips', '/dashboard/map', '/dashboard/budget'];

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowLeft, Plus, Pencil, Move, Trash2, Crosshair, MapPin, Menu } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Move, Trash2, Crosshair, MapPin } from 'lucide-react';
+import UserAvatar from '../ui/UserAvatar';
+import { useAuth } from '../../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import useMediaQuery from '../../hooks/useMediaQuery';
 import useSlideOverA11y from '../../hooks/useSlideOverA11y';
@@ -36,7 +38,7 @@ const MapWorkspaceView = ({
   canEdit = true,
   title,
   onBack,
-  // Mobile-only: opens the dashboard's hamburger slide-over from on top of
+  // Mobile-only: opens the dashboard's passport sheet (avatar) from on top of
   // the fullscreen map, so Statistiky/Přátelé/Nastavení stay reachable
   // without backing out of the map first. Omitted (e.g. per-trip map)
   // simply renders no menu button.
@@ -57,6 +59,7 @@ const MapWorkspaceView = ({
   // nezmizí pod sidebarem. V detailu výletu je 0.
   leftInset = 0,
 }) => {
+  const { user } = useAuth();
   const { t } = useTranslation();
   const isDesktop = useMediaQuery('(min-width: 1024px)');
   const sidebarInset = isDesktop ? leftInset : 0;
@@ -457,10 +460,11 @@ const MapWorkspaceView = ({
         <button
           type="button"
           onClick={onOpenMenu}
-          aria-label={t('map.mobile.menu')}
-          className="pointer-events-auto w-11 h-11 shrink-0 rounded-2xl glass-card border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-700 dark:text-gray-200 cursor-pointer"
+          aria-label={t('dashboardLayout.passport.openMenu')}
+          className="pointer-events-auto w-11 h-11 shrink-0 rounded-2xl bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-white/10 shadow-sm flex items-center justify-center cursor-pointer"
         >
-          <Menu size={18} strokeWidth={2.5} />
+          {/* Stejný vstup do „pasu“ jako avatar v horní liště — mapa ji skrývá */}
+          <UserAvatar user={user} size="sm" />
         </button>
       )}
     </div>
@@ -520,8 +524,8 @@ const MapWorkspaceView = ({
         header={header}
         bodyScroll={bodyScroll}
         // Scrollable content needs enough bottom clearance to scroll clear
-        // of the floating nav pill (it's not reserved space, just room to
-        // reach past it) — only while the pill is actually shown.
+        // of the bottom nav bar (it's not reserved space, just room to
+        // reach past it) — only while the bar is actually shown.
         navClearance={Boolean(mobileNav) && showMobileNav}
         ariaLabel={title}
       >

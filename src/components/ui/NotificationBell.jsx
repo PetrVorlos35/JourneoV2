@@ -12,7 +12,9 @@ const notifIcons = {
   TRIP_VOTED: Heart,
 };
 
-const NotificationBell = () => {
+// `placement="sidebar"`: zvonek sedí v levém panelu, panel notifikací se
+// proto na desktopu otevírá doprava do obsahu, ne doleva mimo obrazovku.
+const NotificationBell = ({ placement = 'right' }) => {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -124,7 +126,7 @@ const NotificationBell = () => {
       <button
         onClick={handleToggle}
         aria-label={t('notifications.title')}
-        className="relative w-10 h-10 flex items-center justify-center rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-300 cursor-pointer"
+        className="relative w-11 h-11 md:w-10 md:h-10 flex items-center justify-center rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-300 cursor-pointer"
       >
         <Bell size={20} strokeWidth={2} className="text-gray-500 dark:text-gray-400" />
         <AnimatePresence>
@@ -148,7 +150,7 @@ const NotificationBell = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="fixed md:absolute left-0 right-0 md:left-auto top-[max(4.25rem,calc(env(safe-area-inset-top)+3.75rem))] md:top-14 w-full md:w-96 max-h-[calc(100dvh-max(4.25rem,calc(env(safe-area-inset-top)+3.75rem))-1rem)] md:max-h-[420px] bg-white dark:bg-[#1c1c1e] shadow-2xl rounded-b-[2rem] md:rounded-2xl border-b md:border border-black/5 dark:border-white/10 overflow-hidden z-[100] flex flex-col"
+            className={`fixed md:absolute left-0 right-0 ${placement === 'sidebar' ? 'md:left-0 md:right-auto md:top-12' : 'md:left-auto md:top-14'} top-[max(4.25rem,calc(env(safe-area-inset-top)+3.75rem))] w-full md:w-96 max-h-[calc(100dvh-max(4.25rem,calc(env(safe-area-inset-top)+3.75rem))-1rem)] md:max-h-[420px] bg-white dark:bg-[#1c1c1e] shadow-2xl rounded-b-[2rem] md:rounded-2xl border-b md:border border-black/5 dark:border-white/10 overflow-hidden z-[100] flex flex-col`}
           >
             <div className="px-5 py-4 border-b border-gray-100 dark:border-white/10 flex items-center justify-between">
               <h3 className="font-bold text-[15px] text-gray-900 dark:text-white tracking-tight">{t('notifications.title')}</h3>

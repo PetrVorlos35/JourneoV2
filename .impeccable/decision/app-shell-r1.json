@@ -1,0 +1,59 @@
+{
+  "title": "Navigace aplikace: nové kolo",
+  "question": "Tři nové varianty, předchozí jsou vyřazené. Mobil ve všech sjednotím s detailem výletu: dole lišta přes celou šířku s velkým „+“ uprostřed.",
+  "options": [
+    {
+      "id": "command-first",
+      "label": "Hledání jako hlavní vstup",
+      "kicker": "THE ROLL",
+      "thesis": "Místo menu je nahoře velké pole „Kam dál?“ (⌘K) — napíšeš výlet, den, výdaj nebo sekci a jsi tam; klasické sekce jsou jen tichý řádek vedle.",
+      "palette": ["#fbfbfd", "#111827", "#2563eb", "#e5e7eb"],
+      "materials": ["široké pole hledání v horní liště", "tichý řádek sekcí"],
+      "viewport": "Horní lišta: vlevo logo, uprostřed široké pole „Hledat výlet, den, výdaj… ⌘K“, vpravo „+ Nový výlet“, zvonek a avatar s menu. Pod ní tenký řádek sekcí Přehled · Výlety · Mapa · Výdaje · Statistiky · Přátelé. Obsah přes celou šířku. Mobil: nahoře logo + pole hledání přes celou šířku, dole Přehled · Výlety · [+] · Mapa · Výdaje.",
+      "risk": "Sází na to, že Spotlight používáš; kdo hledání nepoužívá, má sekce méně výrazné než dnes.",
+      "wireframe": {"cols": 12, "rows": 10, "regions": [
+        {"label": "logo", "x": 0, "y": 0, "w": 2, "h": 1},
+        {"label": "Kam dál? ⌘K", "x": 3, "y": 0, "w": 6, "h": 1, "accent": true},
+        {"label": "+ výlet · 🔔 · avatar", "x": 9, "y": 0, "w": 3, "h": 1},
+        {"label": "Přehled · Výlety · Mapa · Výdaje · …", "x": 0, "y": 1, "w": 12, "h": 1},
+        {"label": "obsah", "x": 0, "y": 2, "w": 12, "h": 8}
+      ]}
+    },
+    {
+      "id": "passport",
+      "label": "Panel jako cestovní pas",
+      "thesis": "Panel začíná tebou: avatar, jméno a tvoje čísla (zemí, výletů, dní na cestách), pod tím navigace a nejbližší výlet — osobní, ne korporátní.",
+      "palette": ["#fbfbfd", "#111827", "#2563eb", "#f1f1f4"],
+      "materials": ["osobní hlavička s čísly", "panel s linkou vpravo"],
+      "viewport": "Panel 264 px: nahoře logo, v1.5 a zvonek; pod tím blok profilu — avatar, jméno, řádek „12 zemí · 18 výletů · 94 dní“, klik otevře menu s nastavením, vzhledem a odhlášením; hledání ⌘K a „+ Nový výlet“; sekce; dole karta nejbližšího výletu s odpočtem. Plovoucí tlačítka vpravo nahoře zmizí. Mobil: nahoře logo · hledání · zvonek · avatar, dole Přehled · Výlety · [+] · Mapa · Výdaje; avatar otevře stejný „pas“.",
+      "risk": "Čísla v panelu se opakují se statistikami a dlaždicemi na přehledu.",
+      "wireframe": {"cols": 12, "rows": 10, "regions": [
+        {"label": "logo · 🔔", "x": 0, "y": 0, "w": 2, "h": 1},
+        {"label": "avatar · zemí · výletů", "x": 0, "y": 1, "w": 2, "h": 2, "accent": true},
+        {"label": "⌘K · + výlet", "x": 0, "y": 3, "w": 2, "h": 1},
+        {"label": "sekce", "x": 0, "y": 4, "w": 2, "h": 4},
+        {"label": "nejbližší výlet", "x": 0, "y": 8, "w": 2, "h": 2},
+        {"label": "obsah", "x": 2, "y": 0, "w": 10, "h": 10}
+      ]}
+    },
+    {
+      "id": "dividers",
+      "label": "Záložky zápisníku",
+      "thesis": "Stejný jazyk jako v detailu výletu: obsah je bílá stránka a sekce visí jako rozdělovací záložky na jejím levém okraji — celá aplikace je jeden zápisník.",
+      "palette": ["#fbfbfd", "#111827", "#2563eb", "#f1f1f4"],
+      "materials": ["bílá stránka obsahu", "rozdělovací záložky na levé hraně"],
+      "viewport": "Vlevo nahoře logo, hledání ⌘K a „+ Nový výlet“; pod nimi svislé záložky Přehled, Výlety, Mapa, Výdaje, Statistiky, Přátelé přimknuté k levé hraně bílé stránky, aktivní splývá se stránkou; dole avatar s menu a zvonek. Obsah leží na jedné velké bílé stránce. Mobil: dole Přehled · Výlety · [+] · Mapa · Výdaje, nahoře logo · hledání · zvonek · avatar.",
+      "risk": "V detailu výletu by byly záložky vlevo i vpravo — dvě vrstvy rozdělovačů najednou, musí se jasně odlišit.",
+      "wireframe": {"cols": 12, "rows": 10, "regions": [
+        {"label": "logo · ⌘K · + výlet", "x": 0, "y": 0, "w": 2, "h": 2},
+        {"label": "záložky sekcí", "x": 0, "y": 2, "w": 2, "h": 6, "accent": true},
+        {"label": "avatar · 🔔", "x": 0, "y": 9, "w": 2, "h": 1},
+        {"label": "bílá stránka obsahu", "x": 2, "y": 0, "w": 10, "h": 10}
+      ]}
+    }
+  ],
+  "reroll": true,
+  "steer": true,
+  "followup": true,
+  "buildPath": {"value": "code", "toggle": false}
+}

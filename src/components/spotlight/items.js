@@ -90,7 +90,7 @@ export const buildItems = ({
     { icon: Wallet,    label: t('dashboardLayout.nav.budget'),     to: '/dashboard/budget',     keywords: 'vydaje rozpocet budget penize utraty' },
     { icon: Settings,  label: t('dashboardLayout.nav.settings'),   to: '/dashboard/settings',   keywords: 'nastaveni profil ucet mena jazyk settings' },
     { icon: Trash2,    label: t('spotlight.pages.trash'),          to: '/dashboard/trash',      keywords: 'kos smazane obnovit trash bin' },
-    ...(isAdmin ? [{ icon: Shield, label: t('dashboardLayout.nav.admin'), to: '/admin', keywords: 'admin sprava panel users' }] : []),
+    ...(isAdmin ? [{ icon: Shield, label: t('dashboardLayout.nav.admin'), to: '/dashboard/admin', keywords: 'admin sprava panel users' }] : []),
   ];
   for (const page of pages) {
     items.push(item({

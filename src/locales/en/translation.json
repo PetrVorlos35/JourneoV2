@@ -12,8 +12,8 @@
     "empty": "There are no release notes yet.",
     "releases": {
       "v1_5": {
-        "title": "A new trip page",
-        "summary": "A trip is now a notebook: every day has its own page, you flip between days with the date strip, arrow keys or a swipe, and packing, links, map and budget sit as tabs on the page edge. Everything saves by itself, and on mobile logging an expense is one tap away.",
+        "title": "A new trip page and navigation",
+        "summary": "A trip is now a notebook: every day has its own page, you flip between days with the date strip, arrow keys or a swipe, and packing, links, map and budget sit as tabs on the page edge. Everything saves by itself, logging an expense on mobile is one tap away, and the whole app got new, unified navigation.",
         "highlights": [
           "A day page with its title, place and plan on ruled paper — edit everything in place",
           "A date strip with each day's place and today marked; flip days with ← → or a swipe",
@@ -23,7 +23,9 @@
           "Packing split into “Still to pack” and “Packed” with a progress bar",
           "Links and notes sort themselves, links show their domain",
           "The trip budget on one clear page: what's spent, on what, and expenses by trip day",
-          "A light-mode share dialog and easier-to-read labels across the app"
+          "A light-mode share dialog and easier-to-read labels across the app",
+          "A new sidebar with your “passport” — countries visited, trips and days on the road, plus a countdown to your next trip",
+          "On mobile, one bottom bar with a + in the middle and your avatar instead of a menu — it opens your profile, settings and appearance"
         ]
       },
       "v1_4": {
@@ -490,6 +492,27 @@
         "message": "Are you sure you want to log out of your account?",
         "confirm": "Log out"
       }
+    },
+    "navLabel": "Main navigation",
+    "navShort": {
+      "overview": "Home",
+      "myTrips": "Trips",
+      "map": "Map",
+      "statistics": "Stats",
+      "friends": "Friends",
+      "budget": "Expenses",
+      "create": "Trip"
+    },
+    "passport": {
+      "countries": "Countries",
+      "trips": "Trips",
+      "days": "Days",
+      "openMenu": "Account & settings",
+      "nextTrip": "Next trip",
+      "ongoing": "Now · day {{n}} of {{total}}",
+      "dayOf": "day of {{total}}",
+      "daysToGo_one": "day to go",
+      "daysToGo_other": "days to go"
     }
   },
   "spotlight": {
@@ -1630,7 +1653,59 @@
         "dialogLabel": "Trip detail"
       }
     },
-    "close": "Close"
+    "close": "Close",
+    "v2": {
+      "title": "Admin",
+      "thisWeek": "This week",
+      "newUsers": "New users",
+      "newTrips": "New trips",
+      "active30": "Active in 30 days",
+      "active30Hint": "edited a trip",
+      "totalUsers": "Users",
+      "totalTrips": "Trips",
+      "friendships": "Friendships",
+      "unverified": "Unverified accounts",
+      "chartTitle": "Sign-ups and trips per week",
+      "chartRange": "Last 12 weeks",
+      "signups": "Sign-ups",
+      "trips": "Trips",
+      "weekOf": "Week of {{date}}",
+      "chartTable": "Data table",
+      "newest": "Newest users",
+      "mostActive": "Most trips",
+      "allUsers": "All users",
+      "sortNewest": "Newest",
+      "sortName": "Name",
+      "sortEmail": "E-mail",
+      "sortLabel": "Sort",
+      "loadMore": "Load more",
+      "selectUser": "Pick a user from the list.",
+      "selectTrip": "Pick a trip from the list.",
+      "back": "Back to list",
+      "registered": "Joined {{date}}",
+      "verified": "E-mail verified",
+      "unverifiedEmail": "E-mail not verified",
+      "unverifiedShort": "unverified",
+      "self": "This is your account — you can't delete it or remove your own rights.",
+      "deleteAccount": "Delete account",
+      "makeAdmin": "Grant admin rights",
+      "removeAdmin": "Remove admin rights",
+      "inTrash": "in trash",
+      "owner": "Owner",
+      "days": "Itinerary days",
+      "expenses": "Expenses",
+      "packing": "Packing",
+      "documents": "Documents",
+      "likes": "Likes",
+      "itinerary": "Itinerary",
+      "noItinerary": "The itinerary is empty.",
+      "deleteTrip": "Delete trip",
+      "dayN": "Day {{n}}",
+      "tripCount": "Trips",
+      "friendCount": "Friends",
+      "searchTrips": "Search trips…",
+      "searchUsers": "Search name or e-mail…"
+    }
   },
   "common": {
     "loading": "Loading...",

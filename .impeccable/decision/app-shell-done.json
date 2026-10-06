@@ -1,0 +1,16 @@
+{
+  "title": "Vybráno: Panel jako cestovní pas",
+  "question": "Díky, stavím variantu „Panel jako cestovní pas“ a sjednocenou mobilní lištu. Tuhle stránku můžeš zavřít.",
+  "options": [
+    {
+      "id": "ok",
+      "label": "Panel jako cestovní pas",
+      "thesis": "Osobní hlavička s čísly, navigace, nejbližší výlet; mobil s lištou a „+“ uprostřed.",
+      "palette": ["#fbfbfd", "#111827", "#2563eb", "#f1f1f4"],
+      "materials": ["osobní hlavička s čísly", "panel s linkou vpravo"],
+      "viewport": "Potvrzení volby.",
+      "risk": "—"
+    }
+  ],
+  "buildPath": {"value": "code", "toggle": false}
+}

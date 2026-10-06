@@ -5,6 +5,33 @@ const router = Router();
 
 // ── GET /api/admin/dashboard ────────────────────────────────
 // Platform-wide statistics for admin dashboard
+// Souvislá řada posledních 12 ISO týdnů (i prázdné týdny = 0), aby graf
+// neskákal přes mezery. Klíč odpovídá MySQL YEARWEEK(date, 3).
+const isoYearWeek = (d) => {
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+  const week = Math.ceil(((t - yearStart) / 86400000 + 1) / 7);
+  return t.getUTCFullYear() * 100 + week;
+};
+const buildWeeklySeries = (signupRows, tripRows) => {
+  const signups = new Map(signupRows.map((r) => [Number(r.yw), Number(r.count)]));
+  const trips = new Map(tripRows.map((r) => [Number(r.yw), Number(r.count)]));
+  const out = [];
+  const now = new Date();
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(now.getDate() - i * 7);
+    // pondělí daného týdne jako popisek
+    const monday = new Date(d);
+    monday.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    const yw = isoYearWeek(d);
+    out.push({ week: monday.toISOString().slice(0, 10), signups: signups.get(yw) || 0, trips: trips.get(yw) || 0 });
+  }
+  return out;
+};
+
 router.get('/dashboard', async (req, res) => {
   try {
     const [
@@ -18,6 +45,11 @@ router.get('/dashboard', async (req, res) => {
       [topUsersRows],
       [totalExpenseAmountRows],
       [tripsPerMonthRows],
+      [newTripsWeekRows],
+      [activeUsersRows],
+      [unverifiedRows],
+      [signupsWeeklyRows],
+      [tripsWeeklyRows],
     ] = await Promise.all([
       // Total users
       pool.query('SELECT COUNT(*) AS count FROM users'),
@@ -61,6 +93,23 @@ router.get('/dashboard', async (req, res) => {
         GROUP BY DATE_FORMAT(created_at, '%Y-%m')
         ORDER BY month ASC
       `),
+      // New trips last 7 days
+      pool.query('SELECT COUNT(*) AS count FROM trips WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)'),
+      // Users who edited a trip in the last 30 days (proxy for activity)
+      pool.query('SELECT COUNT(DISTINCT user_id) AS count FROM trips WHERE updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)'),
+      // Accounts that never verified their e-mail
+      pool.query('SELECT COUNT(*) AS count FROM users WHERE is_verified = 0'),
+      // Weekly series for the growth chart (last 12 ISO weeks)
+      pool.query(`
+        SELECT YEARWEEK(created_at, 3) AS yw, COUNT(*) AS count
+        FROM users WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 12 WEEK)
+        GROUP BY yw
+      `),
+      pool.query(`
+        SELECT YEARWEEK(created_at, 3) AS yw, COUNT(*) AS count
+        FROM trips WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 12 WEEK)
+        GROUP BY yw
+      `),
     ]);
 
     res.json({
@@ -72,6 +121,10 @@ router.get('/dashboard', async (req, res) => {
         newUsersWeek: parseInt(newUsersWeekRows[0].count),
         newUsersMonth: parseInt(newUsersMonthRows[0].count),
         totalExpenseAmount: parseFloat(totalExpenseAmountRows[0].total),
+        newTripsWeek: parseInt(newTripsWeekRows[0].count),
+        activeUsers30: parseInt(activeUsersRows[0].count),
+        unverifiedUsers: parseInt(unverifiedRows[0].count),
+        weekly: buildWeeklySeries(signupsWeeklyRows, tripsWeeklyRows),
         recentUsers: recentUsersRows.map(u => ({
           id: u.id,
           email: u.email,
@@ -132,7 +185,7 @@ router.get('/users', async (req, res) => {
 
     // Get users with stats
     const [users] = await pool.query(
-      `SELECT u.id, u.email, u.first_name, u.last_name, u.avatar_url, u.bio, u.role, u.created_at,
+      `SELECT u.id, u.email, u.first_name, u.last_name, u.avatar_url, u.bio, u.role, u.created_at, u.is_verified,
         (SELECT COUNT(*) FROM trips t WHERE t.user_id = u.id) AS trip_count,
         (SELECT COUNT(*) FROM friendships f WHERE (f.requester_id = u.id OR f.addressee_id = u.id) AND f.status = 'ACCEPTED') AS friend_count
       FROM users u
@@ -154,6 +207,7 @@ router.get('/users', async (req, res) => {
         createdAt: u.created_at,
         tripCount: parseInt(u.trip_count),
         friendCount: parseInt(u.friend_count),
+        isVerified: !!u.is_verified,
       })),
       pagination: {
         page,
@@ -176,7 +230,7 @@ router.get('/users/:id', async (req, res) => {
     const userId = parseInt(req.params.id);
 
     const [users] = await pool.query(
-      'SELECT id, email, first_name, last_name, avatar_url, bio, role, created_at FROM users WHERE id = ?',
+      'SELECT id, email, first_name, last_name, avatar_url, bio, role, created_at, is_verified FROM users WHERE id = ?',
       [userId]
     );
 
@@ -189,7 +243,7 @@ router.get('/users/:id', async (req, res) => {
     // Get user's trips
     const [trips] = await pool.query(
       `SELECT t.id, t.title, DATE_FORMAT(t.start_date, '%Y-%m-%d') AS startDate, 
-        DATE_FORMAT(t.end_date, '%Y-%m-%d') AS endDate, t.created_at,
+        DATE_FORMAT(t.end_date, '%Y-%m-%d') AS endDate, t.created_at, t.deleted_at,
         COALESCE((SELECT SUM(e.amount) FROM trip_expenses e WHERE e.trip_id = t.id), 0) AS totalExpenses,
         (SELECT COUNT(*) FROM votes v WHERE v.trip_id = t.id AND v.value = 1) AS likes
       FROM trips t WHERE t.user_id = ? ORDER BY t.created_at DESC`,
@@ -215,6 +269,7 @@ router.get('/users/:id', async (req, res) => {
         bio: user.bio,
         role: user.role || 'user',
         createdAt: user.created_at,
+        isVerified: !!user.is_verified,
         trips: trips.map(t => ({
           id: t.id.toString(),
           title: t.title,
@@ -223,6 +278,7 @@ router.get('/users/:id', async (req, res) => {
           createdAt: t.created_at,
           totalExpenses: parseFloat(t.totalExpenses),
           likes: parseInt(t.likes),
+          inTrash: !!t.deleted_at,
         })),
         friends: friends.map(f => ({
           id: f.id,
@@ -337,7 +393,7 @@ router.get('/trips', async (req, res) => {
       `SELECT t.id, t.title, 
         DATE_FORMAT(t.start_date, '%Y-%m-%d') AS startDate,
         DATE_FORMAT(t.end_date, '%Y-%m-%d') AS endDate,
-        t.created_at,
+        t.created_at, t.deleted_at,
         u.id AS userId, u.email AS userEmail, u.first_name AS userFirstName, u.last_name AS userLastName, u.avatar_url AS userAvatar,
         (SELECT COUNT(*) FROM trip_activities a WHERE a.trip_id = t.id) AS activityCount,
         COALESCE((SELECT SUM(e.amount) FROM trip_expenses e WHERE e.trip_id = t.id), 0) AS totalExpenses,
@@ -369,6 +425,7 @@ router.get('/trips', async (req, res) => {
         totalExpenses: parseFloat(t.totalExpenses),
         likes: parseInt(t.likes),
         durationDays: parseInt(t.durationDays),
+        inTrash: !!t.deleted_at,
       })),
       pagination: {
         page,
@@ -415,7 +472,7 @@ router.get('/trips/:id', async (req, res) => {
       `SELECT t.id, t.title, 
         DATE_FORMAT(t.start_date, '%Y-%m-%d') AS startDate,
         DATE_FORMAT(t.end_date, '%Y-%m-%d') AS endDate,
-        t.created_at,
+        t.created_at, t.deleted_at,
         u.id AS userId, u.email AS userEmail, u.first_name AS userFirstName, 
         u.last_name AS userLastName, u.avatar_url AS userAvatar,
         DATEDIFF(t.end_date, t.start_date) AS durationDays
@@ -473,6 +530,7 @@ router.get('/trips/:id', async (req, res) => {
         createdAt: trip.created_at,
         durationDays: parseInt(trip.durationDays),
         likes: parseInt(voteScore[0].likes),
+        inTrash: !!trip.deleted_at,
         user: {
           id: trip.userId,
           email: trip.userEmail,

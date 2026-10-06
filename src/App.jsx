@@ -8,7 +8,6 @@ import { Analytics } from '@vercel/analytics/react';
 // Lazy load everything except the landing page to speed up initial load
 const AuthFlow = lazy(() => import('./components/auth/AuthFlow'));
 const DashboardHome = lazy(() => import('./components/dashboard/DashboardHome'));
-const AdminHome = lazy(() => import('./components/admin/AdminHome'));
 const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./components/TermsOfService'));
 const PublicTripView = lazy(() => import('./components/public/PublicTripView'));
@@ -54,6 +53,12 @@ const AdminProtectedRoute = ({ children }) => {
   return children;
 };
 
+// Admin žije uvnitř dashboardu; staré odkazy /admin/... vedou tam.
+const AdminRedirect = () => {
+  const location = useLocation();
+  return <Navigate to={`/dashboard${location.pathname}${location.search}`} replace />;
+};
+
 function App() {
   return (
     <div className="bg-gray-50 dark:bg-black min-h-screen text-gray-900 dark:text-white transition-colors duration-500">
@@ -73,7 +78,7 @@ function App() {
             path="/admin/*"
             element={
               <AdminProtectedRoute>
-                <AdminHome />
+                <AdminRedirect />
               </AdminProtectedRoute>
             }
           />

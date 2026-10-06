@@ -1,0 +1,56 @@
+{
+  "title": "Navigace aplikace: desktop panel + mobilní lišta",
+  "question": "Vizuální styl Journea zůstává (DESIGN.md). Vyber rozložení navigace. Mobil ve všech variantách sjednotím s detailem výletu: lišta přes celou šířku dole s velkým „+“ uprostřed a avatar nahoře místo hamburgeru.",
+  "options": [
+    {
+      "id": "topbar",
+      "label": "Horní lišta místo panelu",
+      "kicker": "THE ROLL",
+      "thesis": "Žádný postranní panel: navigace, hledání, nový výlet a profil v jedné tenké liště nahoře, obsah dostane celou šířku.",
+      "palette": ["#fbfbfd", "#111827", "#2563eb", "#e5e7eb"],
+      "materials": ["tenká lišta s linkou dole", "záložky sekcí s podtržením aktivní"],
+      "viewport": "Nahoře vlevo logo a v1.5, uprostřed sekce Přehled · Výlety · Mapa · Výdaje · Statistiky · Přátelé, vpravo hledání ⌘K, „+ Nový výlet“, zvonek, Admin a avatar s menu (nastavení, vzhled, odhlášení). Pod tím obsah přes celou šířku. Mobil: horní lišta logo · hledání · zvonek · avatar, dole Přehled · Výlety · [+] · Mapa · Výdaje.",
+      "risk": "Šest sekcí plus akce se na menších noteboocích (~1100 px) do jedné lišty těsně vejde; Statistiky a Přátelé by mohly spadnout do „Více“.",
+      "wireframe": {"cols": 12, "rows": 10, "regions": [
+        {"label": "logo", "x": 0, "y": 0, "w": 2, "h": 1},
+        {"label": "Přehled · Výlety · Mapa · Výdaje · …", "x": 2, "y": 0, "w": 6, "h": 1, "accent": true},
+        {"label": "⌘K · + výlet · 🔔 · avatar", "x": 8, "y": 0, "w": 4, "h": 1},
+        {"label": "obsah přes celou šířku", "x": 0, "y": 1, "w": 12, "h": 9}
+      ]}
+    },
+    {
+      "id": "rail-context",
+      "label": "Úzký pruh ikon + panel výletů",
+      "thesis": "Vlevo štíhlý pruh ikon pro sekce a vedle něj sklopitelný sloupec s tvými výlety — mezi výlety přepínáš jako mezi složkami.",
+      "palette": ["#fbfbfd", "#111827", "#2563eb", "#f1f1f4"],
+      "materials": ["pruh ikon 72 px", "sklopitelný sloupec výletů"],
+      "viewport": "Úplně vlevo 72px pruh: logo, ikony sekcí s popiskem pod ikonou, dole zvonek a avatar. Vedle 240px sloupec: hledání, „+ Nový výlet“, výlety rozdělené na Probíhá / Chystá se / Proběhlé s barevnou tečkou a daty. Sloupec jde sklopit (⌘\\) a v detailu výletu se sklopí sám. Mobil: dole Přehled · Výlety · [+] · Mapa · Výdaje, výlety jako list v záložce Výlety.",
+      "risk": "Dvě vrstvy navigace vlevo zaberou ~310 px, když je sloupec otevřený; bez sklápění by tlačily obsah.",
+      "wireframe": {"cols": 12, "rows": 10, "regions": [
+        {"label": "ikony sekcí", "x": 0, "y": 0, "w": 1, "h": 10, "accent": true},
+        {"label": "hledání · + výlet · seznam výletů", "x": 1, "y": 0, "w": 2, "h": 10},
+        {"label": "obsah", "x": 3, "y": 0, "w": 9, "h": 10}
+      ]}
+    },
+    {
+      "id": "flush-sidebar",
+      "label": "Klidný panel přes celou výšku",
+      "thesis": "Panel přestane být plovoucí kartou: přimkne se k okraji s jemnou linkou, nese navigaci, rychlý seznam nejbližších výletů a vše ostatní schová do profilu.",
+      "palette": ["#fbfbfd", "#111827", "#2563eb", "#e5e7eb"],
+      "materials": ["panel s linkou vpravo", "seznam výletů s barevnou tečkou"],
+      "viewport": "Panel 256 px: nahoře logo, v1.5 a zvonek; hledání ⌘K a „+ Nový výlet“; sekce Přehled · Moje výlety · Mapa · Výdaje, oddělené Statistiky · Přátelé (· Admin); pod tím „Nejbližší výlety“ (3–4 s daty, probíhající zvýrazněný); dole avatar se jménem, klik otevře menu s nastavením, vzhledem a odhlášením. Plovoucí tlačítka vpravo nahoře zmizí. Mobil: horní lišta logo · hledání · zvonek · avatar, dole Přehled · Výlety · [+] · Mapa · Výdaje.",
+      "risk": "Nejbezpečnější a nejznámější tvar — dobře se používá, ale nejméně překvapí.",
+      "wireframe": {"cols": 12, "rows": 10, "regions": [
+        {"label": "logo · 🔔", "x": 0, "y": 0, "w": 2, "h": 1},
+        {"label": "⌘K · + výlet", "x": 0, "y": 1, "w": 2, "h": 1},
+        {"label": "sekce", "x": 0, "y": 2, "w": 2, "h": 3, "accent": true},
+        {"label": "nejbližší výlety", "x": 0, "y": 5, "w": 2, "h": 4},
+        {"label": "avatar · menu", "x": 0, "y": 9, "w": 2, "h": 1},
+        {"label": "obsah", "x": 2, "y": 0, "w": 10, "h": 10}
+      ]}
+    }
+  ],
+  "reroll": true,
+  "steer": true,
+  "buildPath": {"value": "code", "toggle": false}
+}

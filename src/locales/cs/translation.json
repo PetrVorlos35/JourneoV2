@@ -12,8 +12,8 @@
     "empty": "Zatím tu nejsou žádné novinky.",
     "releases": {
       "v1_5": {
-        "title": "Nový detail výletu",
-        "summary": "Výlet je teď zápisník: každý den má svou stránku, mezi dny listujete pásem dat nahoře, šipkami nebo přejetím prstem a balení, odkazy, mapa i rozpočet visí jako záložky na okraji stránky. Všechno se ukládá samo a výdaj zapíšete na mobilu jedním ťuknutím.",
+        "title": "Nový detail výletu a navigace",
+        "summary": "Výlet je teď zápisník: každý den má svou stránku, mezi dny listujete pásem dat nahoře, šipkami nebo přejetím prstem a balení, odkazy, mapa i rozpočet visí jako záložky na okraji stránky. Všechno se ukládá samo, výdaj zapíšete na mobilu jedním ťuknutím a celá aplikace dostala novou, sjednocenou navigaci.",
         "highlights": [
           "Stránka dne s názvem, místem a plánem na linkovaném papíře — vše upravíte přímo na místě",
           "Pás dnů s datem a místem, dnešek je označený; listování šipkami ← → nebo přejetím prstem",
@@ -23,7 +23,9 @@
           "Balení rozdělené na „Zbývá zabalit“ a „Sbaleno“ s ukazatelem průběhu",
           "Odkazy a poznámky se samy roztřídí, u odkazů vidíte doménu",
           "Rozpočet ve výletu přehledně na jedné stránce: kolik je utraceno, za co a výdaje po dnech výletu",
-          "Okno sdílení výletu ve světlém vzhledu a čitelnější popisky v celé aplikaci"
+          "Okno sdílení výletu ve světlém vzhledu a čitelnější popisky v celé aplikaci",
+          "Nový postranní panel s vaším „pasem“ — navštívené země, počet výletů a dní na cestách, a odpočet do nejbližšího výletu",
+          "Na mobilu jednotná spodní lišta s tlačítkem + uprostřed a avatar místo menu — otevře profil, nastavení a vzhled"
         ]
       },
       "v1_4": {
@@ -490,6 +492,29 @@
         "message": "Opravdu se chcete odhlásit ze svého účtu?",
         "confirm": "Odhlásit se"
       }
+    },
+    "navLabel": "Hlavní navigace",
+    "navShort": {
+      "overview": "Přehled",
+      "myTrips": "Výlety",
+      "map": "Mapa",
+      "statistics": "Statistiky",
+      "friends": "Přátelé",
+      "budget": "Výdaje",
+      "create": "Výlet"
+    },
+    "passport": {
+      "countries": "Země",
+      "trips": "Výlety",
+      "days": "Dny",
+      "openMenu": "Účet a nastavení",
+      "nextTrip": "Nejbližší výlet",
+      "ongoing": "Probíhá · den {{n}} z {{total}}",
+      "dayOf": "den z {{total}}",
+      "daysToGo_one": "den do odjezdu",
+      "daysToGo_few": "dny do odjezdu",
+      "daysToGo_many": "dne do odjezdu",
+      "daysToGo_other": "dní do odjezdu"
     }
   },
   "spotlight": {
@@ -1644,7 +1669,59 @@
         "dialogLabel": "Detail výletu"
       }
     },
-    "close": "Zavřít"
+    "close": "Zavřít",
+    "v2": {
+      "title": "Admin",
+      "thisWeek": "Tento týden",
+      "newUsers": "Noví uživatelé",
+      "newTrips": "Nové výlety",
+      "active30": "Aktivní za 30 dní",
+      "active30Hint": "upravili výlet",
+      "totalUsers": "Uživatelé",
+      "totalTrips": "Výlety",
+      "friendships": "Přátelství",
+      "unverified": "Neověřené účty",
+      "chartTitle": "Registrace a výlety po týdnech",
+      "chartRange": "Posledních 12 týdnů",
+      "signups": "Registrace",
+      "trips": "Výlety",
+      "weekOf": "Týden od {{date}}",
+      "chartTable": "Tabulka hodnot",
+      "newest": "Nejnovější uživatelé",
+      "mostActive": "Nejvíc výletů",
+      "allUsers": "Všichni uživatelé",
+      "sortNewest": "Nejnovější",
+      "sortName": "Jméno",
+      "sortEmail": "E-mail",
+      "sortLabel": "Řazení",
+      "loadMore": "Načíst další",
+      "selectUser": "Vyber uživatele ze seznamu.",
+      "selectTrip": "Vyber výlet ze seznamu.",
+      "back": "Zpět na seznam",
+      "registered": "Registrace {{date}}",
+      "verified": "Ověřený e-mail",
+      "unverifiedEmail": "Neověřený e-mail",
+      "unverifiedShort": "neověřený",
+      "self": "Tohle je tvůj účet — nemůžeš si ho smazat ani odebrat práva.",
+      "deleteAccount": "Smazat účet",
+      "makeAdmin": "Udělit admin práva",
+      "removeAdmin": "Odebrat admin práva",
+      "inTrash": "v koši",
+      "owner": "Vlastník",
+      "days": "Dny programu",
+      "expenses": "Výdaje",
+      "packing": "Balení",
+      "documents": "Dokumenty",
+      "likes": "Lajky",
+      "itinerary": "Program",
+      "noItinerary": "Program je prázdný.",
+      "deleteTrip": "Smazat výlet",
+      "dayN": "Den {{n}}",
+      "tripCount": "Výlety",
+      "friendCount": "Přátelé",
+      "searchTrips": "Hledat výlet…",
+      "searchUsers": "Hledat jméno nebo e-mail…"
+    }
   },
   "common": {
     "loading": "Načítám...",
