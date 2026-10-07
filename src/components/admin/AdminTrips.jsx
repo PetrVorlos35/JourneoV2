@@ -68,10 +68,10 @@ const TripDossier = ({ tripId, onDeleted, onBack }) => {
         <div className="flex flex-wrap items-center gap-2 mb-2">
           {trip.inTrash && <Badge tone="red">{t('admin.v2.inTrash')}</Badge>}
         </div>
-        <h2 className="text-[24px] sm:text-[28px] font-bold tracking-tight leading-tight text-gray-900 dark:text-white break-words" style={{ textWrap: 'balance' }}>
+        <h2 className="text-[24px] sm:text-[28px] font-bold tracking-tight leading-tight text-primary break-words" style={{ textWrap: 'balance' }}>
           {trip.title}
         </h2>
-        <p className="mt-1 text-[14px] font-medium text-gray-600 dark:text-gray-300 tabular-nums">
+        <p className="mt-1 text-[14px] font-medium text-secondary tabular-nums">
           {formatDate(trip.startDate, i18n.language)} – {formatDate(trip.endDate, i18n.language)}
           <span className="mx-2 text-gray-300 dark:text-gray-600">·</span>
           {t('tripDetail.notebook.days', { count: trip.durationDays + 1 })}
@@ -83,8 +83,8 @@ const TripDossier = ({ tripId, onDeleted, onBack }) => {
         >
           <UserAvatar user={avatarUser(trip.user)} size="sm" />
           <span className="min-w-0 flex-1">
-            <span className="block text-[12px] font-medium text-gray-500 dark:text-gray-400">{t('admin.v2.owner')}</span>
-            <span className="block text-[14px] font-semibold text-gray-900 dark:text-white truncate group-hover:underline underline-offset-2">
+            <span className="block text-[12px] font-medium text-muted">{t('admin.v2.owner')}</span>
+            <span className="block text-[14px] font-semibold text-primary truncate group-hover:underline underline-offset-2">
               {displayName(trip.user, trip.user.email)}
             </span>
           </span>
@@ -94,8 +94,8 @@ const TripDossier = ({ tripId, onDeleted, onBack }) => {
         <dl className="mt-5 grid grid-cols-3 sm:grid-cols-5 gap-x-4 gap-y-4 pt-5 border-t border-dashed border-gray-300 dark:border-white/15">
           {facts.map((f) => (
             <div key={f.label} className="flex flex-col min-w-0">
-              <dt className="order-last mt-1 text-[12px] font-medium text-gray-500 dark:text-gray-400 truncate">{f.label}</dt>
-              <dd className="text-[22px] font-bold leading-none tabular-nums text-gray-900 dark:text-white">{f.value}</dd>
+              <dt className="order-last mt-1 text-[12px] font-medium text-muted truncate">{f.label}</dt>
+              <dd className="text-[22px] font-bold leading-none tabular-nums text-primary">{f.value}</dd>
             </div>
           ))}
         </dl>
@@ -103,22 +103,22 @@ const TripDossier = ({ tripId, onDeleted, onBack }) => {
 
       <DetailSection title={t('admin.v2.itinerary')} count={trip.activities.length}>
         {trip.activities.length === 0 ? (
-          <p className="py-3 text-[14px] text-gray-500 dark:text-gray-400">{t('admin.v2.noItinerary')}</p>
+          <p className="py-3 text-[14px] text-muted">{t('admin.v2.noItinerary')}</p>
         ) : (
           <ol>
             {trip.activities.map((a, i) => (
               <li key={a.id} className="flex gap-4 py-3 border-b border-gray-100 dark:border-white/[0.06] last:border-b-0">
-                <span className="w-12 shrink-0 text-[12px] font-semibold text-gray-500 dark:text-gray-400 pt-0.5 tabular-nums">
+                <span className="w-12 shrink-0 text-[12px] font-semibold text-muted pt-0.5 tabular-nums">
                   {t('admin.v2.dayN', { n: (a.dayIndex ?? i) + 1 })}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-[14px] font-semibold text-gray-900 dark:text-white">{a.title || '—'}</span>
+                  <span className="block text-[14px] font-semibold text-primary">{a.title || '—'}</span>
                   {a.location && (
-                    <span className="mt-0.5 inline-flex items-center gap-1 text-[12px] font-medium text-gray-500 dark:text-gray-400">
+                    <span className="mt-0.5 inline-flex items-center gap-1 text-[12px] font-medium text-muted">
                       <MapPin size={12} strokeWidth={2.25} /> {a.location}
                     </span>
                   )}
-                  {a.plan && <span className="mt-1 block text-[13px] text-gray-600 dark:text-gray-300 whitespace-pre-wrap line-clamp-3">{a.plan}</span>}
+                  {a.plan && <span className="mt-1 block text-[13px] text-secondary whitespace-pre-wrap line-clamp-3">{a.plan}</span>}
                 </span>
               </li>
             ))}
@@ -130,7 +130,7 @@ const TripDossier = ({ tripId, onDeleted, onBack }) => {
         <button
           type="button"
           onClick={remove}
-          className="inline-flex items-center gap-2 h-10 px-3 -ml-3 rounded-xl text-[14px] font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 h-10 px-3 -ml-3 rounded-xl text-[14px] font-semibold text-danger hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer"
         >
           <Trash2 size={16} strokeWidth={2.25} /> {t('admin.v2.deleteTrip')}
         </button>
@@ -185,13 +185,13 @@ const AdminTrips = () => {
   const list = (
     <>
       <ListToolbar value={search} onChange={setSearch} placeholder={t('admin.v2.searchTrips')} />
-      <p className="px-4 py-2 text-[13px] font-medium text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-white/10 tabular-nums">
+      <p className="px-4 py-2 text-[13px] font-medium text-muted border-b border-subtle tabular-nums">
         {t('admin.trips.total', { count: total })}
       </p>
       {loading ? (
         <div className="p-4"><AdminTableSkeleton rows={8} /></div>
       ) : trips.length === 0 ? (
-        <p className="py-12 text-center text-[14px] text-gray-500 dark:text-gray-400">{t('admin.trips.notFound')}</p>
+        <p className="py-12 text-center text-[14px] text-muted">{t('admin.trips.notFound')}</p>
       ) : (
         <ul className="lg:max-h-[calc(100dvh-18rem)] lg:overflow-y-auto custom-scrollbar">
           {trips.map((trip) => (
@@ -199,14 +199,14 @@ const AdminTrips = () => {
               <UserAvatar user={avatarUser(trip.user)} size="sm" />
               <span className="min-w-0 flex-1">
                 <span className="flex items-center gap-2">
-                  <span className="text-[14px] font-semibold text-gray-900 dark:text-white truncate">{trip.title}</span>
+                  <span className="text-[14px] font-semibold text-primary truncate">{trip.title}</span>
                   {trip.inTrash && <Badge tone="red">{t('admin.v2.inTrash')}</Badge>}
                 </span>
-                <span className="block text-[12px] font-medium text-gray-500 dark:text-gray-400 truncate">
+                <span className="block text-[12px] font-medium text-muted truncate">
                   {displayName(trip.user, trip.user.email)}
                 </span>
               </span>
-              <span className="shrink-0 text-right text-[12px] font-medium tabular-nums text-gray-600 dark:text-gray-300">
+              <span className="shrink-0 text-right text-[12px] font-medium tabular-nums text-secondary">
                 {formatDate(trip.startDate, i18n.language)}
               </span>
             </ListRow>

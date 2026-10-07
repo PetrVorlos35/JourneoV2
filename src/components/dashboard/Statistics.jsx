@@ -40,14 +40,14 @@ const HighlightCard =({ icon: Icon, label, mainValue, subValue, glowColor, delay
         >
           <Icon size={18} strokeWidth={2} style={{ color: glowColor }} aria-hidden="true" />
         </div>
-        <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium">{label}</p>
+        <p className="text-[11px] text-muted font-medium">{label}</p>
       </div>
       <div>
-        <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-tight line-clamp-2">
+        <p className="text-xl sm:text-2xl font-bold text-primary tracking-tight leading-tight line-clamp-2">
           {mainValue || emptyText}
         </p>
         {subValue && (
-          <p className="text-[12px] sm:text-[13px] text-gray-500 dark:text-gray-400 font-medium mt-1">{subValue}</p>
+          <p className="text-[12px] sm:text-[13px] text-muted font-medium mt-1">{subValue}</p>
         )}
       </div>
     </motion.div>
@@ -88,10 +88,10 @@ const ExpenseBar = ({ breakdown }) => {
               className="w-2.5 h-2.5 rounded-full shrink-0"
               style={{ backgroundColor: CATEGORY_CONFIG[item.category]?.color || '#6b7280' }}
             />
-            <span className="text-[11px] sm:text-[12px] font-medium text-gray-500 dark:text-gray-400">
+            <span className="text-[11px] sm:text-[12px] font-medium text-muted">
               {t('budget.categories.' + item.category)}
             </span>
-            <span className="text-[11px] sm:text-[12px] font-bold text-gray-900 dark:text-white">
+            <span className="text-[11px] sm:text-[12px] font-bold text-primary">
               {item.percentage}%
             </span>
           </div>
@@ -183,14 +183,14 @@ const Statistics = ({ trips }) => {
   if (error) {
     return (
       <div className="w-full space-y-8 pb-24 sm:pb-10">
-        <h1 className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold" style={{ textWrap: 'balance' }}>{t('statistics.title')}</h1>
+        <h1 className="text-2xl sm:text-4xl text-primary tracking-tight font-bold" style={{ textWrap: 'balance' }}>{t('statistics.title')}</h1>
         <div className="glass-card p-12 flex flex-col items-center gap-4 text-center">
           <AlertCircle size={32} strokeWidth={1.5} className="text-red-400" aria-hidden="true" />
-          <p className="text-[15px] font-bold text-gray-900 dark:text-white">{t('statistics.error.title')}</p>
-          <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium">{t('statistics.error.subtitle')}</p>
+          <p className="text-[15px] font-bold text-primary">{t('statistics.error.title')}</p>
+          <p className="text-[13px] text-muted font-medium">{t('statistics.error.subtitle')}</p>
           <button
             onClick={handleRetry}
-            className="mt-2 px-5 py-2.5 sm:py-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-[13px] font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+            className="mt-2 px-5 py-2.5 sm:py-2 rounded-xl bg-accent hover:bg-accent-hover active:scale-95 text-white text-[13px] font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
           >
             {t('statistics.error.retry')}
           </button>
@@ -202,9 +202,9 @@ const Statistics = ({ trips }) => {
   if (totalTrips === 0) {
     return (
       <div className="w-full space-y-8 pb-24 sm:pb-10">
-        <h1 className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold" style={{ textWrap: 'balance' }}>{t('statistics.title')}</h1>
+        <h1 className="text-2xl sm:text-4xl text-primary tracking-tight font-bold" style={{ textWrap: 'balance' }}>{t('statistics.title')}</h1>
         <div className="text-center p-16 glass-card">
-          <p className="text-gray-500 dark:text-gray-400 font-medium text-[15px]">{t('statistics.empty')}</p>
+          <p className="text-muted font-medium text-[15px]">{t('statistics.empty')}</p>
         </div>
       </div>
     );
@@ -224,7 +224,7 @@ const Statistics = ({ trips }) => {
         initial={shouldReduceMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold"
+        className="text-2xl sm:text-4xl text-primary tracking-tight font-bold"
         style={{ textWrap: 'balance' }}
       >
         {t('statistics.title')}
@@ -252,7 +252,7 @@ const Statistics = ({ trips }) => {
             >
               <MapPinned size={18} strokeWidth={2} className="text-emerald-500" aria-hidden="true" />
             </div>
-            <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium">{t('map.title')}</p>
+            <p className="text-[13px] text-muted font-medium">{t('map.title')}</p>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
@@ -265,15 +265,15 @@ const Statistics = ({ trips }) => {
               <div key={label}>
                 <AnimatedValue
                   value={value}
-                  className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tighter leading-none"
+                  className="text-2xl sm:text-3xl font-bold text-primary tracking-tighter leading-none"
                 />
-                <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-1">{label}</p>
+                <p className="text-[11px] text-muted font-medium mt-1">{label}</p>
               </div>
             ))}
           </div>
 
           {visitedPlaces.length > 0 && (
-            <div className="relative h-[220px] sm:h-[280px] rounded-2xl overflow-hidden border border-gray-200 dark:border-white/10 mb-5">
+            <div className="relative h-[220px] sm:h-[280px] rounded-2xl overflow-hidden border border-default mb-5">
               <Suspense fallback={<div className="w-full h-full skeleton" />}>
                 <MapCanvas
                   places={visitedPlaces}
@@ -286,7 +286,7 @@ const Statistics = ({ trips }) => {
                   potřebuje odsud cestu na plnou verzi. */}
               <Link
                 to="/dashboard/map"
-                className="absolute top-3 right-3 z-[500] inline-flex items-center gap-1.5 min-h-[36px] px-3.5 rounded-full glass-card border border-gray-200 dark:border-white/10 text-[12px] font-semibold text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                className="absolute top-3 right-3 z-[500] inline-flex items-center gap-1.5 min-h-[36px] px-3.5 rounded-full glass-card border border-default text-[12px] font-semibold text-gray-700 dark:text-gray-200 hover:text-accent transition-colors"
               >
                 {t('map.stats.open')}
                 <ArrowRight size={13} strokeWidth={2.5} aria-hidden="true" />
@@ -324,21 +324,21 @@ const Statistics = ({ trips }) => {
           >
             <Wallet size={18} strokeWidth={2} className="text-indigo-500" aria-hidden="true" />
           </div>
-          <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium">{t('statistics.financial.label')}</p>
+          <p className="text-[13px] text-muted font-medium">{t('statistics.financial.label')}</p>
         </div>
 
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-wrap items-baseline gap-2 sm:gap-3">
             <AnimatedValue
               value={Math.round(stats?.financial?.totalSpent ?? 0)}
-              className="text-3xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white tracking-tighter leading-none"
+              className="text-3xl sm:text-5xl lg:text-6xl font-bold text-primary tracking-tighter leading-none"
             />
             <span className="text-lg sm:text-xl font-bold text-gray-400 dark:text-gray-500">{currencySymbol}</span>
           </div>
           {stats?.financial?.mostExpensiveTrip && (
-            <p className="text-[12px] sm:text-[13px] text-gray-500 dark:text-gray-400 font-medium mt-2">
-              {t('statistics.financial.mostExpensive')} <span className="text-gray-900 dark:text-white font-bold">{stats.financial.mostExpensiveTrip.title}</span>
-              {' '}— <span className="text-gray-900 dark:text-white font-bold">{stats.financial.mostExpensiveTrip.total.toLocaleString(i18n.language)} {currencySymbol}</span>
+            <p className="text-[12px] sm:text-[13px] text-muted font-medium mt-2">
+              {t('statistics.financial.mostExpensive')} <span className="text-primary font-bold">{stats.financial.mostExpensiveTrip.title}</span>
+              {' '}— <span className="text-primary font-bold">{stats.financial.mostExpensiveTrip.total.toLocaleString(i18n.language)} {currencySymbol}</span>
             </p>
           )}
         </div>

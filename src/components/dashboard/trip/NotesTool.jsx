@@ -34,7 +34,7 @@ const NotesTool = ({ documents, isViewer, onAdd, onDelete }) => {
     setContent('');
   };
 
-  const fieldClass = 'w-full px-4 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-base sm:text-[15px] font-medium text-gray-900 dark:text-white placeholder:text-gray-500 focus:outline-none focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/20 transition-colors';
+  const fieldClass = 'w-full px-4 rounded-2xl bg-white dark:bg-white/5 border border-default text-base sm:text-[15px] font-medium text-primary placeholder:text-gray-500 focus:outline-none focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/20 transition-colors';
 
   return (
     <div className="max-w-2xl">
@@ -63,7 +63,7 @@ const NotesTool = ({ documents, isViewer, onAdd, onDelete }) => {
             <button
               type="submit"
               disabled={!title.trim() || !content.trim()}
-              className="h-11 px-5 flex items-center gap-2 rounded-2xl bg-blue-600 text-white text-[14px] font-semibold hover:bg-blue-500 disabled:bg-gray-200 disabled:text-gray-400 dark:disabled:bg-white/5 dark:disabled:text-gray-500 transition-colors cursor-pointer disabled:cursor-not-allowed"
+              className="h-11 px-5 flex items-center gap-2 rounded-2xl bg-accent text-white text-[14px] font-semibold hover:bg-accent-hover disabled:bg-gray-200 disabled:text-gray-400 dark:disabled:bg-white/5 dark:disabled:text-gray-500 transition-colors cursor-pointer disabled:cursor-not-allowed"
             >
               <Plus size={17} strokeWidth={2.5} /> {t('tripDetail.notebook.add')}
             </button>
@@ -72,14 +72,14 @@ const NotesTool = ({ documents, isViewer, onAdd, onDelete }) => {
       )}
 
       {documents.length === 0 && (
-        <p className="py-10 text-center text-[15px] font-medium text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
+        <p className="py-10 text-center text-[15px] font-medium text-muted max-w-sm mx-auto">
           {t('tripDetail.notebook.notesEmpty')}
         </p>
       )}
 
       {links.length > 0 && (
         <section className="mb-8">
-          <h3 className="text-[13px] font-semibold text-gray-500 dark:text-gray-400 mb-1">
+          <h3 className="text-[13px] font-semibold text-muted mb-1">
             {t('tripDetail.notebook.links')} <span className="tabular-nums">· {links.length}</span>
           </h3>
           <ul>
@@ -89,16 +89,16 @@ const NotesTool = ({ documents, isViewer, onAdd, onDelete }) => {
                   href={doc.content.trim()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 min-w-0 flex items-center gap-3.5 py-3 -ml-2 pl-2 pr-2 rounded-2xl hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                  className="flex-1 min-w-0 flex items-center gap-3.5 py-3 -ml-2 pl-2 pr-2 rounded-2xl hover:bg-field transition-colors"
                 >
-                  <span className="w-10 h-10 shrink-0 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                  <span className="w-10 h-10 shrink-0 rounded-xl bg-active text-accent flex items-center justify-center">
                     <Globe size={18} strokeWidth={2} aria-hidden="true" />
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-[15px] font-semibold text-gray-900 dark:text-white truncate">{doc.title}</span>
-                    <span className="block text-[13px] font-medium text-gray-500 dark:text-gray-400 truncate">{hostOf(doc.content.trim())}</span>
+                    <span className="block text-[15px] font-semibold text-primary truncate">{doc.title}</span>
+                    <span className="block text-[13px] font-medium text-muted truncate">{hostOf(doc.content.trim())}</span>
                   </span>
-                  <ArrowUpRight size={18} strokeWidth={2} className="shrink-0 text-gray-300 group-hover:text-blue-600 dark:text-gray-600 dark:group-hover:text-blue-400 transition-colors" aria-hidden="true" />
+                  <ArrowUpRight size={18} strokeWidth={2} className="shrink-0 text-gray-300 group-hover:text-accent dark:text-gray-600 transition-colors" aria-hidden="true" />
                 </a>
                 {!isViewer && <DeleteButton onClick={() => onDelete(doc.id)} label={deleteLabel} />}
               </li>
@@ -109,7 +109,7 @@ const NotesTool = ({ documents, isViewer, onAdd, onDelete }) => {
 
       {notes.length > 0 && (
         <section>
-          <h3 className="text-[13px] font-semibold text-gray-500 dark:text-gray-400 mb-1">
+          <h3 className="text-[13px] font-semibold text-muted mb-1">
             {t('tripDetail.notebook.notes')} <span className="tabular-nums">· {notes.length}</span>
           </h3>
           <ul>
@@ -119,8 +119,8 @@ const NotesTool = ({ documents, isViewer, onAdd, onDelete }) => {
                   <StickyNote size={18} strokeWidth={2} aria-hidden="true" />
                 </span>
                 <div className="min-w-0 flex-1 pt-0.5">
-                  <p className="text-[15px] font-semibold text-gray-900 dark:text-white">{doc.title}</p>
-                  <p className="mt-0.5 text-[14px] leading-relaxed text-gray-600 dark:text-gray-300 whitespace-pre-wrap break-words">{doc.content}</p>
+                  <p className="text-[15px] font-semibold text-primary">{doc.title}</p>
+                  <p className="mt-0.5 text-[14px] leading-relaxed text-secondary whitespace-pre-wrap break-words">{doc.content}</p>
                 </div>
                 {!isViewer && <DeleteButton onClick={() => onDelete(doc.id)} label={deleteLabel} />}
               </li>

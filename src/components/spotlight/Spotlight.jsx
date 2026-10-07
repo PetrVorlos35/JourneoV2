@@ -37,7 +37,7 @@ const Highlighted = ({ text, positions }) => {
   ranges.forEach(([start, end], i) => {
     if (start > cursor) parts.push(text.slice(cursor, start));
     parts.push(
-      <mark key={i} className="bg-transparent text-blue-600 dark:text-blue-400 font-bold">
+      <mark key={i} className="bg-transparent text-accent font-bold">
         {text.slice(start, end)}
       </mark>
     );
@@ -66,11 +66,11 @@ const ResultRow = ({ entry, active, onSelect, onHover, rowRef }) => {
         <Icon size={17} strokeWidth={2.25} aria-hidden="true" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[14px] font-semibold text-gray-900 dark:text-white truncate">
+        <span className="block text-[14px] font-semibold text-primary truncate">
           <Highlighted text={item.title} positions={positions} />
         </span>
         {item.subtitle && (
-          <span className="block text-[12px] font-medium text-gray-500 dark:text-gray-400 truncate mt-0.5">
+          <span className="block text-[12px] font-medium text-muted truncate mt-0.5">
             {item.subtitle}
           </span>
         )}
@@ -81,7 +81,7 @@ const ResultRow = ({ entry, active, onSelect, onHover, rowRef }) => {
         </span>
       )}
       {item.shortcut && (
-        <kbd className="shrink-0 text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-200/70 dark:bg-white/[0.07] text-gray-500 dark:text-gray-400">
+        <kbd className="shrink-0 text-[10px] font-mono px-1.5 py-0.5 rounded bg-gray-200/70 dark:bg-white/[0.07] text-muted">
           {item.shortcut}
         </kbd>
       )}
@@ -321,7 +321,7 @@ const Spotlight = ({ isOpen, onClose, trips = [], onCreateTrip, onLogout }) => {
             animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
             exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.98 }}
             transition={shouldReduceMotion ? { duration: 0.12 } : { type: 'spring', stiffness: 400, damping: 32 }}
-            className="relative w-full sm:max-w-2xl h-[100dvh] sm:h-auto sm:max-h-[68vh] flex flex-col overflow-hidden bg-white dark:bg-[#1C1C1E] sm:rounded-[1.75rem] border-0 sm:border border-black/5 dark:border-white/10 shadow-2xl"
+            className="relative w-full sm:max-w-2xl h-[100dvh] sm:h-auto sm:max-h-[68vh] flex flex-col overflow-hidden bg-page sm:rounded-[1.75rem] border-0 sm:border border-black/5 dark:border-white/10 shadow-2xl"
           >
             {/* Vyhledávací pole */}
             <div className="flex items-center gap-3 px-4 sm:px-5 pb-3 pt-[max(0.875rem,env(safe-area-inset-top))] sm:pt-4 border-b border-gray-100 dark:border-white/[0.07] shrink-0">
@@ -339,7 +339,7 @@ const Spotlight = ({ isOpen, onClose, trips = [], onCreateTrip, onLogout }) => {
                 autoCorrect="off"
                 spellCheck="false"
                 // 16px, aby Safari na iOS při fokusu nezoomoval stránku
-                className="flex-1 min-w-0 bg-transparent text-[16px] font-medium text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none"
+                className="flex-1 min-w-0 bg-transparent text-[16px] font-medium text-primary placeholder:text-placeholder focus:outline-none"
               />
               <kbd className="hidden sm:block shrink-0 text-[10px] font-mono px-1.5 py-1 rounded bg-gray-100 dark:bg-white/[0.07] text-gray-400 dark:text-gray-500">
                 ESC
@@ -348,7 +348,7 @@ const Spotlight = ({ isOpen, onClose, trips = [], onCreateTrip, onLogout }) => {
                 type="button"
                 onClick={onClose}
                 aria-label={t('common.close')}
-                className="sm:hidden shrink-0 w-9 h-9 -mr-1 flex items-center justify-center rounded-full text-gray-500 dark:text-gray-400 active:bg-gray-100 dark:active:bg-white/10 cursor-pointer"
+                className="sm:hidden shrink-0 w-9 h-9 -mr-1 flex items-center justify-center rounded-full text-muted active:bg-subtle cursor-pointer"
               >
                 <X size={20} strokeWidth={2.25} />
               </button>
@@ -367,8 +367,8 @@ const Spotlight = ({ isOpen, onClose, trips = [], onCreateTrip, onLogout }) => {
                   <div className="w-11 h-11 mx-auto mb-3 rounded-2xl bg-gray-100 dark:bg-white/[0.07] flex items-center justify-center text-gray-400 dark:text-gray-500">
                     <Search size={18} strokeWidth={2.25} aria-hidden="true" />
                   </div>
-                  <p className="text-[14px] font-bold text-gray-900 dark:text-white">{t('spotlight.empty.title')}</p>
-                  <p className="text-[12px] font-medium text-gray-500 dark:text-gray-400 mt-1">
+                  <p className="text-[14px] font-bold text-primary">{t('spotlight.empty.title')}</p>
+                  <p className="text-[12px] font-medium text-muted mt-1">
                     {t('spotlight.empty.hint')}
                   </p>
                 </div>

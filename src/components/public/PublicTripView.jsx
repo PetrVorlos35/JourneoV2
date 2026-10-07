@@ -57,7 +57,7 @@ const PublicTripView = () => {
     <button
       onClick={toggleTheme}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="w-8 h-8 flex items-center justify-center rounded-full text-gray-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-200 cursor-pointer"
+      className="w-8 h-8 flex items-center justify-center rounded-full text-gray-500 dark:text-white/50 hover:text-primary hover:bg-subtle transition-all duration-200 cursor-pointer"
     >
       {isDark ? <Sun size={16} strokeWidth={2} /> : <Moon size={16} strokeWidth={2} />}
     </button>
@@ -100,7 +100,7 @@ const PublicTripView = () => {
           <div className="w-16 h-16 rounded-3xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-6">
             <AlertCircle size={28} className="text-red-400" strokeWidth={2} />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">
+          <h1 className="text-2xl font-bold text-primary mb-3 tracking-tight">
             {t('publicTrip.notFound.title')}
           </h1>
           <p className="text-gray-400 dark:text-white/40 text-[15px] mb-8 max-w-sm leading-relaxed">
@@ -108,7 +108,7 @@ const PublicTripView = () => {
           </p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl transition-colors duration-200 text-[14px] cursor-pointer"
+            className="inline-flex items-center gap-2 px-6 py-3.5 bg-accent hover:bg-accent-hover text-white font-bold rounded-2xl transition-colors duration-200 text-[14px] cursor-pointer"
           >
             {t('publicTrip.notFound.cta')}
             <ArrowRight size={16} strokeWidth={2.5} />
@@ -146,7 +146,7 @@ const PublicTripView = () => {
 
   return (
     <div className={isDark ? 'dark' : ''}>
-      <div className="min-h-screen bg-[#fbfbfd] dark:bg-neutral-950 text-gray-900 dark:text-white transition-colors duration-300">
+      <div className="min-h-screen bg-[#fbfbfd] dark:bg-neutral-950 text-primary transition-colors duration-300">
 
         {/* ── Floating navbar ── */}
         <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-3xl rounded-full glass-nav px-2 py-2">
@@ -157,7 +157,7 @@ const PublicTripView = () => {
                 alt="Journeo"
                 className="h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               />
-              <span className="font-semibold text-lg tracking-tight text-gray-900 dark:text-white">Journeo</span>
+              <span className="font-semibold text-lg tracking-tight text-primary">Journeo</span>
             </Link>
             <div className="flex items-center gap-1 pr-1">
               <ThemeToggle />
@@ -175,7 +175,7 @@ const PublicTripView = () => {
                 onClick={() => handleMobileNav(id)}
                 className={`flex flex-col items-center gap-1 flex-1 py-1.5 transition-all duration-200 cursor-pointer rounded-2xl ${
                   mobileView === id
-                    ? 'text-blue-600 dark:text-blue-400'
+                    ? 'text-accent'
                     : 'text-gray-400 dark:text-white/35 hover:text-gray-700 dark:hover:text-white/60'
                 }`}
               >
@@ -195,14 +195,14 @@ const PublicTripView = () => {
               <div className="flex items-center gap-2.5 mb-4">
                 <UserAvatar user={owner} size="sm" />
                 <span className="text-[13px] font-semibold text-gray-500 dark:text-white/40">{ownerName}</span>
-                <span className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-400 dark:text-white/30 ml-1">
+                <span className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-gray-100 dark:bg-white/5 border border-default text-gray-400 dark:text-white/30 ml-1">
                   {t('publicTrip.readOnly')}
                 </span>
               </div>
             )}
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
-                <h1 className="text-3xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight mb-2 truncate" style={{ textWrap: 'balance' }}>
+                <h1 className="text-3xl lg:text-5xl font-bold text-primary leading-tight tracking-tight mb-2 truncate" style={{ textWrap: 'balance' }}>
                   {trip.title}
                 </h1>
                 <p className="text-gray-400 dark:text-white/40 flex items-center gap-2 text-[13px] font-medium">
@@ -233,8 +233,8 @@ const PublicTripView = () => {
                     onClick={() => { setActiveView('packing'); setMobileView('packing'); }}
                     className={`w-full flex items-center gap-3 text-left px-4 py-3.5 rounded-xl transition-all duration-300 font-bold cursor-pointer ${
                       activeView === 'packing'
-                        ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                        : 'text-gray-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
+                        ? 'bg-active text-accent'
+                        : 'text-gray-500 dark:text-white/50 hover:text-primary hover:bg-gray-100 dark:hover:bg-white/5'
                     }`}
                   >
                     <PackageOpen size={18} strokeWidth={2.5} /> {t('publicTrip.tabs.packing')}
@@ -243,8 +243,8 @@ const PublicTripView = () => {
                     onClick={() => { setActiveView('documents'); setMobileView('documents'); }}
                     className={`w-full flex items-center gap-3 text-left px-4 py-3.5 rounded-xl transition-all duration-300 font-bold cursor-pointer ${
                       activeView === 'documents'
-                        ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                        : 'text-gray-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5'
+                        ? 'bg-active text-accent'
+                        : 'text-gray-500 dark:text-white/50 hover:text-primary hover:bg-gray-100 dark:hover:bg-white/5'
                     }`}
                   >
                     <LinkIcon size={18} strokeWidth={2.5} /> {t('publicTrip.tabs.documents')}
@@ -263,8 +263,8 @@ const PublicTripView = () => {
                         onClick={() => { setActiveView(index); setMobileView('itinerary'); }}
                         className={`w-full flex items-center justify-between text-left px-4 py-4 rounded-xl transition-all duration-300 cursor-pointer ${
                           activeView === index
-                            ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20'
-                            : 'text-gray-900 dark:text-white bg-gray-50 dark:bg-white/5 hover:bg-gray-100 dark:hover:bg-white/10'
+                            ? 'bg-accent text-white shadow-md shadow-blue-500/20'
+                            : 'text-primary bg-field hover:bg-subtle'
                         }`}
                       >
                         <div className="min-w-0">
@@ -287,31 +287,31 @@ const PublicTripView = () => {
               {/* ── Mobile Info tab ── */}
               <div className={`${mobileView === 'info' ? 'block' : 'hidden'} lg:hidden animate-in fade-in duration-300`}>
                 <div className="glass-card p-6">
-                  <h2 className="font-bold text-xl mb-6 flex items-center gap-3 text-gray-900 dark:text-white tracking-tight">
-                    <div className="w-9 h-9 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center shrink-0">
+                  <h2 className="font-bold text-xl mb-6 flex items-center gap-3 text-primary tracking-tight">
+                    <div className="w-9 h-9 bg-active text-accent rounded-xl flex items-center justify-center shrink-0">
                       <Info size={18} strokeWidth={2.5} />
                     </div>
                     {t('tripDetail.info.title')}
                   </h2>
                   <div className="space-y-5">
                     {ownerName && (
-                      <div className="flex justify-between items-center pb-4 border-b border-gray-100 dark:border-white/10">
+                      <div className="flex justify-between items-center pb-4 border-b border-subtle">
                         <span className="text-gray-400 dark:text-white/40 text-[12px] font-medium">{t('readOnlyTrip.info.author')}</span>
                         <div className="flex items-center gap-2">
                           <UserAvatar user={owner} size="sm" />
-                          <span className="font-bold text-gray-900 dark:text-white text-[14px]">{ownerName}</span>
+                          <span className="font-bold text-primary text-[14px]">{ownerName}</span>
                         </div>
                       </div>
                     )}
-                    <div className="flex justify-between items-center pb-4 border-b border-gray-100 dark:border-white/10">
+                    <div className="flex justify-between items-center pb-4 border-b border-subtle">
                       <span className="text-gray-400 dark:text-white/40 text-[12px] font-medium">{t('tripDetail.info.date')}</span>
-                      <span className="font-bold text-gray-900 dark:text-white text-[13px]">
+                      <span className="font-bold text-primary text-[13px]">
                         {format(new Date(trip.startDate), 'd. M. yyyy')} — {format(new Date(trip.endDate), 'd. M. yyyy')}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center pb-4 border-b border-gray-100 dark:border-white/10">
+                    <div className="flex justify-between items-center pb-4 border-b border-subtle">
                       <span className="text-gray-400 dark:text-white/40 text-[12px] font-medium">{t('tripDetail.info.days')}</span>
-                      <span className="font-bold text-gray-900 dark:text-white text-[14px]">{dailyPlans.length} {t('tripDetail.info.daysValue')}</span>
+                      <span className="font-bold text-primary text-[14px]">{dailyPlans.length} {t('tripDetail.info.daysValue')}</span>
                     </div>
                   </div>
                 </div>
@@ -326,7 +326,7 @@ const PublicTripView = () => {
                       onClick={() => setActiveView(index)}
                       className={`flex-shrink-0 text-left p-3 rounded-2xl transition-all duration-200 border-2 cursor-pointer w-[88px] ${
                         activeView === index
-                          ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                          ? 'border-blue-600 bg-active text-accent'
                           : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 dark:text-white/50'
                       }`}
                     >
@@ -345,9 +345,9 @@ const PublicTripView = () => {
               {/* ── Packing list ── */}
               <div className={`flex-col flex-1 lg:min-h-0 ${mobileView === 'packing' ? 'flex' : 'hidden'} ${activeView === 'packing' ? 'lg:flex' : 'lg:hidden'}`}>
                 <div className="glass-card flex flex-col flex-1 lg:min-h-0">
-                  <div className="p-5 lg:p-10 border-b border-gray-100 dark:border-white/10 shrink-0">
-                    <h2 className="font-bold text-2xl lg:text-3xl tracking-tight text-gray-900 dark:text-white flex items-center gap-3 lg:gap-4">
-                      <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0">
+                  <div className="p-5 lg:p-10 border-b border-subtle shrink-0">
+                    <h2 className="font-bold text-2xl lg:text-3xl tracking-tight text-primary flex items-center gap-3 lg:gap-4">
+                      <div className="w-10 h-10 lg:w-12 lg:h-12 bg-active text-accent rounded-2xl flex items-center justify-center shrink-0">
                         <PackageOpen size={20} strokeWidth={2} />
                       </div>
                       {t('publicTrip.tabs.packing')}
@@ -359,14 +359,14 @@ const PublicTripView = () => {
                     ) : (
                       <div className="space-y-2 lg:space-y-3">
                         {packingList.map(item => (
-                          <div key={item.id} className="flex items-center gap-3 lg:gap-4 py-3.5 lg:py-4 px-4 lg:px-5 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
+                          <div key={item.id} className="flex items-center gap-3 lg:gap-4 py-3.5 lg:py-4 px-4 lg:px-5 bg-field rounded-2xl border border-gray-100 dark:border-white/5">
                             <div className={`w-6 h-6 shrink-0 rounded-md border-2 flex items-center justify-center transition-colors ${
                               !!item.checked ? 'border-blue-500 bg-blue-500' : 'border-gray-300 dark:border-white/20'
                             }`}>
                               {!!item.checked && <Check size={12} strokeWidth={2.5} className="text-white" />}
                             </div>
                             <span className={`flex-1 min-w-0 break-words text-[15px] font-bold transition-colors ${
-                              !!item.checked ? 'text-gray-400 dark:text-white/30 line-through' : 'text-gray-900 dark:text-white'
+                              !!item.checked ? 'text-gray-400 dark:text-white/30 line-through' : 'text-primary'
                             }`}>
                               {item.text}
                             </span>
@@ -381,9 +381,9 @@ const PublicTripView = () => {
               {/* ── Documents ── */}
               <div className={`flex-col flex-1 lg:min-h-0 ${mobileView === 'documents' ? 'flex' : 'hidden'} ${activeView === 'documents' ? 'lg:flex' : 'lg:hidden'}`}>
                 <div className="glass-card flex flex-col flex-1 lg:min-h-0">
-                  <div className="p-5 lg:p-10 border-b border-gray-100 dark:border-white/10 shrink-0">
-                    <h2 className="font-bold text-2xl lg:text-3xl tracking-tight text-gray-900 dark:text-white flex items-center gap-3 lg:gap-4">
-                      <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0">
+                  <div className="p-5 lg:p-10 border-b border-subtle shrink-0">
+                    <h2 className="font-bold text-2xl lg:text-3xl tracking-tight text-primary flex items-center gap-3 lg:gap-4">
+                      <div className="w-10 h-10 lg:w-12 lg:h-12 bg-active text-accent rounded-2xl flex items-center justify-center shrink-0">
                         <LinkIcon size={20} strokeWidth={2} />
                       </div>
                       {t('publicTrip.tabs.documents')}
@@ -391,21 +391,21 @@ const PublicTripView = () => {
                   </div>
                   <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col p-5 lg:p-10 gap-4">
                     {documents.length === 0 ? (
-                      <div className="py-12 text-center text-gray-400 dark:text-white/30 font-bold border-2 border-dashed border-gray-200 dark:border-white/10 rounded-3xl">
+                      <div className="py-12 text-center text-gray-400 dark:text-white/30 font-bold border-2 border-dashed border-default rounded-3xl">
                         {t('publicTrip.documents.empty')}
                       </div>
                     ) : (
                       documents.map(doc => {
                         const isUrl = doc.content.startsWith('http://') || doc.content.startsWith('https://');
                         return (
-                          <div key={doc.id} className="bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 p-5 lg:p-6 rounded-3xl">
-                            <h4 className="font-bold text-base lg:text-lg text-gray-900 dark:text-white mb-3 tracking-tight">{doc.title}</h4>
+                          <div key={doc.id} className="bg-field border border-default p-5 lg:p-6 rounded-3xl">
+                            <h4 className="font-bold text-base lg:text-lg text-primary mb-3 tracking-tight">{doc.title}</h4>
                             {isUrl ? (
                               <a
                                 href={doc.content}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-black/40 text-[13px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors rounded-xl border border-gray-200 dark:border-white/5 cursor-pointer"
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-black/40 text-[13px] font-bold text-accent hover:text-blue-500 transition-colors rounded-xl border border-gray-200 dark:border-white/5 cursor-pointer"
                               >
                                 <ExternalLink size={16} strokeWidth={2} /> {t('publicTrip.documents.open')}
                               </a>
@@ -426,10 +426,10 @@ const PublicTripView = () => {
                   if (activeView !== idx) return null;
                   return (
                     <div key={idx} className="glass-card flex flex-col flex-1 lg:min-h-0">
-                      <div className="p-5 lg:p-10 border-b border-gray-100 dark:border-white/10 shrink-0">
+                      <div className="p-5 lg:p-10 border-b border-subtle shrink-0">
                         <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 mb-4 lg:mb-8">
-                          <h2 className="font-bold text-2xl lg:text-4xl tracking-tight text-gray-900 dark:text-white">{day.title}</h2>
-                          <span className="text-[12px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 px-3 py-1 rounded-full w-fit">
+                          <h2 className="font-bold text-2xl lg:text-4xl tracking-tight text-primary">{day.title}</h2>
+                          <span className="text-[12px] font-bold text-accent bg-active px-3 py-1 rounded-full w-fit">
                             {format(new Date(day.date), 'EEEE, d. M.', { locale: dateLocale })}
                           </span>
                         </div>
@@ -437,7 +437,7 @@ const PublicTripView = () => {
                           <p className="text-[12px] font-medium text-gray-400 dark:text-white/40 flex items-center gap-2">
                             <MapPin size={14} strokeWidth={2.5} /> {t('tripDetail.itinerary.locationLabel')}
                           </p>
-                          <p className="py-2.5 lg:py-4 px-4 font-bold text-base lg:text-lg text-gray-900 dark:text-white min-h-[44px] lg:min-h-[52px]">
+                          <p className="py-2.5 lg:py-4 px-4 font-bold text-base lg:text-lg text-primary min-h-[44px] lg:min-h-[52px]">
                             {day.location || <span className="text-gray-400 dark:text-white/25 font-normal italic">{t('tripDetail.itinerary.noLocation')}</span>}
                           </p>
                         </div>
@@ -448,13 +448,13 @@ const PublicTripView = () => {
                           {t('readOnlyTrip.dayPlan')}
                         </p>
                         {day.plan ? (
-                          <div className="flex-1 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5 p-4 lg:p-6 overflow-y-auto custom-scrollbar">
+                          <div className="flex-1 bg-field rounded-2xl border border-gray-100 dark:border-white/5 p-4 lg:p-6 overflow-y-auto custom-scrollbar">
                             <p className="text-gray-700 dark:text-white/80 whitespace-pre-wrap font-medium text-[15px] leading-relaxed">
                               {day.plan}
                             </p>
                           </div>
                         ) : (
-                          <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-white/5 rounded-2xl border-2 border-dashed border-gray-200 dark:border-white/10">
+                          <div className="flex-1 flex items-center justify-center bg-field rounded-2xl border-2 border-dashed border-default">
                             <p className="text-gray-300 dark:text-white/25 font-bold text-[15px]">{t('publicTrip.noDayNotes')}</p>
                           </div>
                         )}
@@ -468,15 +468,15 @@ const PublicTripView = () => {
           </div>
 
           {/* ── CTA ── */}
-          <div className="hidden lg:block mt-16 pt-10 border-t border-gray-200 dark:border-white/10">
+          <div className="hidden lg:block mt-16 pt-10 border-t border-default">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
               <div>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight mb-1">{t('publicTrip.cta.title')}</h3>
+                <h3 className="text-lg font-bold text-primary tracking-tight mb-1">{t('publicTrip.cta.title')}</h3>
                 <p className="text-gray-400 dark:text-white/40 text-[14px]">{t('publicTrip.cta.desc')}</p>
               </div>
               <Link
                 to="/auth"
-                className="shrink-0 inline-flex items-center gap-2 px-6 py-3.5 bg-gray-900 dark:bg-white hover:bg-gray-700 dark:hover:bg-white/90 active:scale-95 text-white dark:text-black font-bold rounded-2xl transition-all duration-200 text-[14px] cursor-pointer whitespace-nowrap"
+                className="shrink-0 inline-flex items-center gap-2 px-6 py-3.5 bg-ink hover:bg-gray-700 dark:hover:bg-white/90 active:scale-95 text-white dark:text-black font-bold rounded-2xl transition-all duration-200 text-[14px] cursor-pointer whitespace-nowrap"
               >
                 {t('publicTrip.cta.button')}
                 <ArrowRight size={16} strokeWidth={2.5} />

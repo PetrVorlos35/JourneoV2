@@ -102,12 +102,12 @@ const Trash = ({ onTripsChanged }) => {
         <div className="space-y-1 sm:space-y-2">
           <Link
             to="/dashboard/all-trips"
-            className="inline-flex items-center gap-1.5 text-[13px] text-gray-500 dark:text-gray-400 font-medium hover:text-gray-900 dark:hover:text-white transition-colors"
+            className="inline-flex items-center gap-1.5 text-[13px] text-muted font-medium hover:text-primary transition-colors"
           >
             <ArrowLeft size={14} strokeWidth={2.5} aria-hidden="true" /> {t('trash.backToTrips')}
           </Link>
-          <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('trash.title')}</h1>
-          <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium">{t('trash.subtitle')}</p>
+          <h1 className="text-3xl sm:text-4xl text-primary tracking-tight font-bold">{t('trash.title')}</h1>
+          <p className="text-[13px] text-muted font-medium">{t('trash.subtitle')}</p>
         </div>
 
         {trips.length > 0 && (
@@ -126,8 +126,8 @@ const Trash = ({ onTripsChanged }) => {
           <div className="w-14 h-14 bg-gray-100 dark:bg-white/5 rounded-2xl flex items-center justify-center text-gray-400">
             <Trash2 size={26} strokeWidth={2} aria-hidden="true" />
           </div>
-          <p className="text-2xl text-gray-900 dark:text-white font-bold tracking-tight">{t('trash.empty.title')}</p>
-          <p className="text-[15px] text-gray-500 dark:text-gray-400 font-medium max-w-md">{t('trash.empty.description')}</p>
+          <p className="text-2xl text-primary font-bold tracking-tight">{t('trash.empty.title')}</p>
+          <p className="text-[15px] text-muted font-medium max-w-md">{t('trash.empty.description')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -147,9 +147,9 @@ const Trash = ({ onTripsChanged }) => {
                   </span>
                 </div>
 
-                <h2 className="text-xl font-bold mb-2 text-gray-900 dark:text-white tracking-tight truncate min-w-0">{trip.title}</h2>
+                <h2 className="text-xl font-bold mb-2 text-primary tracking-tight truncate min-w-0">{trip.title}</h2>
 
-                <div className="flex items-center text-[13px] font-medium text-gray-500 dark:text-gray-400 gap-2">
+                <div className="flex items-center text-[13px] font-medium text-muted gap-2">
                   <Calendar size={15} strokeWidth={2} aria-hidden="true" />
                   <span>{format(new Date(trip.startDate), 'd. M.')} — {format(new Date(trip.endDate), 'd. M. yyyy')}</span>
                 </div>
@@ -157,11 +157,11 @@ const Trash = ({ onTripsChanged }) => {
                   {t('trash.deletedOn', { date: format(new Date(trip.deletedAt), 'd. M. yyyy') })}
                 </p>
 
-                <div className="mt-auto flex items-center gap-3 pt-6 border-t border-gray-100 dark:border-white/10">
+                <div className="mt-auto flex items-center gap-3 pt-6 border-t border-subtle">
                   <button
                     onClick={() => handleRestore(trip)}
                     disabled={busy}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-blue-600 text-white text-[13px] font-semibold hover:bg-blue-700 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-accent text-white text-[13px] font-semibold hover:bg-accent-hover transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                   >
                     <RotateCcw size={14} strokeWidth={2.5} aria-hidden="true" />
                     {t('trash.restore')}

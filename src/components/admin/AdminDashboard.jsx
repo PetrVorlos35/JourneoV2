@@ -21,7 +21,7 @@ const WeeklyChart = ({ weeks, t, locale }) => {
 
   return (
     <div>
-      <div className="flex items-center gap-5 text-[13px] font-medium text-gray-600 dark:text-gray-300">
+      <div className="flex items-center gap-5 text-[13px] font-medium text-secondary">
         {SERIES.map((s) => (
           <span key={s.key} className="inline-flex items-center gap-2">
             <span className={`w-2.5 h-2.5 rounded-sm ${s.dot}`} aria-hidden="true" />
@@ -32,11 +32,11 @@ const WeeklyChart = ({ weeks, t, locale }) => {
 
       <div className="relative mt-5" aria-hidden="true">
         {/* jemná mřížka: jen polovina a vršek */}
-        <div className="absolute inset-x-0 top-0 border-t border-dashed border-gray-200 dark:border-white/10" />
+        <div className="absolute inset-x-0 top-0 border-t border-dashed border-default" />
         <div className="absolute inset-x-0 top-1/2 border-t border-dashed border-gray-100 dark:border-white/[0.06]" />
-        <span className="absolute -top-2.5 right-0 bg-white dark:bg-[#1C1C1E] pl-1.5 text-[11px] font-medium tabular-nums text-gray-500">{max}</span>
+        <span className="absolute -top-2.5 right-0 bg-page pl-1.5 text-[11px] font-medium tabular-nums text-gray-500">{max}</span>
 
-        <div className="relative h-44 flex items-end gap-1 sm:gap-2 border-b border-gray-200 dark:border-white/10">
+        <div className="relative h-44 flex items-end gap-1 sm:gap-2 border-b border-default">
           {weeks.map((w, i) => (
             <div
               key={w.week}
@@ -52,7 +52,7 @@ const WeeklyChart = ({ weeks, t, locale }) => {
                 />
               ))}
               {hover === i && (
-                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-10 w-max px-3 py-2 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[12px] shadow-lg pointer-events-none">
+                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-10 w-max px-3 py-2 rounded-xl bg-ink text-white dark:text-gray-900 text-[12px] shadow-lg pointer-events-none">
                   <p className="font-semibold">{t('admin.v2.weekOf', { date: label(w.week) })}</p>
                   {SERIES.map((s) => (
                     <p key={s.key} className="flex items-center gap-2 mt-0.5 tabular-nums">
@@ -67,7 +67,7 @@ const WeeklyChart = ({ weeks, t, locale }) => {
         </div>
         <div className="flex gap-1 sm:gap-2 mt-2">
           {weeks.map((w, i) => (
-            <span key={w.week} className="flex-1 text-center text-[11px] font-medium tabular-nums text-gray-500 dark:text-gray-400">
+            <span key={w.week} className="flex-1 text-center text-[11px] font-medium tabular-nums text-muted">
               {i % 2 === 0 ? label(w.week) : ''}
             </span>
           ))}
@@ -92,10 +92,10 @@ const PersonRow = ({ u, meta, t }) => (
     >
       <UserAvatar user={avatarUser(u)} size="sm" />
       <span className="min-w-0 flex-1">
-        <span className="block text-[14px] font-semibold text-gray-900 dark:text-white truncate">{displayName(u, t('admin.users.detail.noName'))}</span>
-        <span className="block text-[12px] font-medium text-gray-500 dark:text-gray-400 truncate">{u.email}</span>
+        <span className="block text-[14px] font-semibold text-primary truncate">{displayName(u, t('admin.users.detail.noName'))}</span>
+        <span className="block text-[12px] font-medium text-muted truncate">{u.email}</span>
       </span>
-      <span className="shrink-0 text-[13px] font-medium tabular-nums text-gray-600 dark:text-gray-300">{meta}</span>
+      <span className="shrink-0 text-[13px] font-medium tabular-nums text-secondary">{meta}</span>
     </Link>
   </li>
 );
@@ -114,11 +114,11 @@ const AdminDashboard = () => {
 
   if (loading) return <AdminDashboardSkeleton />;
   if (!data) {
-    return <p className="py-20 text-center text-gray-500 dark:text-gray-400">{t('admin.dashboard.loadError')}</p>;
+    return <p className="py-20 text-center text-muted">{t('admin.dashboard.loadError')}</p>;
   }
 
   const n = (v) => (v ?? 0).toLocaleString(i18n.language);
-  const pageCard = 'bg-white dark:bg-[#1C1C1E] border border-gray-200/80 dark:border-white/10 rounded-[1.75rem] p-5 sm:p-8';
+  const pageCard = 'bg-page border border-gray-200/80 dark:border-white/10 rounded-[1.75rem] p-5 sm:p-8';
 
   const facts = [
     { label: t('admin.v2.totalUsers'), value: n(data.totalUsers), note: `+${n(data.newUsersWeek)} · 7 d` },
@@ -134,10 +134,10 @@ const AdminDashboard = () => {
         <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-5">
           {facts.map((f) => (
             <div key={f.label} className="min-w-0 flex flex-col">
-              <dt className="order-last mt-1 text-[13px] font-medium text-gray-600 dark:text-gray-300">{f.label}</dt>
-              <dd className="text-[26px] font-bold leading-none tracking-tight tabular-nums text-gray-900 dark:text-white">
+              <dt className="order-last mt-1 text-[13px] font-medium text-secondary">{f.label}</dt>
+              <dd className="text-[26px] font-bold leading-none tracking-tight tabular-nums text-primary">
                 {f.value}
-                {f.note && <span className="ml-2 text-[12px] font-semibold tracking-normal text-gray-500 dark:text-gray-400">{f.note}</span>}
+                {f.note && <span className="ml-2 text-[12px] font-semibold tracking-normal text-muted">{f.note}</span>}
               </dd>
             </div>
           ))}
@@ -146,8 +146,8 @@ const AdminDashboard = () => {
 
       <section className={pageCard}>
         <div className="flex flex-wrap items-baseline justify-between gap-2 mb-5">
-          <h2 className="text-[18px] font-bold tracking-tight text-gray-900 dark:text-white">{t('admin.v2.chartTitle')}</h2>
-          <p className="text-[13px] font-medium text-gray-500 dark:text-gray-400">{t('admin.v2.chartRange')}</p>
+          <h2 className="text-[18px] font-bold tracking-tight text-primary">{t('admin.v2.chartTitle')}</h2>
+          <p className="text-[13px] font-medium text-muted">{t('admin.v2.chartRange')}</p>
         </div>
         {data.weekly?.length ? <WeeklyChart weeks={data.weekly} t={t} locale={i18n.language} /> : <p className="text-gray-500">{t('admin.dashboard.tripsChart.noData')}</p>}
       </section>
@@ -155,8 +155,8 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         <section className={pageCard}>
           <div className="flex items-baseline justify-between gap-3 mb-2">
-            <h2 className="text-[18px] font-bold tracking-tight text-gray-900 dark:text-white">{t('admin.v2.newest')}</h2>
-            <Link to="/dashboard/admin/users" className="inline-flex items-center gap-1 text-[13px] font-semibold text-blue-700 dark:text-blue-400 hover:underline underline-offset-2">
+            <h2 className="text-[18px] font-bold tracking-tight text-primary">{t('admin.v2.newest')}</h2>
+            <Link to="/dashboard/admin/users" className="inline-flex items-center gap-1 text-[13px] font-semibold text-active hover:underline underline-offset-2">
               {t('admin.v2.allUsers')} <ArrowRight size={14} strokeWidth={2.5} />
             </Link>
           </div>
@@ -167,7 +167,7 @@ const AdminDashboard = () => {
           </ul>
         </section>
         <section className={pageCard}>
-          <h2 className="text-[18px] font-bold tracking-tight text-gray-900 dark:text-white mb-2">{t('admin.v2.mostActive')}</h2>
+          <h2 className="text-[18px] font-bold tracking-tight text-primary mb-2">{t('admin.v2.mostActive')}</h2>
           <ul>
             {(data.topUsers || []).map((u) => (
               <PersonRow key={u.id} u={u} t={t} meta={`${n(u.tripCount)} ${t('admin.dashboard.stats.tripCount')}`} />

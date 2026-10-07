@@ -142,7 +142,7 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
             className="relative w-full max-w-2xl bg-[#fbfbfd] dark:bg-[#1C1C1E] rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl flex flex-col h-auto max-h-[85dvh] sm:max-h-[90dvh] overflow-hidden z-10"
           >
             <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10">
-              <button onClick={onClose} aria-label={t('common.close')} className="w-10 h-10 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer disabled:cursor-not-allowed">
+              <button onClick={onClose} aria-label={t('common.close')} className="w-10 h-10 bg-subtle rounded-full flex items-center justify-center text-muted hover:text-primary transition-colors cursor-pointer disabled:cursor-not-allowed">
                 <X size={20} strokeWidth={2.5} />
               </button>
             </div>
@@ -153,8 +153,8 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
             <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar p-5 sm:p-8 pt-2 sm:pt-4 flex flex-col">
               <div className="w-full flex flex-col flex-1 space-y-4 sm:space-y-5">
                 <div className="space-y-1 sm:space-y-2 mb-2 sm:mb-0 pr-12 sm:pr-0">
-                  <p className="text-[12px] text-gray-500 dark:text-gray-400 font-semibold">{t('createTripModal.planning')}</p>
-                  <h1 className="text-2xl sm:text-3xl text-gray-900 dark:text-white tracking-tight font-bold">{t('createTripModal.title')}</h1>
+                  <p className="text-[12px] text-muted font-semibold">{t('createTripModal.planning')}</p>
+                  <h1 className="text-2xl sm:text-3xl text-primary tracking-tight font-bold">{t('createTripModal.title')}</h1>
                 </div>
 
                 {/* Animated Stepper */}
@@ -171,7 +171,7 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                             animate={{ borderColor: isActive ? 'rgba(37, 99, 235, 0.3)' : 'transparent' }}
                             className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm z-10 border-4 transition-colors duration-300 ${
                               isCompleted || isActive
-                                ? 'bg-blue-600 text-white'
+                                ? 'bg-accent text-white'
                                 : 'bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-600'
                             }`}
                           >
@@ -189,7 +189,7 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                           </motion.div>
                           <div className="absolute top-12 w-max text-center">
                             <span className={`text-[12px] font-semibold transition-colors duration-300 ${
-                              isActive ? 'text-blue-600 dark:text-blue-400' : isCompleted ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-600'
+                              isActive ? 'text-accent' : isCompleted ? 'text-primary' : 'text-gray-400 dark:text-gray-600'
                             }`}>
                               {s.label}
                             </span>
@@ -210,8 +210,8 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                     {step === 1 && (
                       <motion.div key="step1" variants={variants} initial="initial" animate="animate" exit="exit" className="space-y-6 w-full" style={{ gridArea: '1 / 1 / 2 / 2' }}>
                         <div className="space-y-2 sm:space-y-3">
-                          <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{t('createTripModal.step1.title')}</h2>
-                          <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">{t('createTripModal.step1.subtitle')}</p>
+                          <h2 className="text-3xl font-bold tracking-tight text-primary">{t('createTripModal.step1.title')}</h2>
+                          <p className="text-muted text-lg font-medium">{t('createTripModal.step1.subtitle')}</p>
                         </div>
                         <div className="relative group w-full">
                           <div className={`absolute inset-y-0 left-4 sm:left-5 flex items-center pointer-events-none transition-colors ${nameError ? 'text-red-500' : 'text-gray-400 group-focus-within:text-blue-500'}`}>
@@ -249,20 +249,20 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                       <motion.div key="step2" variants={variants} initial="initial" animate="animate" exit="exit" className="flex flex-col gap-4 sm:gap-6 w-full" style={{ gridArea: '1 / 1 / 2 / 2' }}>
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
                           <div className="space-y-1 sm:space-y-2">
-                            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{t('createTripModal.step2.title')}</h2>
-                            <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-medium">{t('createTripModal.step2.subtitle')}</p>
+                            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-primary">{t('createTripModal.step2.title')}</h2>
+                            <p className="text-muted text-base sm:text-lg font-medium">{t('createTripModal.step2.subtitle')}</p>
                           </div>
-                          <div className={`flex flex-row items-center justify-between sm:justify-center gap-4 px-5 py-3 sm:px-6 sm:py-4 bg-white/70 dark:bg-[#1C1C1E]/70 backdrop-blur-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.15)] rounded-2xl w-full sm:w-fit max-w-full shrink-0 border-2 transition-colors ${range?.from ? 'border-blue-500/60 dark:border-blue-500/40' : 'border-white/50 dark:border-white/10'}`}>
+                          <div className={`flex flex-row items-center justify-between sm:justify-center gap-4 px-5 py-3 sm:px-6 sm:py-4 bg-page/70 backdrop-blur-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.15)] rounded-2xl w-full sm:w-fit max-w-full shrink-0 border-2 transition-colors ${range?.from ? 'border-blue-500/60 dark:border-blue-500/40' : 'border-white/50 dark:border-white/10'}`}>
                             <div className="flex flex-col min-w-0">
-                              <span className="text-[12px] text-gray-500 dark:text-gray-400 font-semibold mb-1">{t('createTripModal.step2.departure')}</span>
-                              <span className={`text-base sm:text-lg font-bold truncate ${range?.from ? 'text-gray-900 dark:text-white' : 'text-gray-400 italic'}`}>
+                              <span className="text-[12px] text-muted font-semibold mb-1">{t('createTripModal.step2.departure')}</span>
+                              <span className={`text-base sm:text-lg font-bold truncate ${range?.from ? 'text-primary' : 'text-gray-400 italic'}`}>
                                 {range?.from ? format(range.from, 'd. M. yyyy', { locale: dateLocale }) : t('createTripModal.step2.select')}
                               </span>
                             </div>
                             <ArrowRight size={16} strokeWidth={2} className="text-gray-400 shrink-0 mx-1 sm:mx-2" />
                             <div className="flex flex-col min-w-0 text-right sm:text-left">
-                              <span className="text-[12px] text-gray-500 dark:text-gray-400 font-semibold mb-1">{t('createTripModal.step2.return')}</span>
-                              <span className={`text-base sm:text-lg font-bold truncate ${range?.to ? 'text-gray-900 dark:text-white' : 'text-gray-400 italic'}`}>
+                              <span className="text-[12px] text-muted font-semibold mb-1">{t('createTripModal.step2.return')}</span>
+                              <span className={`text-base sm:text-lg font-bold truncate ${range?.to ? 'text-primary' : 'text-gray-400 italic'}`}>
                                 {range?.to ? format(range.to, 'd. M. yyyy', { locale: dateLocale }) : t('createTripModal.step2.select')}
                               </span>
                             </div>
@@ -300,29 +300,29 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
                     {step === 3 && (
                       <motion.div key="step3" variants={variants} initial="initial" animate="animate" exit="exit" className="space-y-6 w-full" style={{ gridArea: '1 / 1 / 2 / 2' }}>
                         <div className="space-y-2 sm:space-y-3">
-                          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">{t('createTripModal.step3.title')}</h2>
-                          <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg font-medium">{t('createTripModal.step3.subtitle')}</p>
+                          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-primary">{t('createTripModal.step3.title')}</h2>
+                          <p className="text-muted text-base sm:text-lg font-medium">{t('createTripModal.step3.subtitle')}</p>
                         </div>
                         <div className="glass-card rounded-[2rem] p-5 sm:p-8 space-y-6 w-full max-w-xl">
                           <div className="flex items-start gap-4 sm:gap-6">
-                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-active text-accent rounded-2xl flex items-center justify-center shrink-0">
                               <MapPin size={20} strokeWidth={2} className="sm:w-6 sm:h-6" />
                             </div>
                             <div className="w-full">
-                              <p className="text-[12px] text-gray-500 dark:text-gray-400 font-semibold mb-1 ml-2">{t('createTripModal.step3.destinationLabel')}</p>
-                              <input type="text" maxLength={255} value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="font-bold text-xl sm:text-3xl tracking-tight text-gray-900 dark:text-white leading-tight bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 rounded-lg px-2 py-1 w-full transition-all -ml-2" />
+                              <p className="text-[12px] text-muted font-semibold mb-1 ml-2">{t('createTripModal.step3.destinationLabel')}</p>
+                              <input type="text" maxLength={255} value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="font-bold text-xl sm:text-3xl tracking-tight text-primary leading-tight bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 focus:ring-black/10 dark:focus:ring-white/20 rounded-lg px-2 py-1 w-full transition-all -ml-2" />
                               <div className="flex justify-end mt-1 pr-1">
                                 <CharCount value={formData.title} max={255} />
                               </div>
                             </div>
                           </div>
                           <div className="flex items-start gap-4 sm:gap-6">
-                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center shrink-0">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-active text-accent rounded-2xl flex items-center justify-center shrink-0">
                               <Calendar size={20} strokeWidth={2} className="sm:w-6 sm:h-6" />
                             </div>
                             <div className="w-full">
-                              <p className="text-[12px] text-gray-500 dark:text-gray-400 font-semibold mb-1 ml-2">{t('createTripModal.step3.datesLabel')}</p>
-                              <div className={`flex items-center flex-wrap gap-1 sm:gap-2 font-bold text-lg sm:text-2xl tracking-tight leading-tight ${dateError ? 'text-red-500' : 'text-gray-900 dark:text-white'}`}>
+                              <p className="text-[12px] text-muted font-semibold mb-1 ml-2">{t('createTripModal.step3.datesLabel')}</p>
+                              <div className={`flex items-center flex-wrap gap-1 sm:gap-2 font-bold text-lg sm:text-2xl tracking-tight leading-tight ${dateError ? 'text-red-500' : 'text-primary'}`}>
                                 <input type="date" value={formData.startDate} min="2024-01-01" max="2030-12-31" onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} className={`bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 rounded-lg px-2 py-1 transition-all -ml-2 cursor-pointer ${dateError ? 'focus:ring-red-500 ring-1 ring-red-500/50' : 'focus:ring-black/10 dark:focus:ring-white/20'}`} />
                                 <span className="text-gray-300 dark:text-white/20">—</span>
                                 <input type="date" value={formData.endDate} min="2024-01-01" max="2030-12-31" onChange={(e) => setFormData({ ...formData, endDate: e.target.value })} className={`bg-transparent hover:bg-black/5 dark:hover:bg-white/5 focus:bg-black/5 dark:focus:bg-white/10 focus:outline-none focus:ring-1 rounded-lg px-2 py-1 transition-all cursor-pointer ${dateError ? 'focus:ring-red-500 ring-1 ring-red-500/50' : 'focus:ring-black/10 dark:focus:ring-white/20'}`} />
@@ -339,14 +339,14 @@ const CreateTripModal = ({ isOpen, onClose, onAddTrip }) => {
 
             <div className="flex justify-between items-center p-6 sm:p-8 pt-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:pb-6 border-t border-gray-100 dark:border-white/5 bg-[#fbfbfd] dark:bg-[#1C1C1E] w-full shrink-0 z-10">
               {step > 1 ? (
-                <button onClick={prevStep} aria-label={step === 3 ? t('createTripModal.nav.edit') : t('createTripModal.nav.back')} className="flex items-center gap-2 px-4 sm:px-6 py-3.5 sm:py-4 text-[12px] sm:text-[13px] text-gray-500 hover:text-gray-900 dark:hover:text-white font-semibold transition-colors bg-white/40 dark:bg-white/5 rounded-2xl cursor-pointer disabled:cursor-not-allowed">
+                <button onClick={prevStep} aria-label={step === 3 ? t('createTripModal.nav.edit') : t('createTripModal.nav.back')} className="flex items-center gap-2 px-4 sm:px-6 py-3.5 sm:py-4 text-[12px] sm:text-[13px] text-gray-500 hover:text-primary font-semibold transition-colors bg-white/40 dark:bg-white/5 rounded-2xl cursor-pointer disabled:cursor-not-allowed">
                   <ArrowLeft size={16} strokeWidth={2.5} />
                   <span className="hidden sm:inline">{step === 3 ? t('createTripModal.nav.edit') : t('createTripModal.nav.back')}</span>
                 </button>
               ) : (
                 <div />
               )}
-              <button onClick={step === 3 ? handleSubmit : nextStep} disabled={isLoading} className="group inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold transition-colors duration-300 shadow-md shadow-blue-500/20 active:scale-95 text-sm sm:text-base disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer">
+              <button onClick={step === 3 ? handleSubmit : nextStep} disabled={isLoading} className="group inline-flex items-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-accent hover:bg-accent-hover text-white rounded-2xl font-bold transition-colors duration-300 shadow-md shadow-blue-500/20 active:scale-95 text-sm sm:text-base disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer">
                 {step === 3 ? (
                   isLoading ? <><Loader2 size={18} strokeWidth={2.5} className="animate-spin" />{t('createTripModal.nav.creating')}</> : <><Rocket size={18} strokeWidth={2.5} className="group-hover:-translate-y-1 group-hover:translate-x-1 transition-transform" />{t('createTripModal.nav.create')}</>
                 ) : (

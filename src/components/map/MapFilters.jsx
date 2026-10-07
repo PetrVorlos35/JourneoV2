@@ -77,8 +77,8 @@ const MapFilters = ({
   const chipClass = (active) =>
     `min-h-[36px] px-3.5 rounded-full text-[12px] font-semibold border transition-colors cursor-pointer ${
       active
-        ? 'bg-blue-600 border-blue-600 text-white'
-        : 'bg-white/80 dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-blue-400'
+        ? 'bg-accent border-blue-600 text-white'
+        : 'bg-white/80 dark:bg-white/5 border-default text-secondary hover:border-blue-400'
     }`;
 
   return (
@@ -100,7 +100,7 @@ const MapFilters = ({
             onFocus={() => query.length >= MIN_QUERY_LENGTH && setShowResults(true)}
             placeholder={t('map.filters.searchPlaceholder')}
             aria-label={t('map.filters.searchPlaceholder')}
-            className="w-full min-h-[44px] pl-11 pr-11 rounded-2xl glass-card border border-gray-200 dark:border-white/10 text-base sm:text-[14px] font-medium text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-blue-500 transition-colors"
+            className="w-full min-h-[44px] pl-11 pr-11 rounded-2xl glass-card border border-default text-base sm:text-[14px] font-medium text-primary placeholder:text-placeholder focus:outline-none focus:border-blue-500 transition-colors"
           />
           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
             {isSearching ? (
@@ -127,14 +127,14 @@ const MapFilters = ({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 8 }}
                 transition={{ duration: 0.18 }}
-                className="absolute left-0 right-0 top-full mt-2 glass-card rounded-2xl border border-gray-100 dark:border-white/10 shadow-2xl p-2 max-h-[300px] overflow-y-auto custom-scrollbar"
+                className="absolute left-0 right-0 top-full mt-2 glass-card rounded-2xl border border-subtle shadow-2xl p-2 max-h-[300px] overflow-y-auto custom-scrollbar"
               >
                 {results.map((result) => (
                   <li key={`${result.lat},${result.lng}`}>
                     <button
                       type="button"
                       onClick={() => pickResult(result)}
-                      className="w-full min-h-[44px] text-left px-3 py-2.5 rounded-xl flex items-start gap-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors group cursor-pointer"
+                      className="w-full min-h-[44px] text-left px-3 py-2.5 rounded-xl flex items-start gap-3 hover:bg-subtle transition-colors group cursor-pointer"
                     >
                       <MapPin
                         size={16}
@@ -143,11 +143,11 @@ const MapFilters = ({
                         className="mt-0.5 shrink-0 text-gray-400 group-hover:text-blue-500 transition-colors"
                       />
                       <span className="min-w-0">
-                        <span className="block text-[14px] font-bold text-gray-900 dark:text-white truncate">
+                        <span className="block text-[14px] font-bold text-primary truncate">
                           {result.name}
                         </span>
                         {result.address && (
-                          <span className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 truncate">
+                          <span className="block text-[11px] font-medium text-muted truncate">
                             {result.address}
                           </span>
                         )}
@@ -167,7 +167,7 @@ const MapFilters = ({
           disabled={isLocating}
           aria-label={t('map.filters.locate')}
           title={t('map.filters.locate')}
-          className="w-11 h-11 shrink-0 rounded-2xl glass-card border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+          className="w-11 h-11 shrink-0 rounded-2xl glass-card border border-default flex items-center justify-center text-secondary hover:text-accent transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isLocating ? (
             <Loader2 size={17} className="animate-spin" aria-hidden="true" />
@@ -184,8 +184,8 @@ const MapFilters = ({
           aria-label={t('map.filters.toggle')}
           className={`relative w-11 h-11 shrink-0 rounded-2xl border flex items-center justify-center transition-colors cursor-pointer ${
             showFilters || activeFilterCount > 0
-              ? 'bg-blue-600 border-blue-600 text-white'
-              : 'glass-card border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:text-blue-600'
+              ? 'bg-accent border-blue-600 text-white'
+              : 'glass-card border-default text-secondary hover:text-blue-600'
           }`}
         >
           <SlidersHorizontal size={17} strokeWidth={2.5} aria-hidden="true" />
@@ -206,7 +206,7 @@ const MapFilters = ({
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className="glass-card rounded-2xl border border-gray-200 dark:border-white/10 p-3 space-y-3">
+            <div className="glass-card rounded-2xl border border-default p-3 space-y-3">
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
@@ -249,7 +249,7 @@ const MapFilters = ({
                   value={filters.tripId ?? ''}
                   onChange={(e) => onChange({ ...filters, tripId: e.target.value || null })}
                   aria-label={t('map.filters.tripLabel')}
-                  className="w-full min-h-[44px] px-4 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-base sm:text-[13px] font-semibold text-gray-700 dark:text-gray-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
+                  className="w-full min-h-[44px] px-4 rounded-2xl bg-white dark:bg-white/5 border border-default text-base sm:text-[13px] font-semibold text-gray-700 dark:text-gray-200 focus:outline-none focus:border-blue-500 transition-colors cursor-pointer"
                 >
                   <option value="">{t('map.filters.allTrips')}</option>
                   {trips.map((trip) => (

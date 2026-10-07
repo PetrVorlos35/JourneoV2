@@ -15,7 +15,7 @@ const HeroAction = ({ to, icon: Icon, label, primary = false }) => (
     to={to}
     className={`inline-flex items-center gap-2 rounded-2xl px-4 min-h-[44px] text-[14px] font-semibold transition-all active:scale-[0.97] ${
       primary
-        ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-[0_4px_16px_rgba(37,99,235,0.3)]'
+        ? 'bg-accent text-white hover:bg-accent-hover shadow-[0_4px_16px_rgba(37,99,235,0.3)]'
         : 'bg-gray-100 dark:bg-white/[0.08] text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-white/[0.14]'
     }`}
   >
@@ -54,15 +54,15 @@ const HeroCard = ({ trip, state, placeCount, onCreate }) => {
         <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-400 flex items-center justify-center mb-5">
           <Plane size={26} strokeWidth={2} aria-hidden="true" />
         </div>
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight mb-1.5">
+        <h2 className="text-xl sm:text-2xl font-bold text-primary tracking-tight mb-1.5">
           {t('tripsOverview.noTrip.title')}
         </h2>
-        <p className="text-[14px] font-medium text-gray-500 dark:text-gray-400 mb-6 max-w-sm">
+        <p className="text-[14px] font-medium text-muted mb-6 max-w-sm">
           {t('tripsOverview.noTrip.subtitle')}
         </p>
         <button
           onClick={onCreate}
-          className="inline-flex items-center gap-2 rounded-2xl px-5 min-h-[44px] bg-blue-600 text-white text-[15px] font-semibold hover:bg-blue-700 transition-all active:scale-[0.97] shadow-[0_4px_16px_rgba(37,99,235,0.3)] cursor-pointer"
+          className="inline-flex items-center gap-2 rounded-2xl px-5 min-h-[44px] bg-accent text-white text-[15px] font-semibold hover:bg-accent-hover transition-all active:scale-[0.97] shadow-[0_4px_16px_rgba(37,99,235,0.3)] cursor-pointer"
         >
           <Plus size={18} strokeWidth={2.5} aria-hidden="true" />
           {t('tripsOverview.actions.newTrip')}
@@ -105,8 +105,8 @@ const HeroCard = ({ trip, state, placeCount, onCreate }) => {
           </span>
         </div>
 
-        <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight mb-2">
-          <Link to={tripHref} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 rounded-lg">
+        <h2 className="text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-2">
+          <Link to={tripHref} className="hover:text-accent transition-colors outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 rounded-lg">
             {trip.title}
           </Link>
         </h2>
@@ -117,12 +117,12 @@ const HeroCard = ({ trip, state, placeCount, onCreate }) => {
               {t('tripsOverview.hero.today')}
             </p>
             {todayActivity.title && (
-              <p className="text-[15px] sm:text-base font-semibold text-gray-900 dark:text-white">
+              <p className="text-[15px] sm:text-base font-semibold text-primary">
                 {todayActivity.title}
               </p>
             )}
             {todayActivity.plan && (
-              <p className="text-[13px] sm:text-[14px] font-medium text-gray-500 dark:text-gray-400 line-clamp-2 mt-0.5">
+              <p className="text-[13px] sm:text-[14px] font-medium text-muted line-clamp-2 mt-0.5">
                 {todayActivity.plan}
               </p>
             )}
@@ -134,7 +134,7 @@ const HeroCard = ({ trip, state, placeCount, onCreate }) => {
             )}
           </div>
         ) : (
-          <p className="text-[14px] font-medium text-gray-500 dark:text-gray-400 mb-6">
+          <p className="text-[14px] font-medium text-muted mb-6">
             {t('tripsOverview.hero.noPlanToday')}
           </p>
         )}
@@ -163,28 +163,28 @@ const HeroCard = ({ trip, state, placeCount, onCreate }) => {
           {t('tripsOverview.countdown.label')}
         </p>
         <div className="flex items-baseline gap-2.5 mb-4 sm:mb-6">
-          <span className="text-6xl sm:text-7xl font-bold tracking-tighter text-gray-900 dark:text-white leading-none">
+          <span className="text-6xl sm:text-7xl font-bold tracking-tighter text-primary leading-none">
             {days > 0 ? days : t('tripsOverview.countdown.today')}
           </span>
           {days > 0 && (
-            <span className="text-base font-medium text-gray-500 dark:text-gray-400">
+            <span className="text-base font-medium text-muted">
               {t('tripsOverview.countdown.days')}
             </span>
           )}
         </div>
 
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight mb-1.5">
+        <h2 className="text-2xl sm:text-3xl font-bold text-primary tracking-tight mb-1.5">
           {trip.title}
         </h2>
-        <p className="text-[13px] sm:text-[14px] font-medium text-gray-500 dark:text-gray-400">
+        <p className="text-[13px] sm:text-[14px] font-medium text-muted">
           {meta.join(' · ')}
         </p>
 
         <div className="mt-auto pt-6 flex items-center gap-1.5">
-          <span className="text-[14px] font-semibold text-blue-600 dark:text-blue-400">
+          <span className="text-[14px] font-semibold text-accent">
             {t('tripsOverview.continuePlanning')}
           </span>
-          <ArrowRight size={15} strokeWidth={2.5} className="text-blue-600 dark:text-blue-400 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+          <ArrowRight size={15} strokeWidth={2.5} className="text-accent transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
         </div>
       </motion.div>
     );
@@ -196,21 +196,21 @@ const HeroCard = ({ trip, state, placeCount, onCreate }) => {
       <p className="text-[12px] font-semibold text-gray-500 dark:text-gray-500 mb-2">
         {t('tripsOverview.hero.lastTrip')}
       </p>
-      <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight mb-1.5">
-        <Link to={tripHref} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 rounded-lg">
+      <h2 className="text-2xl sm:text-4xl font-bold text-primary tracking-tight mb-1.5">
+        <Link to={tripHref} className="hover:text-accent transition-colors outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 rounded-lg">
           {trip.title}
         </Link>
       </h2>
-      <p className="text-[13px] sm:text-[14px] font-medium text-gray-500 dark:text-gray-400">
+      <p className="text-[13px] sm:text-[14px] font-medium text-muted">
         {meta.join(' · ')}
       </p>
-      <p className="text-[14px] font-medium text-gray-500 dark:text-gray-400 mt-5 max-w-sm">
+      <p className="text-[14px] font-medium text-muted mt-5 max-w-sm">
         {t('tripsOverview.hero.planNextPrompt')}
       </p>
       <div className="mt-auto pt-6">
         <button
           onClick={onCreate}
-          className="inline-flex items-center gap-2 rounded-2xl px-5 min-h-[44px] bg-blue-600 text-white text-[15px] font-semibold hover:bg-blue-700 transition-all active:scale-[0.97] shadow-[0_4px_16px_rgba(37,99,235,0.3)] cursor-pointer"
+          className="inline-flex items-center gap-2 rounded-2xl px-5 min-h-[44px] bg-accent text-white text-[15px] font-semibold hover:bg-accent-hover transition-all active:scale-[0.97] shadow-[0_4px_16px_rgba(37,99,235,0.3)] cursor-pointer"
         >
           <Plus size={18} strokeWidth={2.5} aria-hidden="true" />
           {t('tripsOverview.actions.newTrip')}

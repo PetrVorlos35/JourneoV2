@@ -132,24 +132,24 @@ const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLeng
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.98 }}
             transition={{ duration: 0.2 }}
-            className="absolute left-0 right-0 top-full mt-2 z-[200] glass-card shadow-2xl p-2 rounded-2xl border border-gray-100 dark:border-white/10"
+            className="absolute left-0 right-0 top-full mt-2 z-[200] glass-card shadow-2xl p-2 rounded-2xl border border-subtle"
           >
             <ul className="max-h-[300px] overflow-y-auto custom-scrollbar">
               {suggestions.map((suggestion) => (
                 <li key={suggestion.id}>
                   <button
                     onClick={() => handleSelect(suggestion)}
-                    className="w-full min-h-[44px] text-left px-4 py-3 rounded-xl flex items-start gap-3 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors group cursor-pointer disabled:cursor-not-allowed"
+                    className="w-full min-h-[44px] text-left px-4 py-3 rounded-xl flex items-start gap-3 hover:bg-subtle transition-colors group cursor-pointer disabled:cursor-not-allowed"
                   >
                     <div className="mt-0.5 text-gray-400 group-hover:text-blue-500 transition-colors shrink-0">
                       <MapPin size={18} strokeWidth={2} />
                     </div>
                     <div className="min-w-0">
-                      <div className="font-bold text-[15px] text-gray-900 dark:text-white truncate">
+                      <div className="font-bold text-[15px] text-primary truncate">
                         {suggestion.name}
                       </div>
                       {suggestion.detail && (
-                        <div className="text-[12px] text-gray-500 dark:text-gray-400 font-medium truncate mt-0.5">
+                        <div className="text-[12px] text-muted font-medium truncate mt-0.5">
                           {suggestion.detail}
                         </div>
                       )}

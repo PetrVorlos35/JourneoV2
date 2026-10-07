@@ -43,16 +43,16 @@ const ChangelogModal = ({ isOpen, onClose }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "100%" }}
             transition={{ type: 'spring', damping: 28, stiffness: 240 }}
-            className="relative w-full max-w-md z-10 flex flex-col bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl overflow-hidden max-h-[85dvh] sm:max-h-[88dvh]"
+            className="relative w-full max-w-md z-10 flex flex-col bg-page border border-subtle rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl overflow-hidden max-h-[85dvh] sm:max-h-[88dvh]"
           >
             {/* Header */}
-            <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-5 border-b border-gray-100 dark:border-white/10 shrink-0">
+            <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-5 border-b border-subtle shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-500/15 text-indigo-600 dark:text-indigo-300 flex items-center justify-center shrink-0">
                   <Sparkles size={18} strokeWidth={2.5} />
                 </div>
                 <div>
-                  <h2 className="text-gray-900 dark:text-white font-bold text-lg leading-tight tracking-tight">
+                  <h2 className="text-primary font-bold text-lg leading-tight tracking-tight">
                     {t('changelog.title')}
                   </h2>
                   <p className="text-gray-500 dark:text-white/40 text-[12px] font-medium mt-0.5">
@@ -62,7 +62,7 @@ const ChangelogModal = ({ isOpen, onClose }) => {
               </div>
               <button
                 onClick={onClose}
-                className="w-10 h-10 sm:w-9 sm:h-9 shrink-0 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-white/50 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/15 transition-all cursor-pointer"
+                className="w-10 h-10 sm:w-9 sm:h-9 shrink-0 flex items-center justify-center rounded-xl bg-subtle text-gray-500 dark:text-white/50 hover:text-primary hover:bg-gray-200 dark:hover:bg-white/15 transition-all cursor-pointer"
                 aria-label={t('common.close')}
               >
                 <X size={16} strokeWidth={2.5} />
@@ -99,7 +99,7 @@ const ChangelogModal = ({ isOpen, onClose }) => {
                     </div>
 
                     {/* Title + summary */}
-                    <h3 className="text-gray-900 dark:text-white font-bold text-[15px] tracking-tight mb-1.5">
+                    <h3 className="text-primary font-bold text-[15px] tracking-tight mb-1.5">
                       {t(`${base}.title`)}
                     </h3>
                     <p className="text-gray-500 dark:text-white/45 text-[13px] leading-relaxed mb-4">

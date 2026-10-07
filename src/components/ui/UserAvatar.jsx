@@ -25,7 +25,7 @@ const UserAvatar = ({ user, size = "md", className = "" }) => {
     xl: 32
   };
 
-  const baseClasses = `rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-2 border-blue-600/30 flex items-center justify-center shrink-0 ${className}`;
+  const baseClasses = `rounded-full bg-active text-accent border-2 border-blue-600/30 flex items-center justify-center shrink-0 ${className}`;
 
   if (user?.avatar_url && avatarPresets[user.avatar_url]) {
     const Icon = avatarPresets[user.avatar_url];

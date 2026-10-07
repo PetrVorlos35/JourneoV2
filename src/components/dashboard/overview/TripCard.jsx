@@ -61,7 +61,7 @@ const TripCard = ({ trip, onDeleteTrip }) => {
         </div>
       </div>
 
-      <h3 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900 dark:text-white tracking-tight truncate min-w-0">
+      <h3 className="text-xl sm:text-2xl font-bold mb-2 text-primary tracking-tight truncate min-w-0">
         {trip.title}
       </h3>
 
@@ -72,7 +72,7 @@ const TripCard = ({ trip, onDeleteTrip }) => {
         </span>
       </div>
 
-      <div className="mt-auto flex items-center justify-between pt-5 border-t border-gray-100 dark:border-white/10">
+      <div className="mt-auto flex items-center justify-between pt-5 border-t border-subtle">
         <div className="flex items-center gap-3 text-gray-400 text-[12px] font-medium">
           <span>{t('tripsOverview.activities')} {trip.activities?.length || 0}</span>
           {trip.role === 'owner' && (
@@ -84,7 +84,7 @@ const TripCard = ({ trip, onDeleteTrip }) => {
         </div>
         <Link
           to={`/dashboard/trip/${trip.id}?from=dashboard`}
-          className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors min-h-[44px]"
+          className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent hover:text-blue-500 transition-colors min-h-[44px]"
         >
           {t('tripsOverview.open')}
           <ArrowRight size={14} strokeWidth={2.5} className="transition-transform group-hover:translate-x-1" aria-hidden="true" />

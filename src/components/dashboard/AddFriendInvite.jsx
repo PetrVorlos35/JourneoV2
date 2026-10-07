@@ -68,7 +68,7 @@ const AddFriendInvite = () => {
     <div className="space-y-10 w-full pb-10">
       <Link
         to="/dashboard/friends"
-        className="inline-flex items-center text-[13px] font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors duration-300 py-2 -my-2"
+        className="inline-flex items-center text-[13px] font-semibold text-muted hover:text-primary transition-colors duration-300 py-2 -my-2"
       >
         <ArrowLeft size={16} className="mr-2" strokeWidth={2.5} /> {t('addFriendInvite.backToFriends')}
       </Link>
@@ -86,10 +86,10 @@ const AddFriendInvite = () => {
             <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-2xl flex items-center justify-center text-gray-400 mx-auto mb-6">
               <Link2Off size={28} strokeWidth={2} />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight mb-2">
+            <h1 className="text-2xl font-bold text-primary tracking-tight mb-2">
               {t('addFriendInvite.invalid.title')}
             </h1>
-            <p className="text-[15px] text-gray-500 dark:text-gray-400 font-medium max-w-sm mx-auto">
+            <p className="text-[15px] text-muted font-medium max-w-sm mx-auto">
               {t('addFriendInvite.invalid.description')}
             </p>
           </div>
@@ -98,15 +98,15 @@ const AddFriendInvite = () => {
             <div className="flex justify-center mb-6">
               <UserAvatar user={inviter} size="xl" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight mb-2">
+            <h1 className="text-2xl font-bold text-primary tracking-tight mb-2">
               {t('addFriendInvite.self.title')}
             </h1>
-            <p className="text-[15px] text-gray-500 dark:text-gray-400 font-medium max-w-sm mx-auto mb-6">
+            <p className="text-[15px] text-muted font-medium max-w-sm mx-auto mb-6">
               {t('addFriendInvite.self.description')}
             </p>
             <Link
               to="/dashboard/friends"
-              className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors"
+              className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent hover:text-blue-500 transition-colors"
             >
               {t('addFriendInvite.goToFriends')} <ArrowRight size={16} strokeWidth={2.5} />
             </Link>
@@ -115,14 +115,14 @@ const AddFriendInvite = () => {
           <div className="relative flex flex-col items-center text-center gap-5">
             <UserAvatar user={inviter} size="xl" />
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-1 break-words" style={{ textWrap: 'balance' }}>
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-primary mb-1 break-words" style={{ textWrap: 'balance' }}>
                 {`${inviter?.first_name || ''} ${inviter?.last_name || ''}`.trim() || t('friends.defaultName')}
               </h1>
               <p className="text-[13px] font-semibold text-gray-500">
                 {t('addFriendInvite.subtitle')}
               </p>
               {inviter?.bio && (
-                <p className="text-[15px] text-gray-500 dark:text-gray-400 font-medium mt-3 max-w-md">{inviter.bio}</p>
+                <p className="text-[15px] text-muted font-medium mt-3 max-w-md">{inviter.bio}</p>
               )}
             </div>
 
@@ -134,23 +134,23 @@ const AddFriendInvite = () => {
                   </span>
                   <Link
                     to={`/dashboard/profile/${inviter.id}`}
-                    className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors"
+                    className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent hover:text-blue-500 transition-colors"
                   >
                     {t('addFriendInvite.viewProfile')} <ArrowRight size={16} strokeWidth={2.5} />
                   </Link>
                 </div>
               ) : status === 'PENDING_SENT' ? (
-                <span className="flex items-center gap-2 px-6 py-3 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 font-bold rounded-2xl text-[13px]">
+                <span className="flex items-center gap-2 px-6 py-3 bg-subtle text-muted font-bold rounded-2xl text-[13px]">
                   <Clock size={16} strokeWidth={2.5} /> {t('addFriendInvite.requestSent')}
                 </span>
               ) : status === 'PENDING_RECEIVED' ? (
                 <div className="flex flex-col items-center gap-3">
-                  <span className="flex items-center gap-2 px-6 py-3 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 font-bold rounded-2xl text-[13px]">
+                  <span className="flex items-center gap-2 px-6 py-3 bg-subtle text-muted font-bold rounded-2xl text-[13px]">
                     <Clock size={16} strokeWidth={2.5} /> {t('addFriendInvite.pendingReceived')}
                   </span>
                   <Link
                     to="/dashboard/friends"
-                    className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors"
+                    className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent hover:text-blue-500 transition-colors"
                   >
                     {t('addFriendInvite.pendingReceivedAction')} <ArrowRight size={16} strokeWidth={2.5} />
                   </Link>
@@ -159,7 +159,7 @@ const AddFriendInvite = () => {
                 <button
                   onClick={handleAdd}
                   disabled={sending}
-                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-500 transition-all duration-300 shadow-md shadow-blue-500/20 active:scale-95 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-6 py-3 bg-accent text-white font-bold rounded-2xl hover:bg-accent-hover transition-all duration-300 shadow-md shadow-blue-500/20 active:scale-95 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                 >
                   {sending
                     ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

@@ -40,7 +40,7 @@ const inputClass =
   'w-full bg-black/[0.04] border border-black/[0.06] rounded-xl px-4 py-2.5 text-[15px] text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/60 focus:border-transparent transition-all font-medium';
 const labelClass = 'block text-[13px] font-semibold text-gray-700 mb-1';
 const primaryBtnClass =
-  'w-full flex items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full shadow-lg shadow-blue-600/25 transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2';
+  'w-full flex items-center justify-center gap-2 py-3 bg-accent hover:bg-accent-hover text-white text-sm font-semibold rounded-full shadow-lg shadow-blue-600/25 transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2';
 
 const ErrorBanner = ({ message, reduceMotion }) => (
   <AnimatePresence>

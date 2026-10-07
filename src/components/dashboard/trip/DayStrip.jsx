@@ -53,17 +53,17 @@ const DayStrip = ({ days, activeIndex, dimmed = false, onSelect, dateLocale }) =
             className={`group relative flex-1 min-w-[92px] sm:min-w-[104px] max-w-[160px] shrink-0 text-left rounded-2xl px-3.5 pt-2.5 pb-3 transition-colors duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50 ${
               selected
                 ? dimmed
-                  ? 'bg-gray-200/70 dark:bg-white/10 text-gray-900 dark:text-white'
-                  : 'bg-blue-600 text-white shadow-[0_6px_16px_-8px_rgba(37,99,235,0.7)]'
-                : 'bg-white dark:bg-white/[0.04] border border-gray-200/80 dark:border-white/10 text-gray-900 dark:text-white hover:border-gray-300 dark:hover:border-white/20'
+                  ? 'bg-gray-200/70 dark:bg-white/10 text-primary'
+                  : 'bg-accent text-white shadow-[0_6px_16px_-8px_rgba(37,99,235,0.7)]'
+                : 'bg-white dark:bg-white/[0.04] border border-gray-200/80 dark:border-white/10 text-primary hover:border-gray-300 dark:hover:border-white/20'
             }`}
           >
             <span className="flex items-center gap-1.5 text-[12px] font-medium">
-              <span className={selected && !dimmed ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'}>
+              <span className={selected && !dimmed ? 'text-blue-100' : 'text-muted'}>
                 {format(date, 'EEEEEE', { locale: dateLocale })}
               </span>
               {today && (
-                <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${selected && !dimmed ? 'text-white' : 'text-blue-600 dark:text-blue-400'}`}>
+                <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${selected && !dimmed ? 'text-white' : 'text-accent'}`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${selected && !dimmed ? 'bg-white' : 'bg-blue-600 dark:bg-blue-400'}`} aria-hidden="true" />
                   {t('tripDetail.notebook.today')}
                 </span>
@@ -72,7 +72,7 @@ const DayStrip = ({ days, activeIndex, dimmed = false, onSelect, dateLocale }) =
             <span className="block text-[26px] font-bold tracking-tight leading-none mt-1 tabular-nums">
               {format(date, 'd.')}
             </span>
-            <span className={`block text-[12px] font-medium truncate mt-1.5 ${selected && !dimmed ? 'text-blue-100' : day.location ? 'text-gray-500 dark:text-gray-400' : 'text-gray-300 dark:text-gray-600'}`}>
+            <span className={`block text-[12px] font-medium truncate mt-1.5 ${selected && !dimmed ? 'text-blue-100' : day.location ? 'text-muted' : 'text-gray-300 dark:text-gray-600'}`}>
               {day.location ? day.location.split(',')[0] : '—'}
             </span>
           </button>

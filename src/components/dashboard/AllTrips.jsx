@@ -43,12 +43,12 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
     <div className="space-y-8 w-full pb-10">
       <div className="flex items-end justify-between gap-4">
         <div className="space-y-1 sm:space-y-2 min-w-0">
-          <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium">{t('allTrips.subtitle')}</p>
-          <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold truncate">{t('allTrips.title')}</h1>
+          <p className="text-[13px] text-muted font-medium">{t('allTrips.subtitle')}</p>
+          <h1 className="text-3xl sm:text-4xl text-primary tracking-tight font-bold truncate">{t('allTrips.title')}</h1>
         </div>
         <Link
           to="/dashboard/trash"
-          className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-3 py-2.5 transition-all shrink-0"
+          className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-muted hover:text-primary hover:bg-subtle rounded-xl px-3 py-2.5 transition-all shrink-0"
         >
           <Trash2 size={15} strokeWidth={2.5} aria-hidden="true" /> {t('allTrips.trash')}
         </Link>
@@ -108,7 +108,7 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
           {hasActiveFilters && (
             <button
               onClick={() => { setSearchQuery(''); setStatusFilter('all'); }}
-              className="flex items-center justify-center gap-1.5 text-sm font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-4 py-2.5 transition-all shrink-0 cursor-pointer"
+              className="flex items-center justify-center gap-1.5 text-sm font-semibold text-muted hover:text-primary hover:bg-subtle rounded-xl px-4 py-2.5 transition-all shrink-0 cursor-pointer"
             >
               <X size={16} strokeWidth={2.5} /> {t('allTrips.filter.reset')}
             </button>
@@ -119,13 +119,13 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
       {/* Grid */}
       {trips.length === 0 ? (
         <div className="py-14 sm:py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none px-4">
-          <p className="text-2xl text-gray-900 dark:text-white font-bold tracking-tight">{t('allTrips.noTrips.title')}</p>
-          <p className="text-[15px] text-gray-500 dark:text-gray-400 font-medium max-w-md">{t('allTrips.noTrips.description')}</p>
+          <p className="text-2xl text-primary font-bold tracking-tight">{t('allTrips.noTrips.title')}</p>
+          <p className="text-[15px] text-muted font-medium max-w-md">{t('allTrips.noTrips.description')}</p>
         </div>
       ) : filteredTrips.length === 0 ? (
         <div className="py-14 sm:py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none px-4">
-          <p className="text-2xl text-gray-900 dark:text-white font-bold tracking-tight">{t('allTrips.empty.title')}</p>
-          <p className="text-[15px] text-gray-500 dark:text-gray-400 font-medium max-w-md">{t('allTrips.empty.description')}</p>
+          <p className="text-2xl text-primary font-bold tracking-tight">{t('allTrips.empty.title')}</p>
+          <p className="text-[15px] text-muted font-medium max-w-md">{t('allTrips.empty.description')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -136,7 +136,7 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
 
             const statusColors = {
               ongoing:  'bg-green-500/10 text-green-600 dark:text-green-400',
-              upcoming: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+              upcoming: 'bg-blue-500/10 text-accent',
               past:     'bg-gray-500/10 text-gray-600 dark:text-gray-400',
             };
             const statusLabels = {
@@ -157,7 +157,7 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
                   </div>
                   <div className="flex items-center gap-2 flex-wrap justify-end">
                     {(trip.role === 'editor' || trip.role === 'viewer') && (
-                      <span className="flex items-center gap-1 text-[11px] font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-white/10 px-2 py-0.5 rounded-full">
+                      <span className="flex items-center gap-1 text-[11px] font-medium text-muted bg-subtle px-2 py-0.5 rounded-full">
                         <Users size={11} strokeWidth={2} aria-hidden="true" />
                         {t('allTrips.shared')}
                       </span>
@@ -175,14 +175,14 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
                   </div>
                 </div>
 
-                <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white tracking-tight truncate min-w-0">{trip.title}</h2>
+                <h2 className="text-2xl font-bold mb-2 text-primary tracking-tight truncate min-w-0">{trip.title}</h2>
 
-                <div className="flex items-center text-[13px] font-medium text-gray-500 dark:text-gray-400 gap-2 mb-8">
+                <div className="flex items-center text-[13px] font-medium text-muted gap-2 mb-8">
                   <Calendar size={15} strokeWidth={2} aria-hidden="true" />
                   <span>{format(new Date(trip.startDate), 'd. M.')} — {format(new Date(trip.endDate), 'd. M. yyyy')}</span>
                 </div>
 
-                <div className="mt-auto flex items-center justify-between pt-6 border-t border-gray-100 dark:border-white/10">
+                <div className="mt-auto flex items-center justify-between pt-6 border-t border-subtle">
                   <div className="flex items-center gap-3 text-[12px] font-medium text-gray-400 dark:text-gray-500">
                     <span>{tripDays} {t('allTrips.days')}</span>
                     {trip.role === 'owner' && trip.likes > 0 && (
@@ -192,7 +192,7 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
                       </span>
                     )}
                   </div>
-                  <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-blue-600 dark:text-blue-400 group-hover:text-blue-500 transition-colors">
+                  <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent group-hover:text-blue-500 transition-colors">
                     {t('allTrips.open')} <ArrowRight size={15} strokeWidth={2.5} aria-hidden="true" />
                   </span>
                 </div>

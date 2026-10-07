@@ -1,3 +1,4 @@
+// design-lint-ignore-file: categorical card palette, intentionally not semantic tokens.
 // Deterministic colour per trip, hashed from its title — the same trip keeps
 // the same colour everywhere it appears (overview, all-trips) without storing
 // anything on the server.

@@ -37,7 +37,7 @@ const LikeButton = ({ tripId, initialLikes = 0, initialIsLiked = false, onLikeCh
   };
 
   return (
-    <div className="flex flex-row items-center gap-1.5 glass-card rounded-full pl-2 pr-4 py-1.5 shadow-sm border border-gray-100 dark:border-white/10 w-fit">
+    <div className="flex flex-row items-center gap-1.5 glass-card rounded-full pl-2 pr-4 py-1.5 shadow-sm border border-subtle w-fit">
       <motion.button
         whileTap={{ scale: 0.8 }}
         onClick={handleLike}
@@ -73,7 +73,7 @@ const LikeButton = ({ tripId, initialLikes = 0, initialIsLiked = false, onLikeCh
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 400, damping: 15 }}
           className={`text-[14px] font-bold tabular-nums leading-none ${
-            isLiked ? 'text-red-500' : 'text-gray-700 dark:text-gray-300'
+            isLiked ? 'text-red-500' : 'text-soft'
           }`}
         >
           {likes}

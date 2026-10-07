@@ -29,7 +29,7 @@ const DashboardNotFound = () => {
           {t('notFound.title')}
         </h1>
 
-        <p className="text-gray-500 dark:text-gray-400 font-medium text-lg leading-relaxed px-4">
+        <p className="text-muted font-medium text-lg leading-relaxed px-4">
           {t('notFound.description')}
         </p>
       </motion.div>

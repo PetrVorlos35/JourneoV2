@@ -210,10 +210,10 @@ const MapWorkspaceView = ({
     snapPoints = ['bar'];
     header = (
       <div className="px-4 py-3 flex items-center gap-2">
-        <button type="button" onClick={cancelPlacing} className={`${actionButton} flex-1 bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-200`}>
+        <button type="button" onClick={cancelPlacing} className={`${actionButton} flex-1 bg-subtle text-gray-700 dark:text-gray-200`}>
           {t('map.mobile.cancel')}
         </button>
-        <button type="button" onClick={confirmPlacing} className={`${actionButton} flex-[1.4] bg-blue-600 text-white hover:bg-blue-700`}>
+        <button type="button" onClick={confirmPlacing} className={`${actionButton} flex-[1.4] bg-accent text-white hover:bg-accent-hover`}>
           <Crosshair size={16} strokeWidth={2.5} aria-hidden="true" />
           {t('map.mobile.placeHere')}
         </button>
@@ -271,8 +271,8 @@ const MapWorkspaceView = ({
             <Icon size={17} strokeWidth={2.5} aria-hidden="true" />
           </span>
           <div className="min-w-0 flex-1">
-            <h2 className="text-[16px] font-bold text-gray-900 dark:text-white truncate">{selectedPlace.name}</h2>
-            <p className="text-[12px] font-medium text-gray-500 dark:text-gray-400 truncate">
+            <h2 className="text-[16px] font-bold text-primary truncate">{selectedPlace.name}</h2>
+            <p className="text-[12px] font-medium text-muted truncate">
               {[
                 t(`map.statuses.${selectedPlace.status}`),
                 t(categoryLabelKey(selectedPlace.category)),
@@ -292,7 +292,7 @@ const MapWorkspaceView = ({
             <button
               type="button"
               onClick={() => editPlace(selectedPlace)}
-              className={`${actionButton} flex-1 bg-blue-600 text-white hover:bg-blue-700`}
+              className={`${actionButton} flex-1 bg-accent text-white hover:bg-accent-hover`}
             >
               <Pencil size={15} strokeWidth={2.5} aria-hidden="true" />
               {t('map.mobile.edit')}
@@ -300,7 +300,7 @@ const MapWorkspaceView = ({
             <button
               type="button"
               onClick={() => startMovingSelected(selectedPlace)}
-              className={`${actionButton} flex-1 bg-gray-100 dark:bg-white/10 text-gray-700 dark:text-gray-200`}
+              className={`${actionButton} flex-1 bg-subtle text-gray-700 dark:text-gray-200`}
             >
               <Move size={15} strokeWidth={2.5} aria-hidden="true" />
               {t('map.mobile.move')}
@@ -320,13 +320,13 @@ const MapWorkspaceView = ({
     body = (
       <div className="space-y-4 pt-2">
         {selectedPlace.address && (
-          <p className="flex items-start gap-2 text-[13px] font-medium text-gray-600 dark:text-gray-300">
+          <p className="flex items-start gap-2 text-[13px] font-medium text-secondary">
             <MapPin size={14} strokeWidth={2.5} className="mt-0.5 shrink-0 text-gray-400" aria-hidden="true" />
             {selectedPlace.address}
           </p>
         )}
         {selectedPlace.note && (
-          <p className="text-[13px] font-medium text-gray-600 dark:text-gray-300 whitespace-pre-line">
+          <p className="text-[13px] font-medium text-secondary whitespace-pre-line">
             {selectedPlace.note}
           </p>
         )}
@@ -339,8 +339,8 @@ const MapWorkspaceView = ({
     header = (
       <div className="px-4 pt-1 pb-3 flex items-center gap-3">
         <div className="min-w-0 flex-1">
-          <h2 className="text-[16px] font-bold text-gray-900 dark:text-white truncate">{title}</h2>
-          <p className="text-[12px] font-medium text-gray-500 dark:text-gray-400">
+          <h2 className="text-[16px] font-bold text-primary truncate">{title}</h2>
+          <p className="text-[12px] font-medium text-muted">
             {loading ? t('map.loading') : t('map.subtitle', { count: places.length })}
           </p>
         </div>
@@ -348,7 +348,7 @@ const MapWorkspaceView = ({
           <button
             type="button"
             onClick={startPlacing}
-            className={`${actionButton} shrink-0 bg-blue-600 text-white hover:bg-blue-700`}
+            className={`${actionButton} shrink-0 bg-accent text-white hover:bg-accent-hover`}
           >
             <Plus size={16} strokeWidth={2.5} aria-hidden="true" />
             {t('map.mobile.addPlace')}
@@ -440,7 +440,7 @@ const MapWorkspaceView = ({
           type="button"
           onClick={handleBack}
           aria-label={t('map.mobile.back')}
-          className="pointer-events-auto w-11 h-11 shrink-0 rounded-2xl glass-card border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-700 dark:text-gray-200 cursor-pointer"
+          className="pointer-events-auto w-11 h-11 shrink-0 rounded-2xl glass-card border border-default flex items-center justify-center text-gray-700 dark:text-gray-200 cursor-pointer"
         >
           <ArrowLeft size={18} strokeWidth={2.5} />
         </button>
@@ -461,7 +461,7 @@ const MapWorkspaceView = ({
           type="button"
           onClick={onOpenMenu}
           aria-label={t('dashboardLayout.passport.openMenu')}
-          className="pointer-events-auto w-11 h-11 shrink-0 rounded-2xl bg-white dark:bg-[#1C1C1E] border border-gray-200 dark:border-white/10 shadow-sm flex items-center justify-center cursor-pointer"
+          className="pointer-events-auto w-11 h-11 shrink-0 rounded-2xl bg-page border border-default shadow-sm flex items-center justify-center cursor-pointer"
         >
           {/* Stejný vstup do „pasu“ jako avatar v horní liště — mapa ji skrývá */}
           <UserAvatar user={user} size="sm" />
@@ -481,7 +481,7 @@ const MapWorkspaceView = ({
           // Umisťování: místo celé výšky panelu jen kompaktní lišta dole,
           // ať zůstane vidět co nejvíc mapy pod křížkem.
           <div
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[30] w-[min(360px,calc(100%-2rem))] glass-card rounded-2xl border border-gray-200 dark:border-white/10 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]"
+            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[30] w-[min(360px,calc(100%-2rem))] glass-card rounded-2xl border border-default shadow-[0_8px_40px_-12px_rgba(0,0,0,0.35)]"
             style={sidebarInset ? { marginLeft: sidebarInset / 2 } : undefined}
           >
             {header}
@@ -511,7 +511,7 @@ const MapWorkspaceView = ({
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      className="fixed inset-0 z-[120] bg-[#fbfbfd] dark:bg-black overflow-hidden"
+      className="fixed inset-0 z-[120] bg-desk overflow-hidden"
     >
       <div className="absolute inset-0">{canvas}</div>
       {crosshair}

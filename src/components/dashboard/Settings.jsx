@@ -182,31 +182,31 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
     <div className="w-full space-y-12 pb-10">
       {ModalPortal}
       <div className="space-y-2">
-        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('settings.subtitle')}</p>
-        <h1 className="text-2xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold" style={{ textWrap: 'balance' }}>{t('settings.title')}</h1>
+        <p className="text-sm font-medium text-muted">{t('settings.subtitle')}</p>
+        <h1 className="text-2xl sm:text-4xl text-primary tracking-tight font-bold" style={{ textWrap: 'balance' }}>{t('settings.title')}</h1>
       </div>
 
       <div className="space-y-8">
 
         {/* Profile Section */}
         <div className="glass-card p-5 sm:p-8 md:p-10">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
+          <h2 className="text-2xl font-bold text-primary mb-8 flex items-center gap-3">
+            <div className="w-10 h-10 bg-active text-accent rounded-xl flex items-center justify-center">
               <User size={20} strokeWidth={2} />
             </div>
             {t('settings.profile.title')}
           </h2>
           <form onSubmit={handleProfileSave} className="space-y-8">
             <div>
-              <label className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-4 block">{t('settings.profile.avatarLabel')}</label>
+              <label className="text-[13px] font-semibold text-soft mb-4 block">{t('settings.profile.avatarLabel')}</label>
               <div className="flex flex-wrap gap-4">
                 <button
                   type="button"
                   onClick={() => handleProfileChange('avatar_url', '')}
                   className={`relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 border-2 ${
                     !profileForm.avatar_url
-                      ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                      : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                      ? 'border-blue-600 bg-active text-accent'
+                      : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-primary'
                   } cursor-pointer disabled:cursor-not-allowed`}
                   title={t('settings.profile.avatarDefault')}
                 >
@@ -219,8 +219,8 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                     onClick={() => handleProfileChange('avatar_url', preset.id)}
                     className={`relative w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-300 border-2 ${
                       profileForm.avatar_url === preset.id
-                        ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                        : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                        ? 'border-blue-600 bg-active text-accent'
+                        : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-primary'
                     } cursor-pointer disabled:cursor-not-allowed`}
                   >
                     <preset.Icon strokeWidth={2} size={24} />
@@ -231,7 +231,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div>
-                <label htmlFor="settings-first-name" className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 block">{t('settings.profile.firstName')}</label>
+                <label htmlFor="settings-first-name" className="text-[13px] font-semibold text-soft mb-2 block">{t('settings.profile.firstName')}</label>
                 <input
                   id="settings-first-name"
                   type="text"
@@ -246,7 +246,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                 </div>
               </div>
               <div>
-                <label htmlFor="settings-last-name" className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 block">{t('settings.profile.lastName')}</label>
+                <label htmlFor="settings-last-name" className="text-[13px] font-semibold text-soft mb-2 block">{t('settings.profile.lastName')}</label>
                 <input
                   id="settings-last-name"
                   type="text"
@@ -262,7 +262,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
               </div>
             </div>
             <div>
-              <label htmlFor="settings-bio" className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 block">{t('settings.profile.bio')}</label>
+              <label htmlFor="settings-bio" className="text-[13px] font-semibold text-soft mb-2 block">{t('settings.profile.bio')}</label>
               <textarea
                 id="settings-bio"
                 placeholder={t('settings.profile.bioPlaceholder')}
@@ -277,7 +277,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
               </div>
             </div>
             <div>
-              <label htmlFor="settings-bank-account" className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+              <label htmlFor="settings-bank-account" className="text-[13px] font-semibold text-soft mb-2 flex items-center gap-2">
                 <Landmark size={15} className="text-gray-400" strokeWidth={2} />
                 {t('settings.profile.bankAccount')}
               </label>
@@ -294,9 +294,9 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
               <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1.5 pl-1">{t('settings.profile.bankAccountHint')}</p>
             </div>
             <div>
-              <label className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 block">{t('friends.invite.title')}</label>
+              <label className="text-[13px] font-semibold text-soft mb-2 block">{t('friends.invite.title')}</label>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                <div className="flex-1 flex items-center gap-2 bg-gray-50 dark:bg-white/5 border border-gray-100 dark:border-white/10 rounded-2xl px-4 py-2.5 min-w-0">
+                <div className="flex-1 flex items-center gap-2 bg-field border border-subtle rounded-2xl px-4 py-2.5 min-w-0">
                   <LinkIcon size={14} className="text-gray-400 shrink-0" strokeWidth={2.5} />
                   <span className="flex-1 text-[12px] text-gray-600 dark:text-white/60 font-mono truncate select-all">
                     {inviteUrl || '…'}
@@ -306,21 +306,21 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                     onClick={handleCopyInvite}
                     disabled={!inviteUrl}
                     aria-label={t('friends.invite.copy')}
-                    className="shrink-0 w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-500 dark:text-white/70 hover:text-gray-900 dark:hover:text-white transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="shrink-0 w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center rounded-xl bg-subtle hover:bg-gray-200 dark:hover:bg-white/20 text-gray-500 dark:text-white/70 hover:text-primary transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {linkCopied ? <Check size={14} strokeWidth={2.5} className="text-green-500 dark:text-green-400" /> : <Copy size={14} strokeWidth={2} />}
                   </button>
                 </div>
                 <Link
                   to="/dashboard/friends"
-                  className="shrink-0 inline-flex items-center gap-1.5 text-[12px] font-bold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors px-1"
+                  className="shrink-0 inline-flex items-center gap-1.5 text-[12px] font-bold text-accent hover:text-blue-500 transition-colors px-1"
                 >
                   {t('addFriendInvite.goToFriends')} <ArrowRight size={14} strokeWidth={2.5} />
                 </Link>
               </div>
             </div>
             <div>
-              <label htmlFor="settings-email" className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 block">{t('settings.profile.emailLabel')}</label>
+              <label htmlFor="settings-email" className="text-[13px] font-semibold text-soft mb-2 block">{t('settings.profile.emailLabel')}</label>
               <input
                 id="settings-email"
                 type="email"
@@ -336,7 +336,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                 className={`flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 text-white rounded-2xl font-bold transition-all duration-300 shadow-md active:scale-95 disabled:opacity-50 disabled:hover:scale-100 ${
                   hasUnsavedChanges
                     ? 'bg-amber-500 hover:bg-amber-400 shadow-amber-500/20'
-                    : 'bg-blue-600 hover:bg-blue-500 shadow-blue-500/20 disabled:hover:bg-blue-600'
+                    : 'bg-accent hover:bg-accent-hover shadow-blue-500/20 disabled:hover:bg-accent'
                 } cursor-pointer disabled:cursor-not-allowed`}
               >
                 {saving ? (
@@ -352,13 +352,13 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
 
         {/* Currency */}
         <div className="glass-card p-5 sm:p-8 md:p-10">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
+          <h2 className="text-2xl font-bold text-primary mb-4 flex items-center gap-3">
+            <div className="w-10 h-10 bg-active text-accent rounded-xl flex items-center justify-center">
               <DollarSign size={20} strokeWidth={2} />
             </div>
             {t('settings.currency.title')}
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 font-medium mb-8">
+          <p className="text-muted font-medium mb-8">
             {t('settings.currency.subtitle')}
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
@@ -368,8 +368,8 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                 onClick={() => handleCurrencyChange(id)}
                 className={`flex items-center justify-center py-3 sm:py-4 px-2 rounded-2xl border-2 font-bold transition-colors duration-300 text-[13px] ${
                   currency === id
-                    ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                    : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10'
+                    ? 'border-blue-600 bg-active text-accent'
+                    : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-primary hover:bg-gray-200 dark:hover:bg-white/10'
                 } cursor-pointer disabled:cursor-not-allowed`}
               >
                 {label}
@@ -380,14 +380,14 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
 
         {/* Appearance (Theme) Section */}
         <div className="glass-card p-5 sm:p-8 md:p-10">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
+          <h2 className="text-2xl font-bold text-primary mb-4 flex items-center gap-3">
+            <div className="w-10 h-10 bg-active text-accent rounded-xl flex items-center justify-center">
               <Sun size={20} strokeWidth={2} className="dark:hidden" />
               <Moon size={20} strokeWidth={2} className="hidden dark:block" />
             </div>
             {t('settings.appearance.title')}
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 font-medium mb-8">
+          <p className="text-muted font-medium mb-8">
             {t('settings.appearance.subtitle')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
@@ -397,8 +397,8 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                 onClick={() => setTheme(id)}
                 className={`flex flex-row sm:flex-col items-center justify-start sm:justify-center p-4 rounded-2xl border-2 transition-all duration-300 ${
                   theme === id
-                    ? 'border-blue-600 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
-                    : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-white/10'
+                    ? 'border-blue-600 bg-active text-accent'
+                    : 'border-transparent bg-gray-100 dark:bg-white/5 text-gray-500 hover:text-primary hover:bg-gray-200 dark:hover:bg-white/10'
                 } cursor-pointer disabled:cursor-not-allowed`}
               >
                 <Icon size={24} strokeWidth={2} className="mr-4 sm:mr-0 sm:mb-2" />
@@ -410,13 +410,13 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
 
         {/* Language Section */}
         <div className="glass-card p-5 sm:p-8 md:p-10">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
+          <h2 className="text-2xl font-bold text-primary mb-4 flex items-center gap-3">
+            <div className="w-10 h-10 bg-active text-accent rounded-xl flex items-center justify-center">
               <Globe size={20} strokeWidth={2} />
             </div>
             {t('settings.language.title')}
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 font-medium mb-8">
+          <p className="text-muted font-medium mb-8">
             {t('settings.language.subtitle')}
           </p>
           <DashboardLanguageSwitcher />
@@ -424,25 +424,25 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
 
         {/* Change Password Section */}
         <div className="glass-card p-5 sm:p-8 md:p-10">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center">
+          <h2 className="text-2xl font-bold text-primary mb-4 flex items-center gap-3">
+            <div className="w-10 h-10 bg-active text-accent rounded-xl flex items-center justify-center">
               <KeyRound size={20} strokeWidth={2} />
             </div>
             {t('settings.password.title')}
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 font-medium mb-8">
+          <p className="text-muted font-medium mb-8">
             {t('settings.password.subtitle')}
           </p>
 
           {pwdError && (
-            <div role="alert" className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm font-bold">
+            <div role="alert" className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-danger text-sm font-bold">
               {pwdError}
             </div>
           )}
 
           <form onSubmit={handlePwdSave} className="space-y-6 max-w-md">
             <div>
-              <label htmlFor="settings-old-password" className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 block">{t('settings.password.current')}</label>
+              <label htmlFor="settings-old-password" className="text-[13px] font-semibold text-soft mb-2 block">{t('settings.password.current')}</label>
               <div className="relative">
                 <input
                   id="settings-old-password"
@@ -464,7 +464,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
             </div>
 
             <div>
-              <label htmlFor="settings-new-password" className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 block">{t('settings.password.new')}</label>
+              <label htmlFor="settings-new-password" className="text-[13px] font-semibold text-soft mb-2 block">{t('settings.password.new')}</label>
               <div className="relative">
                 <input
                   id="settings-new-password"
@@ -509,7 +509,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
                       { label: t('settings.password.req.uppercase'), met: /[A-Z]/.test(pwdForm.newPassword) },
                       { label: t('settings.password.req.digit'), met: /[0-9]/.test(pwdForm.newPassword) },
                     ].map((req, i) => (
-                      <div key={i} className={`flex items-center gap-2 text-[11px] font-medium transition-colors duration-300 ${req.met ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                      <div key={i} className={`flex items-center gap-2 text-[11px] font-medium transition-colors duration-300 ${req.met ? 'text-green-600 dark:text-green-400' : 'text-muted'}`}>
                         <div className={`p-0.5 rounded-full ${req.met ? 'bg-green-100 dark:bg-green-500/20' : 'bg-transparent'}`}>
                           {req.met ? <Check size={10} strokeWidth={4} /> : <X size={10} strokeWidth={3} className="opacity-50" />}
                         </div>
@@ -522,7 +522,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
             </div>
 
             <div>
-              <label htmlFor="settings-confirm-password" className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-2 block">{t('settings.password.confirm')}</label>
+              <label htmlFor="settings-confirm-password" className="text-[13px] font-semibold text-soft mb-2 block">{t('settings.password.confirm')}</label>
               <div className="relative">
                 <input
                   id="settings-confirm-password"
@@ -555,8 +555,8 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
 
         {/* Danger zone */}
         <div className="bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-[2rem] p-5 sm:p-8 md:p-10">
-          <h2 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400 rounded-xl flex items-center justify-center">
+          <h2 className="text-2xl font-bold text-danger mb-4 flex items-center gap-3">
+            <div className="w-10 h-10 bg-red-100 dark:bg-red-500/20 text-danger rounded-xl flex items-center justify-center">
               <Trash2 size={20} strokeWidth={2} />
             </div>
             {t('settings.danger.title')}
@@ -566,7 +566,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
           </p>
           <button
             onClick={handleClear}
-            className="w-full sm:w-auto px-6 py-3 border-2 border-red-500/30 text-red-600 dark:text-red-400 rounded-2xl font-bold hover:bg-red-500 hover:text-white transition-colors duration-300 shadow-sm shadow-red-500/10 active:scale-95 cursor-pointer disabled:cursor-not-allowed"
+            className="w-full sm:w-auto px-6 py-3 border-2 border-red-500/30 text-danger rounded-2xl font-bold hover:bg-red-500 hover:text-white transition-colors duration-300 shadow-sm shadow-red-500/10 active:scale-95 cursor-pointer disabled:cursor-not-allowed"
           >
             {t('settings.danger.button')}
           </button>

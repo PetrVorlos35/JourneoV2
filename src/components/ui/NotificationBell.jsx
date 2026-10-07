@@ -126,9 +126,9 @@ const NotificationBell = ({ placement = 'right' }) => {
       <button
         onClick={handleToggle}
         aria-label={t('notifications.title')}
-        className="relative w-11 h-11 md:w-10 md:h-10 flex items-center justify-center rounded-2xl hover:bg-gray-100 dark:hover:bg-white/10 transition-all duration-300 cursor-pointer"
+        className="relative w-11 h-11 md:w-10 md:h-10 flex items-center justify-center rounded-2xl hover:bg-subtle transition-all duration-300 cursor-pointer"
       >
-        <Bell size={20} strokeWidth={2} className="text-gray-500 dark:text-gray-400" />
+        <Bell size={20} strokeWidth={2} className="text-muted" />
         <AnimatePresence>
           {unreadCount > 0 && (
             <motion.span
@@ -150,14 +150,14 @@ const NotificationBell = ({ placement = 'right' }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`fixed md:absolute left-0 right-0 ${placement === 'sidebar' ? 'md:left-0 md:right-auto md:top-12' : 'md:left-auto md:top-14'} top-[max(4.25rem,calc(env(safe-area-inset-top)+3.75rem))] w-full md:w-96 max-h-[calc(100dvh-max(4.25rem,calc(env(safe-area-inset-top)+3.75rem))-1rem)] md:max-h-[420px] bg-white dark:bg-[#1c1c1e] shadow-2xl rounded-b-[2rem] md:rounded-2xl border-b md:border border-black/5 dark:border-white/10 overflow-hidden z-[100] flex flex-col`}
+            className={`fixed md:absolute left-0 right-0 ${placement === 'sidebar' ? 'md:left-0 md:right-auto md:top-12' : 'md:left-auto md:top-14'} top-[max(4.25rem,calc(env(safe-area-inset-top)+3.75rem))] w-full md:w-96 max-h-[calc(100dvh-max(4.25rem,calc(env(safe-area-inset-top)+3.75rem))-1rem)] md:max-h-[420px] bg-page shadow-2xl rounded-b-[2rem] md:rounded-2xl border-b md:border border-black/5 dark:border-white/10 overflow-hidden z-[100] flex flex-col`}
           >
-            <div className="px-5 py-4 border-b border-gray-100 dark:border-white/10 flex items-center justify-between">
-              <h3 className="font-bold text-[15px] text-gray-900 dark:text-white tracking-tight">{t('notifications.title')}</h3>
+            <div className="px-5 py-4 border-b border-subtle flex items-center justify-between">
+              <h3 className="font-bold text-[15px] text-primary tracking-tight">{t('notifications.title')}</h3>
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
-                  className="p-2 -m-2 text-[12px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors cursor-pointer"
+                  className="p-2 -m-2 text-[12px] font-semibold text-accent hover:text-blue-500 transition-colors cursor-pointer"
                 >
                   {t('notifications.markAllRead')}
                 </button>
@@ -170,7 +170,7 @@ const NotificationBell = ({ placement = 'right' }) => {
               ) : notifications.length === 0 ? (
                 <div className="py-12 text-center">
                   <Bell size={28} className="mx-auto text-gray-300 dark:text-gray-600 mb-3" />
-                  <p className="text-gray-500 dark:text-gray-400 text-[14px] font-bold">{t('notifications.empty')}</p>
+                  <p className="text-muted text-[14px] font-bold">{t('notifications.empty')}</p>
                 </div>
               ) : (
                 notifications.map(n => {
@@ -187,15 +187,15 @@ const NotificationBell = ({ placement = 'right' }) => {
                       <div className="flex items-start gap-3">
                         <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                           n.type === 'FRIEND_REQUEST'
-                            ? 'bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                            ? 'bg-blue-100 dark:bg-blue-500/10 text-accent'
                             : n.type === 'FRIEND_ACCEPTED'
                               ? 'bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400'
-                              : 'bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400'
+                              : 'bg-red-100 dark:bg-red-500/10 text-danger'
                         }`}>
                           <Icon size={16} strokeWidth={2.5} />
                         </div>
                         <div className="flex-1 min-w-0 flex flex-col gap-1">
-                          <p className={`text-sm leading-tight break-words ${!n.isRead ? 'font-bold text-gray-900 dark:text-white' : 'font-medium text-gray-600 dark:text-gray-400'}`}>
+                          <p className={`text-sm leading-tight break-words ${!n.isRead ? 'font-bold text-primary' : 'font-medium text-gray-600 dark:text-gray-400'}`}>
                             {n.type === 'FRIEND_REQUEST'
                               ? t('notifications.messages.friendRequest', { name: n.actorName || '?' })
                               : n.type === 'FRIEND_ACCEPTED'
@@ -210,13 +210,13 @@ const NotificationBell = ({ placement = 'right' }) => {
                             <div className="flex flex-row gap-2 mt-2">
                               <button
                                 onClick={() => handleAcceptRequest(n.referenceId, n.id)}
-                                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3 md:py-2.5 bg-blue-600 text-white text-[12px] font-bold rounded-xl hover:bg-blue-500 transition-colors cursor-pointer"
+                                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3 md:py-2.5 bg-accent text-white text-[12px] font-bold rounded-xl hover:bg-accent-hover transition-colors cursor-pointer"
                               >
                                 <Check size={14} strokeWidth={3} /> {t('notifications.accept')}
                               </button>
                               <button
                                 onClick={() => handleDeclineRequest(n.referenceId, n.id)}
-                                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3 md:py-2.5 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 text-[12px] font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/15 transition-colors cursor-pointer"
+                                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-3 md:py-2.5 bg-subtle text-gray-600 dark:text-gray-400 text-[12px] font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/15 transition-colors cursor-pointer"
                               >
                                 <X size={14} strokeWidth={3} /> {t('notifications.decline')}
                               </button>

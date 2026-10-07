@@ -112,7 +112,7 @@ const PlaceForm = ({
   };
 
   const inputClass =
-    'w-full px-4 py-3 sm:py-2.5 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-base sm:text-[14px] font-medium text-gray-900 dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-colors';
+    'w-full px-4 py-3 sm:py-2.5 rounded-2xl bg-white dark:bg-white/5 border border-default text-base sm:text-[14px] font-medium text-primary placeholder:text-placeholder focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 transition-colors';
 
   return (
     <form
@@ -123,10 +123,10 @@ const PlaceForm = ({
       {/* Hlavička */}
       <div className={`flex items-start gap-3 pb-4 border-b border-gray-100 dark:border-white/5 ${isPanel ? 'px-1 pt-1' : 'px-5 sm:px-6 pt-5'}`}>
         <div className="min-w-0 flex-1">
-          <h2 className="text-[17px] font-bold text-gray-900 dark:text-white">
+          <h2 className="text-[17px] font-bold text-primary">
             {t(isExisting ? 'map.sheet.editTitle' : 'map.sheet.newTitle')}
           </h2>
-          <p className="mt-0.5 flex items-start gap-1.5 text-[12px] font-medium text-gray-500 dark:text-gray-400">
+          <p className="mt-0.5 flex items-start gap-1.5 text-[12px] font-medium text-muted">
             <MapPin size={13} strokeWidth={2.5} className="mt-0.5 shrink-0" aria-hidden="true" />
             <span className="truncate">
               {place.address || `${place.lat.toFixed(5)}, ${place.lng.toFixed(5)}`}
@@ -137,7 +137,7 @@ const PlaceForm = ({
           type="button"
           onClick={onClose}
           aria-label={t('common.close')}
-          className="w-10 h-10 sm:w-9 sm:h-9 shrink-0 -mr-1 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+          className="w-10 h-10 sm:w-9 sm:h-9 shrink-0 -mr-1 rounded-full flex items-center justify-center text-gray-400 hover:text-primary hover:bg-subtle transition-colors cursor-pointer"
         >
           <X size={18} strokeWidth={2.5} />
         </button>
@@ -172,7 +172,7 @@ const PlaceForm = ({
             {t('map.sheet.locationLabel')}
           </span>
           <div className="flex items-center gap-2">
-            <p className="flex-1 min-w-0 text-[12px] font-semibold text-gray-600 dark:text-gray-300 tabular-nums truncate">
+            <p className="flex-1 min-w-0 text-[12px] font-semibold text-secondary tabular-nums truncate">
               {place.lat.toFixed(5)}, {place.lng.toFixed(5)}
             </p>
             {onToggleMove && (
@@ -182,8 +182,8 @@ const PlaceForm = ({
                 aria-pressed={isMoving}
                 className={`min-h-[36px] px-3 shrink-0 rounded-xl inline-flex items-center gap-1.5 text-[12px] font-semibold border transition-colors cursor-pointer ${
                   isMoving
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-blue-400'
+                    ? 'bg-accent border-blue-600 text-white'
+                    : 'bg-white dark:bg-white/5 border-default text-secondary hover:border-blue-400'
                 }`}
               >
                 <Move size={13} strokeWidth={2.5} aria-hidden="true" />
@@ -192,7 +192,7 @@ const PlaceForm = ({
             )}
           </div>
           {isMoving && (
-            <p className="mt-2 text-[11px] font-medium text-blue-600 dark:text-blue-400">
+            <p className="mt-2 text-[11px] font-medium text-accent">
               {t('map.sheet.moveHint')}
             </p>
           )}
@@ -216,8 +216,8 @@ const PlaceForm = ({
                 aria-pressed={form.status === value}
                 className={`min-h-[44px] px-3 rounded-2xl flex items-center justify-center gap-2 text-[13px] font-semibold border transition-colors cursor-pointer ${
                   form.status === value
-                    ? 'bg-blue-600 border-blue-600 text-white'
-                    : 'bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-blue-400'
+                    ? 'bg-accent border-blue-600 text-white'
+                    : 'bg-white dark:bg-white/5 border-default text-secondary hover:border-blue-400'
                 }`}
               >
                 <Icon size={15} strokeWidth={2.5} aria-hidden="true" />
@@ -244,7 +244,7 @@ const PlaceForm = ({
                 className={`min-h-[44px] px-3.5 rounded-2xl flex items-center gap-2 text-[13px] font-semibold border transition-colors cursor-pointer ${
                   form.category === key
                     ? 'bg-white dark:bg-white/10 border-2'
-                    : 'bg-white dark:bg-white/5 border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-300 hover:border-gray-300 dark:hover:border-white/20'
+                    : 'bg-white dark:bg-white/5 border-default text-secondary hover:border-gray-300 dark:hover:border-white/20'
                 }`}
               >
                 <Icon size={15} strokeWidth={2.5} aria-hidden="true" />
@@ -336,7 +336,7 @@ const PlaceForm = ({
         <button
           type="submit"
           disabled={!form.name.trim() || isSaving}
-          className="flex-1 min-h-[44px] rounded-2xl bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:hover:bg-blue-600 text-white text-[14px] font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:cursor-not-allowed"
+          className="flex-1 min-h-[44px] rounded-2xl bg-accent hover:bg-accent-hover disabled:opacity-40 disabled:hover:bg-accent text-white text-[14px] font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer disabled:cursor-not-allowed"
         >
           {isSaving && <Loader2 size={16} className="animate-spin" aria-hidden="true" />}
           {t(isExisting ? 'map.sheet.save' : 'map.sheet.create')}

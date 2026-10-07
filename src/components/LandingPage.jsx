@@ -33,7 +33,7 @@ const Reveal = ({ children, delay = 0, className = '' }) => {
 const PrimaryCta = ({ children, className = '' }) => (
   <Link
     to="/auth"
-    className={`group inline-flex items-center justify-center gap-2 bg-blue-600 text-white font-semibold rounded-full px-8 py-4 shadow-lg shadow-blue-600/25 hover:bg-blue-700 active:scale-[0.98] transition-all duration-300 ${className}`}
+    className={`group inline-flex items-center justify-center gap-2 bg-accent text-white font-semibold rounded-full px-8 py-4 shadow-lg shadow-blue-600/25 hover:bg-accent-hover active:scale-[0.98] transition-all duration-300 ${className}`}
   >
     {children}
     <ArrowRight
@@ -274,7 +274,7 @@ const PackingCard = () => {
             <div key={i} className="flex items-center gap-2">
               <span
                 className={`w-4 h-4 rounded-md flex items-center justify-center flex-shrink-0 ${
-                  done ? 'bg-blue-600 text-white' : 'border-[1.5px] border-gray-300'
+                  done ? 'bg-accent text-white' : 'border-[1.5px] border-gray-300'
                 }`}
               >
                 {done && <Check size={9} strokeWidth={3.5} />}
@@ -413,12 +413,12 @@ const DashboardMock = () => {
       {/* App header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
         <div className="flex items-center gap-2.5">
-          <div className="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm shadow-blue-600/30">
+          <div className="w-6 h-6 rounded-lg bg-accent flex items-center justify-center shadow-sm shadow-blue-600/30">
             <span className="text-white text-[10px] font-black">J</span>
           </div>
           <span className="text-gray-900 text-sm font-semibold">{t('tripsOverview.title')}</span>
         </div>
-        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-white bg-blue-600 rounded-full px-3 py-1.5 shadow-sm shadow-blue-600/30">
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-white bg-accent rounded-full px-3 py-1.5 shadow-sm shadow-blue-600/30">
           <Plus size={12} strokeWidth={3} />
           <span className="hidden sm:inline">{t('tripsOverview.actions.newTrip')}</span>
         </div>
@@ -430,7 +430,7 @@ const DashboardMock = () => {
           {sideIcons.map((Icon, i) => (
             <div
               key={i}
-              className={`p-2.5 rounded-xl ${i === 0 ? 'bg-blue-600 text-white shadow-md shadow-blue-600/25' : 'text-gray-400'}`}
+              className={`p-2.5 rounded-xl ${i === 0 ? 'bg-accent text-white shadow-md shadow-blue-600/25' : 'text-gray-400'}`}
             >
               <Icon size={15} strokeWidth={2.25} />
             </div>
@@ -673,7 +673,7 @@ const MapVignette = () => {
   // Stylizovaná mini-mapa: jemná uliční mřížka, přerušovaná trasa a tři
   // špendlíky v barvách kategorií — evokuje mapu míst, ne reálný Leaflet.
   const pins = [
-    { c: 'bg-blue-600', left: '15%', top: '78%' },
+    { c: 'bg-accent', left: '15%', top: '78%' },
     { c: 'bg-emerald-500', left: '47%', top: '47%' },
     { c: 'bg-amber-500', left: '78%', top: '25%' },
   ];
@@ -751,7 +751,7 @@ const ChangelogSection = () => {
           <Reveal>
             <article className="rounded-[2rem] border border-gray-200/70 bg-white/70 backdrop-blur-sm p-7 sm:p-9">
               <div className="flex items-center gap-2.5 flex-wrap mb-4">
-                <span className="text-[12px] font-bold tracking-wide px-2.5 py-1 rounded-lg bg-blue-600 text-white shadow-sm shadow-blue-600/25">
+                <span className="text-[12px] font-bold tracking-wide px-2.5 py-1 rounded-lg bg-accent text-white shadow-sm shadow-blue-600/25">
                   v{latest.version}
                 </span>
                 <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md bg-emerald-50 text-emerald-600">
@@ -962,7 +962,7 @@ const LandingPage = () => {
               onClick={scrollToId('changelog')}
               className="inline-flex items-center gap-2 rounded-full bg-blue-50 border border-blue-100 pl-1.5 pr-3 py-1.5 text-[13px] font-semibold text-blue-700 hover:bg-blue-100 transition-colors max-w-full"
             >
-              <span className="shrink-0 rounded-full bg-blue-600 text-white text-[10px] font-bold uppercase tracking-wide px-2 py-0.5">
+              <span className="shrink-0 rounded-full bg-accent text-white text-[10px] font-bold uppercase tracking-wide px-2 py-0.5">
                 {t('landing.hero.newBadge')} v{latestRelease.version}
               </span>
               <span className="truncate">{t(`changelog.releases.${latestRelease.key}.title`)}</span>
@@ -1145,7 +1145,7 @@ const LandingPage = () => {
           <Doodle name="arrow" className="left-[3%] top-16 w-[80px]" />
           <Doodle name="plane" className="right-[5%] top-10 w-[86px] rotate-[8deg]" delay={0.15} />
           <Reveal className="max-w-5xl mx-auto">
-            <div className="relative overflow-hidden rounded-[2.5rem] bg-blue-600 px-6 py-16 sm:p-20 text-center shadow-[0_32px_80px_-32px_rgba(37,99,235,0.55)]">
+            <div className="relative overflow-hidden rounded-[2.5rem] bg-accent px-6 py-16 sm:p-20 text-center shadow-[0_32px_80px_-32px_rgba(37,99,235,0.55)]">
               <div
                 className="absolute -top-32 left-1/2 -translate-x-1/2 w-[560px] h-[560px] rounded-full bg-blue-400/30 blur-[100px] pointer-events-none"
                 aria-hidden="true"

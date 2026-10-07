@@ -22,10 +22,10 @@ import UserAvatar from '../ui/UserAvatar';
 import { formatCurrency } from '../../utils/currency';
 
 const CATEGORIES = [
-  { id: 'transport',      icon: Car,          colorClass: 'bg-blue-500',    lightBgClass: 'bg-blue-50 dark:bg-blue-500/10',     textClass: 'text-blue-600 dark:text-blue-400' },
+  { id: 'transport',      icon: Car,          colorClass: 'bg-blue-500',    lightBgClass: 'bg-active',     textClass: 'text-accent' },
   { id: 'accommodation',  icon: Home,         colorClass: 'bg-purple-500',  lightBgClass: 'bg-purple-50 dark:bg-purple-500/10', textClass: 'text-purple-600 dark:text-purple-400' },
   { id: 'food',           icon: Utensils,     colorClass: 'bg-orange-500',  lightBgClass: 'bg-orange-50 dark:bg-orange-500/10', textClass: 'text-orange-600 dark:text-orange-400' },
-  { id: 'activities',     icon: Palmtree,     colorClass: 'bg-emerald-500', lightBgClass: 'bg-emerald-50 dark:bg-emerald-500/10', textClass: 'text-emerald-600 dark:text-emerald-400' },
+  { id: 'activities',     icon: Palmtree,     colorClass: 'bg-emerald-500', lightBgClass: 'bg-emerald-50 dark:bg-emerald-500/10', textClass: 'text-success' },
   { id: 'other',          icon: MoreHorizontal, colorClass: 'bg-gray-500', lightBgClass: 'bg-gray-100 dark:bg-gray-500/10',    textClass: 'text-gray-600 dark:text-gray-400' },
 ];
 
@@ -128,21 +128,21 @@ const SettleUpModal = ({ isOpen, onClose, creditor, amount, currency, locale, tr
             animate={{ opacity: 1, y: 0 }}
             exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: '100%' }}
             transition={shouldReduceMotion ? { duration: 0.2 } : { ease: [0.22, 1, 0.36, 1], duration: 0.35 }}
-            className="relative w-full max-w-md bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-t-[2rem] sm:rounded-[2rem] p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8 shadow-2xl z-10 max-h-[85dvh] overflow-y-auto overscroll-contain"
+            className="relative w-full max-w-md bg-page border border-subtle rounded-t-[2rem] sm:rounded-[2rem] p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8 shadow-2xl z-10 max-h-[85dvh] overflow-y-auto overscroll-contain"
           >
-            <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-200 dark:border-white/10">
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-default">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 bg-emerald-50 dark:bg-emerald-500/10 text-success rounded-xl flex items-center justify-center shrink-0">
                   <HandCoins size={17} strokeWidth={2} />
                 </div>
-                <h3 id="settle-title" className="font-bold text-xl sm:text-2xl tracking-tight text-gray-900 dark:text-white truncate">
+                <h3 id="settle-title" className="font-bold text-xl sm:text-2xl tracking-tight text-primary truncate">
                   {t('budget.settle.title')}
                 </h3>
               </div>
               <button
                 onClick={onClose}
                 aria-label={t('budget.addModal.close')}
-                className="w-10 h-10 sm:w-9 sm:h-9 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer shrink-0"
+                className="w-10 h-10 sm:w-9 sm:h-9 bg-subtle rounded-full flex items-center justify-center text-muted hover:text-primary transition-colors cursor-pointer shrink-0"
               >
                 <X size={18} strokeWidth={2.5} aria-hidden="true" />
               </button>
@@ -158,16 +158,16 @@ const SettleUpModal = ({ isOpen, onClose, creditor, amount, currency, locale, tr
 
             {/* Send money to */}
             {bankAccount ? (
-              <div className="rounded-2xl bg-gray-50 dark:bg-white/[0.04] border border-gray-100 dark:border-white/10 p-4 mb-7">
-                <p className="text-[13px] font-semibold text-gray-500 dark:text-gray-400 mb-2">{t('budget.settle.sendMoneyTo')}</p>
+              <div className="rounded-2xl bg-gray-50 dark:bg-white/[0.04] border border-subtle p-4 mb-7">
+                <p className="text-[13px] font-semibold text-muted mb-2">{t('budget.settle.sendMoneyTo')}</p>
                 <div className="flex items-center gap-3">
-                  <span className="flex-1 font-mono text-[15px] sm:text-[16px] font-semibold text-gray-900 dark:text-white tracking-tight break-all select-all">
+                  <span className="flex-1 font-mono text-[15px] sm:text-[16px] font-semibold text-primary tracking-tight break-all select-all">
                     {bankAccount}
                   </span>
                   <button
                     onClick={handleCopy}
                     aria-label={t('budget.settle.copyAccount')}
-                    className="shrink-0 w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-500 dark:text-white/70 hover:text-gray-900 dark:hover:text-white transition-all cursor-pointer"
+                    className="shrink-0 w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center rounded-xl bg-subtle hover:bg-gray-200 dark:hover:bg-white/20 text-gray-500 dark:text-white/70 hover:text-primary transition-all cursor-pointer"
                   >
                     {copied ? <Check size={15} strokeWidth={2.5} className="text-emerald-500 dark:text-emerald-400" /> : <Copy size={15} strokeWidth={2} />}
                   </button>
@@ -216,24 +216,24 @@ const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSha
     <div className={embedded ? 'pt-10' : 'glass-card p-6 sm:p-8'}>
       {embedded ? (
         <div>
-          <h3 className="text-[18px] font-bold tracking-tight text-gray-900 dark:text-white">{t('budget.balances.title')}</h3>
-          <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium mt-0.5">{t('budget.balances.subtitle')}</p>
+          <h3 className="text-[18px] font-bold tracking-tight text-primary">{t('budget.balances.title')}</h3>
+          <p className="text-[13px] text-muted font-medium mt-0.5">{t('budget.balances.subtitle')}</p>
         </div>
       ) : (
       <div className="flex items-center gap-3 mb-1.5">
-        <div className="w-9 h-9 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 bg-emerald-50 dark:bg-emerald-500/10 text-success rounded-xl flex items-center justify-center shrink-0">
           <Scale size={16} strokeWidth={2} />
         </div>
         <div>
-          <h3 className="font-bold text-gray-900 dark:text-white text-[15px] sm:text-lg leading-tight">{t('budget.balances.title')}</h3>
-          <p className="text-[11px] sm:text-[12px] text-gray-500 dark:text-gray-400 font-medium">{t('budget.balances.subtitle')}</p>
+          <h3 className="font-bold text-primary text-[15px] sm:text-lg leading-tight">{t('budget.balances.title')}</h3>
+          <p className="text-[11px] sm:text-[12px] text-muted font-medium">{t('budget.balances.subtitle')}</p>
         </div>
       </div>
       )}
 
       {!hasSharedExpenses ? (
         <div className="mt-5 flex flex-col items-center justify-center text-center py-6">
-          <p className="text-[14px] font-semibold text-gray-500 dark:text-gray-400">{t('budget.balances.empty')}</p>
+          <p className="text-[14px] font-semibold text-muted">{t('budget.balances.empty')}</p>
         </div>
       ) : (
         <>
@@ -253,8 +253,8 @@ const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSha
               const amountClass = settled
                 ? 'text-gray-400 dark:text-gray-500'
                 : positive
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-red-500 dark:text-red-400';
+                  ? 'text-success'
+                  : 'text-danger';
               return (
                 <div
                   key={b.userId}
@@ -264,10 +264,10 @@ const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSha
                 >
                   <UserAvatar user={toAvatarUser(m)} size="sm" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-[13px] font-bold text-gray-900 dark:text-white truncate leading-tight">
+                    <p className="text-[13px] font-bold text-primary truncate leading-tight">
                       {isMe ? t('budget.balances.you') : getMemberName(m)}
                     </p>
-                    <p className="text-[12px] font-medium text-gray-500 dark:text-gray-400 leading-tight mt-0.5">{label}</p>
+                    <p className="text-[12px] font-medium text-muted leading-tight mt-0.5">{label}</p>
                   </div>
                   <span className={`font-bold text-[14px] tracking-tight tabular-nums shrink-0 ${amountClass}`}>
                     {settled ? '—' : formatCurrency(Math.abs(net), currency, locale)}
@@ -280,12 +280,12 @@ const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSha
           {/* Suggested settlements — or an "all settled" confirmation */}
           {settlements.length === 0 ? (
             <div className="mt-5 flex items-center justify-center gap-2.5 py-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/60 dark:border-emerald-500/20">
-              <CheckCircle2 size={18} strokeWidth={2.5} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <CheckCircle2 size={18} strokeWidth={2.5} className="text-success shrink-0" />
               <span className="text-[14px] font-bold text-emerald-700 dark:text-emerald-300">{t('budget.balances.allSettled')}</span>
             </div>
           ) : (
             <div className="mt-6">
-              <p className="text-[13px] font-semibold text-gray-500 dark:text-gray-400 mb-3">{t('budget.balances.toSettle')}</p>
+              <p className="text-[13px] font-semibold text-muted mb-3">{t('budget.balances.toSettle')}</p>
               <div className={embedded ? '' : 'space-y-2'}>
                 {settlements.map((s, i) => {
                   const from = memberById(s.from);
@@ -301,19 +301,19 @@ const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSha
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <UserAvatar user={toAvatarUser(from)} size="sm" />
-                        <span className={`text-[13px] font-semibold truncate ${fromMe ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'}`}>
+                        <span className={`text-[13px] font-semibold truncate ${fromMe ? 'text-primary' : 'text-secondary'}`}>
                           {fromMe ? t('budget.balances.you') : getMemberName(from)}
                         </span>
                       </div>
                       <ArrowRight size={15} strokeWidth={2.5} className="text-gray-300 dark:text-gray-600 shrink-0" />
                       <div className="flex items-center gap-2 min-w-0">
                         <UserAvatar user={toAvatarUser(to)} size="sm" />
-                        <span className={`text-[13px] font-semibold truncate ${toMe ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'}`}>
+                        <span className={`text-[13px] font-semibold truncate ${toMe ? 'text-primary' : 'text-secondary'}`}>
                           {toMe ? t('budget.balances.you') : getMemberName(to)}
                         </span>
                       </div>
                       <div className="ml-auto flex items-center gap-2 shrink-0">
-                        <span className="font-bold text-[14px] tracking-tight tabular-nums text-gray-900 dark:text-white">
+                        <span className="font-bold text-[14px] tracking-tight tabular-nums text-primary">
                           {formatCurrency(s.amount, currency, locale)}
                         </span>
                         {fromMe && (
@@ -369,11 +369,11 @@ const ExpenseRow = ({ expense, compact = false, flush = false, currency, locale,
           <Icon size={14} strokeWidth={2.5} />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[12px] font-medium text-gray-500 dark:text-gray-400 mb-0.5 leading-none">{t('budget.categories.' + expense.category)}</p>
-          <p className={`text-[14px] font-semibold text-gray-900 dark:text-white leading-tight ${flush ? 'line-clamp-2 break-words' : 'truncate'}`}>{expense.description}</p>
+          <p className="text-[12px] font-medium text-muted mb-0.5 leading-none">{t('budget.categories.' + expense.category)}</p>
+          <p className={`text-[14px] font-semibold text-primary leading-tight ${flush ? 'line-clamp-2 break-words' : 'truncate'}`}>{expense.description}</p>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
-          <p className="font-bold text-[15px] tracking-tight tabular-nums text-gray-900 dark:text-white">
+          <p className="font-bold text-[15px] tracking-tight tabular-nums text-primary">
             {formatCurrency(expense.amount, currency, locale)}
           </p>
           {!isViewer && (
@@ -381,14 +381,14 @@ const ExpenseRow = ({ expense, compact = false, flush = false, currency, locale,
               <button
                 onClick={() => onEdit(expense)}
                 aria-label={t('budget.expenseEdit')}
-                className={`${flush ? 'hidden md:flex' : 'flex'} w-10 h-10 md:w-7 md:h-7 items-center justify-center text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-blue-50 dark:hover:bg-blue-500/10 cursor-pointer`}
+                className={`${flush ? 'hidden md:flex' : 'flex'} w-10 h-10 md:w-7 md:h-7 items-center justify-center text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-active cursor-pointer`}
               >
                 <Pencil size={13} strokeWidth={2.5} />
               </button>
               <button
                 onClick={() => onDelete(expense.id)}
                 aria-label={t('budget.expenseDelete')}
-                className="w-10 h-10 md:w-7 md:h-7 flex items-center justify-center text-gray-400 hover:text-red-500 dark:text-gray-500 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 cursor-pointer"
+                className="w-10 h-10 md:w-7 md:h-7 flex items-center justify-center text-gray-400 hover:text-danger dark:text-gray-500 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 cursor-pointer"
               >
                 <Trash2 size={13} strokeWidth={2.5} />
               </button>
@@ -411,9 +411,9 @@ const ExpenseRow = ({ expense, compact = false, flush = false, currency, locale,
         </div>
         <div className="min-w-0">
           <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1.5 leading-none">{t('budget.categories.' + expense.category)}</p>
-          <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white truncate tracking-tight leading-tight mb-1.5">{expense.description}</p>
+          <p className="text-lg sm:text-xl font-bold text-primary truncate tracking-tight leading-tight mb-1.5">{expense.description}</p>
           {expense.date && (
-            <div className="flex items-center gap-1.5 text-[12px] font-medium text-gray-500 dark:text-gray-400">
+            <div className="flex items-center gap-1.5 text-[12px] font-medium text-muted">
               <Calendar size={13} strokeWidth={2} />
               {format(parseISO(expense.date), 'd. MMMM yyyy', { locale: dateLocale })}
             </div>
@@ -421,20 +421,20 @@ const ExpenseRow = ({ expense, compact = false, flush = false, currency, locale,
         </div>
       </div>
       <div className="flex items-center sm:items-end justify-between sm:flex-col shrink-0 gap-2 border-t sm:border-t-0 border-gray-100 dark:border-white/5 pt-4 sm:pt-0">
-        <span className="font-bold text-2xl tracking-tight tabular-nums text-gray-900 dark:text-white">{formatCurrency(expense.amount, currency, locale)}</span>
+        <span className="font-bold text-2xl tracking-tight tabular-nums text-primary">{formatCurrency(expense.amount, currency, locale)}</span>
         {!isViewer && (
           <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => onEdit(expense)}
               aria-label={t('budget.expenseEdit')}
-              className="flex items-center gap-1.5 text-[12px] sm:text-[11px] font-medium text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all px-3.5 py-2.5 sm:px-0 sm:py-0 rounded-full sm:rounded-none bg-gray-100/70 dark:bg-white/[0.06] sm:bg-transparent dark:sm:bg-transparent cursor-pointer"
+              className="flex items-center gap-1.5 text-[12px] sm:text-[11px] font-medium text-muted hover:text-blue-500 dark:hover:text-blue-400 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all px-3.5 py-2.5 sm:px-0 sm:py-0 rounded-full sm:rounded-none bg-gray-100/70 dark:bg-white/[0.06] sm:bg-transparent dark:sm:bg-transparent cursor-pointer"
             >
               <Pencil size={13} strokeWidth={2} aria-hidden="true" />
               <span className="sm:hidden">{t('budget.expenseEdit')}</span>
             </button>
             <button
               onClick={() => onDelete(expense.id)}
-              className="flex items-center gap-1.5 text-[12px] sm:text-[11px] font-medium text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all px-3.5 py-2.5 sm:px-0 sm:py-0 rounded-full sm:rounded-none bg-gray-100/70 dark:bg-white/[0.06] sm:bg-transparent dark:sm:bg-transparent cursor-pointer"
+              className="flex items-center gap-1.5 text-[12px] sm:text-[11px] font-medium text-muted hover:text-danger opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all px-3.5 py-2.5 sm:px-0 sm:py-0 rounded-full sm:rounded-none bg-gray-100/70 dark:bg-white/[0.06] sm:bg-transparent dark:sm:bg-transparent cursor-pointer"
             >
               <Trash2 size={13} strokeWidth={2} aria-hidden="true" /> {t('budget.expenseDelete')}
             </button>
@@ -486,17 +486,17 @@ const CategoryBar = ({ expenses, currency, locale, onCategoryClick, activeCatego
               className={`flex items-center justify-between p-3 rounded-xl text-left transition-all cursor-pointer ${
                 isActive
                   ? `${c.lightBgClass} ring-1 ring-current ${c.textClass}`
-                  : 'hover:bg-gray-50 dark:hover:bg-white/5'
+                  : 'hover:bg-field'
               }`}
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className={`w-2.5 h-2.5 ${c.colorClass} rounded-full shrink-0`} />
-                <span className="text-[12px] text-gray-500 dark:text-gray-400 font-medium truncate">
+                <span className="text-[12px] text-muted font-medium truncate">
                   {t('budget.categories.' + c.id)}
                 </span>
               </div>
               <div className="text-right shrink-0 ml-2">
-                <p className="font-bold text-[13px] tracking-tight tabular-nums text-gray-900 dark:text-white">
+                <p className="font-bold text-[13px] tracking-tight tabular-nums text-primary">
                   {formatCurrency(c.amount, currency, locale)}
                 </p>
                 <p className="text-[10px] text-gray-400 dark:text-gray-500">{c.percent.toFixed(0)}%</p>
@@ -689,16 +689,16 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
             animate={{ opacity: 1, y: 0 }}
             exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: '100%' }}
             transition={shouldReduceMotion ? { duration: 0.2 } : { ease: [0.22, 1, 0.36, 1], duration: 0.35 }}
-            className="relative w-full max-w-lg bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-t-[2rem] sm:rounded-[2rem] p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8 shadow-2xl max-h-[85dvh] overflow-y-auto overscroll-contain sm:max-h-none sm:overflow-visible z-10"
+            className="relative w-full max-w-lg bg-page border border-subtle rounded-t-[2rem] sm:rounded-[2rem] p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8 shadow-2xl max-h-[85dvh] overflow-y-auto overscroll-contain sm:max-h-none sm:overflow-visible z-10"
           >
-            <div className="flex justify-between items-center mb-5 sm:mb-6 pb-4 sm:pb-5 border-b border-gray-200 dark:border-white/10">
-              <h3 id="add-expense-title" className="font-bold text-2xl sm:text-3xl tracking-tight text-gray-900 dark:text-white">
+            <div className="flex justify-between items-center mb-5 sm:mb-6 pb-4 sm:pb-5 border-b border-default">
+              <h3 id="add-expense-title" className="font-bold text-2xl sm:text-3xl tracking-tight text-primary">
                 {isEditing ? t('budget.addModal.editTitle') : t('budget.addModal.title')}
               </h3>
               <button
                 onClick={onClose}
                 aria-label={t('budget.addModal.close')}
-                className="w-10 h-10 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
+                className="w-10 h-10 bg-subtle rounded-full flex items-center justify-center text-muted hover:text-primary transition-colors cursor-pointer"
               >
                 <X size={20} strokeWidth={2.5} aria-hidden="true" />
               </button>
@@ -707,7 +707,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-4">
                 <div>
-                  <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-2 block">{t('budget.addModal.descriptionLabel')}</label>
+                  <label className="text-[11px] font-medium text-muted mb-2 block">{t('budget.addModal.descriptionLabel')}</label>
                   <input
                     type="text"
                     required
@@ -723,7 +723,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
                 </div>
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-2 block">{t('budget.addModal.amountLabel')} ({currency})</label>
+                    <label className="text-[11px] font-medium text-muted mb-2 block">{t('budget.addModal.amountLabel')} ({currency})</label>
                     <input
                       type="number"
                       required
@@ -736,7 +736,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
                     />
                   </div>
                   <div>
-                    <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-2 block">{t('budget.addModal.categoryLabel')}</label>
+                    <label className="text-[11px] font-medium text-muted mb-2 block">{t('budget.addModal.categoryLabel')}</label>
                     <div className="relative">
                       <select
                         value={form.category}
@@ -744,7 +744,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
                         className="glass-input appearance-none cursor-pointer pr-10"
                       >
                         {CATEGORIES.map(c => (
-                          <option key={c.id} value={c.id} className="text-gray-900 dark:bg-[#1C1C1E] dark:text-white">
+                          <option key={c.id} value={c.id} className="text-primary dark:bg-[#1C1C1E]">
                             {t('budget.categories.' + c.id)}
                           </option>
                         ))}
@@ -754,7 +754,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
                   </div>
                 </div>
                 <div className="relative">
-                  <label className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-2 block">{t('budget.addModal.dateLabel')}</label>
+                  <label className="text-[11px] font-medium text-muted mb-2 block">{t('budget.addModal.dateLabel')}</label>
                   <button
                     type="button"
                     onClick={() => setShowCalendar(!showCalendar)}
@@ -776,7 +776,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
                         }}
                         locale={dateLocale}
                         modifiers={modifiers}
-                        modifiersClassNames={{ trip: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold border border-blue-500/20' }}
+                        modifiersClassNames={{ trip: 'bg-blue-500/10 text-accent font-bold border border-blue-500/20' }}
                         className="premium-calendar"
                       />
                     </div>
@@ -786,13 +786,13 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
 
               {/* ── Splitting section (shared trips only) ── */}
               {canSplit && (
-                <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-white/10">
+                <div className="space-y-3 pt-4 border-t border-default">
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-7 h-7 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-lg flex items-center justify-center shrink-0">
+                      <div className="w-7 h-7 bg-emerald-50 dark:bg-emerald-500/10 text-success rounded-lg flex items-center justify-center shrink-0">
                         <Split size={14} strokeWidth={2} />
                       </div>
-                      <span className="text-[14px] font-bold text-gray-900 dark:text-white">{t('budget.addModal.splitLabel')}</span>
+                      <span className="text-[14px] font-bold text-primary">{t('budget.addModal.splitLabel')}</span>
                     </div>
                     {/* Toggle: ON = split among members · OFF = personal expense */}
                     <button
@@ -817,15 +817,15 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
                     <>
                       {/* Who paid — inline label + select */}
                       <div className="flex items-center gap-3">
-                        <label className="text-[12px] font-medium text-gray-500 dark:text-gray-400 shrink-0">{t('budget.addModal.paidByLabel')}</label>
+                        <label className="text-[12px] font-medium text-muted shrink-0">{t('budget.addModal.paidByLabel')}</label>
                         <div className="relative flex-1 min-w-0">
                           <select
                             value={form.paidBy ?? ''}
                             onChange={(e) => setForm({ ...form, paidBy: parseInt(e.target.value) })}
-                            className="w-full appearance-none cursor-pointer pl-3 pr-9 py-2.5 bg-gray-100/60 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-base sm:text-[13px] font-semibold text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:bg-[#1C1C1E]"
+                            className="w-full appearance-none cursor-pointer pl-3 pr-9 py-2.5 bg-gray-100/60 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-base sm:text-[13px] font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:bg-[#1C1C1E]"
                           >
                             {members.map((m) => (
-                              <option key={m.id} value={m.id} className="text-gray-900 dark:bg-[#1C1C1E] dark:text-white">
+                              <option key={m.id} value={m.id} className="text-primary dark:bg-[#1C1C1E]">
                                 {memberLabel(m, currentUserId, t)}
                               </option>
                             ))}
@@ -846,8 +846,8 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
                             onClick={() => setForm({ ...form, splitMode: opt.id })}
                             className={`flex-1 py-2.5 sm:py-1.5 rounded-md text-[13px] sm:text-[12px] font-bold transition-all cursor-pointer ${
                               form.splitMode === opt.id
-                                ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white shadow-sm'
-                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                                ? 'bg-white dark:bg-white/10 text-primary shadow-sm'
+                                : 'text-muted hover:text-gray-700 dark:hover:text-gray-200'
                             }`}
                           >
                             {opt.label}
@@ -876,19 +876,19 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
                                 <span
                                   aria-hidden="true"
                                   className={`w-[18px] h-[18px] rounded-md flex items-center justify-center shrink-0 transition-colors ${
-                                    checked ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-white/10'
+                                    checked ? 'bg-accent text-white' : 'bg-gray-200 dark:bg-white/10'
                                   }`}
                                 >
                                   {checked && <Check size={12} strokeWidth={3} />}
                                 </span>
                                 <UserAvatar user={toAvatarUser(m)} size="sm" />
-                                <span className="text-[13px] font-semibold text-gray-900 dark:text-white truncate flex-1 min-w-0">
+                                <span className="text-[13px] font-semibold text-primary truncate flex-1 min-w-0">
                                   {memberLabel(m, currentUserId, t)}
                                 </span>
                               </button>
                               {checked && (
                                 form.splitMode === 'equal' ? (
-                                  <span className="text-[13px] font-bold text-gray-500 dark:text-gray-400 tabular-nums shrink-0">
+                                  <span className="text-[13px] font-bold text-muted tabular-nums shrink-0">
                                     {formatCurrency(equalShareFor(m.id), currency, i18n.language)}
                                   </span>
                                 ) : (
@@ -899,7 +899,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
                                     placeholder="0.00"
                                     value={form.customAmounts[m.id] ?? ''}
                                     onChange={(e) => setForm((f) => ({ ...f, customAmounts: { ...f.customAmounts, [m.id]: e.target.value } }))}
-                                    className="w-24 px-3 py-2 sm:py-1.5 bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-lg text-base sm:text-[13px] font-semibold text-right text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 tabular-nums shrink-0"
+                                    className="w-24 px-3 py-2 sm:py-1.5 bg-white dark:bg-white/5 border border-default rounded-lg text-base sm:text-[13px] font-semibold text-right text-primary focus:outline-none focus:ring-2 focus:ring-blue-500/50 tabular-nums shrink-0"
                                   />
                                 )
                               )}
@@ -911,7 +911,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
                       {/* Custom-mode running total vs target */}
                       {form.splitMode === 'custom' && amountNum > 0 && (
                         <div className={`flex items-center justify-between text-[12px] font-semibold px-1 ${
-                          Math.abs(customSum - amountNum) > 0.01 ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'
+                          Math.abs(customSum - amountNum) > 0.01 ? 'text-danger' : 'text-success'
                         }`}>
                           <span>{formatCurrency(customSum, currency, i18n.language)} / {formatCurrency(amountNum, currency, i18n.language)}</span>
                           {Math.abs(customSum - amountNum) <= 0.01 && <Check size={14} strokeWidth={2.5} />}
@@ -924,7 +924,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
 
               <button
                 type="submit"
-                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors duration-300 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer"
+                className="w-full py-4 bg-accent text-white rounded-2xl font-bold hover:bg-accent-hover transition-colors duration-300 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer"
               >
                 {isEditing ? t('budget.addModal.editSubmit') : t('budget.addModal.submit')}
               </button>
@@ -1115,8 +1115,8 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
     const n = differenceInDays(parseISO(dateStr), parseISO(trip.startDate)) + 1;
     return n >= 1 && n <= tripDays ? n : null;
   };
-  const sectionTitle = 'text-[18px] font-bold tracking-tight text-gray-900 dark:text-white';
-  const ledgerControl = 'h-10 bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/40 transition-colors font-medium text-base sm:text-[14px] text-gray-900 dark:text-white';
+  const sectionTitle = 'text-[18px] font-bold tracking-tight text-primary';
+  const ledgerControl = 'h-10 bg-field border border-default rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/40 transition-colors font-medium text-base sm:text-[14px] text-primary';
 
   const embeddedSections = (
     <>
@@ -1135,20 +1135,20 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                     aria-pressed={isActive}
                     onClick={() => setCategoryFilter(isActive ? 'all' : c.id)}
                     className={`w-full grid grid-cols-[minmax(0,8.5rem)_1fr_auto] sm:grid-cols-[11rem_1fr_7.5rem_3rem] items-center gap-3 sm:gap-5 py-2.5 px-3 -mx-3 rounded-xl text-left transition-[background-color,opacity] cursor-pointer ${
-                      isActive ? 'bg-gray-100 dark:bg-white/10' : 'hover:bg-gray-50 dark:hover:bg-white/5'
+                      isActive ? 'bg-subtle' : 'hover:bg-field'
                     } ${isDimmed ? 'opacity-45' : ''}`}
                   >
                     <span className="flex items-center gap-2.5 min-w-0 text-[14px] font-medium text-gray-700 dark:text-gray-200">
                       <CatIcon size={16} strokeWidth={2.25} className={`shrink-0 ${c.textClass}`} aria-hidden="true" />
                       <span className="truncate">{t('budget.categories.' + c.id)}</span>
                     </span>
-                    <span className="h-2 rounded-full bg-gray-100 dark:bg-white/10 overflow-hidden" aria-hidden="true">
+                    <span className="h-2 rounded-full bg-subtle overflow-hidden" aria-hidden="true">
                       <span className={`block h-full rounded-full ${c.colorClass}`} style={{ width: `${(c.amount / maxCategory) * 100}%` }} />
                     </span>
-                    <span className="text-right text-[14px] font-semibold tabular-nums text-gray-900 dark:text-white whitespace-nowrap">
+                    <span className="text-right text-[14px] font-semibold tabular-nums text-primary whitespace-nowrap">
                       {formatCurrency(c.amount, currency, i18n.language)}
                     </span>
-                    <span className="hidden sm:block text-right text-[13px] font-medium tabular-nums text-gray-500 dark:text-gray-400">
+                    <span className="hidden sm:block text-right text-[13px] font-medium tabular-nums text-muted">
                       {Math.round((c.amount / total) * 100)} %
                     </span>
                   </button>
@@ -1175,7 +1175,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h3 className={sectionTitle}>
             {t('budget.history')}
-            {filteredExpenses.length > 0 && <span className="ml-2 text-gray-500 dark:text-gray-400 font-medium tabular-nums">· {filteredExpenses.length}</span>}
+            {filteredExpenses.length > 0 && <span className="ml-2 text-muted font-medium tabular-nums">· {filteredExpenses.length}</span>}
           </h3>
           {expenses.length > 0 && (
             <div className="flex gap-2 w-full sm:w-auto">
@@ -1211,7 +1211,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
         {(categoryFilter !== 'all' || searchQuery) && (
           <button
             onClick={() => { setSearchQuery(''); setCategoryFilter('all'); }}
-            className="mt-3 inline-flex items-center gap-1.5 pl-3 pr-2.5 py-1.5 rounded-full bg-gray-100 dark:bg-white/10 text-[13px] font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-white/15 transition-colors cursor-pointer"
+            className="mt-3 inline-flex items-center gap-1.5 pl-3 pr-2.5 py-1.5 rounded-full bg-subtle text-[13px] font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-white/15 transition-colors cursor-pointer"
           >
             {categoryFilter !== 'all' ? t('budget.categories.' + categoryFilter) : `„${searchQuery}“`}
             <X size={14} strokeWidth={2.5} aria-label={t('budget.filter.reset')} />
@@ -1227,12 +1227,12 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                 const dayNo = dayNumberOf(dateKey);
                 return (
                   <div key={dateKey}>
-                    <div className="flex items-baseline justify-between gap-3 pb-2 border-b border-gray-200 dark:border-white/10">
-                      <span className="text-[14px] font-semibold text-gray-900 dark:text-white first-letter:uppercase">
+                    <div className="flex items-baseline justify-between gap-3 pb-2 border-b border-default">
+                      <span className="text-[14px] font-semibold text-primary first-letter:uppercase">
                         {formatGroupDate(dateKey)}
-                        {dayNo && <span className="ml-2 font-medium text-gray-500 dark:text-gray-400">· {t('tripDetail.notebook.dayTitlePlaceholder', { n: dayNo })}</span>}
+                        {dayNo && <span className="ml-2 font-medium text-muted">· {t('tripDetail.notebook.dayTitlePlaceholder', { n: dayNo })}</span>}
                       </span>
-                      <span className="text-[14px] font-semibold tabular-nums text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                      <span className="text-[14px] font-semibold tabular-nums text-soft whitespace-nowrap">
                         {formatCurrency(dayTotal, currency, i18n.language)}
                       </span>
                     </div>
@@ -1244,18 +1244,18 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
               })}
             </div>
           ) : (
-            <div className="mt-4 border-t border-gray-200 dark:border-white/10">
+            <div className="mt-4 border-t border-default">
               {sortedExpenses.map(expense => (
                 <ExpenseRow key={expense.id} expense={expense} compact flush {...rowProps} />
               ))}
             </div>
           )
         ) : expenses.length > 0 ? (
-          <p className="py-10 text-center text-[15px] font-medium text-gray-500 dark:text-gray-400">{t('budget.empty.noResults')}</p>
+          <p className="py-10 text-center text-[15px] font-medium text-muted">{t('budget.empty.noResults')}</p>
         ) : (
           <div className="py-10 text-center">
-            <p className="text-[16px] font-semibold text-gray-900 dark:text-white">{t('budget.empty.noExpenses')}</p>
-            <p className="mt-1 text-[14px] text-gray-500 dark:text-gray-400 max-w-xs mx-auto">{t('budget.empty.noExpensesDesc')}</p>
+            <p className="text-[16px] font-semibold text-primary">{t('budget.empty.noExpenses')}</p>
+            <p className="mt-1 text-[14px] text-muted max-w-xs mx-auto">{t('budget.empty.noExpensesDesc')}</p>
           </div>
         )}
       </section>
@@ -1281,8 +1281,8 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
       {!hideHeader && (
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-8 mb-2">
           <div className="space-y-1">
-            <p className="text-[11px] sm:text-[12px] text-gray-500 dark:text-gray-400 font-medium">{t('budget.subtitle')}</p>
-            <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('budget.title')}</h1>
+            <p className="text-[11px] sm:text-[12px] text-muted font-medium">{t('budget.subtitle')}</p>
+            <h1 className="text-3xl sm:text-4xl text-primary tracking-tight font-bold">{t('budget.title')}</h1>
           </div>
           <div className="flex items-center gap-3">
             {trips.length > 1 && (
@@ -1293,7 +1293,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                   className="glass-input cursor-pointer appearance-none pr-12"
                 >
                   {trips.map(tr => (
-                    <option key={tr.id} value={tr.id} className="text-gray-900 dark:bg-[#1C1C1E] dark:text-white">
+                    <option key={tr.id} value={tr.id} className="text-primary dark:bg-[#1C1C1E]">
                       {tr.title}
                     </option>
                   ))}
@@ -1304,7 +1304,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
             {trip && !isViewer && (
               <button
                 onClick={() => setIsAddModalOpen(true)}
-                className="hidden sm:flex items-center gap-2 px-6 py-3.5 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors shrink-0 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer text-[14px]"
+                className="hidden sm:flex items-center gap-2 px-6 py-3.5 bg-accent text-white rounded-2xl font-bold hover:bg-accent-hover transition-colors shrink-0 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer text-[14px]"
               >
                 <Plus size={18} strokeWidth={2.5} /> {t('budget.addExpense')}
               </button>
@@ -1315,27 +1315,27 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
 
       {trips.length === 0 ? (
         <div className="text-center py-20 glass-card flex flex-col items-center justify-center space-y-4">
-          <p className="font-bold text-2xl text-gray-900 dark:text-white tracking-tight">{t('budget.empty.noTrips')}</p>
-          <p className="text-[15px] font-medium text-gray-500 dark:text-gray-400 max-w-md">{t('budget.empty.noTripsDesc')}</p>
+          <p className="font-bold text-2xl text-primary tracking-tight">{t('budget.empty.noTrips')}</p>
+          <p className="text-[15px] font-medium text-muted max-w-md">{t('budget.empty.noTripsDesc')}</p>
         </div>
       ) : trip ? (
         <>
           {/* ── Shrnutí (vložené do stránky výletu): věta, ne metrikový panel ── */}
           {hideHeader ? (
             <div className="pb-2">
-              <p className="text-[20px] sm:text-[22px] font-medium text-gray-600 dark:text-gray-300 leading-snug">
+              <p className="text-[20px] sm:text-[22px] font-medium text-secondary leading-snug">
                 {t('tripDetail.notebook.spent')}{' '}
-                <span className="font-bold text-gray-900 dark:text-white tabular-nums whitespace-nowrap">{formatCurrency(total, currency, i18n.language)}</span>
+                <span className="font-bold text-primary tabular-nums whitespace-nowrap">{formatCurrency(total, currency, i18n.language)}</span>
                 {budgetTarget && (
                   <> {t('tripDetail.notebook.of')} <span className="tabular-nums whitespace-nowrap">{formatCurrency(budgetTarget, currency, i18n.language)}</span></>
                 )}
               </p>
               {budgetTarget && (
                 <div className="mt-3 max-w-xl">
-                  <div className="h-2 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
+                  <div className="h-2 bg-subtle rounded-full overflow-hidden">
                     <div className={`h-full rounded-full ${progressColor} transition-[width] duration-700 ease-out`} style={{ width: `${progress}%` }} />
                   </div>
-                  <p className={`mt-2 text-[13px] font-medium ${remaining !== null && remaining < 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}`}>
+                  <p className={`mt-2 text-[13px] font-medium ${remaining !== null && remaining < 0 ? 'text-danger' : 'text-gray-600 dark:text-gray-400'}`}>
                     {Math.round(progress)} % · {remaining !== null && remaining >= 0
                       ? t('budget.summary.remainingAmount', { amount: formatCurrency(remaining, currency, i18n.language) })
                       : t('budget.target.over')}
@@ -1344,17 +1344,17 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
               )}
               <dl className="mt-5 flex flex-wrap gap-x-8 gap-y-3 text-[14px]">
                 <div>
-                  <dt className="text-gray-500 dark:text-gray-400">{t('budget.summary.avgPerDay')}</dt>
-                  <dd className="font-semibold text-gray-900 dark:text-white tabular-nums">{avgPerDay > 0 ? formatCurrency(Math.round(avgPerDay), currency, i18n.language) : '—'}</dd>
+                  <dt className="text-muted">{t('budget.summary.avgPerDay')}</dt>
+                  <dd className="font-semibold text-primary tabular-nums">{avgPerDay > 0 ? formatCurrency(Math.round(avgPerDay), currency, i18n.language) : '—'}</dd>
                 </div>
                 <div>
-                  <dt className="text-gray-500 dark:text-gray-400">{t('budget.summary.daysLeft')}</dt>
-                  <dd className="font-semibold text-gray-900 dark:text-white tabular-nums">{daysRemaining}</dd>
+                  <dt className="text-muted">{t('budget.summary.daysLeft')}</dt>
+                  <dd className="font-semibold text-primary tabular-nums">{daysRemaining}</dd>
                 </div>
                 {projectedTotal !== null && budgetTarget && (
                   <div>
-                    <dt className="text-gray-500 dark:text-gray-400">{t('budget.summary.projected')}</dt>
-                    <dd className={`font-semibold tabular-nums ${projectedTotal > budgetTarget ? 'text-red-600 dark:text-red-400' : 'text-emerald-700 dark:text-emerald-400'}`}>{formatCurrency(projectedTotal, currency, i18n.language)}</dd>
+                    <dt className="text-muted">{t('budget.summary.projected')}</dt>
+                    <dd className={`font-semibold tabular-nums ${projectedTotal > budgetTarget ? 'text-danger' : 'text-emerald-700 dark:text-emerald-400'}`}>{formatCurrency(projectedTotal, currency, i18n.language)}</dd>
                   </div>
                 )}
               </dl>
@@ -1372,17 +1372,17 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                       className="flex-1 min-w-0 glass-input py-2.5 text-base sm:text-sm"
                       autoFocus
                     />
-                    <button onClick={handleSaveTarget} aria-label={t('budget.target.save')} className="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-500 transition-colors cursor-pointer shrink-0">
+                    <button onClick={handleSaveTarget} aria-label={t('budget.target.save')} className="w-10 h-10 bg-accent text-white rounded-xl flex items-center justify-center hover:bg-accent-hover transition-colors cursor-pointer shrink-0">
                       <Check size={15} strokeWidth={2.5} />
                     </button>
-                    <button onClick={() => setEditingTarget(false)} aria-label={t('budget.addModal.close')} className="w-10 h-10 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 rounded-xl flex items-center justify-center hover:bg-gray-200 dark:hover:bg-white/20 transition-colors cursor-pointer shrink-0">
+                    <button onClick={() => setEditingTarget(false)} aria-label={t('budget.addModal.close')} className="w-10 h-10 bg-subtle text-gray-600 dark:text-gray-400 rounded-xl flex items-center justify-center hover:bg-gray-200 dark:hover:bg-white/20 transition-colors cursor-pointer shrink-0">
                       <X size={15} strokeWidth={2.5} />
                     </button>
                   </div>
                 ) : (
                   <button
                     onClick={() => { setTargetInput(budgetTarget ? String(budgetTarget) : ''); setEditingTarget(true); }}
-                    className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer mt-4 min-h-[40px] sm:min-h-0"
+                    className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-gray-600 dark:text-gray-400 hover:text-accent transition-colors cursor-pointer mt-4 min-h-[40px] sm:min-h-0"
                   >
                     <Target size={14} strokeWidth={2} />
                     {budgetTarget ? t('budget.target.edit') : t('budget.target.set')}
@@ -1397,7 +1397,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
               {/* Left: total + progress + target */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between mb-3 sm:mb-4 gap-3">
-                  <p className="text-[13px] font-semibold text-gray-500 dark:text-gray-400 mt-0.5">
+                  <p className="text-[13px] font-semibold text-muted mt-0.5">
                     {t('budget.summary.total')}
                   </p>
                   <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
@@ -1408,7 +1408,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0 }}
-                          className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-full shrink-0"
+                          className="flex items-center gap-1.5 text-[11px] font-bold text-success bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-full shrink-0"
                         >
                           <TrendingUp size={11} strokeWidth={2.5} /> {t('budget.pacing.onTrack')}
                         </motion.span>
@@ -1419,7 +1419,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0 }}
-                          className="flex items-center gap-1.5 text-[11px] font-bold text-red-500 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-3 py-1.5 rounded-full shrink-0"
+                          className="flex items-center gap-1.5 text-[11px] font-bold text-danger bg-red-50 dark:bg-red-500/10 px-3 py-1.5 rounded-full shrink-0"
                         >
                           <TrendingDown size={11} strokeWidth={2.5} /> {t('budget.pacing.overPace')}
                         </motion.span>
@@ -1429,7 +1429,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                 </div>
 
                 <div className="flex items-baseline gap-3 mb-4 sm:mb-5 flex-wrap">
-                  <p className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-gray-900 dark:text-white leading-none">
+                  <p className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter text-primary leading-none">
                     {formatCurrency(total, currency, i18n.language)}
                   </p>
                   {budgetTarget && (
@@ -1441,7 +1441,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
 
                 {budgetTarget && (
                   <div className="space-y-2 mb-4 sm:mb-5">
-                    <div className="h-2 bg-gray-100 dark:bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-2 bg-subtle rounded-full overflow-hidden">
                       <motion.div
                         className={`h-full rounded-full ${progressColor}`}
                         initial={shouldReduceMotion ? false : { width: 0 }}
@@ -1453,7 +1453,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                       <span className="text-gray-400 dark:text-gray-500">
                         {Math.round(progress)}% {t('budget.summary.used')}
                       </span>
-                      <span className={remaining !== null && remaining < 0 ? 'text-red-500 font-bold' : 'text-gray-500 dark:text-gray-400'}>
+                      <span className={remaining !== null && remaining < 0 ? 'text-red-500 font-bold' : 'text-muted'}>
                         {remaining !== null && remaining >= 0
                           ? t('budget.summary.remainingAmount', { amount: formatCurrency(remaining, currency, i18n.language) })
                           : t('budget.target.over')
@@ -1480,14 +1480,14 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                       <button
                         onClick={handleSaveTarget}
                         aria-label={t('budget.target.save')}
-                        className="w-10 h-10 sm:w-9 sm:h-9 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-500 transition-colors cursor-pointer shrink-0"
+                        className="w-10 h-10 sm:w-9 sm:h-9 bg-accent text-white rounded-xl flex items-center justify-center hover:bg-accent-hover transition-colors cursor-pointer shrink-0"
                       >
                         <Check size={15} strokeWidth={2.5} />
                       </button>
                       <button
                         onClick={() => setEditingTarget(false)}
                         aria-label={t('budget.addModal.close')}
-                        className="w-10 h-10 sm:w-9 sm:h-9 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 rounded-xl flex items-center justify-center hover:bg-gray-200 dark:hover:bg-white/20 transition-colors cursor-pointer shrink-0"
+                        className="w-10 h-10 sm:w-9 sm:h-9 bg-subtle text-muted rounded-xl flex items-center justify-center hover:bg-gray-200 dark:hover:bg-white/20 transition-colors cursor-pointer shrink-0"
                       >
                         <X size={15} strokeWidth={2.5} />
                       </button>
@@ -1505,12 +1505,12 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
               </div>
 
               {/* Right: stats */}
-              <div className="flex flex-row lg:flex-col gap-6 sm:gap-8 border-t lg:border-t-0 lg:border-l border-gray-100 dark:border-white/10 pt-5 lg:pt-0 lg:pl-10 flex-wrap sm:flex-nowrap lg:shrink-0">
+              <div className="flex flex-row lg:flex-col gap-6 sm:gap-8 border-t lg:border-t-0 lg:border-l border-subtle pt-5 lg:pt-0 lg:pl-10 flex-wrap sm:flex-nowrap lg:shrink-0">
                 <div>
-                  <p className="text-[12px] text-gray-500 dark:text-gray-400 font-medium mb-1">
+                  <p className="text-[12px] text-muted font-medium mb-1">
                     {t('budget.summary.avgPerDay')}
                   </p>
-                  <p className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                  <p className="text-xl sm:text-2xl font-bold tracking-tight text-primary">
                     {avgPerDay > 0 ? formatCurrency(Math.round(avgPerDay), currency, i18n.language) : '—'}
                   </p>
                   <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5">
@@ -1519,20 +1519,20 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                 </div>
 
                 <div>
-                  <p className="text-[12px] text-gray-500 dark:text-gray-400 font-medium mb-1">
+                  <p className="text-[12px] text-muted font-medium mb-1">
                     {t('budget.summary.daysLeft')}
                   </p>
-                  <p className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                  <p className="text-xl sm:text-2xl font-bold tracking-tight text-primary">
                     {daysRemaining}
                   </p>
                 </div>
 
                 {projectedTotal !== null && budgetTarget && (
                   <div>
-                    <p className="text-[12px] text-gray-500 dark:text-gray-400 font-medium mb-1">
+                    <p className="text-[12px] text-muted font-medium mb-1">
                       {t('budget.summary.projected')}
                     </p>
-                    <p className={`text-xl sm:text-2xl font-bold tracking-tight ${projectedTotal > budgetTarget ? 'text-red-500 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                    <p className={`text-xl sm:text-2xl font-bold tracking-tight ${projectedTotal > budgetTarget ? 'text-danger' : 'text-success'}`}>
                       {formatCurrency(projectedTotal, currency, i18n.language)}
                     </p>
                   </div>
@@ -1559,8 +1559,8 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
           {/* ── Category Breakdown ── */}
           {expenses.length > 0 && (
             <div className="glass-card p-6 sm:p-8">
-              <h3 className="font-bold text-gray-900 dark:text-white text-[15px] sm:text-lg mb-5 sm:mb-6 flex items-center gap-3">
-                <div className="w-9 h-9 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center shrink-0">
+              <h3 className="font-bold text-primary text-[15px] sm:text-lg mb-5 sm:mb-6 flex items-center gap-3">
+                <div className="w-9 h-9 bg-active text-accent rounded-xl flex items-center justify-center shrink-0">
                   <TrendingUp size={16} strokeWidth={2} />
                 </div>
                 {t('budget.breakdown')}
@@ -1588,7 +1588,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                     placeholder={t('budget.search.placeholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-base sm:text-[14px] text-gray-900 dark:text-white"
+                    className="w-full pl-9 pr-4 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-base sm:text-[14px] text-primary"
                   />
                 </div>
                 <div className="flex gap-3 w-full sm:w-auto">
@@ -1596,7 +1596,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                     <select
                       value={categoryFilter}
                       onChange={(e) => setCategoryFilter(e.target.value)}
-                      className="w-full sm:w-auto pl-3 pr-9 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-base sm:text-[14px] appearance-none cursor-pointer text-gray-900 dark:text-white dark:bg-[#1C1C1E]"
+                      className="w-full sm:w-auto pl-3 pr-9 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-base sm:text-[14px] appearance-none cursor-pointer text-primary dark:bg-[#1C1C1E]"
                     >
                       <option value="all">{t('budget.categories.all')}</option>
                       {CATEGORIES.map(c => <option key={c.id} value={c.id}>{t('budget.categories.' + c.id)}</option>)}
@@ -1607,7 +1607,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="w-full sm:w-auto pl-3 pr-9 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-base sm:text-[14px] appearance-none cursor-pointer text-gray-900 dark:text-white dark:bg-[#1C1C1E]"
+                      className="w-full sm:w-auto pl-3 pr-9 py-2.5 bg-gray-100/50 dark:bg-white/5 border border-gray-200/50 dark:border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all font-medium text-base sm:text-[14px] appearance-none cursor-pointer text-primary dark:bg-[#1C1C1E]"
                     >
                       <option value="date-desc">{t('budget.sort.dateDesc')}</option>
                       <option value="date-asc">{t('budget.sort.dateAsc')}</option>
@@ -1620,7 +1620,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                     <button
                       onClick={() => { setSearchQuery(''); setCategoryFilter('all'); }}
                       aria-label={t('budget.filter.reset')}
-                      className="flex items-center gap-1 text-[13px] font-bold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl px-3 py-2.5 transition-all shrink-0 cursor-pointer"
+                      className="flex items-center gap-1 text-[13px] font-bold text-muted hover:text-primary hover:bg-subtle rounded-xl px-3 py-2.5 transition-all shrink-0 cursor-pointer"
                     >
                       <X size={14} strokeWidth={2.5} />
                     </button>
@@ -1630,9 +1630,9 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
             )}
 
             <div className="flex items-center justify-between pb-1">
-              <h3 className="text-[12px] font-semibold text-gray-500 dark:text-gray-400">{t('budget.history')}</h3>
+              <h3 className="text-[12px] font-semibold text-muted">{t('budget.history')}</h3>
               {filteredExpenses.length > 0 && (
-                <span className="px-2.5 py-1 bg-gray-100 dark:bg-white/10 rounded-full text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                <span className="px-2.5 py-1 bg-subtle rounded-full text-[11px] font-bold text-muted">
                   {filteredExpenses.length} {t('budget.items')}
                 </span>
               )}
@@ -1648,8 +1648,8 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                     return (
                       <div key={dateKey} className="glass-card overflow-hidden">
                         <div className="flex items-center justify-between px-4 sm:px-5 py-3 border-b border-gray-100/70 dark:border-white/[0.06]">
-                          <span className="text-[13px] font-bold text-gray-900 dark:text-white">{formatGroupDate(dateKey)}</span>
-                          <span className="text-[13px] font-semibold tabular-nums text-gray-600 dark:text-gray-300">
+                          <span className="text-[13px] font-bold text-primary">{formatGroupDate(dateKey)}</span>
+                          <span className="text-[13px] font-semibold tabular-nums text-secondary">
                             {formatCurrency(dayTotal, currency, i18n.language)}
                           </span>
                         </div>
@@ -1672,20 +1672,20 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
               )
             ) : expenses.length > 0 ? (
               <div className="text-center py-10 glass-card">
-                <p className="font-bold text-xl text-gray-900 dark:text-white tracking-tight mb-2">{t('budget.empty.noResults')}</p>
-                <p className="text-[14px] text-gray-500 dark:text-gray-400">{t('budget.empty.noResultsDesc')}</p>
+                <p className="font-bold text-xl text-primary tracking-tight mb-2">{t('budget.empty.noResults')}</p>
+                <p className="text-[14px] text-muted">{t('budget.empty.noResultsDesc')}</p>
               </div>
             ) : (
               <div className="glass-card p-10 sm:p-14 flex flex-col items-center justify-center text-center">
-                <div className="w-14 h-14 bg-blue-50 dark:bg-blue-500/10 rounded-2xl flex items-center justify-center mb-4">
+                <div className="w-14 h-14 bg-active rounded-2xl flex items-center justify-center mb-4">
                   <Wallet className="text-blue-500 dark:text-blue-400" size={26} strokeWidth={1.5} />
                 </div>
-                <p className="font-bold text-xl text-gray-900 dark:text-white tracking-tight mb-2">{t('budget.empty.noExpenses')}</p>
-                <p className="text-[14px] text-gray-500 dark:text-gray-400 max-w-xs mb-6">{t('budget.empty.noExpensesDesc')}</p>
+                <p className="font-bold text-xl text-primary tracking-tight mb-2">{t('budget.empty.noExpenses')}</p>
+                <p className="text-[14px] text-muted max-w-xs mb-6">{t('budget.empty.noExpensesDesc')}</p>
                 {!isViewer && (
                   <button
                     onClick={() => setIsAddModalOpen(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-500 transition-colors shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer text-[14px]"
+                    className="flex items-center gap-2 px-6 py-3 bg-accent text-white rounded-2xl font-bold hover:bg-accent-hover transition-colors shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer text-[14px]"
                   >
                     <Plus size={18} strokeWidth={2.5} /> {t('budget.addExpense')}
                   </button>
@@ -1703,7 +1703,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
         <button
           onClick={() => setIsAddModalOpen(true)}
           aria-label={t('budget.addExpense')}
-          className="sm:hidden fixed bottom-[calc(max(1.25rem,env(safe-area-inset-bottom))+5rem)] right-4 z-[100] w-14 h-14 bg-blue-600 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(37,99,235,0.4)] active:scale-90 transition-transform cursor-pointer"
+          className="sm:hidden fixed bottom-[calc(max(1.25rem,env(safe-area-inset-bottom))+5rem)] right-4 z-[100] w-14 h-14 bg-accent text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(37,99,235,0.4)] active:scale-90 transition-transform cursor-pointer"
         >
           <Plus size={28} strokeWidth={2.5} />
         </button>

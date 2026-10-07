@@ -9,7 +9,10 @@
     "dev:full": "concurrently \"npm run dev\" \"npm run dev:server\" --names \"VITE,API\" --colors \"cyan,magenta\"",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "tokens": "node scripts/build-tokens.mjs",
+    "tokens:check": "node scripts/build-tokens.mjs --check",
+    "lint:design": "node scripts/lint-design.mjs"
   },
   "dependencies": {
     "@maplibre/maplibre-gl-leaflet": "^0.1.4",

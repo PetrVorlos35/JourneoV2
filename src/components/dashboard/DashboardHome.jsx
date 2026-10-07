@@ -147,19 +147,19 @@ const DashboardHome = () => {
           initial={{ opacity: 0, y: -8, scale: 0.95 }}
           animate={{ opacity: ts.visible ? 1 : 0, y: 0, scale: 1 }}
           transition={{ duration: 0.2 }}
-          className="relative w-[340px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl bg-white dark:bg-[#1C1C1E] border border-black/5 dark:border-white/10 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.4)]"
+          className="relative w-[340px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl bg-page border border-black/5 dark:border-white/10 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.4)]"
         >
           <div className="flex items-center gap-3 pl-4 pr-3 py-3.5">
             <div className="w-9 h-9 shrink-0 rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 flex items-center justify-center">
               <Trash2 size={16} strokeWidth={2} aria-hidden="true" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-bold text-gray-900 dark:text-white truncate">{trip.title}</p>
-              <p className="text-[12px] font-medium text-gray-500 dark:text-gray-400">{t('dashboardHome.tripDeleted')}</p>
+              <p className="text-[13px] font-bold text-primary truncate">{trip.title}</p>
+              <p className="text-[12px] font-medium text-muted">{t('dashboardHome.tripDeleted')}</p>
             </div>
             <button
               onClick={() => undoAction.undo()}
-              className="shrink-0 px-3.5 py-1.5 rounded-xl bg-blue-600 text-white text-[13px] font-semibold hover:bg-blue-700 transition-colors cursor-pointer"
+              className="shrink-0 px-3.5 py-1.5 rounded-xl bg-accent text-white text-[13px] font-semibold hover:bg-accent-hover transition-colors cursor-pointer"
             >
               {t('dashboardHome.undo')}
             </button>
