@@ -40,7 +40,7 @@ const TripCard = ({ trip, onDeleteTrip }) => {
         </div>
         <div className="flex items-center gap-2">
           {isOngoing && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-success-wash px-2.5 py-1 text-[11px] font-bold text-success">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
               {t('tripsOverview.hero.inProgress')}
             </span>
@@ -52,7 +52,7 @@ const TripCard = ({ trip, onDeleteTrip }) => {
           )}
           <button
             onClick={handleDelete}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer"
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-danger-wash text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer"
             aria-label={`${t('tripsOverview.delete.title')}: ${trip.title}`}
             title={t('tripsOverview.delete.title')}
           >
@@ -61,7 +61,7 @@ const TripCard = ({ trip, onDeleteTrip }) => {
         </div>
       </div>
 
-      <h3 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900 dark:text-white tracking-tight truncate min-w-0">
+      <h3 className="text-xl sm:text-2xl font-bold mb-2 text-primary tracking-tight truncate min-w-0">
         {trip.title}
       </h3>
 
@@ -72,7 +72,7 @@ const TripCard = ({ trip, onDeleteTrip }) => {
         </span>
       </div>
 
-      <div className="mt-auto flex items-center justify-between pt-5 border-t border-gray-100 dark:border-white/10">
+      <div className="mt-auto flex items-center justify-between pt-5 border-t border-subtle">
         <div className="flex items-center gap-3 text-gray-400 text-[12px] font-medium">
           <span>{t('tripsOverview.activities')} {trip.activities?.length || 0}</span>
           {trip.role === 'owner' && (
@@ -84,7 +84,7 @@ const TripCard = ({ trip, onDeleteTrip }) => {
         </div>
         <Link
           to={`/dashboard/trip/${trip.id}?from=dashboard`}
-          className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors min-h-[44px]"
+          className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent hover:text-blue-500 transition-colors min-h-[44px]"
         >
           {t('tripsOverview.open')}
           <ArrowRight size={14} strokeWidth={2.5} className="transition-transform group-hover:translate-x-1" aria-hidden="true" />

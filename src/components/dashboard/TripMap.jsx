@@ -49,7 +49,7 @@ const TripMap = ({ trip, dayCount = 0, canEdit = true, onExit }) => {
   };
 
   const routeSummary = (
-    <div className="flex items-center gap-2 text-[13px] font-semibold text-gray-500 dark:text-gray-400">
+    <div className="flex items-center gap-2 text-[13px] font-semibold text-muted">
       <Route size={16} strokeWidth={2.5} aria-hidden="true" />
       {route.length > 1
         ? t('map.trip.routeSummary', {
@@ -65,7 +65,7 @@ const TripMap = ({ trip, dayCount = 0, canEdit = true, onExit }) => {
       type="button"
       onClick={handleImport}
       disabled={isImporting}
-      className="min-h-[44px] px-4 rounded-2xl bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 text-[13px] font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2 hover:border-blue-400 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+      className="min-h-[44px] px-4 rounded-2xl bg-white dark:bg-white/5 border border-default text-[13px] font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2 hover:border-blue-400 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
     >
       {isImporting ? (
         <Loader2 size={15} className="animate-spin" aria-hidden="true" />

@@ -203,12 +203,12 @@ const Friends = () => {
       {ModalPortal}
 
       <div className="space-y-2">
-        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('friends.subtitle')}</p>
-        <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold">{t('friends.title')}</h1>
+        <p className="text-sm font-medium text-muted">{t('friends.subtitle')}</p>
+        <h1 className="text-3xl sm:text-4xl text-primary tracking-tight font-bold">{t('friends.title')}</h1>
       </div>
 
       {/* Invite link — compact */}
-      <div className="rounded-2xl border border-gray-100 dark:border-white/10 bg-gray-50/70 dark:bg-white/[0.03] p-3 sm:p-3.5">
+      <div className="rounded-2xl border border-subtle bg-gray-50/70 dark:bg-white/[0.03] p-3 sm:p-3.5">
         <div className="flex items-center gap-2 mb-2.5">
           <LinkIcon size={13} className="shrink-0 text-gray-400 dark:text-white/40" strokeWidth={2.5} />
           <span className="text-[12px] font-semibold text-gray-600 dark:text-white/60">
@@ -219,7 +219,7 @@ const Friends = () => {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex-1 flex items-center bg-white dark:bg-white/[0.04] border border-gray-100 dark:border-white/10 rounded-xl px-3 h-11 min-w-0">
+          <div className="flex-1 flex items-center bg-white dark:bg-white/[0.04] border border-subtle rounded-xl px-3 h-11 min-w-0">
             <span className="flex-1 text-[13px] text-gray-600 dark:text-white/60 truncate select-all">
               {inviteUrlDisplay || '…'}
             </span>
@@ -228,7 +228,7 @@ const Friends = () => {
             onClick={handleCopyInvite}
             disabled={!inviteUrl}
             aria-label={t('friends.invite.copy')}
-            className="shrink-0 flex items-center gap-1.5 h-11 px-3.5 rounded-xl text-[13px] font-semibold bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/15 text-gray-700 dark:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="shrink-0 flex items-center gap-1.5 h-11 px-3.5 rounded-xl text-[13px] font-semibold bg-subtle hover:bg-gray-200 dark:hover:bg-white/15 text-gray-700 dark:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {linkCopied
               ? <><Check size={14} strokeWidth={2.5} className="text-green-500 dark:text-green-400" /><span className="text-green-500 dark:text-green-400 hidden sm:inline">{t('friends.invite.copied')}</span></>
@@ -286,32 +286,32 @@ const Friends = () => {
               ) : (
                 <div className="space-y-2 pt-2">
                   {searchResults.map(user => (
-                    <div key={user.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-100 dark:border-white/5">
+                    <div key={user.id} className="flex items-center gap-4 p-4 bg-field rounded-2xl border border-gray-100 dark:border-white/5">
                       <UserAvatar user={user} size="sm" />
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-[15px] text-gray-900 dark:text-white truncate">
+                        <p className="font-bold text-[15px] text-primary truncate">
                           {user.first_name || user.last_name
                             ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
                             : user.email}
                         </p>
-                        <p className="text-[12px] text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
+                        <p className="text-[12px] text-muted truncate">{user.email}</p>
                       </div>
                       {user.friendshipStatus === 'ACCEPTED' ? (
                         <button disabled className="flex items-center gap-2 px-4 py-3 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 text-[12px] font-bold rounded-xl shrink-0 opacity-70 cursor-not-allowed">
                           <UserCheck size={16} strokeWidth={2.5} /> {t('friends.status.alreadyFriends')}
                         </button>
                       ) : user.friendshipStatus === 'PENDING_SENT' ? (
-                        <button disabled className="flex items-center gap-2 px-4 py-3 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-[12px] font-bold rounded-xl shrink-0 opacity-70 cursor-not-allowed">
+                        <button disabled className="flex items-center gap-2 px-4 py-3 bg-subtle text-muted text-[12px] font-bold rounded-xl shrink-0 opacity-70 cursor-not-allowed">
                           <Clock size={16} strokeWidth={2.5} /> {t('friends.status.requestSent')}
                         </button>
                       ) : user.friendshipStatus === 'PENDING_RECEIVED' ? (
-                        <button disabled className="flex items-center gap-2 px-4 py-3 bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 text-[12px] font-bold rounded-xl shrink-0 opacity-70 cursor-not-allowed">
+                        <button disabled className="flex items-center gap-2 px-4 py-3 bg-subtle text-muted text-[12px] font-bold rounded-xl shrink-0 opacity-70 cursor-not-allowed">
                           <Clock size={16} strokeWidth={2.5} /> {t('friends.status.pendingReceived')}
                         </button>
                       ) : (
                         <button
                           onClick={() => handleSendRequest(user.id)}
-                          className="flex items-center gap-2 px-4 py-3 bg-blue-600 text-white text-[12px] font-bold rounded-xl hover:bg-blue-500 transition-colors shrink-0 cursor-pointer"
+                          className="flex items-center gap-2 px-4 py-3 bg-accent text-white text-[12px] font-bold rounded-xl hover:bg-accent-hover transition-colors shrink-0 cursor-pointer"
                         >
                           <UserPlus size={16} strokeWidth={2.5} /> {t('friends.status.addButton')}
                         </button>
@@ -326,20 +326,20 @@ const Friends = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 dark:border-white/10 gap-8">
+      <div className="flex border-b border-default gap-8">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`pb-4 px-2 text-[15px] font-bold transition-all duration-300 relative cursor-pointer ${
               activeTab === tab.id
-                ? 'text-blue-600 dark:text-blue-400'
-                : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                ? 'text-accent'
+                : 'text-gray-500 hover:text-primary'
             }`}
           >
             {tab.label}
             {tab.count > 0 && (
-              <span className="ml-2 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-white/10 text-[11px] font-bold text-gray-500 dark:text-gray-400">
+              <span className="ml-2 px-2 py-0.5 rounded-full bg-subtle text-[11px] font-bold text-muted">
                 {tab.count}
               </span>
             )}
@@ -379,10 +379,10 @@ const Friends = () => {
                       <UserAvatar user={friend} size="md" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-lg text-gray-900 dark:text-white truncate tracking-tight">
+                      <h3 className="font-bold text-lg text-primary truncate tracking-tight">
                         {displayName}
                       </h3>
-                      <p className="text-[13px] text-gray-500 dark:text-gray-400 truncate font-medium">
+                      <p className="text-[13px] text-muted truncate font-medium">
                         {friend.bio || friend.email}
                       </p>
                     </div>
@@ -392,7 +392,7 @@ const Friends = () => {
                     <UserCheck size={13} strokeWidth={2.5} aria-hidden="true" /> {t('friends.status.friends')}
                   </div>
 
-                  <div className="mt-auto flex items-center justify-between pt-4 border-t border-gray-100 dark:border-white/10">
+                  <div className="mt-auto flex items-center justify-between pt-4 border-t border-subtle">
                     <button
                       onClick={() => handleRemoveFriend(friend.id, friend.first_name || t('friends.defaultName'))}
                       disabled={pendingActions.has(friend.id)}
@@ -405,7 +405,7 @@ const Friends = () => {
                     </button>
                     <Link
                       to={`/dashboard/profile/${friend.id}`}
-                      className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors py-2.5 -my-2.5 pl-2 -ml-2"
+                      className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-accent hover:text-blue-500 transition-colors py-2.5 -my-2.5 pl-2 -ml-2"
                     >
                       {t('friends.status.profile')} <ArrowRight size={15} strokeWidth={2.5} aria-hidden="true" />
                     </Link>
@@ -418,7 +418,7 @@ const Friends = () => {
               <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-2xl flex items-center justify-center text-gray-400 mb-2">
                 <Users size={28} strokeWidth={2} />
               </div>
-              <p className="text-2xl text-gray-900 dark:text-white font-bold tracking-tight">{t('friends.empty.friends.title')}</p>
+              <p className="text-2xl text-primary font-bold tracking-tight">{t('friends.empty.friends.title')}</p>
               <p className="text-[15px] text-gray-500 font-medium max-w-md">{t('friends.empty.friends.description')}</p>
             </div>
           )}
@@ -446,12 +446,12 @@ const Friends = () => {
                     <UserAvatar user={req} size="md" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-[15px] text-gray-900 dark:text-white truncate">
+                    <h3 className="font-bold text-[15px] text-primary truncate">
                       {req.first_name || req.last_name
                         ? `${req.first_name || ''} ${req.last_name || ''}`.trim()
                         : req.email}
                     </h3>
-                    <p className="text-[12px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5 font-medium mt-0.5">
+                    <p className="text-[12px] text-muted flex items-center gap-1.5 font-medium mt-0.5">
                       <Clock size={12} aria-hidden="true" /> {t('friends.status.waitingConfirm')}
                     </p>
                   </div>
@@ -460,7 +460,7 @@ const Friends = () => {
                   <button
                     onClick={() => handleAccept(req.friendshipId)}
                     disabled={pendingActions.has(req.friendshipId)}
-                    className="flex-1 sm:flex-none flex items-center gap-2 px-4 py-3 sm:py-2.5 bg-blue-600 text-white text-[12px] font-bold rounded-xl hover:bg-blue-500 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed sm:min-w-[100px] justify-center"
+                    className="flex-1 sm:flex-none flex items-center gap-2 px-4 py-3 sm:py-2.5 bg-accent text-white text-[12px] font-bold rounded-xl hover:bg-accent-hover transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed sm:min-w-[100px] justify-center"
                   >
                     {pendingActions.has(req.friendshipId) ? (
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -471,7 +471,7 @@ const Friends = () => {
                   <button
                     onClick={() => handleDecline(req.friendshipId)}
                     disabled={pendingActions.has(req.friendshipId)}
-                    className="flex-1 sm:flex-none flex items-center gap-2 px-4 py-3 sm:py-2.5 bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 text-[12px] font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/15 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed sm:min-w-[100px] justify-center"
+                    className="flex-1 sm:flex-none flex items-center gap-2 px-4 py-3 sm:py-2.5 bg-subtle text-gray-600 dark:text-gray-400 text-[12px] font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-white/15 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed sm:min-w-[100px] justify-center"
                   >
                     {pendingActions.has(req.friendshipId) ? (
                       <div className="w-4 h-4 border-2 border-gray-400/30 border-t-gray-600 dark:border-white/30 dark:border-t-white rounded-full animate-spin" />
@@ -487,7 +487,7 @@ const Friends = () => {
               <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-2xl flex items-center justify-center text-gray-400 mb-2">
                 <UserPlus size={28} strokeWidth={2} />
               </div>
-              <p className="text-2xl text-gray-900 dark:text-white font-bold tracking-tight">{t('friends.empty.requests.title')}</p>
+              <p className="text-2xl text-primary font-bold tracking-tight">{t('friends.empty.requests.title')}</p>
               <p className="text-[15px] text-gray-500 font-medium max-w-md">{t('friends.empty.requests.description')}</p>
             </div>
           )}

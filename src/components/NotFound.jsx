@@ -7,7 +7,7 @@ import Navbar from './Navbar';
 const NotFound = () => {
   const { t } = useTranslation();
   return (
-    <div className="relative min-h-[100dvh] w-full flex flex-col items-center justify-center p-4 overflow-hidden bg-[#fbfbfd] dark:bg-black text-[#1d1d1f] dark:text-[#f5f5f7] font-sans">
+    <div className="relative min-h-[100dvh] w-full flex flex-col items-center justify-center p-4 overflow-hidden bg-desk text-[#1d1d1f] dark:text-[#f5f5f7] font-sans">
       <Navbar />
       
       {/* Huge 404 Watermark Background */}
@@ -37,7 +37,7 @@ const NotFound = () => {
           {t('notFound.title')}
         </h1>
 
-        <p className="text-gray-500 dark:text-gray-400 font-medium text-lg leading-relaxed px-4">
+        <p className="text-muted font-medium text-lg leading-relaxed px-4">
           {t('notFound.description')}
         </p>
       </motion.div>

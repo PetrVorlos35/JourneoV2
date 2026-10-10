@@ -26,7 +26,7 @@ const AdminHome = () => {
   return (
     <div className="w-full pb-32 md:pb-12">
       <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
-        <h1 className="text-[32px] sm:text-5xl font-bold tracking-tight leading-[1.1] text-gray-900 dark:text-white">{t('admin.v2.title')}</h1>
+        <h1 className="text-[32px] sm:text-5xl font-bold tracking-tight leading-[1.1] text-primary">{t('admin.v2.title')}</h1>
         <nav aria-label={t('admin.v2.title')} className="flex p-1 rounded-2xl bg-gray-100 dark:bg-white/[0.06] self-start sm:self-auto">
           {tabs.map((tab) => (
             <NavLink
@@ -35,8 +35,8 @@ const AdminHome = () => {
               end={tab.end}
               className={({ isActive }) => `px-4 h-10 inline-flex items-center rounded-xl text-[14px] font-semibold transition-colors ${
                 isActive
-                  ? 'bg-white dark:bg-[#2c2c2e] text-gray-900 dark:text-white shadow-[0_1px_2px_rgba(17,24,39,0.08)]'
-                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                  ? 'bg-white dark:bg-[#2c2c2e] text-primary shadow-[0_1px_2px_rgba(17,24,39,0.08)]'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-primary'
               }`}
             >
               {tab.label}

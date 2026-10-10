@@ -39,7 +39,7 @@ const Navbar = ({ variant = 'dark' }) => {
             to={user ? '/dashboard' : '/auth'}
             className={
               isLight
-                ? 'inline-block text-[13px] font-semibold bg-blue-600 text-white px-5 py-2.5 rounded-full hover:bg-blue-700 active:scale-[0.97] transition-all duration-300 shadow-md shadow-blue-600/25'
+                ? 'inline-block text-[13px] font-semibold bg-accent text-white px-5 py-2.5 rounded-full hover:bg-accent-hover active:scale-[0.97] transition-all duration-300 shadow-md shadow-blue-600/25'
                 : 'inline-block text-[13px] font-medium bg-white text-black px-5 py-2.5 rounded-full hover:scale-105 transition-transform duration-300 shadow-lg'
             }
           >

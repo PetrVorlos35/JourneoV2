@@ -40,13 +40,13 @@ const SidebarItem = ({ icon: Icon, label, path, active, onClick, className, layo
       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors duration-200 relative group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 ${
         active
           ? 'text-blue-700 dark:text-blue-300'
-          : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.06]'
+          : 'text-gray-600 dark:text-gray-400 hover:text-primary hover:bg-gray-100 dark:hover:bg-white/[0.06]'
       } ${className || ''}`}
     >
       {active && (
         <motion.div
           layoutId={shouldReduceMotion ? undefined : layoutId}
-          className="absolute inset-0 bg-blue-50 dark:bg-blue-500/10 rounded-xl"
+          className="absolute inset-0 bg-active rounded-xl"
           transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 350, damping: 30 }}
         />
       )}
@@ -80,8 +80,8 @@ const ThemeToggle = () => {
           onClick={() => setTheme(value)}
           className={`flex-1 flex items-center justify-center p-2.5 rounded-lg transition-all duration-300 ${
             theme === value
-              ? 'bg-white dark:bg-[#2c2c2e] text-blue-600 dark:text-blue-400 shadow-sm'
-              : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
+              ? 'bg-white dark:bg-[#2c2c2e] text-accent shadow-sm'
+              : 'text-gray-400 dark:text-gray-500 hover:text-secondary'
           } cursor-pointer disabled:cursor-not-allowed`}
           aria-label={label}
         >
@@ -99,8 +99,8 @@ const PassportStats = ({ stats, flags = [], t }) => (
     <dl className="grid grid-cols-3 gap-2">
       {['countries', 'trips', 'days'].map((key) => (
         <div key={key} className="min-w-0 flex flex-col">
-          <dt className="order-last mt-1 text-[12px] font-medium leading-tight text-gray-500 dark:text-gray-400 truncate">{t(`dashboardLayout.passport.${key}`)}</dt>
-          <dd className="text-[26px] font-bold leading-none tracking-tight tabular-nums text-gray-900 dark:text-white">{stats[key] ?? '—'}</dd>
+          <dt className="order-last mt-1 text-[12px] font-medium leading-tight text-muted truncate">{t(`dashboardLayout.passport.${key}`)}</dt>
+          <dd className="text-[26px] font-bold leading-none tracking-tight tabular-nums text-primary">{stats[key] ?? '—'}</dd>
         </div>
       ))}
     </dl>
@@ -117,10 +117,10 @@ const PassportIdentity = ({ user, t, trailing }) => (
   <div className="flex items-center gap-3">
     <UserAvatar user={user} size="md" />
     <div className="min-w-0 flex-1">
-      <p className="text-[14px] font-bold truncate text-gray-900 dark:text-white">
+      <p className="text-[14px] font-bold truncate text-primary">
         {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.email}
       </p>
-      <p className="text-[12px] font-medium truncate text-gray-500 dark:text-gray-400">{user?.bio || t('dashboardLayout.traveler')}</p>
+      <p className="text-[12px] font-medium truncate text-muted">{user?.bio || t('dashboardLayout.traveler')}</p>
     </div>
     {trailing}
   </div>
@@ -324,7 +324,7 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
   }, [isAdmin]);
 
   return (
-    <div className="h-[100dvh] overflow-hidden bg-[#fbfbfd] dark:bg-black text-gray-900 dark:text-[#f5f5f7] flex selection:bg-blue-500/30 font-sans relative transition-colors duration-500">
+    <div className="h-[100dvh] overflow-hidden bg-desk text-gray-900 dark:text-[#f5f5f7] flex selection:bg-blue-500/30 font-sans relative transition-colors duration-500">
       {ModalPortal}
       {spotlightMounted && (
         <Suspense fallback={null}>
@@ -382,7 +382,7 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
           <div className="flex items-center gap-2.5 pl-5 pr-3 pt-5 pb-4">
             <img src={isDark ? JourneoLogo : JourneoLogoDark} alt="Journeo Logo" className="h-7 w-auto object-contain" />
             <span className="font-bold text-lg tracking-tight">Journeo</span>
-            <VersionBadge className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/20 hover:text-gray-900 dark:hover:text-gray-200 transition-colors" />
+            <VersionBadge className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md bg-subtle text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/20 hover:text-gray-900 dark:hover:text-gray-200 transition-colors" />
             <div className="ml-auto"><NotificationBell placement="sidebar" /></div>
           </div>
 
@@ -396,7 +396,7 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
               className={`w-full text-left p-4 rounded-2xl border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 ${
                 profileOpen || location.pathname === '/dashboard/settings'
                   ? 'bg-gray-50 dark:bg-white/[0.06] border-gray-300 dark:border-white/15'
-                  : 'bg-gray-50/70 dark:bg-white/[0.03] border-gray-200/80 dark:border-white/[0.08] hover:border-gray-300 dark:hover:border-white/15'
+                  : 'bg-passport border-gray-200/80 dark:border-white/[0.08] hover:border-gray-300 dark:hover:border-white/15'
               }`}
             >
               <PassportIdentity user={user} t={t} trailing={<ChevronsUpDown size={16} strokeWidth={2} className="shrink-0 text-gray-400" aria-hidden="true" />} />
@@ -412,7 +412,7 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                   transition={{ duration: 0.15, ease: 'easeOut' }}
-                  className="absolute left-3 right-3 top-full mt-2 z-40 p-2 bg-white dark:bg-[#1C1C1E] rounded-2xl border border-gray-200 dark:border-white/10 shadow-[0_12px_32px_-12px_rgba(17,24,39,0.25)]"
+                  className="absolute left-3 right-3 top-full mt-2 z-40 p-2 bg-page rounded-2xl border border-default shadow-[0_12px_32px_-12px_rgba(17,24,39,0.25)]"
                 >
                   <div className="px-1 pb-2"><ThemeToggle /></div>
                   <Link
@@ -425,7 +425,7 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
                   <button
                     type="button"
                     onClick={() => { setProfileOpen(false); handleLogout(); }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-semibold text-danger hover:bg-danger-wash transition-colors cursor-pointer"
                   >
                     <LogOut size={18} strokeWidth={2} /> {t('dashboardLayout.dialogs.logout.confirm')}
                   </button>
@@ -437,7 +437,7 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
           <div className="px-3 mt-4 space-y-2">
             <button
               onClick={handleOpenCreateModal}
-              className="flex w-full items-center gap-2.5 px-3.5 h-11 rounded-xl bg-blue-600 text-white text-[14px] font-semibold shadow-[0_6px_16px_-8px_rgba(37,99,235,0.7)] hover:bg-blue-500 transition-colors group active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2"
+              className="flex w-full items-center gap-2.5 px-3.5 h-11 rounded-xl bg-accent text-white text-[14px] font-semibold shadow-[0_6px_16px_-8px_rgba(37,99,235,0.7)] hover:bg-accent-hover transition-colors group active:scale-[0.98] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2"
             >
               <Plus size={18} strokeWidth={2.5} />
               <span>{t('dashboardLayout.nav.createTrip')}</span>
@@ -447,11 +447,11 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
                 objevit i bez toho, aby ji člověk musel uhodnout. */}
             <button
               onClick={openSpotlight}
-              className="flex w-full items-center gap-2.5 px-3.5 h-10 rounded-xl bg-gray-100/80 dark:bg-white/[0.05] text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/[0.08] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+              className="flex w-full items-center gap-2.5 px-3.5 h-10 rounded-xl bg-gray-100/80 dark:bg-white/[0.05] text-gray-600 dark:text-gray-400 hover:text-primary hover:bg-gray-100 dark:hover:bg-white/[0.08] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
             >
               <Search size={16} strokeWidth={2.25} />
               <span className="text-[13px] font-semibold">{t('spotlight.trigger')}</span>
-              <kbd className="ml-auto text-[11px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-white/[0.07] border border-gray-200 dark:border-white/10 text-gray-500">⌘K</kbd>
+              <kbd className="ml-auto text-[11px] font-mono px-1.5 py-0.5 rounded bg-white dark:bg-white/[0.07] border border-default text-gray-500">⌘K</kbd>
             </button>
           </div>
 
@@ -479,10 +479,10 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
               className="flex items-center gap-3.5 mx-3 mb-4 p-3.5 rounded-2xl border border-gray-200/80 dark:border-white/[0.08] hover:border-gray-300 dark:hover:border-white/15 hover:bg-gray-50 dark:hover:bg-white/[0.03] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
             >
               <span className="shrink-0 w-16 text-center">
-                <span className="block text-[26px] font-bold leading-none tracking-tight tabular-nums text-gray-900 dark:text-white">{nextTripCount.value}</span>
-                <span className="block mt-1 text-[11px] font-medium leading-tight text-gray-500 dark:text-gray-400">{nextTripCount.unit}</span>
+                <span className="block text-[26px] font-bold leading-none tracking-tight tabular-nums text-primary">{nextTripCount.value}</span>
+                <span className="block mt-1 text-[11px] font-medium leading-tight text-muted">{nextTripCount.unit}</span>
               </span>
-              <span className="min-w-0 text-[14px] font-semibold leading-snug text-gray-900 dark:text-white line-clamp-2">{nextTrip.title}</span>
+              <span className="min-w-0 text-[14px] font-semibold leading-snug text-primary line-clamp-2">{nextTrip.title}</span>
             </Link>
           )}
         </aside>
@@ -520,13 +520,13 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
               animate={shouldReduceMotion ? { opacity: 1 } : { y: 0 }}
               exit={shouldReduceMotion ? { opacity: 0 } : { y: '100%' }}
               transition={shouldReduceMotion ? { duration: 0.15 } : { type: 'spring', bounce: 0, duration: 0.4 }}
-              className="relative w-full max-h-[90dvh] bg-white dark:bg-[#1C1C1E] flex flex-col z-10 rounded-t-[1.75rem] shadow-[0_-8px_40px_-12px_rgba(0,0,0,0.35)]"
+              className="relative w-full max-h-[90dvh] bg-page flex flex-col z-10 rounded-t-[1.75rem] shadow-[0_-8px_40px_-12px_rgba(0,0,0,0.35)]"
             >
               <div className="px-4 pt-2.5 pb-1 flex items-center justify-between">
                 <span className="mx-auto w-10 h-1 rounded-full bg-gray-300 dark:bg-white/20" aria-hidden="true" />
               </div>
               <div className="absolute right-3 top-3">
-                <button onClick={closeMobile} aria-label={t('common.close')} className="w-11 h-11 flex items-center justify-center bg-gray-100 dark:bg-white/10 rounded-full text-gray-600 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer">
+                <button onClick={closeMobile} aria-label={t('common.close')} className="w-11 h-11 flex items-center justify-center bg-subtle rounded-full text-gray-600 hover:text-primary transition-colors cursor-pointer">
                   <X size={20} strokeWidth={2.5} />
                 </button>
               </div>
@@ -546,10 +546,10 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
                     className="flex items-center gap-3.5 mt-3 p-3.5 rounded-2xl border border-gray-200/80 dark:border-white/[0.08] active:bg-gray-50 dark:active:bg-white/[0.04]"
                   >
                     <span className="shrink-0 w-16 text-center">
-                      <span className="block text-[26px] font-bold leading-none tracking-tight tabular-nums text-gray-900 dark:text-white">{nextTripCount.value}</span>
-                      <span className="block mt-1 text-[11px] font-medium leading-tight text-gray-500 dark:text-gray-400">{nextTripCount.unit}</span>
+                      <span className="block text-[26px] font-bold leading-none tracking-tight tabular-nums text-primary">{nextTripCount.value}</span>
+                      <span className="block mt-1 text-[11px] font-medium leading-tight text-muted">{nextTripCount.unit}</span>
                     </span>
-                    <span className="min-w-0 text-[15px] font-semibold leading-snug text-gray-900 dark:text-white">{nextTrip.title}</span>
+                    <span className="min-w-0 text-[15px] font-semibold leading-snug text-primary">{nextTrip.title}</span>
                   </Link>
                 )}
 
@@ -564,15 +564,15 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
                 </div>
 
                 <div className="mt-5 px-1">
-                  <p className="mb-2 text-[13px] font-semibold text-gray-500 dark:text-gray-400">{t('dashboardLayout.mobile.appearance')}</p>
+                  <p className="mb-2 text-[13px] font-semibold text-muted">{t('dashboardLayout.mobile.appearance')}</p>
                   <ThemeToggle />
                 </div>
               </div>
 
-              <div className="px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] border-t border-gray-100 dark:border-white/10">
+              <div className="px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] border-t border-subtle">
                 <button
                   onClick={() => { closeMobile(); handleLogout(); }}
-                  className="w-full flex items-center justify-center gap-2.5 h-12 rounded-2xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors font-semibold cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2.5 h-12 rounded-2xl text-danger hover:bg-danger-wash transition-colors font-semibold cursor-pointer"
                 >
                   <LogOut size={19} strokeWidth={2.25} />
                   <span>{t('dashboardLayout.dialogs.logout.confirm')}</span>
@@ -601,7 +601,7 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
             <button
               onClick={openSpotlight}
               aria-label={t('spotlight.title')}
-              className="w-11 h-11 flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors text-gray-900 dark:text-white cursor-pointer"
+              className="w-11 h-11 flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 rounded-full transition-colors text-primary cursor-pointer"
             >
               <Search size={20} strokeWidth={2.25} />
             </button>

@@ -69,24 +69,24 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal, error, onRetry 
   if (error) {
     return (
       <div className="w-full pb-10">
-        <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold mb-8">
+        <h1 className="text-3xl sm:text-4xl text-primary tracking-tight font-bold mb-8">
           {t('tripsOverview.title')}
         </h1>
         <div className="glass-card rounded-[2rem] p-8 sm:p-12 flex flex-col items-center justify-center text-center min-h-[40dvh] space-y-4">
-          <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-500 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-2xl bg-danger-wash text-red-500 flex items-center justify-center">
             <AlertCircle size={26} strokeWidth={2} aria-hidden="true" />
           </div>
           <div>
-            <p className="text-xl font-bold text-gray-900 dark:text-white tracking-tight mb-1.5">
+            <p className="text-xl font-bold text-primary tracking-tight mb-1.5">
               {t('tripsOverview.error.title')}
             </p>
-            <p className="text-[14px] font-medium text-gray-500 dark:text-gray-400 max-w-sm">
+            <p className="text-[14px] font-medium text-muted max-w-sm">
               {t('tripsOverview.error.description')}
             </p>
           </div>
           <button
             onClick={onRetry}
-            className="inline-flex items-center gap-2 rounded-2xl px-5 min-h-[44px] bg-blue-600 text-white text-[15px] font-semibold hover:bg-blue-700 transition-all active:scale-[0.97] cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-2xl px-5 min-h-[44px] bg-accent text-white text-[15px] font-semibold hover:bg-accent-hover transition-all active:scale-[0.97] cursor-pointer"
           >
             {t('tripsOverview.error.retry')}
           </button>
@@ -98,10 +98,10 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal, error, onRetry 
   return (
     <div className="space-y-6 sm:space-y-8 w-full pb-10">
       <div className="space-y-1">
-        <h1 className="text-3xl sm:text-4xl text-gray-900 dark:text-white tracking-tight font-bold" style={{ textWrap: 'balance' }}>
+        <h1 className="text-3xl sm:text-4xl text-primary tracking-tight font-bold" style={{ textWrap: 'balance' }}>
           {t('tripsOverview.title')}
         </h1>
-        <p className="text-[14px] sm:text-[15px] font-medium text-gray-500 dark:text-gray-400">
+        <p className="text-[14px] sm:text-[15px] font-medium text-muted">
           {t('tripsOverview.subtitle')}
         </p>
       </div>
@@ -140,13 +140,13 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal, error, onRetry 
               edges inside the padded scroll container. */}
           <div className="sticky top-0 z-20 -mx-4 px-4 py-3 md:static md:mx-0 md:px-0 md:py-0 md:pt-2 flex items-center justify-between gap-4">
             <span className="absolute inset-0 -z-10 glass md:hidden" aria-hidden="true" />
-            <h2 className="text-[15px] sm:text-lg font-bold text-gray-900 dark:text-white tracking-tight truncate">
+            <h2 className="text-[15px] sm:text-lg font-bold text-primary tracking-tight truncate">
               {t('tripsOverview.yourTrips')}
               <span className="ml-2 text-gray-400 dark:text-gray-500 font-semibold">{listedTrips.length}</span>
             </h2>
             <Link
               to="/dashboard/all-trips"
-              className="inline-flex items-center gap-1.5 shrink-0 text-[13px] font-semibold text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors"
+              className="inline-flex items-center gap-1.5 shrink-0 text-[13px] font-semibold text-accent hover:text-blue-500 transition-colors"
             >
               {t('tripsOverview.allTrips')}
               <ArrowRight size={14} strokeWidth={2.5} aria-hidden="true" />

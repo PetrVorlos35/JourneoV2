@@ -23,11 +23,11 @@ const MetricCard = ({ icon: Icon, label, value, suffix = '', glowColor, delay = 
         <Icon size={22} strokeWidth={2} style={{ color: glowColor }} aria-hidden="true" />
       </div>
       <div className="min-w-0">
-        <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium mb-0.5">{label}</p>
+        <p className="text-[11px] text-muted font-medium mb-0.5">{label}</p>
         <AnimatedValue
           value={value}
           suffix={suffix}
-          className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tighter leading-none"
+          className="text-2xl sm:text-3xl font-bold text-primary tracking-tighter leading-none"
         />
       </div>
     </motion.div>

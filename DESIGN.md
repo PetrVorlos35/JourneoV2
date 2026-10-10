@@ -2,32 +2,32 @@
 name: Journeo
 description: A calm, personal travel notebook for planning and running trips, solo or together.
 colors:
-  accent-blue: "#2563eb"
-  accent-blue-hover: "#3b82f6"
-  accent-blue-night: "#60a5fa"
+  accent-blue: "#155dfc"
+  accent-blue-hover: "#1447e6"
+  accent-blue-night: "#51a2ff"
   desk: "#fbfbfd"
   page: "#ffffff"
   field: "#f9fafb"
   tab-recess: "#f1f1f4"
-  ink: "#111827"
-  ink-plan: "#1f2937"
-  ink-soft: "#374151"
-  muted-strong: "#4b5563"
-  muted: "#6b7280"
-  placeholder: "#9ca3af"
+  ink: "#101828"
+  ink-plan: "#1e2939"
+  ink-soft: "#364153"
+  muted-strong: "#4a5565"
+  muted: "#6a7282"
+  placeholder: "#6a7282"
   hairline: "#e5e7eb"
   rule-soft: "#f3f4f6"
   night-desk: "#000000"
   night-page: "#1c1c1e"
-  night-ink: "#f5f5f7"
+  night-ink: "#ffffff"
   night-sidebar: "#111113"
   active-wash: "#eff6ff"
-  active-ink: "#1d4ed8"
-  success: "#059669"
-  danger: "#ef4444"
+  active-ink: "#1447e6"
+  success: "#007a55"
+  danger: "#e7000b"
   readonly-wash: "#fffbeb"
-  readonly-ink: "#92400e"
-  editor-ink: "#6d28d9"
+  readonly-ink: "#973c00"
+  editor-ink: "#7008e7"
 typography:
   display:
     fontFamily: "Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif"
@@ -218,12 +218,24 @@ Light is the verified register: this build was designed and checked in light, an
 - Ambient, low-contrast shadows; a page never nests a floating card inside itself.
 - Light and dark both shipped on every surface; light is the verified register.
 
+## Design Tokens & Figma
+
+The Figma library is the source of truth: https://www.figma.com/design/RVM2kVY4MrTRiC88nFPeyX/Journeo (pages: Getting Started, Foundations, components, Screens; Light/Dark and Desktop/Mobile modes).
+
+- **Flow:** Figma variables → `design/tokens.json` (export) → `npm run tokens` → `src/styles/tokens.css`. Never edit `tokens.css` by hand.
+- **Logo:** the compass rose `src/assets/Journeo_blacklogo.png` (light) / `Journeo_whitelogo.png` (dark), 28px tall next to an 18px bold wordmark; in Figma both images sit in the Logo component and switch via the `logo/show-on-*` variables.
+- **Values:** primitives are the Tailwind v4 palette (oklch, converted to sRGB in Figma), so a token renders exactly like the utility it replaced. Hex values in this file's front matter are those sRGB conversions.
+- **Use semantic classes, not light/dark pairs:** `bg-desk`, `bg-page`, `bg-field`, `bg-subtle`, `bg-accent`, `hover:bg-accent-hover`, `bg-active`, `bg-glass`, `bg-passport`, `bg-bar`, `bg-success-wash`, `bg-danger-wash`; `text-primary`, `text-secondary`, `text-muted`, `text-accent`, `text-active`, `text-success`, `text-danger`, `placeholder:text-placeholder`; `text-icon-*`; `border-default`, `border-subtle`, `border-glass`, `border-check`; overview tile tones via `var(--color-icon-tone-blue|violet|emerald|amber|red)`; `rounded-control|soft|page|card`; `shadow-page|card|tab|glow|popover|sheet|overlay|focus`; type `text-display … text-micro` plus overview `text-countdown`, `text-hero`, `text-card`, `text-small` (`text-plan-size` for the plan). Dark mode is handled by the token, so no `dark:` counterpart is needed.
+- **Runtime variables** match Figma Dev Mode code syntax, e.g. `var(--color-bg-page)`, `var(--type-size-display)`, `var(--layout-page-padding)`.
+- **Guards:** `npm run lint:design` flags light/dark pairs that have a token and known contrast failures; `npm run tokens:check` fails when `tokens.css` is stale.
+- **Contrast:** every text token pair passes WCAG 2.2 AA in both themes (table on the Foundations page). Do not put `text-muted`, `text-placeholder` or `text-danger` on `bg-subtle`; use `text-secondary`.
+
 ## Colors
 
 A cool, nearly colorless paper palette with a single blue voice and small semantic washes.
 
 ### Primary
-- **Notebook Blue** (accent-blue): selected day chip, primary buttons (add expense, add item, new trip), active tab icon, active bottom-bar slot, caret in the plan, focus rings at 20 to 50% alpha. Hover lightens to **Bright Blue** (accent-blue-hover). In dark mode the accent becomes **Night Blue** (accent-blue-night) for text and icons; filled buttons stay blue-600.
+- **Notebook Blue** (accent-blue): selected day chip, primary buttons (add expense, add item, new trip), active tab icon, active bottom-bar slot, caret in the plan, focus rings at 20 to 50% alpha. Hover darkens to **Deep Blue** (accent-blue-hover, blue-700) so white text keeps 4.5:1. In dark mode the accent becomes **Night Blue** (accent-blue-night) for text and icons; filled buttons stay blue-600.
 - **Active Wash** (active-wash) with **Active Ink** (active-ink): the active navigation row in the sidebar and the passport sheet, plus the shortcut chip inside it. A tint, not a fill, so the sidebar's single filled blue control stays "+ Vytvořit výlet". In dark mode the wash is blue-500 at 10% and the ink blue-300.
 
 ### Neutral
@@ -238,8 +250,8 @@ A cool, nearly colorless paper palette with a single blue voice and small semant
 - **Night Sidebar** (night-sidebar): the desktop sidebar ground in dark mode, a step above the black desk.
 
 ### Semantic
-- **Saved Green** (success): saved state check, "all packed", positive balances.
-- **Alert Red** (danger): delete hovers, over-budget, save-failed retry.
+- **Saved Green** (success): saved state check, "all packed", positive balances. Text uses emerald-700 (`text-success`) for AA contrast; icons and fills may stay emerald-600.
+- **Alert Red** (danger): delete hovers, over-budget, save-failed retry. Text uses red-600 (`text-danger`); icons and borders may use red-500.
 - **Read-only Amber** (readonly-wash with readonly-ink): the read-only banner and viewer role chip. **Editor Violet** (editor-ink on a violet-50 wash) marks the editor role chip.
 
 ### Named Rules

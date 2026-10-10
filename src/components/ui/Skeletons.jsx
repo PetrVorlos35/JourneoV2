@@ -26,7 +26,7 @@ const TripCardSkeleton = () => (
     </div>
     <Skeleton className="h-7 w-3/4 mb-3" />
     <Skeleton className="h-4 w-1/2 mb-8" />
-    <div className="mt-auto flex items-center justify-between pt-6 border-t border-gray-100 dark:border-white/10">
+    <div className="mt-auto flex items-center justify-between pt-6 border-t border-subtle">
       <Skeleton className="h-3.5 w-20" />
       <Skeleton className="h-3.5 w-16" />
     </div>

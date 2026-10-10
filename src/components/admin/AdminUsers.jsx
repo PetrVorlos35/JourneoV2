@@ -93,27 +93,27 @@ const UserDossier = ({ userId, onSelectUser, onChanged, onDeleted, onBack }) => 
         <div className="flex items-center gap-4">
           <UserAvatar user={avatarUser(user)} size="lg" />
           <div className="min-w-0">
-            <h2 className="text-[24px] sm:text-[28px] font-bold tracking-tight leading-tight text-gray-900 dark:text-white break-words">
+            <h2 className="text-[24px] sm:text-[28px] font-bold tracking-tight leading-tight text-primary break-words">
               {displayName(user, t('admin.users.detail.noName'))}
             </h2>
-            <p className="text-[14px] font-medium text-gray-600 dark:text-gray-300 break-all">{user.email}</p>
+            <p className="text-[14px] font-medium text-secondary break-all">{user.email}</p>
           </div>
         </div>
         <div className="mt-4 flex flex-wrap items-center gap-2">
           {isAdmin && <Badge tone="amber">Admin</Badge>}
           <Badge tone={user.isVerified ? 'green' : 'amber'}>{user.isVerified ? t('admin.v2.verified') : t('admin.v2.unverifiedEmail')}</Badge>
-          <span className="text-[13px] font-medium text-gray-500 dark:text-gray-400">{t('admin.v2.registered', { date: formatDate(user.createdAt, i18n.language) })}</span>
+          <span className="text-[13px] font-medium text-muted">{t('admin.v2.registered', { date: formatDate(user.createdAt, i18n.language) })}</span>
         </div>
-        {user.bio && <p className="mt-3 text-[14px] text-gray-600 dark:text-gray-300">{user.bio}</p>}
+        {user.bio && <p className="mt-3 text-[14px] text-secondary">{user.bio}</p>}
 
         {isSelf ? (
-          <p className="mt-5 text-[13px] font-medium text-gray-500 dark:text-gray-400">{t('admin.v2.self')}</p>
+          <p className="mt-5 text-[13px] font-medium text-muted">{t('admin.v2.self')}</p>
         ) : (
           <button
             type="button"
             onClick={toggleRole}
             disabled={busy}
-            className="mt-5 inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-gray-200 dark:border-white/10 text-[14px] font-semibold text-gray-800 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-white/5 disabled:opacity-50 transition-colors cursor-pointer"
+            className="mt-5 inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-default text-[14px] font-semibold text-plan hover:bg-field disabled:opacity-50 transition-colors cursor-pointer"
           >
             <Shield size={16} strokeWidth={2.25} className="text-amber-600 dark:text-amber-400" />
             {isAdmin ? t('admin.v2.removeAdmin') : t('admin.v2.makeAdmin')}
@@ -123,7 +123,7 @@ const UserDossier = ({ userId, onSelectUser, onChanged, onDeleted, onBack }) => 
 
       <DetailSection title={t('admin.v2.tripCount')} count={user.trips.length}>
         {user.trips.length === 0 ? (
-          <p className="py-3 text-[14px] text-gray-500 dark:text-gray-400">{t('admin.users.detail.noTrips')}</p>
+          <p className="py-3 text-[14px] text-muted">{t('admin.users.detail.noTrips')}</p>
         ) : (
           <ul>
             {user.trips.map((trip) => (
@@ -134,15 +134,15 @@ const UserDossier = ({ userId, onSelectUser, onChanged, onDeleted, onBack }) => 
                 >
                   <span className="min-w-0 flex-1">
                     <span className="flex items-center gap-2">
-                      <span className="text-[14px] font-semibold text-gray-900 dark:text-white truncate group-hover:underline underline-offset-2">{trip.title}</span>
+                      <span className="text-[14px] font-semibold text-primary truncate group-hover:underline underline-offset-2">{trip.title}</span>
                       {trip.inTrash && <Badge tone="red">{t('admin.v2.inTrash')}</Badge>}
                     </span>
-                    <span className="block text-[12px] font-medium text-gray-500 dark:text-gray-400 tabular-nums">
+                    <span className="block text-[12px] font-medium text-muted tabular-nums">
                       {formatDate(trip.startDate, i18n.language)} – {formatDate(trip.endDate, i18n.language)}
                     </span>
                   </span>
                   {trip.likes > 0 && (
-                    <span className="inline-flex items-center gap-1 text-[13px] font-medium tabular-nums text-gray-600 dark:text-gray-300">
+                    <span className="inline-flex items-center gap-1 text-[13px] font-medium tabular-nums text-secondary">
                       <Heart size={13} strokeWidth={2.25} /> {trip.likes}
                     </span>
                   )}
@@ -156,7 +156,7 @@ const UserDossier = ({ userId, onSelectUser, onChanged, onDeleted, onBack }) => 
 
       <DetailSection title={t('admin.v2.friendCount')} count={user.friends.length}>
         {user.friends.length === 0 ? (
-          <p className="py-3 text-[14px] text-gray-500 dark:text-gray-400">{t('admin.users.detail.noFriends')}</p>
+          <p className="py-3 text-[14px] text-muted">{t('admin.users.detail.noFriends')}</p>
         ) : (
           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
             {user.friends.map((f) => (
@@ -168,8 +168,8 @@ const UserDossier = ({ userId, onSelectUser, onChanged, onDeleted, onBack }) => 
                 >
                   <UserAvatar user={avatarUser(f)} size="sm" />
                   <span className="min-w-0">
-                    <span className="block text-[14px] font-semibold text-gray-900 dark:text-white truncate group-hover:underline underline-offset-2">{displayName(f, t('admin.users.detail.noName'))}</span>
-                    <span className="block text-[12px] font-medium text-gray-500 dark:text-gray-400 truncate">{f.email}</span>
+                    <span className="block text-[14px] font-semibold text-primary truncate group-hover:underline underline-offset-2">{displayName(f, t('admin.users.detail.noName'))}</span>
+                    <span className="block text-[12px] font-medium text-muted truncate">{f.email}</span>
                   </span>
                 </button>
               </li>
@@ -183,7 +183,7 @@ const UserDossier = ({ userId, onSelectUser, onChanged, onDeleted, onBack }) => 
           <button
             type="button"
             onClick={remove}
-            className="inline-flex items-center gap-2 h-10 px-3 -ml-3 rounded-xl text-[14px] font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer"
+            className="inline-flex items-center gap-2 h-10 px-3 -ml-3 rounded-xl text-[14px] font-semibold text-danger hover:bg-danger-wash transition-colors cursor-pointer"
           >
             <Trash2 size={16} strokeWidth={2.25} /> {t('admin.v2.deleteAccount')}
           </button>
@@ -246,7 +246,7 @@ const AdminUsers = () => {
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value)}
             aria-label={t('admin.v2.sortLabel')}
-            className="h-10 pl-3 pr-8 rounded-xl appearance-none bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-base sm:text-[14px] font-semibold text-gray-800 dark:text-gray-100 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:bg-[#1C1C1E]"
+            className="h-10 pl-3 pr-8 rounded-xl appearance-none bg-field border border-default text-base sm:text-[14px] font-semibold text-plan cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:bg-[#1C1C1E]"
           >
             <option value="newest">{t('admin.v2.sortNewest')}</option>
             <option value="name">{t('admin.v2.sortName')}</option>
@@ -255,13 +255,13 @@ const AdminUsers = () => {
           <ChevronDown size={14} strokeWidth={2.5} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
         </div>
       </ListToolbar>
-      <p className="px-4 py-2 text-[13px] font-medium text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-white/10 tabular-nums">
+      <p className="px-4 py-2 text-[13px] font-medium text-muted border-b border-subtle tabular-nums">
         {t('admin.users.total', { count: total })}
       </p>
       {loading ? (
         <div className="p-4"><AdminTableSkeleton rows={8} /></div>
       ) : users.length === 0 ? (
-        <p className="py-12 text-center text-[14px] text-gray-500 dark:text-gray-400">{t('admin.users.notFound')}</p>
+        <p className="py-12 text-center text-[14px] text-muted">{t('admin.users.notFound')}</p>
       ) : (
         <ul className="lg:max-h-[calc(100dvh-18rem)] lg:overflow-y-auto custom-scrollbar">
           {users.map((u) => (
@@ -269,14 +269,14 @@ const AdminUsers = () => {
               <UserAvatar user={avatarUser(u)} size="sm" />
               <span className="min-w-0 flex-1">
                 <span className="flex items-center gap-2">
-                  <span className="text-[14px] font-semibold text-gray-900 dark:text-white truncate">{displayName(u, t('admin.users.detail.noName'))}</span>
+                  <span className="text-[14px] font-semibold text-primary truncate">{displayName(u, t('admin.users.detail.noName'))}</span>
                   {u.role === 'admin' && <Badge tone="amber">Admin</Badge>}
                 </span>
-                <span className="block text-[12px] font-medium text-gray-500 dark:text-gray-400 truncate">{u.email}</span>
+                <span className="block text-[12px] font-medium text-muted truncate">{u.email}</span>
               </span>
               <span className="shrink-0 text-right">
-                <span className="block text-[13px] font-semibold tabular-nums text-gray-800 dark:text-gray-100">{u.tripCount}</span>
-                <span className="block text-[11px] font-medium text-gray-500 dark:text-gray-400 tabular-nums">
+                <span className="block text-[13px] font-semibold tabular-nums text-plan">{u.tripCount}</span>
+                <span className="block text-[11px] font-medium text-muted tabular-nums">
                   {u.isVerified === false ? t('admin.v2.unverifiedShort') : formatDate(u.createdAt, i18n.language)}
                 </span>
               </span>

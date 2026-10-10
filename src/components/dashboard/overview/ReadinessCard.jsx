@@ -73,7 +73,7 @@ const ReadinessCard = ({ trip, placeCount }) => {
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-xl font-bold tracking-tighter text-gray-900 dark:text-white">
+            <span className="text-xl font-bold tracking-tighter text-primary">
               {score}<span className="text-sm font-semibold text-gray-400 dark:text-gray-500">%</span>
             </span>
           </div>
@@ -94,14 +94,14 @@ const ReadinessCard = ({ trip, placeCount }) => {
                 className={`w-4 h-4 shrink-0 rounded-full flex items-center justify-center ${
                   item.done
                     ? 'bg-emerald-500 text-white'
-                    : 'border-[1.5px] border-gray-300 dark:border-white/20'
+                    : 'border-[1.5px] border-check'
                 }`}
                 aria-hidden="true"
               >
                 {item.done && <Check size={10} strokeWidth={3.5} />}
               </span>
               <span className={`text-[13px] font-medium truncate ${
-                item.done ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'
+                item.done ? 'text-muted' : 'text-primary'
               }`}>
                 {labelFor(item)}
               </span>

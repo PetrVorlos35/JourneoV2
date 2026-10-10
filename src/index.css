@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap');
 @import "tailwindcss";
+@import "./styles/tokens.css";
 
 @theme {
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -25,7 +26,7 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     -webkit-tap-highlight-color: transparent;
-    @apply bg-[#fbfbfd] text-gray-900 font-sans transition-colors duration-500;
+    @apply bg-desk text-primary font-sans transition-colors duration-500;
   }
 
   /* Comfortable touch feedback in place of hover on coarse pointers */
@@ -33,10 +34,6 @@
     button, a {
       touch-action: manipulation;
     }
-  }
-  
-  .dark body {
-    @apply bg-black text-[#f5f5f7];
   }
 }
 
@@ -178,7 +175,7 @@
 
 /* Cards — for content cards, stat blocks, trip tiles */
 .glass-card {
-  @apply bg-white/70 dark:bg-[#1C1C1E]/70 backdrop-blur-2xl border border-white/50 dark:border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.15)] rounded-[2rem];
+  @apply bg-glass backdrop-blur-2xl border border-glass shadow-card rounded-card;
 }
 
 /* Navigation bar — for top floating nav */
@@ -188,7 +185,7 @@
 
 /* Input fields — consistent glass inputs */
 .glass-input {
-  @apply w-full bg-white/40 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl px-5 py-4 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 dark:focus:border-blue-400/50 transition-all duration-300 font-medium;
+  @apply w-full bg-white/40 dark:bg-white/5 border border-default rounded-2xl px-5 py-4 text-primary placeholder:text-placeholder focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/50 dark:focus:border-blue-400/50 transition-all duration-300 font-medium;
 }
 
 /* ===== Skeleton Loading ===== */

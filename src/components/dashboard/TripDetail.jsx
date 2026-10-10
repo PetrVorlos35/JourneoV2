@@ -33,17 +33,17 @@ const SaveStatus = ({ state, onRetry, t }) => {
   if (state === 'idle') return null;
   if (state === 'error') {
     return (
-      <button onClick={onRetry} className="inline-flex items-center gap-1.5 text-red-600 dark:text-red-400 font-semibold hover:underline underline-offset-2 cursor-pointer">
+      <button onClick={onRetry} className="inline-flex items-center gap-1.5 text-danger font-semibold hover:underline underline-offset-2 cursor-pointer">
         <AlertCircle size={14} strokeWidth={2.5} aria-hidden="true" /> {t('tripDetail.notebook.saveError')}
       </button>
     );
   }
   const busy = state === 'pending' || state === 'saving';
   return (
-    <span role="status" className="inline-flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
+    <span role="status" className="inline-flex items-center gap-1.5 text-muted">
       {busy
         ? <Loader2 size={13} strokeWidth={2.5} className="animate-spin" aria-hidden="true" />
-        : <Check size={14} strokeWidth={2.5} className="text-emerald-600 dark:text-emerald-400" aria-hidden="true" />}
+        : <Check size={14} strokeWidth={2.5} className="text-success" aria-hidden="true" />}
       {busy ? t('tripDetail.notebook.saving') : t('tripDetail.notebook.saved')}
     </span>
   );
@@ -225,10 +225,10 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
 
   if (!trip) {
     return (
-      <div className="text-center py-20 text-gray-500 dark:text-gray-400 font-bold text-xl">
+      <div className="text-center py-20 text-muted font-bold text-xl">
         {t('tripDetail.notFound')}
         <br />
-        <Link to="/dashboard" className="text-blue-600 dark:text-blue-400 hover:text-blue-500 transition-colors mt-4 inline-block text-[13px] font-semibold">
+        <Link to="/dashboard" className="text-accent hover:text-blue-500 transition-colors mt-4 inline-block text-[13px] font-semibold">
           {t('tripDetail.backToOverview')}
         </Link>
       </div>
@@ -333,7 +333,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
         exit: { opacity: 0, transition: { duration: 0.05 } },
       };
 
-  const iconButton = 'w-11 h-11 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-200/80 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0';
+  const iconButton = 'w-11 h-11 flex items-center justify-center rounded-2xl bg-white dark:bg-white/5 border border-gray-200/80 dark:border-white/10 text-soft hover:bg-gray-50 dark:hover:bg-white/10 hover:text-primary active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shrink-0';
 
   const day = dailyPlans[dayIndex];
 
@@ -370,7 +370,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
               <button
                 onClick={() => setShowShareModal(true)}
                 aria-label={t('shareModal.shareButton')}
-                className="h-11 w-11 sm:w-auto sm:px-5 flex items-center justify-center gap-2 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-[14px] font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 active:scale-95 transition-all cursor-pointer shrink-0"
+                className="h-11 w-11 sm:w-auto sm:px-5 flex items-center justify-center gap-2 rounded-2xl bg-ink text-white dark:text-gray-900 text-[14px] font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 active:scale-95 transition-all cursor-pointer shrink-0"
               >
                 <Users size={17} strokeWidth={2.5} />
                 <span className="hidden sm:inline">{t('shareModal.shareButton')}</span>
@@ -404,7 +404,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
       {/* ── Hlavička ── */}
       <header className="mb-5 sm:mb-8">
         <div className="flex items-center justify-between gap-3">
-          <button onClick={() => navigate(backHref)} className="inline-flex items-center py-2 -my-2 text-[13px] font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors cursor-pointer">
+          <button onClick={() => navigate(backHref)} className="inline-flex items-center py-2 -my-2 text-[13px] font-semibold text-muted hover:text-primary transition-colors cursor-pointer">
             <ArrowLeft size={16} className="mr-2" strokeWidth={2.5} /> {backText}
           </button>
           {/* Na mobilu akce v řádku se zpětným odkazem, aby měl název celou šířku */}
@@ -423,12 +423,12 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                   onChange={e => { setTripTitle(e.target.value); markDirty(); }}
                   onKeyDown={e => { if (e.key === 'Enter' || e.key === 'Escape') setEditingTitle(false); }}
                   onBlur={() => setEditingTitle(false)}
-                  className="w-full -mx-2 px-2 py-0.5 rounded-2xl bg-white dark:bg-white/5 border border-blue-500/40 ring-4 ring-blue-500/10 text-[26px] sm:text-5xl font-bold tracking-tight text-gray-900 dark:text-white focus:outline-none"
+                  className="w-full -mx-2 px-2 py-0.5 rounded-2xl bg-white dark:bg-white/5 border border-blue-500/40 ring-4 ring-blue-500/10 text-[26px] sm:text-5xl font-bold tracking-tight text-primary focus:outline-none"
                 />
                 {tripTitle.length >= 200 && <div className="mt-1"><CharCount value={tripTitle} max={255} /></div>}
               </div>
             ) : (
-              <h1 className="text-[26px] sm:text-5xl font-bold tracking-tight leading-[1.1] text-gray-900 dark:text-white break-words" style={{ textWrap: 'balance' }}>
+              <h1 className="text-[26px] sm:text-5xl font-bold tracking-tight leading-[1.1] text-primary break-words" style={{ textWrap: 'balance' }}>
                 {isViewer ? tripTitle : (
                   <button
                     onClick={() => setEditingTitle(true)}
@@ -443,15 +443,15 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
             )}
 
             <div className="mt-2.5 sm:mt-3 overflow-hidden">
-            <p className="meta-dots -ml-5 flex flex-wrap items-center gap-y-1 text-[14px] font-medium text-gray-500 dark:text-gray-400">
-              <span className="text-gray-900 dark:text-white font-semibold">
+            <p className="meta-dots -ml-5 flex flex-wrap items-center gap-y-1 text-[14px] font-medium text-muted">
+              <span className="text-primary font-semibold">
                 {format(start, 'd. MMM', { locale: dateLocale })} – {format(end, 'd. MMM yyyy', { locale: dateLocale })}
               </span>
               <span className="whitespace-nowrap">{t('tripDetail.notebook.days', { count: tripLength })}</span>
               <span className="whitespace-nowrap">{timing}</span>
               {trip.role && !isOwner && (
                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[12px] font-semibold ${
-                  isViewer ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400' : 'bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400'
+                  isViewer ? 'bg-readonly text-readonly' : 'bg-editor text-editor'
                 }`}>
                   {isViewer ? <Eye size={12} strokeWidth={2.5} /> : <Pencil size={12} strokeWidth={2.5} />}
                   {t(`tripDetail.roles.${trip.role}`)}
@@ -470,7 +470,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
         </div>
 
         {isViewer && (
-          <p className="mt-5 inline-flex items-center gap-2.5 px-4 py-2.5 bg-amber-50 dark:bg-amber-500/10 rounded-2xl text-[13px] font-semibold text-amber-800 dark:text-amber-300">
+          <p className="mt-5 inline-flex items-center gap-2.5 px-4 py-2.5 bg-readonly rounded-2xl text-[13px] font-semibold text-readonly">
             <Eye size={15} strokeWidth={2.5} className="shrink-0" />
             {t('tripDetail.viewerBanner')}
           </p>
@@ -488,7 +488,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
           aria-label={activeTab?.label}
-          className={`relative flex flex-col flex-1 min-w-0 bg-white dark:bg-[#1C1C1E] border border-gray-200/80 dark:border-white/10 rounded-[1.75rem] shadow-[0_1px_2px_rgba(17,24,39,0.04),0_12px_32px_-16px_rgba(17,24,39,0.12)] min-h-[calc(100dvh-22rem)] lg:min-h-[calc(100dvh-22rem)] ${view === 'map' ? 'overflow-hidden' : ''}`}
+          className={`relative flex flex-col flex-1 min-w-0 bg-page border border-gray-200/80 dark:border-white/10 rounded-[1.75rem] shadow-[0_1px_2px_rgba(17,24,39,0.04),0_12px_32px_-16px_rgba(17,24,39,0.12)] min-h-[calc(100dvh-22rem)] lg:min-h-[calc(100dvh-22rem)] ${view === 'map' ? 'overflow-hidden' : ''}`}
         >
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
@@ -512,12 +512,12 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
               {(view === 'packing' || view === 'documents' || view === 'budget') && (
                 <div>
                   <div className="flex items-center justify-between gap-4 px-5 sm:px-10 pt-6 sm:pt-9 pb-6">
-                    <h2 className="text-[28px] sm:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">{activeTab.label}</h2>
+                    <h2 className="text-[28px] sm:text-4xl font-bold tracking-tight text-primary">{activeTab.label}</h2>
                     <button
                       onClick={() => setView('program')}
                       aria-label={t('tripDetail.notebook.backToProgram')}
                       title={t('tripDetail.notebook.backToProgram')}
-                      className="hidden lg:flex w-10 h-10 items-center justify-center rounded-xl text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                      className="hidden lg:flex w-10 h-10 items-center justify-center rounded-xl text-gray-400 hover:text-primary hover:bg-subtle transition-colors cursor-pointer"
                     >
                       <X size={20} strokeWidth={2.25} />
                     </button>
@@ -568,11 +568,11 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                 aria-current={active ? 'page' : undefined}
                 className={`relative -mt-px first:mt-0 flex items-start gap-3 text-left pr-3 py-3.5 rounded-r-xl border border-l-0 transition-[background-color,color,margin,padding] duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 ${
                   active
-                    ? '-ml-px pl-[17px] mr-0 z-10 bg-white dark:bg-[#1C1C1E] border-gray-200 dark:border-white/10 text-gray-900 dark:text-white shadow-[6px_4px_14px_-8px_rgba(17,24,39,0.16)]'
-                    : 'pl-4 mr-3 bg-[#f1f1f4] dark:bg-[#151517] border-gray-200 dark:border-white/[0.08] text-gray-600 dark:text-gray-400 hover:mr-1.5 hover:text-gray-900 dark:hover:text-white'
+                    ? '-ml-px pl-[17px] mr-0 z-10 bg-page border-default text-primary shadow-[6px_4px_14px_-8px_rgba(17,24,39,0.16)]'
+                    : 'pl-4 mr-3 bg-[#f1f1f4] dark:bg-[#151517] border-gray-200 dark:border-white/[0.08] text-gray-600 dark:text-gray-400 hover:mr-1.5 hover:text-primary'
                 }`}
               >
-                <Icon size={18} strokeWidth={2.25} className={`mt-0.5 shrink-0 ${active ? 'text-blue-600 dark:text-blue-400' : ''}`} aria-hidden="true" />
+                <Icon size={18} strokeWidth={2.25} className={`mt-0.5 shrink-0 ${active ? 'text-accent' : ''}`} aria-hidden="true" />
                 <span className="min-w-0">
                   <span className="block text-[14px] font-semibold leading-tight">{label}</span>
                   <span className="block text-[12px] font-medium mt-0.5 truncate tabular-nums text-gray-600 dark:text-gray-400">{status}</span>
@@ -583,7 +583,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           {!isViewer && (
             <button
               onClick={() => setAddExpenseRequest(n => n + 1)}
-              className="mt-4 mr-3 h-11 flex items-center justify-center gap-2 rounded-2xl bg-blue-600 text-white text-[14px] font-semibold hover:bg-blue-500 active:scale-95 transition-all shadow-[0_6px_16px_-8px_rgba(37,99,235,0.7)] cursor-pointer"
+              className="mt-4 mr-3 h-11 flex items-center justify-center gap-2 rounded-2xl bg-accent text-white text-[14px] font-semibold hover:bg-accent-hover active:scale-95 transition-all shadow-[0_6px_16px_-8px_rgba(37,99,235,0.7)] cursor-pointer"
             >
               <Plus size={17} strokeWidth={2.5} /> {t('tripDetail.notebook.addExpense')}
             </button>
@@ -594,7 +594,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
       {/* ── Mobilní spodní lišta: Program · Balení · [+ Výdaj] · Odkazy · Rozpočet ── */}
       <nav
         aria-label={t('tripDetail.tabs.tools')}
-        className="lg:hidden fixed inset-x-0 bottom-0 z-50 bg-white/95 dark:bg-[#1C1C1E]/95 backdrop-blur-xl border-t border-gray-200/80 dark:border-white/10 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+        className="lg:hidden fixed inset-x-0 bottom-0 z-50 bg-page/95 backdrop-blur-xl border-t border-gray-200/80 dark:border-white/10 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
       >
         <div className="max-w-xl mx-auto grid grid-cols-5 items-end px-2 pt-1.5">
           {['program', 'packing', 'add', 'documents', 'budget'].map((slot) => {
@@ -606,10 +606,10 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                   aria-label={t('budget.addExpense')}
                   className="flex flex-col items-center gap-1 pb-1.5 cursor-pointer group"
                 >
-                  <span className="-mt-5 w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-[0_8px_20px_-8px_rgba(37,99,235,0.7)] group-active:scale-95 transition-transform">
+                  <span className="-mt-5 w-14 h-14 rounded-2xl bg-accent text-white flex items-center justify-center shadow-[0_8px_20px_-8px_rgba(37,99,235,0.7)] group-active:scale-95 transition-transform">
                     <Plus size={26} strokeWidth={2.5} aria-hidden="true" />
                   </span>
-                  <span className="text-[11px] font-semibold text-blue-700 dark:text-blue-400">{t('tripDetail.notebook.addExpense')}</span>
+                  <span className="text-[11px] font-semibold text-active">{t('tripDetail.notebook.addExpense')}</span>
                 </button>
               );
             }
@@ -621,7 +621,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                 onClick={() => (slot === 'program' ? setView('program') : openView(slot))}
                 aria-current={active ? 'page' : undefined}
                 className={`flex flex-col items-center gap-1 py-1.5 min-h-[52px] rounded-xl transition-colors cursor-pointer ${
-                  active ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 active:bg-gray-100 dark:active:bg-white/5'
+                  active ? 'text-accent' : 'text-gray-600 dark:text-gray-400 active:bg-gray-100 dark:active:bg-white/5'
                 }`}
               >
                 <Icon size={22} strokeWidth={active ? 2.5 : 2} aria-hidden="true" />

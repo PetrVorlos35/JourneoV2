@@ -66,13 +66,13 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="relative z-10 bg-white dark:bg-[#1C1C1E] border border-gray-100 dark:border-white/10 rounded-t-[2rem] sm:rounded-[2rem] w-full max-w-md max-h-[85dvh] overflow-y-auto custom-scrollbar p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8 shadow-2xl"
+            className="relative z-10 bg-page border border-subtle rounded-t-[2rem] sm:rounded-[2rem] w-full max-w-md max-h-[85dvh] overflow-y-auto custom-scrollbar p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8 shadow-2xl"
           >
             {/* Close btn */}
             <button
               onClick={onClose}
               aria-label={t('common.close')}
-              className="absolute top-4 right-4 w-10 h-10 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer disabled:cursor-not-allowed"
+              className="absolute top-4 right-4 w-10 h-10 bg-subtle rounded-full flex items-center justify-center text-muted hover:text-primary transition-colors cursor-pointer disabled:cursor-not-allowed"
             >
               <X size={20} strokeWidth={2.5} />
             </button>
@@ -80,20 +80,20 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
             {/* Icon */}
             <div className={`inline-flex p-4 rounded-2xl mb-6 ${
               config?.variant === 'danger'
-                ? 'bg-red-50 dark:bg-red-500/10 text-red-500'
-                : 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
+                ? 'bg-danger-wash text-red-500'
+                : 'bg-active text-accent'
             }`}>
               <AlertTriangle size={28} strokeWidth={2.5} />
             </div>
 
             {/* Title */}
-            <h2 className="font-bold text-2xl sm:text-3xl tracking-tight text-gray-900 dark:text-white mb-4">
+            <h2 className="font-bold text-2xl sm:text-3xl tracking-tight text-primary mb-4">
               {config?.title || t('dialog.defaultTitle')}
             </h2>
 
             {/* Message */}
             {config?.message && (
-              <p className="text-[15px] text-gray-500 dark:text-gray-400 mb-8 font-medium leading-relaxed">
+              <p className="text-[15px] text-muted mb-8 font-medium leading-relaxed">
                 {config.message}
               </p>
             )}
@@ -101,7 +101,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
             {/* Prompt input */}
             {config?.type === 'prompt' && (
               <div className="mb-8">
-                <label className="block text-[12px] font-semibold text-gray-500 dark:text-gray-400 mb-2">
+                <label className="block text-[12px] font-semibold text-muted mb-2">
                   {config.inputLabel || t('dialog.defaultInputLabel')}
                 </label>
                 <input
@@ -126,7 +126,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
             <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end pt-2">
               <button
                 onClick={() => onCancel(false)}
-                className="w-full sm:w-auto px-6 py-4 rounded-2xl text-[13px] font-semibold text-gray-500 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                className="w-full sm:w-auto px-6 py-4 rounded-2xl text-[13px] font-semibold text-gray-500 hover:text-primary hover:bg-subtle transition-colors cursor-pointer disabled:cursor-not-allowed"
               >
                 {config?.cancelLabel || t('dialog.cancel')}
               </button>
@@ -140,7 +140,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
                 className={`w-full sm:w-auto px-8 py-4 rounded-2xl font-bold transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed shadow-md active:scale-95 ${
                   config?.variant === 'danger'
                     ? 'bg-red-500 text-white shadow-red-500/20 hover:bg-red-600'
-                    : 'bg-blue-600 text-white shadow-blue-500/20 hover:bg-blue-500'
+                    : 'bg-accent text-white shadow-blue-500/20 hover:bg-accent-hover'
                 } cursor-pointer disabled:cursor-not-allowed`}
               >
                 {config?.confirmLabel || t('dialog.confirm')}

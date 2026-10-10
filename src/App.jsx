@@ -61,7 +61,7 @@ const AdminRedirect = () => {
 
 function App() {
   return (
-    <div className="bg-gray-50 dark:bg-black min-h-screen text-gray-900 dark:text-white transition-colors duration-500">
+    <div className="bg-gray-50 dark:bg-black min-h-screen text-primary transition-colors duration-500">
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />

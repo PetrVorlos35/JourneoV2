@@ -19,14 +19,14 @@ export const GROUP_ORDER = [
 // Barva dlaždice s ikonou podle typu — výsledky jdou tak rozeznat
 // periferním viděním, ne až přečtením řádku.
 export const TYPE_STYLES = {
-  trip:     'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400',
+  trip:     'bg-active text-accent',
   day:      'bg-sky-50 text-sky-600 dark:bg-sky-500/10 dark:text-sky-400',
   place:    'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400',
   expense:  'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400',
   packing:  'bg-teal-50 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400',
   document: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400',
   friend:   'bg-fuchsia-50 text-fuchsia-600 dark:bg-fuchsia-500/10 dark:text-fuchsia-400',
-  page:     'bg-gray-100 text-gray-600 dark:bg-white/[0.07] dark:text-gray-300',
+  page:     'bg-gray-100 text-secondary dark:bg-white/[0.07]',
   action:   'bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400',
 };
 

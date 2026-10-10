@@ -39,17 +39,17 @@ const Tile = ({ icon: Icon, accent, label, value, sub, to, delay = 0, children }
       <div className="flex items-center gap-2.5 mb-3">
         <span
           className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-          style={{ backgroundColor: `${accent}15` }}
+          style={{ backgroundColor: `color-mix(in srgb, ${accent} 8.2%, transparent)` }}
         >
           <Icon size={16} strokeWidth={2.2} style={{ color: accent }} aria-hidden="true" />
         </span>
-        <span className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 truncate">{label}</span>
+        <span className="text-[11px] font-semibold text-muted truncate">{label}</span>
       </div>
-      <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-none truncate">
+      <p className="text-xl sm:text-2xl font-bold text-primary tracking-tight leading-none truncate">
         {value}
       </p>
       {sub && (
-        <p className="text-[12px] font-medium text-gray-500 dark:text-gray-400 mt-1.5 truncate">{sub}</p>
+        <p className="text-[12px] font-medium text-muted mt-1.5 truncate">{sub}</p>
       )}
       {children}
     </motion.div>
@@ -98,7 +98,7 @@ const OverviewTiles = ({ budget, balances, places, tripCounts }) => {
       sub: owing
         ? t('tripsOverview.tiles.balanceIOwe', { count: people })
         : t('tripsOverview.tiles.balanceOwedToMe', { count: people }),
-      accent: owing ? '#f87171' : '#34d399',
+      accent: owing ? 'var(--color-icon-tone-red)' : 'var(--color-icon-tone-emerald)',
     };
   })();
 
@@ -122,7 +122,7 @@ const OverviewTiles = ({ budget, balances, places, tripCounts }) => {
     <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
       <Tile
         icon={Wallet}
-        accent="#60a5fa"
+        accent="var(--color-icon-tone-blue)"
         label={t('tripsOverview.tiles.budget')}
         value={budgetTile.value}
         sub={budgetTile.sub}
@@ -141,7 +141,7 @@ const OverviewTiles = ({ budget, balances, places, tripCounts }) => {
 
       <Tile
         icon={Scale}
-        accent={balanceTile.accent || '#a78bfa'}
+        accent={balanceTile.accent || 'var(--color-icon-tone-violet)'}
         label={t('tripsOverview.tiles.balance')}
         value={balanceTile.value}
         sub={balanceTile.sub}
@@ -151,7 +151,7 @@ const OverviewTiles = ({ budget, balances, places, tripCounts }) => {
 
       <Tile
         icon={Globe2}
-        accent="#34d399"
+        accent="var(--color-icon-tone-emerald)"
         label={t('tripsOverview.tiles.countries')}
         value={geoTile.value}
         sub={geoTile.sub}
@@ -170,7 +170,7 @@ const OverviewTiles = ({ budget, balances, places, tripCounts }) => {
 
       <Tile
         icon={Plane}
-        accent="#fbbf24"
+        accent="var(--color-icon-tone-amber)"
         label={t('tripsOverview.tiles.trips')}
         value={tripCounts.total}
         sub={t('tripsOverview.tiles.tripsUpcoming', { count: tripCounts.upcoming })}
@@ -199,9 +199,9 @@ export const FriendRequestsRow = ({ count }) => {
     >
       <Link
         to="/dashboard/friends"
-        className="flex items-center gap-3 rounded-2xl bg-blue-50 dark:bg-blue-500/10 px-4 min-h-[48px] py-2.5 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-500/[0.16] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+        className="flex items-center gap-3 rounded-2xl bg-active px-4 min-h-[48px] py-2.5 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-500/[0.16] transition-colors outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
       >
-        <span className="flex items-center justify-center w-6 h-6 shrink-0 rounded-full bg-blue-600 text-white text-[12px] font-bold">
+        <span className="flex items-center justify-center w-6 h-6 shrink-0 rounded-full bg-accent text-white text-[12px] font-bold">
           {count}
         </span>
         <span className="text-[14px] font-semibold flex-1 min-w-0 truncate">
