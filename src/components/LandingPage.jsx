@@ -1079,22 +1079,6 @@ const LandingPage = () => {
           </div>
         </section>
 
-        {/* ── Founder note ── */}
-        <section className="relative px-6 pb-20 sm:pb-28">
-          <Reveal className="max-w-2xl mx-auto text-center">
-            <p className="text-gray-700 leading-relaxed text-lg sm:text-xl" style={{ textWrap: 'pretty' }}>
-              {t('landing.story.quote')}
-            </p>
-            <p
-              className="mt-6 text-blue-600 text-2xl sm:text-3xl rotate-[-2deg] select-none"
-              style={{ fontFamily: "'Caveat', cursive" }}
-            >
-              {t('landing.story.signature')}
-            </p>
-            <p className="text-gray-400 text-sm mt-0.5">{t('landing.story.role')}</p>
-          </Reveal>
-        </section>
-
         {/* ── Features ── */}
         <section id="features" className="relative px-6 py-24 sm:py-32 scroll-mt-24">
           <Doodle name="suitcase" className="left-[6%] top-20 w-[82px] rotate-[-5deg]" />
@@ -1228,9 +1212,18 @@ const LandingPage = () => {
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-4" style={{ textWrap: 'balance' }}>
               {t('landing.feedback.title')}
             </h2>
-            <p className="text-gray-600 leading-relaxed mb-8" style={{ textWrap: 'pretty' }}>
+            <p className="text-gray-600 leading-relaxed" style={{ textWrap: 'pretty' }}>
               {t('landing.feedback.subtitle')}
             </p>
+            <div className="mt-5 mb-8">
+              <p
+                className="text-blue-600 text-2xl sm:text-3xl rotate-[-2deg] select-none"
+                style={{ fontFamily: "'Caveat', cursive" }}
+              >
+                {t('landing.story.signature')}
+              </p>
+              <p className="text-gray-400 text-sm mt-0.5">{t('landing.story.role')}</p>
+            </div>
             <a
               href="mailto:petr@vorlos.eu"
               className="inline-flex items-center gap-2.5 font-semibold text-gray-900 rounded-full px-7 py-3.5 border border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm transition-all duration-300"
