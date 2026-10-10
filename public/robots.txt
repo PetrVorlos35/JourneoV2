@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /share/
+Disallow: /api/
+
+Sitemap: https://journeo.vorlos.eu/sitemap.xml
