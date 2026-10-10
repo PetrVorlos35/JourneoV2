@@ -554,7 +554,7 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
         </div>
 
         {/* Danger zone */}
-        <div className="bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-[2rem] p-5 sm:p-8 md:p-10">
+        <div className="bg-danger-wash border border-red-100 dark:border-red-500/20 rounded-[2rem] p-5 sm:p-8 md:p-10">
           <h2 className="text-2xl font-bold text-danger mb-4 flex items-center gap-3">
             <div className="w-10 h-10 bg-red-100 dark:bg-red-500/20 text-danger rounded-xl flex items-center justify-center">
               <Trash2 size={20} strokeWidth={2} />

@@ -167,7 +167,7 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
                     </span>
                     <button
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDeleteTrip(trip.id); }}
-                      className="w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer"
+                      className="w-10 h-10 flex items-center justify-center rounded-full bg-danger-wash text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer"
                       aria-label={t('allTrips.delete.title')}
                     >
                       <Trash2 size={16} strokeWidth={2} aria-hidden="true" />

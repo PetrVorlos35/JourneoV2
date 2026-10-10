@@ -445,7 +445,7 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
                               onClick={() => handleRemove(collab)}
                               disabled={isRemoving || !!updatingId}
                               aria-label={t('common.delete')}
-                              className="w-9 h-9 sm:w-7 sm:h-7 flex items-center justify-center rounded-xl text-gray-400 hover:text-danger hover:bg-red-50 dark:text-white/30 dark:hover:bg-red-500/10 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all disabled:pointer-events-none cursor-pointer disabled:cursor-not-allowed"
+                              className="w-9 h-9 sm:w-7 sm:h-7 flex items-center justify-center rounded-xl text-gray-400 hover:text-danger hover:bg-danger-wash dark:text-white/30 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all disabled:pointer-events-none cursor-pointer disabled:cursor-not-allowed"
                             >
                               {isRemoving ? (
                                 <Loader2 size={13} className="animate-spin" />

@@ -396,7 +396,7 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
               className={`w-full text-left p-4 rounded-2xl border transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 ${
                 profileOpen || location.pathname === '/dashboard/settings'
                   ? 'bg-gray-50 dark:bg-white/[0.06] border-gray-300 dark:border-white/15'
-                  : 'bg-gray-50/70 dark:bg-white/[0.03] border-gray-200/80 dark:border-white/[0.08] hover:border-gray-300 dark:hover:border-white/15'
+                  : 'bg-passport border-gray-200/80 dark:border-white/[0.08] hover:border-gray-300 dark:hover:border-white/15'
               }`}
             >
               <PassportIdentity user={user} t={t} trailing={<ChevronsUpDown size={16} strokeWidth={2} className="shrink-0 text-gray-400" aria-hidden="true" />} />
@@ -425,7 +425,7 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
                   <button
                     type="button"
                     onClick={() => { setProfileOpen(false); handleLogout(); }}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-semibold text-danger hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-semibold text-danger hover:bg-danger-wash transition-colors cursor-pointer"
                   >
                     <LogOut size={18} strokeWidth={2} /> {t('dashboardLayout.dialogs.logout.confirm')}
                   </button>
@@ -572,7 +572,7 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
               <div className="px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))] border-t border-subtle">
                 <button
                   onClick={() => { closeMobile(); handleLogout(); }}
-                  className="w-full flex items-center justify-center gap-2.5 h-12 rounded-2xl text-danger hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors font-semibold cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2.5 h-12 rounded-2xl text-danger hover:bg-danger-wash transition-colors font-semibold cursor-pointer"
                 >
                   <LogOut size={19} strokeWidth={2.25} />
                   <span>{t('dashboardLayout.dialogs.logout.confirm')}</span>

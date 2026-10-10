@@ -361,7 +361,7 @@ const PublicTripView = () => {
                         {packingList.map(item => (
                           <div key={item.id} className="flex items-center gap-3 lg:gap-4 py-3.5 lg:py-4 px-4 lg:px-5 bg-field rounded-2xl border border-gray-100 dark:border-white/5">
                             <div className={`w-6 h-6 shrink-0 rounded-md border-2 flex items-center justify-center transition-colors ${
-                              !!item.checked ? 'border-blue-500 bg-blue-500' : 'border-gray-300 dark:border-white/20'
+                              !!item.checked ? 'border-blue-500 bg-blue-500' : 'border-check'
                             }`}>
                               {!!item.checked && <Check size={12} strokeWidth={2.5} className="text-white" />}
                             </div>

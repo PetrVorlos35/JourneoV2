@@ -93,14 +93,14 @@ const HeroCard = ({ trip, state, placeCount, onCreate }) => {
 
     return (
       <motion.div {...animation} className={card}>
-        <div className="inline-flex items-center gap-2 self-start rounded-full bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 mb-5">
+        <div className="inline-flex items-center gap-2 self-start rounded-full bg-success-wash px-3 py-1.5 mb-5">
           <span className="relative flex w-2 h-2" aria-hidden="true">
             {!shouldReduceMotion && (
               <span className="absolute inline-flex w-full h-full rounded-full bg-emerald-400 opacity-70 animate-ping" />
             )}
             <span className="relative inline-flex w-2 h-2 rounded-full bg-emerald-500" />
           </span>
-          <span className="text-[12px] font-bold text-emerald-700 dark:text-emerald-400">
+          <span className="text-[12px] font-bold text-success">
             {t('tripsOverview.hero.inProgress')} · {t('tripsOverview.hero.dayOf', { day: dayNumber, total: dayCount })}
           </span>
         </div>

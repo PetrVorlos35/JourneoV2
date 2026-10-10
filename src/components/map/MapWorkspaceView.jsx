@@ -309,7 +309,7 @@ const MapWorkspaceView = ({
               type="button"
               onClick={() => handleDelete(selectedPlace)}
               aria-label={t('map.mobile.delete')}
-              className="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center text-red-500 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors cursor-pointer"
+              className="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center text-red-500 bg-danger-wash hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors cursor-pointer"
             >
               <Trash2 size={16} strokeWidth={2.5} />
             </button>

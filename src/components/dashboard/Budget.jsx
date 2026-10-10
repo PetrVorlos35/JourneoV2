@@ -25,7 +25,7 @@ const CATEGORIES = [
   { id: 'transport',      icon: Car,          colorClass: 'bg-blue-500',    lightBgClass: 'bg-active',     textClass: 'text-accent' },
   { id: 'accommodation',  icon: Home,         colorClass: 'bg-purple-500',  lightBgClass: 'bg-purple-50 dark:bg-purple-500/10', textClass: 'text-purple-600 dark:text-purple-400' },
   { id: 'food',           icon: Utensils,     colorClass: 'bg-orange-500',  lightBgClass: 'bg-orange-50 dark:bg-orange-500/10', textClass: 'text-orange-600 dark:text-orange-400' },
-  { id: 'activities',     icon: Palmtree,     colorClass: 'bg-emerald-500', lightBgClass: 'bg-emerald-50 dark:bg-emerald-500/10', textClass: 'text-success' },
+  { id: 'activities',     icon: Palmtree,     colorClass: 'bg-emerald-500', lightBgClass: 'bg-success-wash', textClass: 'text-success' },
   { id: 'other',          icon: MoreHorizontal, colorClass: 'bg-gray-500', lightBgClass: 'bg-gray-100 dark:bg-gray-500/10',    textClass: 'text-gray-600 dark:text-gray-400' },
 ];
 
@@ -132,7 +132,7 @@ const SettleUpModal = ({ isOpen, onClose, creditor, amount, currency, locale, tr
           >
             <div className="flex justify-between items-center mb-6 pb-4 border-b border-default">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-9 h-9 bg-emerald-50 dark:bg-emerald-500/10 text-success rounded-xl flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 bg-success-wash text-success rounded-xl flex items-center justify-center shrink-0">
                   <HandCoins size={17} strokeWidth={2} />
                 </div>
                 <h3 id="settle-title" className="font-bold text-xl sm:text-2xl tracking-tight text-primary truncate">
@@ -221,7 +221,7 @@ const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSha
         </div>
       ) : (
       <div className="flex items-center gap-3 mb-1.5">
-        <div className="w-9 h-9 bg-emerald-50 dark:bg-emerald-500/10 text-success rounded-xl flex items-center justify-center shrink-0">
+        <div className="w-9 h-9 bg-success-wash text-success rounded-xl flex items-center justify-center shrink-0">
           <Scale size={16} strokeWidth={2} />
         </div>
         <div>
@@ -279,7 +279,7 @@ const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSha
 
           {/* Suggested settlements — or an "all settled" confirmation */}
           {settlements.length === 0 ? (
-            <div className="mt-5 flex items-center justify-center gap-2.5 py-4 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/60 dark:border-emerald-500/20">
+            <div className="mt-5 flex items-center justify-center gap-2.5 py-4 rounded-2xl bg-success-wash border border-emerald-200/60 dark:border-emerald-500/20">
               <CheckCircle2 size={18} strokeWidth={2.5} className="text-success shrink-0" />
               <span className="text-[14px] font-bold text-emerald-700 dark:text-emerald-300">{t('budget.balances.allSettled')}</span>
             </div>
@@ -388,7 +388,7 @@ const ExpenseRow = ({ expense, compact = false, flush = false, currency, locale,
               <button
                 onClick={() => onDelete(expense.id)}
                 aria-label={t('budget.expenseDelete')}
-                className="w-10 h-10 md:w-7 md:h-7 flex items-center justify-center text-gray-400 hover:text-danger dark:text-gray-500 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10 cursor-pointer"
+                className="w-10 h-10 md:w-7 md:h-7 flex items-center justify-center text-gray-400 hover:text-danger dark:text-gray-500 transition-colors rounded-lg hover:bg-danger-wash cursor-pointer"
               >
                 <Trash2 size={13} strokeWidth={2.5} />
               </button>
@@ -789,7 +789,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
                 <div className="space-y-3 pt-4 border-t border-default">
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-7 h-7 bg-emerald-50 dark:bg-emerald-500/10 text-success rounded-lg flex items-center justify-center shrink-0">
+                      <div className="w-7 h-7 bg-success-wash text-success rounded-lg flex items-center justify-center shrink-0">
                         <Split size={14} strokeWidth={2} />
                       </div>
                       <span className="text-[14px] font-bold text-primary">{t('budget.addModal.splitLabel')}</span>
@@ -1354,7 +1354,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                 {projectedTotal !== null && budgetTarget && (
                   <div>
                     <dt className="text-muted">{t('budget.summary.projected')}</dt>
-                    <dd className={`font-semibold tabular-nums ${projectedTotal > budgetTarget ? 'text-danger' : 'text-emerald-700 dark:text-emerald-400'}`}>{formatCurrency(projectedTotal, currency, i18n.language)}</dd>
+                    <dd className={`font-semibold tabular-nums ${projectedTotal > budgetTarget ? 'text-danger' : 'text-success'}`}>{formatCurrency(projectedTotal, currency, i18n.language)}</dd>
                   </div>
                 )}
               </dl>
@@ -1408,7 +1408,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0 }}
-                          className="flex items-center gap-1.5 text-[11px] font-bold text-success bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-full shrink-0"
+                          className="flex items-center gap-1.5 text-[11px] font-bold text-success bg-success-wash px-3 py-1.5 rounded-full shrink-0"
                         >
                           <TrendingUp size={11} strokeWidth={2.5} /> {t('budget.pacing.onTrack')}
                         </motion.span>
@@ -1419,7 +1419,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0 }}
-                          className="flex items-center gap-1.5 text-[11px] font-bold text-danger bg-red-50 dark:bg-red-500/10 px-3 py-1.5 rounded-full shrink-0"
+                          className="flex items-center gap-1.5 text-[11px] font-bold text-danger bg-danger-wash px-3 py-1.5 rounded-full shrink-0"
                         >
                           <TrendingDown size={11} strokeWidth={2.5} /> {t('budget.pacing.overPace')}
                         </motion.span>

@@ -16,7 +16,7 @@ const MobileTabBar = ({ items, activePath, onNavigate, onCreate }) => {
   return (
     <nav
       aria-label={t('dashboardLayout.navLabel')}
-      className="md:hidden fixed inset-x-0 bottom-0 z-50 bg-page/95 backdrop-blur-xl border-t border-gray-200/80 dark:border-white/10 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+      className="md:hidden fixed inset-x-0 bottom-0 z-50 bg-bar backdrop-blur-xl border-t border-gray-200/80 dark:border-white/10 pb-[max(0.5rem,env(safe-area-inset-bottom))]"
     >
       <div className={`max-w-xl mx-auto grid ${onCreate ? 'grid-cols-5' : 'grid-cols-4'} items-end px-2 pt-1.5`}>
         {slots.map((slot) => {

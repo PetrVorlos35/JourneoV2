@@ -55,7 +55,7 @@ const DayStrip = ({ days, activeIndex, dimmed = false, onSelect, dateLocale }) =
                 ? dimmed
                   ? 'bg-gray-200/70 dark:bg-white/10 text-primary'
                   : 'bg-accent text-white shadow-[0_6px_16px_-8px_rgba(37,99,235,0.7)]'
-                : 'bg-white dark:bg-white/[0.04] border border-gray-200/80 dark:border-white/10 text-primary hover:border-gray-300 dark:hover:border-white/20'
+                : 'bg-white dark:bg-white/[0.04] border border-gray-200/80 dark:border-white/10 text-primary hover:border-check'
             }`}
           >
             <span className="flex items-center gap-1.5 text-[12px] font-medium">

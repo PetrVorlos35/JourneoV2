@@ -113,7 +113,7 @@ const Trash = ({ onTripsChanged }) => {
         {trips.length > 0 && (
           <button
             onClick={handleEmptyTrash}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-500 font-semibold text-[14px] hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors shrink-0 cursor-pointer min-h-[44px]"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-danger-wash text-red-500 font-semibold text-[14px] hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors shrink-0 cursor-pointer min-h-[44px]"
           >
             <Trash2 size={16} strokeWidth={2.5} aria-hidden="true" />
             {t('trash.emptyTrash')}
@@ -169,7 +169,7 @@ const Trash = ({ onTripsChanged }) => {
                   <button
                     onClick={() => handleDeleteForever(trip)}
                     disabled={busy}
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-red-50 dark:bg-red-500/10 text-red-500 text-[13px] font-semibold hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-danger-wash text-red-500 text-[13px] font-semibold hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
                   >
                     {t('trash.deleteForever')}
                   </button>

@@ -94,7 +94,7 @@ const ReadinessCard = ({ trip, placeCount }) => {
                 className={`w-4 h-4 shrink-0 rounded-full flex items-center justify-center ${
                   item.done
                     ? 'bg-emerald-500 text-white'
-                    : 'border-[1.5px] border-gray-300 dark:border-white/20'
+                    : 'border-[1.5px] border-check'
                 }`}
                 aria-hidden="true"
               >

@@ -106,8 +106,8 @@ export const Badge = ({ tone = 'gray', children }) => {
   const tones = {
     gray: 'bg-subtle text-secondary',
     amber: 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400',
-    red: 'bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-400',
-    green: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400',
+    red: 'bg-danger-wash text-red-700 dark:text-red-400',
+    green: 'bg-success-wash text-success',
   };
   return <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-semibold whitespace-nowrap ${tones[tone]}`}>{children}</span>;
 };

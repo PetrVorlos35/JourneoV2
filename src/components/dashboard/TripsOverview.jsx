@@ -73,7 +73,7 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal, error, onRetry 
           {t('tripsOverview.title')}
         </h1>
         <div className="glass-card rounded-[2rem] p-8 sm:p-12 flex flex-col items-center justify-center text-center min-h-[40dvh] space-y-4">
-          <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-500/10 text-red-500 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-2xl bg-danger-wash text-red-500 flex items-center justify-center">
             <AlertCircle size={26} strokeWidth={2} aria-hidden="true" />
           </div>
           <div>

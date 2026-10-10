@@ -39,7 +39,7 @@ const Tile = ({ icon: Icon, accent, label, value, sub, to, delay = 0, children }
       <div className="flex items-center gap-2.5 mb-3">
         <span
           className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
-          style={{ backgroundColor: `${accent}15` }}
+          style={{ backgroundColor: `color-mix(in srgb, ${accent} 8.2%, transparent)` }}
         >
           <Icon size={16} strokeWidth={2.2} style={{ color: accent }} aria-hidden="true" />
         </span>
@@ -98,7 +98,7 @@ const OverviewTiles = ({ budget, balances, places, tripCounts }) => {
       sub: owing
         ? t('tripsOverview.tiles.balanceIOwe', { count: people })
         : t('tripsOverview.tiles.balanceOwedToMe', { count: people }),
-      accent: owing ? '#f87171' : '#34d399',
+      accent: owing ? 'var(--color-icon-tone-red)' : 'var(--color-icon-tone-emerald)',
     };
   })();
 
@@ -122,7 +122,7 @@ const OverviewTiles = ({ budget, balances, places, tripCounts }) => {
     <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
       <Tile
         icon={Wallet}
-        accent="#60a5fa"
+        accent="var(--color-icon-tone-blue)"
         label={t('tripsOverview.tiles.budget')}
         value={budgetTile.value}
         sub={budgetTile.sub}
@@ -141,7 +141,7 @@ const OverviewTiles = ({ budget, balances, places, tripCounts }) => {
 
       <Tile
         icon={Scale}
-        accent={balanceTile.accent || '#a78bfa'}
+        accent={balanceTile.accent || 'var(--color-icon-tone-violet)'}
         label={t('tripsOverview.tiles.balance')}
         value={balanceTile.value}
         sub={balanceTile.sub}
@@ -151,7 +151,7 @@ const OverviewTiles = ({ budget, balances, places, tripCounts }) => {
 
       <Tile
         icon={Globe2}
-        accent="#34d399"
+        accent="var(--color-icon-tone-emerald)"
         label={t('tripsOverview.tiles.countries')}
         value={geoTile.value}
         sub={geoTile.sub}
@@ -170,7 +170,7 @@ const OverviewTiles = ({ budget, balances, places, tripCounts }) => {
 
       <Tile
         icon={Plane}
-        accent="#fbbf24"
+        accent="var(--color-icon-tone-amber)"
         label={t('tripsOverview.tiles.trips')}
         value={tripCounts.total}
         sub={t('tripsOverview.tiles.tripsUpcoming', { count: tripCounts.upcoming })}

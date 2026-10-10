@@ -31,7 +31,7 @@ const PackingRow = ({ item, isViewer, onToggle, onDelete, t }) => (
       <button
         onClick={() => onDelete(item.id)}
         aria-label={t('tripDetail.packing.delete.title')}
-        className="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-all cursor-pointer"
+        className="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl text-gray-400 hover:text-red-500 hover:bg-danger-wash opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-all cursor-pointer"
       >
         <Trash2 size={16} strokeWidth={2} />
       </button>

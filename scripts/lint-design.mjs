@@ -9,6 +9,10 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 // [light class, dark class, token utility]
 const PAIRS = [
+  ['bg-emerald-50', 'bg-emerald-500/10', 'bg-success-wash'],
+  ['bg-red-50', 'bg-red-500/10', 'bg-danger-wash'],
+  ['border-gray-300', 'border-white/20', 'border-check'],
+  ['text-emerald-700', 'text-emerald-400', 'text-success'],
   ['bg-white', 'bg-[#1C1C1E]', 'bg-page'],
   ['bg-[#fbfbfd]', 'bg-black', 'bg-desk'],
   ['bg-gray-50', 'bg-white/5', 'bg-field'],

@@ -40,7 +40,7 @@ const TripCard = ({ trip, onDeleteTrip }) => {
         </div>
         <div className="flex items-center gap-2">
           {isOngoing && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-success-wash px-2.5 py-1 text-[11px] font-bold text-success">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" aria-hidden="true" />
               {t('tripsOverview.hero.inProgress')}
             </span>
@@ -52,7 +52,7 @@ const TripCard = ({ trip, onDeleteTrip }) => {
           )}
           <button
             onClick={handleDelete}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer"
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-danger-wash text-red-500 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity hover:bg-red-100 dark:hover:bg-red-500/20 cursor-pointer"
             aria-label={`${t('tripsOverview.delete.title')}: ${trip.title}`}
             title={t('tripsOverview.delete.title')}
           >

@@ -244,7 +244,7 @@ const PlaceForm = ({
                 className={`min-h-[44px] px-3.5 rounded-2xl flex items-center gap-2 text-[13px] font-semibold border transition-colors cursor-pointer ${
                   form.category === key
                     ? 'bg-white dark:bg-white/10 border-2'
-                    : 'bg-white dark:bg-white/5 border-default text-secondary hover:border-gray-300 dark:hover:border-white/20'
+                    : 'bg-white dark:bg-white/5 border-default text-secondary hover:border-check'
                 }`}
               >
                 <Icon size={15} strokeWidth={2.5} aria-hidden="true" />
@@ -328,7 +328,7 @@ const PlaceForm = ({
             type="button"
             onClick={() => onDelete(place)}
             aria-label={t('map.sheet.delete')}
-            className="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center text-red-500 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors cursor-pointer"
+            className="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center text-red-500 bg-danger-wash hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors cursor-pointer"
           >
             <Trash2 size={17} strokeWidth={2.5} />
           </button>

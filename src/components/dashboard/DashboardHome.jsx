@@ -150,7 +150,7 @@ const DashboardHome = () => {
           className="relative w-[340px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl bg-page border border-black/5 dark:border-white/10 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.4)]"
         >
           <div className="flex items-center gap-3 pl-4 pr-3 py-3.5">
-            <div className="w-9 h-9 shrink-0 rounded-full bg-red-50 dark:bg-red-500/10 text-red-500 flex items-center justify-center">
+            <div className="w-9 h-9 shrink-0 rounded-full bg-danger-wash text-red-500 flex items-center justify-center">
               <Trash2 size={16} strokeWidth={2} aria-hidden="true" />
             </div>
             <div className="min-w-0 flex-1">

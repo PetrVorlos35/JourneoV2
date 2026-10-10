@@ -80,7 +80,7 @@ const DialogModal = ({ isOpen, config, onConfirm, onCancel, onClose }) => {
             {/* Icon */}
             <div className={`inline-flex p-4 rounded-2xl mb-6 ${
               config?.variant === 'danger'
-                ? 'bg-red-50 dark:bg-red-500/10 text-red-500'
+                ? 'bg-danger-wash text-red-500'
                 : 'bg-active text-accent'
             }`}>
               <AlertTriangle size={28} strokeWidth={2.5} />

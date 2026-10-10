@@ -130,7 +130,7 @@ const TripDossier = ({ tripId, onDeleted, onBack }) => {
         <button
           type="button"
           onClick={remove}
-          className="inline-flex items-center gap-2 h-10 px-3 -ml-3 rounded-xl text-[14px] font-semibold text-danger hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-2 h-10 px-3 -ml-3 rounded-xl text-[14px] font-semibold text-danger hover:bg-danger-wash transition-colors cursor-pointer"
         >
           <Trash2 size={16} strokeWidth={2.25} /> {t('admin.v2.deleteTrip')}
         </button>
