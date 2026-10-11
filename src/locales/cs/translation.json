@@ -1314,7 +1314,18 @@
       "placeholder": "SMAZAT VŠE",
       "requiredPhrase": "SMAZAT VŠE",
       "confirmBtn": "Trvale smazat",
-      "successMessage": "Všechna data byla úspěšně smazána."
+      "successMessage": "Všechna data byla úspěšně smazána.",
+      "account": {
+        "title": "Smazat účet",
+        "description": "Trvale smaže váš účet, přátele, oznámení a nastavení. Výlety, které vlastníte a sdílíte s někým, kdo je může upravovat, se předají jemu. Ostatní vaše výlety se smažou i lidem, kteří je mohou jen číst. Výdaje, které jste platili ve výletech jiných lidí, v nich zůstanou bez vašeho jména. Nelze vzít zpět.",
+        "button": "Smazat účet",
+        "confirmTitle": "Opravdu smazat účet?",
+        "confirmMessage": "Účet a všechna vaše data budou nenávratně smazána a budete odhlášeni.",
+        "confirmLabel": "Pro potvrzení napište svůj e-mail",
+        "confirmBtn": "Trvale smazat účet",
+        "successMessage": "Váš účet byl smazán.",
+        "error": "Účet se nepodařilo smazat."
+      }
     }
   },
   "friends": {
@@ -1405,7 +1416,8 @@
     },
     "messages": {
       "friendRequest": "{{name}} vám poslal/a žádost o přátelství.",
-      "friendAccepted": "{{name}} přijal/a vaši žádost o přátelství."
+      "friendAccepted": "{{name}} přijal/a vaši žádost o přátelství.",
+      "tripTransferred": "{{name}} smazal/a svůj účet a výlet „{{trip}}“ teď patří vám."
     }
   },
   "friendProfile": {

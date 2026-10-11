@@ -38,6 +38,13 @@ the migration (idempotent). If the daily purge cron (`GET /api/cron/purge-trash`
 the target deployment — it fails closed without it. Even without the cron running,
 expired trips are purged lazily per-user whenever their Trash page loads.
 
+## ⏳ Deploy note — migration 007 (2026-10-11, NOT yet applied)
+
+`server/migrations/007_trip_transferred.sql` adds the `TRIP_TRANSFERRED` notification
+type used by self-service account deletion (`DELETE /api/auth/account`). Without it
+account deletion still works, but the new owner of a handed-over trip gets only the
+email — the dashboard notification INSERT fails (logged, non-blocking).
+
 ---
 
 ## ✅ Security — fixed 2026-07-07 (requires migration 003)

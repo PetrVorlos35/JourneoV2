@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
 import auth from '../middleware/auth.js';
-import { sendVerificationCode } from '../lib/mailer.js';
+import { sendVerificationCode, sendTripTransferredEmail } from '../lib/mailer.js';
 import { getCodeCooldownRemaining } from '../lib/otpThrottle.js';
 import { waitUntil } from '@vercel/functions';
 
@@ -574,6 +574,100 @@ router.post('/change-password', auth, async (req, res) => {
   } catch (err) {
     console.error('Change password error:', err);
     res.status(500).json({ error: 'Chyba serveru při změně hesla.' });
+  }
+});
+
+// ── DELETE /api/auth/account ────────────────────────────────
+// Self-service smazání účtu (GDPR – právo na výmaz). Potvrzuje se opsáním
+// vlastního e-mailu — funguje stejně pro heslo i Google účty (ty mají jen
+// náhodný password_hash).
+//
+// Vlastněné výlety, které mají aspoň jednoho editora, se předají tomu
+// editorovi, který byl k výletu přidán nejdřív. Výlety jen s viewery (nebo
+// bez sdílení, nebo v koši) se smažou. Zbytek mažou ON DELETE CASCADE cizí
+// klíče; výdaje, které uživatel platil v cizích výletech, zůstanou s
+// paid_by = NULL.
+router.delete('/account', auth, async (req, res) => {
+  const confirmEmail = String(req.body?.confirm_email || '').trim().toLowerCase();
+
+  const connection = await pool.getConnection();
+  try {
+    const [users] = await connection.query(
+      'SELECT email, first_name, last_name FROM users WHERE id = ?',
+      [req.userId]
+    );
+    if (users.length === 0) {
+      return res.status(404).json({ error: 'Uživatel nenalezen.' });
+    }
+
+    const { email, first_name, last_name } = users[0];
+    const ownerName = [first_name, last_name].filter(Boolean).join(' ').trim() || email;
+    if (!confirmEmail || confirmEmail !== email.toLowerCase()) {
+      return res.status(400).json({ error: 'Zadaný e-mail neodpovídá vašemu účtu.' });
+    }
+
+    await connection.beginTransaction();
+
+    // Nejstarší editor každého vlastněného (nesmazaného) výletu.
+    const [heirs] = await connection.query(
+      `SELECT tc.trip_id, tc.user_id, t.title, u.email, us.language
+       FROM trip_collaborators tc
+       JOIN trips t ON t.id = tc.trip_id
+       JOIN users u ON u.id = tc.user_id
+       LEFT JOIN user_settings us ON us.user_id = tc.user_id
+       WHERE t.user_id = ? AND t.deleted_at IS NULL AND tc.role = 'editor'
+         AND tc.id = (SELECT MIN(tc2.id) FROM trip_collaborators tc2
+                      WHERE tc2.trip_id = tc.trip_id AND tc2.role = 'editor')
+       FOR UPDATE`,
+      [req.userId]
+    );
+
+    for (const { trip_id, user_id } of heirs) {
+      await connection.query('UPDATE trips SET user_id = ? WHERE id = ?', [user_id, trip_id]);
+      // Nový vlastník už není spolupracovník — vlastnictví plyne z trips.user_id.
+      await connection.query('DELETE FROM trip_collaborators WHERE trip_id = ? AND user_id = ?', [trip_id, user_id]);
+    }
+
+    // Místa, která uživatel přidal do výletů, jež mu (už) nepatří, přejdou na
+    // vlastníka výletu — jinak by je CASCADE na trip_places.user_id smazal.
+    await connection.query(
+      `UPDATE trip_places p JOIN trips t ON t.id = p.trip_id
+       SET p.user_id = t.user_id
+       WHERE p.user_id = ? AND t.user_id <> ?`,
+      [req.userId, req.userId]
+    );
+
+    await connection.query('DELETE FROM verification_tokens WHERE email = ?', [email]);
+    await connection.query('DELETE FROM users WHERE id = ?', [req.userId]);
+
+    await connection.commit();
+
+    // Oznámení novým vlastníkům až po commitu — jejich selhání nesmí
+    // zablokovat smazání účtu (fire-and-forget, jako settlement e-maily).
+    for (const heir of heirs) {
+      waitUntil(
+        pool.query(
+          `INSERT INTO notifications (user_id, type, reference_id, message) VALUES (?, 'TRIP_TRANSFERRED', ?, ?)`,
+          [heir.user_id, heir.trip_id, ownerName]
+        ).catch((err) => console.error('Trip transferred notification error:', err))
+      );
+      waitUntil(
+        sendTripTransferredEmail(heir.email, {
+          previousOwnerName: ownerName,
+          tripName: heir.title,
+          tripId: heir.trip_id,
+          locale: heir.language || 'cs',
+        }).catch((err) => console.error('Trip transferred email error:', err))
+      );
+    }
+
+    res.json({ message: 'Účet byl smazán.', transferredTrips: heirs.length });
+  } catch (err) {
+    await connection.rollback();
+    console.error('Delete account error:', err);
+    res.status(500).json({ error: 'Chyba serveru při mazání účtu.' });
+  } finally {
+    connection.release();
   }
 });
 

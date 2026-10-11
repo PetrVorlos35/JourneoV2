@@ -86,6 +86,12 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const deleteAccount = async (confirmEmail) => {
+    const data = await api.auth.deleteAccount(confirmEmail);
+    logout();
+    return data;
+  };
+
   const updateProfile = async (profileData) => {
     const data = await api.auth.updateProfile(profileData);
     setUser(data.user);
@@ -95,7 +101,7 @@ export const AuthProvider = ({ children }) => {
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, checkEmail, verify, resendOtp, forgotPassword, resetPassword, changePassword, loginWithGoogle, logout, updateProfile, isAdmin }}>
+    <AuthContext.Provider value={{ user, loading, login, register, checkEmail, verify, resendOtp, forgotPassword, resetPassword, changePassword, loginWithGoogle, logout, deleteAccount, updateProfile, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

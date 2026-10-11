@@ -407,3 +407,113 @@ export const sendSettlementEmail = async (email, { payerName, amountLabel, tripN
     throw error;
   }
 };
+
+export const sendTripTransferredEmail = async (email, { previousOwnerName, tripName, tripId, locale = 'en' }) => {
+  const isCs = typeof locale === 'string' && locale.startsWith('cs');
+  const appUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const tripUrl = `${appUrl}/dashboard/trip/${tripId}`;
+
+  const subject = isCs ? 'Výlet vám byl předán – Journeo' : 'A trip was handed over to you – Journeo';
+  const heading = isCs ? 'Nyní jste vlastníkem výletu' : 'You now own this trip';
+  const safeOwner = escapeHtml(previousOwnerName);
+  const safeTrip = escapeHtml(tripName);
+  const message = isCs
+    ? `<strong>${safeOwner}</strong> smazal/a svůj účet na Journeo. Výlet <strong>${safeTrip}</strong> vám byl předán, protože jste v něm měli právo úprav. Teď ho vlastníte vy — můžete ho dál sdílet, upravovat i mazat.`
+    : `<strong>${safeOwner}</strong> deleted their Journeo account. The trip <strong>${safeTrip}</strong> was handed over to you because you could edit it. You now own it — you can share, edit or delete it.`;
+  const buttonText = isCs ? 'Otevřít výlet' : 'Open trip';
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="${isCs ? 'cs' : 'en'}">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${subject}</title>
+      <style>
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+          background-color: #f4f4f5;
+          margin: 0;
+          padding: 0;
+          color: #18181b;
+        }
+        .container {
+          max-width: 500px;
+          margin: 40px auto;
+          background-color: #ffffff;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .header {
+          background-color: #09090b;
+          padding: 24px;
+          text-align: center;
+        }
+        .header h1 {
+          color: #ffffff;
+          margin: 0;
+          font-size: 24px;
+          font-weight: 600;
+          letter-spacing: -0.025em;
+        }
+        .content {
+          padding: 32px 24px;
+          text-align: center;
+        }
+        .content h2 {
+          font-size: 20px;
+          font-weight: 600;
+          margin-top: 0;
+          margin-bottom: 16px;
+        }
+        .content p {
+          font-size: 16px;
+          line-height: 1.5;
+          margin-bottom: 24px;
+          color: #52525b;
+        }
+        .footer {
+          text-align: center;
+          padding: 24px;
+          font-size: 14px;
+          color: #a1a1aa;
+          background-color: #fafafa;
+          border-top: 1px solid #f4f4f5;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Journeo</h1>
+        </div>
+        <div class="content">
+          <h2>${heading}</h2>
+          <p>${message}</p>
+          <a href="${tripUrl}" class="button" style="display:inline-block;background-color:#09090b;color:#ffffff !important;text-decoration:none;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;">
+            <span style="color:#ffffff;">${buttonText}</span>
+          </a>
+        </div>
+        <div class="footer">
+          &copy; ${new Date().getFullYear()} Journeo. ${isCs ? 'Všechna práva vyhrazena.' : 'All rights reserved.'}
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  try {
+    const info = await transporter.sendMail({
+      from: '"Journeo" <petr@vorlos.eu>',
+      to: email,
+      subject,
+      html,
+    });
+    console.log('Trip transferred email odeslán: %s', info.messageId);
+    return info;
+  } catch (error) {
+    console.error('Chyba při odesílání trip transferred emailu:', error);
+    throw error;
+  }
+};

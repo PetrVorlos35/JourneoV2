@@ -1,6 +1,6 @@
-import { Trash2, DollarSign, User, Save, Camera, Mountain, Palmtree, Compass, Map, Plane, Monitor, Sun, Moon, X, KeyRound, Eye, EyeOff, Check, Globe, Link as LinkIcon, Copy, ArrowRight, Landmark } from 'lucide-react';
+import { Trash2, DollarSign, User, Save, Camera, Mountain, Palmtree, Compass, Map, Plane, Monitor, Sun, Moon, X, KeyRound, Eye, EyeOff, Check, Globe, Link as LinkIcon, Copy, ArrowRight, Landmark, UserX } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '../../contexts/CurrencyContext';
@@ -14,7 +14,8 @@ import api from '../../services/api';
 const Settings = ({ onClearData, onConvertCurrency }) => {
   const { currency, setCurrency } = useCurrency();
   const { theme, setTheme } = useTheme();
-  const { user, updateProfile, changePassword } = useAuth();
+  const { user, updateProfile, changePassword, deleteAccount } = useAuth();
+  const navigate = useNavigate();
   const { promptDialog, confirmDialog, ModalPortal } = useDialog();
   const { t } = useTranslation();
 
@@ -127,6 +128,28 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
     if (value === requiredPhrase) {
       onClearData();
       toast.success(t('settings.danger.successMessage'));
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    const value = await promptDialog({
+      title: t('settings.danger.account.confirmTitle'),
+      message: t('settings.danger.account.confirmMessage'),
+      inputLabel: t('settings.danger.account.confirmLabel'),
+      placeholder: user.email,
+      requiredPhrase: user.email,
+      variant: 'danger',
+      confirmLabel: t('settings.danger.account.confirmBtn')
+    });
+
+    if (value !== user.email) return;
+
+    try {
+      await deleteAccount(value);
+      toast.success(t('settings.danger.account.successMessage'));
+      navigate('/', { replace: true });
+    } catch (err) {
+      toast.error(err.message || t('settings.danger.account.error'));
     }
   };
 
@@ -570,6 +593,22 @@ const Settings = ({ onClearData, onConvertCurrency }) => {
           >
             {t('settings.danger.button')}
           </button>
+
+          <div className="mt-8 pt-8 border-t border-red-200 dark:border-red-500/20">
+            <h3 className="text-lg font-bold text-danger mb-2 flex items-center gap-2">
+              <UserX size={18} strokeWidth={2} />
+              {t('settings.danger.account.title')}
+            </h3>
+            <p className="text-red-500/80 font-medium mb-6">
+              {t('settings.danger.account.description')}
+            </p>
+            <button
+              onClick={handleDeleteAccount}
+              className="w-full sm:w-auto px-6 py-3 bg-red-500 text-white rounded-2xl font-bold hover:bg-red-600 transition-colors duration-300 shadow-sm shadow-red-500/10 active:scale-95 cursor-pointer"
+            >
+              {t('settings.danger.account.button')}
+            </button>
+          </div>
         </div>
       </div>
     </div>

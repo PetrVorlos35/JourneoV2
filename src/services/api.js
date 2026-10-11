@@ -85,6 +85,12 @@ export const api = {
         body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
       }),
 
+    deleteAccount: (confirmEmail) =>
+      request('/auth/account', {
+        method: 'DELETE',
+        body: JSON.stringify({ confirm_email: confirmEmail }),
+      }),
+
     login: (email, password) =>
       request('/auth/login', {
         method: 'POST',

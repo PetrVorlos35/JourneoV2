@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, UserPlus, UserCheck, Heart, Check, X } from 'lucide-react';
+import { Bell, UserPlus, UserCheck, Heart, Check, X, ArrowRightLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
@@ -10,6 +10,7 @@ const notifIcons = {
   FRIEND_REQUEST: UserPlus,
   FRIEND_ACCEPTED: UserCheck,
   TRIP_VOTED: Heart,
+  TRIP_TRANSFERRED: ArrowRightLeft,
 };
 
 // `placement="sidebar"`: zvonek sedí v levém panelu, panel notifikací se
@@ -190,7 +191,9 @@ const NotificationBell = ({ placement = 'right' }) => {
                             ? 'bg-blue-100 dark:bg-blue-500/10 text-accent'
                             : n.type === 'FRIEND_ACCEPTED'
                               ? 'bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400'
-                              : 'bg-red-100 dark:bg-red-500/10 text-danger'
+                              : n.type === 'TRIP_TRANSFERRED'
+                                ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                                : 'bg-red-100 dark:bg-red-500/10 text-danger'
                         }`}>
                           <Icon size={16} strokeWidth={2.5} />
                         </div>
@@ -200,7 +203,9 @@ const NotificationBell = ({ placement = 'right' }) => {
                               ? t('notifications.messages.friendRequest', { name: n.actorName || '?' })
                               : n.type === 'FRIEND_ACCEPTED'
                                 ? t('notifications.messages.friendAccepted', { name: n.actorName || '?' })
-                                : n.actorName || '—'}
+                                : n.type === 'TRIP_TRANSFERRED'
+                                  ? t('notifications.messages.tripTransferred', { name: n.actorName || '?', trip: n.tripTitle || '?' })
+                                  : n.actorName || '—'}
                           </p>
                           <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
                             {timeAgo(n.createdAt)}

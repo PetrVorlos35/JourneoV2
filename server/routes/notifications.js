@@ -17,15 +17,18 @@ router.get('/', async (req, res) => {
          n.is_read      AS isRead,
          n.created_at   AS createdAt,
          TRIM(CONCAT(
-           COALESCE(CASE WHEN n.type = 'FRIEND_REQUEST'  THEN u_req.first_name
-                         WHEN n.type = 'FRIEND_ACCEPTED' THEN u_addr.first_name
+           COALESCE(CASE WHEN n.type = 'FRIEND_REQUEST'   THEN u_req.first_name
+                         WHEN n.type = 'FRIEND_ACCEPTED'  THEN u_addr.first_name
+                         WHEN n.type = 'TRIP_TRANSFERRED' THEN n.message
                     END, ''),
            ' ',
            COALESCE(CASE WHEN n.type = 'FRIEND_REQUEST'  THEN u_req.last_name
                          WHEN n.type = 'FRIEND_ACCEPTED' THEN u_addr.last_name
                     END, '')
-         )) AS actorName
+         )) AS actorName,
+         CASE WHEN n.type = 'TRIP_TRANSFERRED' THEN t.title END AS tripTitle
        FROM notifications n
+       LEFT JOIN trips       t      ON t.id = n.reference_id AND n.type = 'TRIP_TRANSFERRED'
        LEFT JOIN friendships f     ON f.id = n.reference_id
        LEFT JOIN users      u_req  ON u_req.id  = f.requester_id
        LEFT JOIN users      u_addr ON u_addr.id = f.addressee_id

@@ -1298,7 +1298,18 @@
       "placeholder": "DELETE ALL",
       "requiredPhrase": "DELETE ALL",
       "confirmBtn": "Permanently delete",
-      "successMessage": "All data was successfully deleted."
+      "successMessage": "All data was successfully deleted.",
+      "account": {
+        "title": "Delete account",
+        "description": "Permanently deletes your account, friends, notifications and settings. Trips you own and share with someone who can edit them are handed over to that person. Your other trips are deleted, including for people who can only view them. Expenses you paid in other people's trips stay there without your name. This cannot be undone.",
+        "button": "Delete account",
+        "confirmTitle": "Really delete your account?",
+        "confirmMessage": "Your account and all your data will be permanently deleted and you will be signed out.",
+        "confirmLabel": "Type your email to confirm",
+        "confirmBtn": "Permanently delete account",
+        "successMessage": "Your account has been deleted.",
+        "error": "Could not delete the account."
+      }
     }
   },
   "friends": {
@@ -1389,7 +1400,8 @@
     },
     "messages": {
       "friendRequest": "{{name}} sent you a friend request.",
-      "friendAccepted": "{{name}} accepted your friend request."
+      "friendAccepted": "{{name}} accepted your friend request.",
+      "tripTransferred": "{{name}} deleted their account — the trip “{{trip}}” is now yours."
     }
   },
   "friendProfile": {
