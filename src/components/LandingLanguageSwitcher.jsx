@@ -1,37 +1,35 @@
-import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const LANGS = ['cs', 'en'];
+// Přepínač ukazuje jen budoucí stav: na české stránce „en“, na anglické „cs“.
+// Popisek je v cílovém jazyce, aby mu rozuměl ten, kdo přepnout chce.
+const TARGETS = {
+  cs: { code: 'en', label: 'Switch to English' },
+  en: { code: 'cs', label: 'Přepnout do češtiny' },
+};
 
 const LandingLanguageSwitcher = ({ isDark = true }) => {
   const { i18n } = useTranslation();
-  const current = i18n.language?.slice(0, 2) || 'cs';
+  const current = i18n.language?.slice(0, 2) === 'en' ? 'en' : 'cs';
+  const target = TARGETS[current];
 
-  const handleSwitch = (code) => {
-    i18n.changeLanguage(code);
-    localStorage.setItem('journeo_lang', code);
+  const handleSwitch = () => {
+    i18n.changeLanguage(target.code);
+    localStorage.setItem('journeo_lang', target.code);
   };
 
-  const activeClass   = isDark ? 'text-white'                        : 'text-gray-900';
-  const inactiveClass = isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-500 hover:text-gray-800';
-  const sepClass      = isDark ? 'text-white/20'                     : 'text-gray-300';
+  const colorClass = isDark ? 'text-gray-300 hover:text-white' : 'text-gray-500 hover:text-gray-900';
 
   return (
-    <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest">
-      {LANGS.map((code, i) => (
-        <Fragment key={code}>
-          {i > 0 && <span className={`${sepClass} select-none`}>|</span>}
-          <button
-            onClick={() => handleSwitch(code)}
-            className={`transition-colors duration-200 cursor-pointer ${
-              current === code ? activeClass : inactiveClass
-            }`}
-          >
-            {code}
-          </button>
-        </Fragment>
-      ))}
-    </div>
+    <button
+      type="button"
+      onClick={handleSwitch}
+      lang={target.code}
+      aria-label={target.label}
+      title={target.label}
+      className={`min-w-11 min-h-11 px-2 inline-flex items-center justify-center rounded-lg text-[11px] font-bold uppercase tracking-widest transition-colors duration-200 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${colorClass}`}
+    >
+      {target.code}
+    </button>
   );
 };
 
