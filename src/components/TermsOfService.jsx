@@ -16,6 +16,7 @@ const TermsOfService = () => {
     t('termsOfService.section4', { returnObjects: true }),
     t('termsOfService.section5', { returnObjects: true }),
     t('termsOfService.section6', { returnObjects: true }),
+    t('termsOfService.section7', { returnObjects: true }),
   ];
 
   return (

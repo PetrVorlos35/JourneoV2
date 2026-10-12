@@ -11,6 +11,7 @@ import Navbar from './Navbar';
 import VersionBadge from './ui/VersionBadge';
 import useForceLightTheme from '../hooks/useForceLightTheme';
 import { CHANGELOG } from '../config/changelog';
+import { openCookieSettings } from '../utils/consent';
 
 const EASE = [0.16, 1, 0.3, 1];
 
@@ -1258,6 +1259,9 @@ const LandingPage = () => {
             <Link to="/terms" className="hover:text-gray-900 transition-colors">
               {t('landing.footer.terms')}
             </Link>
+            <button type="button" onClick={openCookieSettings} className="hover:text-gray-900 transition-colors">
+              {t('landing.footer.cookies')}
+            </button>
           </div>
         </div>
       </footer>

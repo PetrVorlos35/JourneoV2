@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Navbar from './Navbar';
 import useForceLightTheme from '../hooks/useForceLightTheme';
+import { openCookieSettings } from '../utils/consent';
 
 const PrivacyPolicy = () => {
   useForceLightTheme();
@@ -15,6 +16,7 @@ const PrivacyPolicy = () => {
     t('privacyPolicy.section3', { returnObjects: true }),
     t('privacyPolicy.section4', { returnObjects: true }),
     t('privacyPolicy.section5', { returnObjects: true }),
+    t('privacyPolicy.section6', { returnObjects: true }),
   ];
 
   return (
@@ -33,6 +35,15 @@ const PrivacyPolicy = () => {
             <React.Fragment key={i}>
               <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{section.title}</h2>
               <p>{section.content}</p>
+              {section.cookieSettings && (
+                <button
+                  type="button"
+                  onClick={openCookieSettings}
+                  className="inline-flex items-center h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
+                >
+                  {t('cookies.openSettings')}
+                </button>
+              )}
             </React.Fragment>
           ))}
         </div>

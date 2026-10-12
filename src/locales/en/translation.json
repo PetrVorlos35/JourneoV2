@@ -291,7 +291,8 @@
     "footer": {
       "madeWith": "Made with attention to detail.",
       "privacy": "Privacy Policy",
-      "terms": "Terms of Use"
+      "terms": "Terms of Use",
+      "cookies": "Cookie settings"
     },
     "changelog": {
       "title": "Journeo keeps getting better.",
@@ -1737,7 +1738,7 @@
   "privacyPolicy": {
     "back": "Back to home",
     "title": "Privacy Policy",
-    "effectiveDate": "Effective date: January 1, 2026",
+    "effectiveDate": "Effective date: October 12, 2026",
     "section1": {
       "title": "1. What data we collect",
       "content": "We collect data you provide when registering (name, email), and data about your trips that you enter into the app yourself (locations, dates, expenses, notes, photos)."
@@ -1748,21 +1749,26 @@
     },
     "section3": {
       "title": "3. Sharing with third parties",
-      "content": "We do not sell your personal data to any third parties. Data may only be shared with technical infrastructure providers (e.g., hosting services, databases) who are bound by confidentiality."
+      "content": "We do not sell your personal data. We share data with technical infrastructure providers (Vercel hosting, database, email service) who are bound by confidentiality. If you consent to marketing cookies, our partner Travelpayouts (Travelpayouts Ltd.) processes technical data about your browser and how you browse the page in order to attribute commissions for partner links. This partner may also access the content of the displayed page."
     },
     "section4": {
-      "title": "4. Your rights (GDPR)",
-      "content": "You have the right to access your personal data, correct it, delete it (\"right to be forgotten\"), and to data portability. To exercise these rights, please contact us."
+      "title": "4. Cookies and partner links",
+      "content": "We use essential storage (localStorage) for sign-in, language, theme and remembering your cookie choice; it does not require consent. We measure traffic with Vercel Web Analytics, which uses no cookies. Marketing cookies from our partner Travelpayouts are loaded only with your consent. They track partner (affiliate) links to services such as Booking.com or GetYourGuide: when you book through them, Journeo earns a commission and your price stays the same. You can withdraw consent at any time.",
+      "cookieSettings": true
     },
     "section5": {
-      "title": "5. Contact",
+      "title": "5. Your rights (GDPR)",
+      "content": "You have the right to access your personal data, correct it, delete it (\"right to be forgotten\"), to data portability and to withdraw consent. You can delete your account yourself in settings. To exercise other rights, please contact us."
+    },
+    "section6": {
+      "title": "6. Contact",
       "content": "If you have questions about this policy, contact us at petr@vorlos.eu."
     }
   },
   "termsOfService": {
     "back": "Back to home",
     "title": "Terms of Service",
-    "effectiveDate": "Effective date: January 1, 2026",
+    "effectiveDate": "Effective date: October 12, 2026",
     "section1": {
       "title": "1. Acceptance of terms",
       "content": "By using the Journeo app (\"Service\") you agree to these Terms of Service. If you do not agree, please do not use this app."
@@ -1784,7 +1790,11 @@
       "content": "We may cancel or suspend your account without prior notice if you violate these Terms of Service. Upon account deletion, your data will be removed in accordance with our Privacy Policy."
     },
     "section6": {
-      "title": "6. Contact",
+      "title": "6. Partner links",
+      "content": "Journeo is free. Some links in the Service (e.g. to accommodation, activities, eSIMs or insurance) are partner (affiliate) links: if you buy through them, we may earn a commission. This does not change your price. Partner services are the responsibility of their operators and are governed by their terms."
+    },
+    "section7": {
+      "title": "7. Contact",
       "content": "For any questions about these terms, contact us at petr@vorlos.eu."
     }
   },
@@ -1817,5 +1827,23 @@
     "emptied": "Trash emptied",
     "loadError": "Failed to load trash.",
     "error": "Something went wrong."
+  },
+  "cookies": {
+    "title": "Cookies & privacy",
+    "text": "We use essential storage to make the app work (sign-in, language, theme). With your consent we also use marketing cookies from our partner Travelpayouts, which earn us a small commission when you book accommodation or activities through Journeo. It costs you nothing.",
+    "policyLink": "Read the policy",
+    "necessary": {
+      "title": "Essential",
+      "desc": "Sign-in, language, theme and remembering this choice. The app does not work without them."
+    },
+    "marketing": {
+      "title": "Marketing",
+      "desc": "Travelpayouts: tracking partner links (Booking, GetYourGuide, etc.) to attribute commissions."
+    },
+    "acceptAll": "Accept all",
+    "rejectAll": "Essential only",
+    "save": "Save choice",
+    "customize": "Customize",
+    "openSettings": "Change cookie settings"
   }
 }

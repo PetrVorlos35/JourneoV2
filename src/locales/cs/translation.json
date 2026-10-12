@@ -291,7 +291,8 @@
     "footer": {
       "madeWith": "Vytvořeno s důrazem na detail.",
       "privacy": "Ochrana soukromí",
-      "terms": "Podmínky použití"
+      "terms": "Podmínky použití",
+      "cookies": "Nastavení cookies"
     },
     "changelog": {
       "title": "Journeo se pořád zlepšuje.",
@@ -1753,7 +1754,7 @@
   "privacyPolicy": {
     "back": "Zpět na hlavní stránku",
     "title": "Zásady ochrany osobních údajů",
-    "effectiveDate": "Datum účinnosti: 1. ledna 2026",
+    "effectiveDate": "Datum účinnosti: 12. října 2026",
     "section1": {
       "title": "1. Jaké údaje shromažďujeme",
       "content": "Shromažďujeme údaje, které nám poskytnete při registraci (jméno, e-mail), a údaje o vašich cestách, které do aplikace sami vložíte (lokace, data, výdaje, poznámky, fotografie)."
@@ -1764,21 +1765,26 @@
     },
     "section3": {
       "title": "3. Sdílení údajů s třetími stranami",
-      "content": "Vaše osobní údaje neprodáváme žádným třetím stranám. Údaje mohou být sdíleny pouze s poskytovateli technické infrastruktury (např. hostingové služby, databáze), kteří jsou vázáni mlčenlivostí."
+      "content": "Vaše osobní údaje neprodáváme. Údaje sdílíme s poskytovateli technické infrastruktury (hosting Vercel, databáze, e-mailová služba), kteří jsou vázáni mlčenlivostí. Pokud udělíte souhlas s marketingovými cookies, zpracovává partner Travelpayouts (Travelpayouts Ltd.) technické údaje o vašem prohlížeči a o tom, jak procházíte stránku, aby mohl přiřadit provize za partnerské odkazy. Tento partner se může dostat i k obsahu zobrazené stránky."
     },
     "section4": {
-      "title": "4. Vaše práva (GDPR)",
-      "content": "Máte právo na přístup k vašim osobním údajům, jejich opravu, výmaz (\"právo být zapomenut\") a přenositelnost. Pro uplatnění těchto práv nás kontaktujte."
+      "title": "4. Cookies a partnerské odkazy",
+      "content": "Nezbytné úložiště (localStorage) používáme pro přihlášení, jazyk, motiv a uložení vaší volby cookies; souhlas k němu není potřeba. Návštěvnost měříme přes Vercel Web Analytics, které cookies nepoužívá. Marketingové cookies partnera Travelpayouts se načtou jen s vaším souhlasem. Slouží ke sledování partnerských (affiliate) odkazů na služby jako Booking.com nebo GetYourGuide: když přes ně něco rezervujete, dostane Journeo provizi, cena pro vás zůstává stejná. Souhlas můžete kdykoli odvolat.",
+      "cookieSettings": true
     },
     "section5": {
-      "title": "5. Kontakt",
+      "title": "5. Vaše práva (GDPR)",
+      "content": "Máte právo na přístup k vašim osobním údajům, jejich opravu, výmaz (\"právo být zapomenut\"), přenositelnost a odvolání souhlasu. Účet můžete smazat sami v nastavení. Pro uplatnění dalších práv nás kontaktujte."
+    },
+    "section6": {
+      "title": "6. Kontakt",
       "content": "Pokud máte otázky ohledně těchto zásad, kontaktujte nás na e-mailu petr@vorlos.eu."
     }
   },
   "termsOfService": {
     "back": "Zpět na hlavní stránku",
     "title": "Obchodní podmínky",
-    "effectiveDate": "Datum účinnosti: 1. ledna 2026",
+    "effectiveDate": "Datum účinnosti: 12. října 2026",
     "section1": {
       "title": "1. Přijetí podmínek",
       "content": "Používáním aplikace Journeo (\"Služba\") souhlasíte s těmito Obchodními podmínkami. Pokud s nimi nesouhlasíte, nepoužívejte prosím tuto aplikaci."
@@ -1800,7 +1806,11 @@
       "content": "Váš účet můžeme zrušit nebo pozastavit bez předchozího upozornění, pokud porušíte tyto Obchodní podmínky. Zrušením účtu budou vaše data smazána v souladu s našimi Zásadami ochrany osobních údajů."
     },
     "section6": {
-      "title": "6. Kontakt",
+      "title": "6. Partnerské odkazy",
+      "content": "Journeo je zdarma. Některé odkazy ve Službě (např. na ubytování, zážitky, eSIM nebo pojištění) jsou partnerské (affiliate): když přes ně nakoupíte, můžeme dostat provizi. Cenu pro vás to nemění. Za služby partnerů odpovídají jejich provozovatelé a řídí se jejich podmínkami."
+    },
+    "section7": {
+      "title": "7. Kontakt",
       "content": "Pro jakékoli dotazy ohledně těchto podmínek nás kontaktujte na petr@vorlos.eu."
     }
   },
@@ -1834,5 +1844,23 @@
     "emptied": "Koš byl vysypán",
     "loadError": "Nepodařilo se načíst koš.",
     "error": "Něco se pokazilo."
+  },
+  "cookies": {
+    "title": "Cookies a soukromí",
+    "text": "Nezbytné úložiště používáme, aby appka fungovala (přihlášení, jazyk, motiv). Se souhlasem používáme i marketingové cookies partnera Travelpayouts, díky kterým dostaneme malou provizi, když přes Journeo rezervujete ubytování nebo zážitek. Vás to nic nestojí.",
+    "policyLink": "Více v zásadách",
+    "necessary": {
+      "title": "Nezbytné",
+      "desc": "Přihlášení, jazyk, motiv a uložení této volby. Bez nich appka nefunguje."
+    },
+    "marketing": {
+      "title": "Marketingové",
+      "desc": "Travelpayouts: sledování partnerských odkazů (Booking, GetYourGuide aj.) pro výpočet provizí."
+    },
+    "acceptAll": "Přijmout vše",
+    "rejectAll": "Jen nezbytné",
+    "save": "Uložit volbu",
+    "customize": "Nastavení",
+    "openSettings": "Změnit nastavení cookies"
   }
 }
