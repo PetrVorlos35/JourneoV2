@@ -105,7 +105,7 @@ router.post('/request', async (req, res) => {
         // Notify the addressee by email (fire-and-forget)
         const [[addressee]] = await pool.query('SELECT email FROM users WHERE id = ?', [addresseeId]);
         if (addressee?.email) {
-          sendFriendRequestEmail(addressee.email, name).catch(err =>
+          sendFriendRequestEmail(addressee.email, name, f.id).catch(err =>
             console.error('Friend request email error:', err)
           );
         }
@@ -133,7 +133,7 @@ router.post('/request', async (req, res) => {
     // Notify the addressee by email (fire-and-forget)
     const [[addressee]] = await pool.query('SELECT email FROM users WHERE id = ?', [addresseeId]);
     if (addressee?.email) {
-      sendFriendRequestEmail(addressee.email, name).catch(err =>
+      sendFriendRequestEmail(addressee.email, name, friendshipId).catch(err =>
         console.error('Friend request email error:', err)
       );
     }
@@ -455,7 +455,7 @@ router.post('/invite/:token/accept', async (req, res) => {
 
     // Notify the inviter by email (fire-and-forget)
     if (inviter.email) {
-      sendFriendRequestEmail(inviter.email, name).catch(err =>
+      sendFriendRequestEmail(inviter.email, name, friendshipId).catch(err =>
         console.error('Friend request email error:', err)
       );
     }

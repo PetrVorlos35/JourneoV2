@@ -1,6 +1,6 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Search, UserPlus, UserCheck, UserX, Users, X, ArrowRight, Clock, Link as LinkIcon, Copy, Check, RefreshCw } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
@@ -31,7 +31,14 @@ const getFriendColor = (name = '') => {
 const Friends = () => {
   const { t } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
-  const [activeTab, setActiveTab] = useState('friends');
+  // Deep link from the friend-request email / notification:
+  // /dashboard/friends?tab=requests&request=<friendshipId>
+  const [searchParams] = useSearchParams();
+  const highlightedRequestId = Number(searchParams.get('request')) || null;
+  const [activeTab, setActiveTab] = useState(
+    searchParams.get('tab') === 'requests' || highlightedRequestId ? 'requests' : 'friends'
+  );
+  const highlightedRef = useRef(null);
   const [friends, setFriends] = useState([]);
   const [requests, setRequests] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -68,6 +75,17 @@ const Friends = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    if (loading || !highlightedRequestId) return;
+    if (requests.some(r => r.friendshipId === highlightedRequestId)) {
+      highlightedRef.current?.scrollIntoView({ behavior: shouldReduceMotion ? 'auto' : 'smooth', block: 'center' });
+    } else {
+      toast(t('friends.toasts.requestNotFound'), { id: 'friend-request-not-found' });
+    }
+    // Run once after the initial load, not on every requests change (accept/decline).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, highlightedRequestId]);
 
   useEffect(() => {
     api.friends.getInviteLink()
@@ -437,9 +455,12 @@ const Friends = () => {
             requests.map(req => (
               <motion.div
                 key={req.friendshipId}
+                ref={req.friendshipId === highlightedRequestId ? highlightedRef : undefined}
                 variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
                 exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -50 }}
-                className="glass-card p-6 flex flex-col sm:flex-row sm:items-center gap-4 hover:-translate-y-1 transition-transform duration-300"
+                className={`glass-card p-6 flex flex-col sm:flex-row sm:items-center gap-4 hover:-translate-y-1 transition-transform duration-300 ${
+                  req.friendshipId === highlightedRequestId ? 'ring-2 ring-blue-500/60 dark:ring-blue-400/50' : ''
+                }`}
               >
                 <div className="flex items-center gap-4 min-w-0">
                   <div className={`rounded-full ring-2 ${getFriendColor(req.first_name || req.email || '').ring} shrink-0`}>

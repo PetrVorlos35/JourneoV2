@@ -1,17 +1,18 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import api from '../services/api';
+import { useAuth } from './AuthContext';
 
 const CurrencyContext = createContext();
 
 export const CurrencyProvider = ({ children }) => {
+  const { user } = useAuth();
   const [currency, setCurrencyState] = useState(() => {
     return localStorage.getItem('journeo_currency') || 'CZK';
   });
 
-  // Load currency from API when user is logged in
+  // Load currency from API whenever a user signs in
   useEffect(() => {
-    const token = localStorage.getItem('journeo_token');
-    if (token) {
+    if (user?.id) {
       api.settings.get()
         .then(data => {
           if (data.settings?.currency) {
@@ -23,7 +24,7 @@ export const CurrencyProvider = ({ children }) => {
           // Fallback to localStorage value silently
         });
     }
-  }, []);
+  }, [user?.id]);
 
   const setCurrency = (newCurrency) => {
     setCurrencyState(newCurrency);

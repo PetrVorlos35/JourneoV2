@@ -1392,7 +1392,8 @@
       "requestError": "Chyba při odesílání žádosti.",
       "acceptError": "Chyba při přijímání žádosti.",
       "declineError": "Chyba při odmítání žádosti.",
-      "removeError": "Chyba při odebírání přítele."
+      "removeError": "Chyba při odebírání přítele.",
+      "requestNotFound": "Tahle žádost už byla vyřízena."
     }
   },
   "notifications": {

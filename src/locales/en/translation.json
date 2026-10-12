@@ -1376,7 +1376,8 @@
       "requestError": "Error sending request.",
       "acceptError": "Error accepting request.",
       "declineError": "Error declining request.",
-      "removeError": "Error removing friend."
+      "removeError": "Error removing friend.",
+      "requestNotFound": "This request has already been handled."
     }
   },
   "notifications": {

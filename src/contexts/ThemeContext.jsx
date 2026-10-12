@@ -1,9 +1,11 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import api from '../services/api';
+import { useAuth } from './AuthContext';
 
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
+  const { user } = useAuth();
   const [theme, setThemeState] = useState(() => {
     return localStorage.getItem('journeo_theme') || 'dark';
   });
@@ -49,10 +51,11 @@ export const ThemeProvider = ({ children }) => {
     }
   }, []);
 
-  // Load theme from backend on mount (if logged in)
+  // Load theme from backend whenever a user signs in — not only on mount,
+  // otherwise logging in mid-session (e.g. from an email link) keeps the
+  // default theme until the next full reload.
   useEffect(() => {
-    const token = localStorage.getItem('journeo_token');
-    if (token) {
+    if (user?.id) {
       api.settings.get()
         .then(data => {
           if (data?.settings?.theme) {
@@ -63,7 +66,7 @@ export const ThemeProvider = ({ children }) => {
           // Silently fail – use localStorage value
         });
     }
-  }, []);
+  }, [user?.id]);
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, lockLightTheme, unlockLightTheme }}>

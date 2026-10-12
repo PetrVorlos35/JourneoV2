@@ -162,10 +162,10 @@ export const sendVerificationCode = async (email, code, type) => {
  * @param {string} email - The recipient's (addressee's) email address
  * @param {string} requesterName - The name of the person who sent the request
  */
-export const sendFriendRequestEmail = async (email, requesterName) => {
+export const sendFriendRequestEmail = async (email, requesterName, friendshipId) => {
   const subject = 'Nová žádost o přátelství - Journeo';
   const appUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
-  const friendsUrl = `${appUrl}/dashboard/friends`;
+  const friendsUrl = `${appUrl}/dashboard/friends?tab=requests&request=${friendshipId}`;
 
   const html = `
     <!DOCTYPE html>

@@ -29,7 +29,7 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!user) {
-    return <Navigate to="/auth" state={{ from: location.pathname }} replace />;
+    return <Navigate to="/auth" state={{ from: location.pathname + location.search }} replace />;
   }
 
   return children;

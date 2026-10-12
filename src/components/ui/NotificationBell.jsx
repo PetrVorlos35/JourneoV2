@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Bell, UserPlus, UserCheck, Heart, Check, X, ArrowRightLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { NotificationListSkeleton } from './Skeletons';
@@ -17,6 +18,7 @@ const notifIcons = {
 // proto na desktopu otevírá doprava do obsahu, ne doleva mimo obrazovku.
 const NotificationBell = ({ placement = 'right' }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -198,15 +200,28 @@ const NotificationBell = ({ placement = 'right' }) => {
                           <Icon size={16} strokeWidth={2.5} />
                         </div>
                         <div className="flex-1 min-w-0 flex flex-col gap-1">
-                          <p className={`text-sm leading-tight break-words ${!n.isRead ? 'font-bold text-primary' : 'font-medium text-gray-600 dark:text-gray-400'}`}>
-                            {n.type === 'FRIEND_REQUEST'
-                              ? t('notifications.messages.friendRequest', { name: n.actorName || '?' })
-                              : n.type === 'FRIEND_ACCEPTED'
-                                ? t('notifications.messages.friendAccepted', { name: n.actorName || '?' })
-                                : n.type === 'TRIP_TRANSFERRED'
-                                  ? t('notifications.messages.tripTransferred', { name: n.actorName || '?', trip: n.tripTitle || '?' })
-                                  : n.actorName || '—'}
-                          </p>
+                          {n.type === 'FRIEND_REQUEST' && n.referenceId ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsOpen(false);
+                                navigate(`/dashboard/friends?tab=requests&request=${n.referenceId}`);
+                              }}
+                              className={`text-left text-sm leading-tight break-words hover:underline cursor-pointer ${!n.isRead ? 'font-bold text-primary' : 'font-medium text-gray-600 dark:text-gray-400'}`}
+                            >
+                              {t('notifications.messages.friendRequest', { name: n.actorName || '?' })}
+                            </button>
+                          ) : (
+                            <p className={`text-sm leading-tight break-words ${!n.isRead ? 'font-bold text-primary' : 'font-medium text-gray-600 dark:text-gray-400'}`}>
+                              {n.type === 'FRIEND_REQUEST'
+                                ? t('notifications.messages.friendRequest', { name: n.actorName || '?' })
+                                : n.type === 'FRIEND_ACCEPTED'
+                                  ? t('notifications.messages.friendAccepted', { name: n.actorName || '?' })
+                                  : n.type === 'TRIP_TRANSFERRED'
+                                    ? t('notifications.messages.tripTransferred', { name: n.actorName || '?', trip: n.tripTitle || '?' })
+                                    : n.actorName || '—'}
+                            </p>
+                          )}
                           <p className="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
                             {timeAgo(n.createdAt)}
                           </p>
