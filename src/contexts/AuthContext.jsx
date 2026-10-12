@@ -12,15 +12,24 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('journeo_token');
     if (token) {
-      api.auth.me()
-        .then(data => {
+      // Token mažeme jen když ho server odmítne. Výpadek sítě nebo restart
+      // API (fetch bez odpovědi, 5xx) nesmí uživatele odhlásit — zkusíme
+      // to ještě párkrát.
+      const loadMe = async (attempt = 0) => {
+        try {
+          const data = await api.auth.me();
           setUser(data.user);
-        })
-        .catch(() => {
-          localStorage.removeItem('journeo_token');
+        } catch (err) {
+          const rejected = err.status === 401 || err.status === 403 || err.status === 404;
+          if (!rejected && attempt < 3) {
+            await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+            return loadMe(attempt + 1);
+          }
+          if (rejected) localStorage.removeItem('journeo_token');
           setUser(null);
-        })
-        .finally(() => setLoading(false));
+        }
+      };
+      loadMe().finally(() => setLoading(false));
     } else {
       setLoading(false);
     }

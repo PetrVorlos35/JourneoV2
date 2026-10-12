@@ -1345,17 +1345,13 @@
     }
   },
   "friends": {
-    "subtitle": "Sociální síť",
     "title": "Přátelé",
     "defaultName": "tohoto uživatele",
     "search": {
-      "label": "Hledat uživatele",
-      "placeholder": "Hledat podle jména nebo e-mailu...",
-      "clear": "Vymazat hledání"
-    },
-    "tabs": {
-      "friends": "Přátelé",
-      "requests": "Žádosti"
+      "label": "Najít přítele",
+      "placeholder": "Najít podle jména nebo e-mailu",
+      "clear": "Vymazat hledání",
+      "noResults": "Nikoho takového jsme nenašli."
     },
     "invite": {
       "title": "Váš zvací odkaz",
@@ -1365,7 +1361,7 @@
       "copied": "Zkopírováno",
       "copyError": "Odkaz se nepodařilo zkopírovat.",
       "hint": "Pošlete ho komukoliv — po přihlášení vás přidá jedním klikem.",
-      "regenerate": "Nový odkaz",
+      "regenerate": "Vygenerovat nový odkaz",
       "regenerateTitle": "Vygenerovat nový odkaz?",
       "regenerateMessage": "Stávající zvací odkaz přestane fungovat. Kdokoliv, kdo ho má, vás přes něj už nepřidá.",
       "regenerateConfirm": "Vygenerovat nový odkaz",
@@ -1385,16 +1381,6 @@
       "remove": "Odebrat",
       "profile": "Profil"
     },
-    "empty": {
-      "friends": {
-        "title": "Zatím žádní přátelé",
-        "description": "Vyhledejte uživatele a pošlete jim žádost o přátelství."
-      },
-      "requests": {
-        "title": "Žádné nové žádosti",
-        "description": "Až vám někdo pošle žádost o přátelství, zobrazí se zde."
-      }
-    },
     "remove": {
       "title": "Odebrat přítele?",
       "message": "Opravdu chcete odebrat {{name}} ze seznamu přátel? Ztratíte vzájemný přístup k výletům.",
@@ -1409,6 +1395,59 @@
       "declineError": "Chyba při odmítání žádosti.",
       "removeError": "Chyba při odebírání přítele.",
       "requestNotFound": "Tahle žádost už byla vyřízena."
+    },
+    "summary": {
+      "friends_one": "{{count}} spolucestující",
+      "friends_few": "{{count}} spolucestující",
+      "friends_many": "{{count}} spolucestujících",
+      "friends_other": "{{count}} spolucestujících",
+      "countries_one": "{{count}} společná země",
+      "countries_few": "{{count}} společné země",
+      "countries_many": "{{count}} společné země",
+      "countries_other": "{{count}} společných zemí"
+    },
+    "inviteButton": "Pozvat odkazem",
+    "requests": {
+      "title": "Žádosti o přátelství",
+      "message": "<0>{{name}}</0> vám poslal(a) žádost o přátelství"
+    },
+    "card": {
+      "since": "Přátelé od {{date}}",
+      "trips_one": "výlet spolu",
+      "trips_few": "výlety spolu",
+      "trips_many": "výletu spolu",
+      "trips_other": "výletů spolu",
+      "countries_one": "země",
+      "countries_few": "země",
+      "countries_many": "země",
+      "countries_other": "zemí",
+      "days_one": "den na cestě",
+      "days_few": "dny na cestě",
+      "days_many": "dne na cestě",
+      "days_other": "dní na cestě",
+      "nextTrip": "Příští společný výlet",
+      "daysToGo_one": "den",
+      "daysToGo_few": "dny",
+      "daysToGo_many": "dne",
+      "daysToGo_other": "dní",
+      "ongoing": "Právě spolu na cestě",
+      "nothingPlanned": "Zatím nic naplánovaného",
+      "neverTraveled": "Zatím jste spolu nikam nejeli",
+      "owesYou": "Dluží vám {{amount}}",
+      "youOwe": "Dlužíte {{amount}}",
+      "settled": "Jste vyrovnaní",
+      "profile": "Profil",
+      "menu": "Další akce pro {{name}}",
+      "remove": "Odebrat z přátel"
+    },
+    "listTitle": "Vaši spolucestující",
+    "loadError": "Přátele se nepodařilo načíst.",
+    "retry": "Zkusit znovu",
+    "inviteCard": {
+      "title": "Kdo jede příště?",
+      "description": "Pošlete svůj odkaz komukoli. Po přihlášení vás přidá jedním klikem a hned spolu můžete plánovat a dělit výdaje.",
+      "emptyTitle": "Pozvěte první spolucestující",
+      "emptyDescription": "S přáteli sdílíte výlety, plánujete spolu a na konci se jedním klikem vyrovnáte."
     }
   },
   "notifications": {

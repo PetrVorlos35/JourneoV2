@@ -244,36 +244,27 @@ export const StatisticsSkeleton = () => (
 
 /** Friends page skeleton. */
 export const FriendsSkeleton = () => (
-  <div className="space-y-10 w-full pb-10">
-    <div className="space-y-2">
-      <Skeleton className="h-4 w-32" />
+  <div className="w-full pb-16">
+    <div className="mb-8 space-y-3">
       <Skeleton className="h-10 w-40" />
+      <Skeleton className="h-4 w-56" />
     </div>
-
-    {/* Invite bar */}
-    <Skeleton className="h-24 rounded-2xl" />
-
-    {/* Search card */}
-    <div className="glass-card p-6 rounded-[2rem] space-y-4">
-      <Skeleton className="h-14 w-full rounded-2xl" />
-    </div>
-
-    {/* Tabs */}
-    <div className="flex gap-8">
-      <Skeleton className="h-5 w-24" />
-      <Skeleton className="h-5 w-24" />
-    </div>
-
-    {/* Friend rows */}
-    <div className="space-y-3">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 p-4 glass-card rounded-2xl">
-          <Skeleton className="w-12 h-12" rounded="rounded-full" />
-          <div className="flex-1 space-y-2">
-            <Skeleton className="h-4 w-40" />
-            <Skeleton className="h-3 w-28" />
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="bg-page border border-default rounded-page p-5 sm:p-6 space-y-4">
+          <div className="flex items-center gap-3.5">
+            <Skeleton className="w-14 h-14" rounded="rounded-full" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="h-4 w-36" />
+              <Skeleton className="h-3 w-24" />
+            </div>
           </div>
-          <Skeleton className="h-10 w-24 rounded-xl" />
+          <div className="grid grid-cols-3 gap-2 pt-4">
+            <Skeleton className="h-8 w-10" />
+            <Skeleton className="h-8 w-10" />
+            <Skeleton className="h-8 w-10" />
+          </div>
+          <Skeleton className="h-11 w-full rounded-soft" />
         </div>
       ))}
     </div>

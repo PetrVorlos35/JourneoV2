@@ -1329,17 +1329,13 @@
     }
   },
   "friends": {
-    "subtitle": "Social network",
     "title": "Friends",
     "defaultName": "this user",
     "search": {
-      "label": "Search users",
-      "placeholder": "Search by name or email...",
-      "clear": "Clear search"
-    },
-    "tabs": {
-      "friends": "Friends",
-      "requests": "Requests"
+      "label": "Find a friend",
+      "placeholder": "Find by name or email",
+      "clear": "Clear search",
+      "noResults": "We couldn't find anyone like that."
     },
     "invite": {
       "title": "Your invite link",
@@ -1349,7 +1345,7 @@
       "copied": "Copied",
       "copyError": "Couldn't copy the link.",
       "hint": "Share it with anyone — one tap adds you after they sign in.",
-      "regenerate": "New link",
+      "regenerate": "Generate a new link",
       "regenerateTitle": "Generate a new link?",
       "regenerateMessage": "The current invite link will stop working. Anyone who still has it won't be able to use it to add you.",
       "regenerateConfirm": "Generate new link",
@@ -1369,16 +1365,6 @@
       "remove": "Remove",
       "profile": "Profile"
     },
-    "empty": {
-      "friends": {
-        "title": "No friends yet",
-        "description": "Search for users and send them a friend request."
-      },
-      "requests": {
-        "title": "No new requests",
-        "description": "When someone sends you a friend request, it will appear here."
-      }
-    },
     "remove": {
       "title": "Remove friend?",
       "message": "Are you sure you want to remove {{name}} from your friends list? You will lose mutual access to trips.",
@@ -1393,6 +1379,47 @@
       "declineError": "Error declining request.",
       "removeError": "Error removing friend.",
       "requestNotFound": "This request has already been handled."
+    },
+    "summary": {
+      "friends_one": "{{count}} travel buddy",
+      "friends_other": "{{count}} travel buddies",
+      "countries_one": "{{count}} shared country",
+      "countries_other": "{{count}} shared countries"
+    },
+    "inviteButton": "Invite with a link",
+    "requests": {
+      "title": "Friend requests",
+      "message": "<0>{{name}}</0> sent you a friend request"
+    },
+    "card": {
+      "since": "Friends since {{date}}",
+      "trips_one": "trip together",
+      "trips_other": "trips together",
+      "countries_one": "country",
+      "countries_other": "countries",
+      "days_one": "day travelling",
+      "days_other": "days travelling",
+      "nextTrip": "Next trip together",
+      "daysToGo_one": "day",
+      "daysToGo_other": "days",
+      "ongoing": "Travelling together now",
+      "nothingPlanned": "Nothing planned yet",
+      "neverTraveled": "You haven't travelled together yet",
+      "owesYou": "Owes you {{amount}}",
+      "youOwe": "You owe {{amount}}",
+      "settled": "All settled",
+      "profile": "Profile",
+      "menu": "More actions for {{name}}",
+      "remove": "Remove friend"
+    },
+    "listTitle": "Your travel buddies",
+    "loadError": "Couldn't load your friends.",
+    "retry": "Try again",
+    "inviteCard": {
+      "title": "Who's coming next?",
+      "description": "Send your link to anyone. Once they sign in, they add you in one click and you can plan and split costs together.",
+      "emptyTitle": "Invite your first travel buddy",
+      "emptyDescription": "Friends share trips, plan together and settle up in one click at the end."
     }
   },
   "notifications": {

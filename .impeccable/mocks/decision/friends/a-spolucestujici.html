@@ -1,0 +1,75 @@
+<!doctype html><html lang="cs"><head><meta charset="utf-8"><title>Spolucestující</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin-bottom:28px}
+.head p{margin-top:6px;font-size:15px;font-weight:500;color:var(--muted)}
+.req{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--hair);border-radius:20px;padding:14px 16px 14px 14px;margin-bottom:24px;box-shadow:0 4px 24px rgba(0,0,0,.04)}
+.req .dot{width:8px;height:8px;border-radius:99px;background:var(--accent);flex:none}
+.req b{font-weight:700}.req .t{flex:1;font-size:14px;font-weight:500;color:var(--soft)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.card{background:#fff;border:1px solid var(--hair);border-radius:28px;padding:24px;box-shadow:0 1px 2px rgba(17,24,39,.04),0 12px 32px -16px rgba(17,24,39,.12);display:flex;flex-direction:column}
+.card .id{display:flex;gap:14px;align-items:center}
+.card .nm{font-size:18px;font-weight:700;letter-spacing:-.02em}
+.card .bio{font-size:13px;color:var(--muted);font-weight:500;margin-top:2px}
+.since{margin-top:14px;font-size:12px;font-weight:500;color:var(--muted)}
+.card dl{display:grid;grid-template-columns:repeat(3,1fr);margin-top:18px;padding-top:18px;border-top:1px dashed #d1d5db}
+.card dd{font-size:30px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.card dt{font-size:12px;font-weight:500;color:var(--muted);margin-top:6px}
+.stamps{margin-top:14px;display:flex;gap:6px;font-size:18px;letter-spacing:.1em}
+.next{margin-top:18px;display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--field);border:1px solid var(--rule)}
+.next .num{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1;text-align:center;min-width:34px}
+.next .u{font-size:10.5px;font-weight:500;color:var(--muted);display:block;margin-top:2px}
+.next .tt{font-size:13px;font-weight:600;line-height:1.3}
+.foot{margin-top:auto;padding-top:16px;display:flex;align-items:center;justify-content:space-between}
+.owe{background:var(--success-wash);color:var(--success)}
+.even{background:var(--subtle);color:var(--muted-strong)}
+.lnk{font-size:13px;font-weight:600;color:var(--accent);display:inline-flex;gap:4px;align-items:center}
+.invite{border:1.5px dashed #d1d5db;border-radius:28px;padding:24px;display:flex;flex-direction:column;justify-content:center;gap:12px;background:rgba(255,255,255,.5)}
+.invite h3{font-size:18px;font-weight:700;letter-spacing:-.02em}
+.invite p{font-size:13px;color:var(--muted);font-weight:500;line-height:1.5}
+.url{display:flex;gap:8px;margin-top:4px}
+.url span{flex:1;min-width:0;height:40px;display:block;line-height:38px;padding:0 12px;border-radius:12px;background:#fff;border:1px solid var(--hair);font-size:12.5px;color:var(--muted-strong);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.search{height:40px;width:260px;border-radius:16px;border:1px solid var(--hair);background:#fff;display:flex;align-items:center;gap:8px;padding:0 12px;font-size:13px;color:var(--muted)}
+</style></head><body>
+<div id="side"></div>
+<main>
+  <div class="head">
+    <div><h1>Přátelé</h1><p class="tab">2 spolucestující · 6 společných výletů · 4 země</p></div>
+    <div style="display:flex;gap:8px"><div class="search"><i data-lucide="search"></i> Najít podle jména nebo e-mailu</div><button class="btn s"><i data-lucide="link"></i> Pozvat odkazem</button></div>
+  </div>
+
+  <div class="req">
+    <span class="dot"></span><div class="av md">PV</div>
+    <p class="t"><b>Petr Vorlicek</b> vám poslal žádost o přátelství · <span style="color:var(--muted)">před 2 h</span></p>
+    <button class="btn g">Odmítnout</button><button class="btn p"><i data-lucide="user-check"></i> Přijmout</button>
+  </div>
+
+  <div class="grid">
+    <article class="card">
+      <div class="id"><div class="av lg"><i data-lucide="mountain"></i></div><div><p class="nm">Petr Vorel</p><p class="bio">surfař</p></div></div>
+      <p class="since">Přátelé od března 2025</p>
+      <dl class="tab"><div><dd>4</dd><dt>výlety spolu</dt></div><div><dd>3</dd><dt>země</dt></div><div><dd>23</dd><dt>dní na cestě</dt></div></dl>
+      <div class="stamps">🇵🇹🇪🇸🇬🇧</div>
+      <div class="next"><div><span class="num tab">12</span><span class="u">dní</span></div><div><p class="tt">Portugalsko: Lisabon &amp; Algarve</p><p class="cap">Příští společný výlet</p></div></div>
+      <div class="foot"><span class="chip owe tab"><i data-lucide="arrow-down-left"></i> Dluží vám 1 240 Kč</span><span class="lnk">Profil <i data-lucide="arrow-right"></i></span></div>
+    </article>
+    <article class="card">
+      <div class="id"><div class="av lg"><i data-lucide="palmtree"></i></div><div><p class="nm">Petr Vorlito</p><p class="bio">petrvorlicek7@gmail.com</p></div></div>
+      <p class="since">Přátelé od září 2025</p>
+      <dl class="tab"><div><dd>2</dd><dt>výlety spolu</dt></div><div><dd>1</dd><dt>země</dt></div><div><dd>9</dd><dt>dní na cestě</dt></div></dl>
+      <div class="stamps">🇫🇷</div>
+      <div class="next" style="background:transparent;border-style:dashed"><div style="color:var(--muted)"><i data-lucide="calendar-plus"></i></div><div><p class="tt" style="color:var(--muted-strong)">Žádný plánovaný výlet</p><p class="cap">Pozvat na výlet</p></div></div>
+      <div class="foot"><span class="chip even"><i data-lucide="check"></i> Jste vyrovnaní</span><span class="lnk">Profil <i data-lucide="arrow-right"></i></span></div>
+    </article>
+    <div class="invite">
+      <div class="av lg" style="background:#fff;border:1.5px dashed #cbd5e1;color:var(--muted)"><i data-lucide="user-plus"></i></div>
+      <h3>Kdo jede příště?</h3>
+      <p>Pošlete svůj odkaz komukoli. Po přihlášení vás přidá jedním klikem a hned spolu můžete plánovat a dělit výdaje.</p>
+      <div class="url"><span>journeo.vorlos.eu/dashboard/add-friend/8cf502…</span><button class="btn s"><i data-lucide="copy"></i> Kopírovat</button></div>
+    </div>
+  </div>
+</main>
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script>fetch('sidebar.html').then(r=>r.text()).then(h=>{document.getElementById('side').outerHTML=h;lucide.createIcons()})</script>
+</body></html>

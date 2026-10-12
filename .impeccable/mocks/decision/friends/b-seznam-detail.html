@@ -1,0 +1,71 @@
+<!doctype html><html lang="cs"><head><meta charset="utf-8"><title>Seznam a detail</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+main{display:flex;flex-direction:column}
+.wrap{flex:1;min-height:0;display:grid;grid-template-columns:340px 1fr;margin-top:24px;background:#fff;border:1px solid var(--hair);border-radius:28px;overflow:hidden;box-shadow:0 1px 2px rgba(17,24,39,.04),0 12px 32px -16px rgba(17,24,39,.12)}
+.list{border-right:1px solid var(--rule);display:flex;flex-direction:column;background:var(--field)}
+.list .top{padding:16px;display:flex;gap:8px}
+.search{flex:1;height:40px;border-radius:12px;border:1px solid var(--hair);background:#fff;display:flex;align-items:center;gap:8px;padding:0 12px;font-size:13px;color:var(--muted)}
+.ib{width:40px;height:40px;border-radius:12px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px -8px rgba(37,99,235,.7)}
+.sec{padding:14px 20px 6px}
+.row{display:flex;align-items:center;gap:12px;padding:10px 12px;margin:2px 8px;border-radius:14px}
+.row .n{font-size:14px;font-weight:600}.row .s{font-size:12px;color:var(--muted);font-weight:500}
+.row.on{background:#fff;box-shadow:0 1px 2px rgba(17,24,39,.06),0 4px 14px -8px rgba(17,24,39,.18)}
+.row .badge{margin-left:auto;font-size:11px;font-weight:600;background:var(--accent);color:#fff;border-radius:99px;padding:2px 8px}
+.row .mini{margin-left:auto;display:flex;gap:6px}
+.mini span{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.detail{padding:36px 44px;overflow:hidden}
+.dh{display:flex;align-items:center;gap:20px}
+.dh .nm{font-size:30px;font-weight:700;letter-spacing:-.025em}
+.dh .bio{font-size:14px;color:var(--muted);font-weight:500;margin-top:4px}
+.acts{margin-left:auto;display:flex;gap:8px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);margin-top:28px;border:1px solid var(--rule);border-radius:20px}
+.kpis div{padding:18px 20px}.kpis div+div{border-left:1px solid var(--rule)}
+.kpis dd{font-size:28px;font-weight:700;letter-spacing:-.03em;line-height:1}.kpis dt{font-size:12px;color:var(--muted);font-weight:500;margin-top:6px}
+.cols{display:grid;grid-template-columns:1.4fr 1fr;gap:32px;margin-top:30px}
+h3{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:10px}
+.trip{display:flex;align-items:center;gap:14px;padding:12px 0;border-top:1px solid var(--rule)}
+.trip:first-of-type{border-top:0}
+.fl{width:40px;height:40px;border-radius:12px;background:var(--field);display:flex;align-items:center;justify-content:center;font-size:20px}
+.trip .t{font-size:14px;font-weight:600}.trip .d{font-size:12px;color:var(--muted);font-weight:500}
+.trip .r{margin-left:auto}
+.bal{border-radius:20px;background:var(--success-wash);padding:18px 20px}
+.bal .a{font-size:28px;font-weight:700;color:var(--success);letter-spacing:-.03em}
+.bal p{font-size:13px;color:#065f46;font-weight:500;margin-top:4px}
+.bal .btn{margin-top:14px;background:#fff;color:var(--success)}
+.up{background:var(--amber-wash);color:var(--amber-ink)}
+</style></head><body>
+<div id="side"></div>
+<main>
+  <h1>Přátelé</h1>
+  <div class="wrap">
+    <div class="list">
+      <div class="top"><div class="search"><i data-lucide="search"></i> Hledat v přátelích</div><div class="ib"><i data-lucide="user-plus"></i></div></div>
+      <p class="sec lbl">Žádosti · 1</p>
+      <div class="row"><div class="av md">PV</div><div><p class="n">Petr Vorlicek</p><p class="s">před 2 h</p></div><div class="mini"><span style="background:var(--subtle)"><i data-lucide="x"></i></span><span style="background:var(--accent);color:#fff"><i data-lucide="check"></i></span></div></div>
+      <p class="sec lbl">Přátelé · 2</p>
+      <div class="row on"><div class="av md"><i data-lucide="mountain"></i></div><div><p class="n">Petr Vorel</p><p class="s">4 výlety spolu</p></div><span style="margin-left:auto;color:var(--muted)"><i data-lucide="chevron-right"></i></span></div>
+      <div class="row"><div class="av md"><i data-lucide="palmtree"></i></div><div><p class="n">Petr Vorlito</p><p class="s">2 výlety spolu</p></div></div>
+    </div>
+    <section class="detail">
+      <div class="dh"><div class="av xl"><i data-lucide="mountain"></i></div><div><p class="nm">Petr Vorel</p><p class="bio">surfař · přátelé od března 2025</p></div>
+        <div class="acts"><button class="btn s"><i data-lucide="user"></i> Profil</button><button class="btn s"><i data-lucide="calendar-plus"></i> Pozvat na výlet</button><button class="btn g"><i data-lucide="more-horizontal"></i></button></div></div>
+      <dl class="kpis tab"><div><dd>4</dd><dt>výlety spolu</dt></div><div><dd>3</dd><dt>země</dt></div><div><dd>23</dd><dt>dní na cestě</dt></div><div><dd>12</dd><dt>dní do dalšího</dt></div></dl>
+      <div class="cols">
+        <div><h3>Společné výlety</h3>
+          <div class="trip"><div class="fl">🇵🇹</div><div><p class="t">Portugalsko: Lisabon &amp; Algarve</p><p class="d tab">24. 10. – 2. 11. 2026</p></div><span class="r chip up">Za 12 dní</span></div>
+          <div class="trip"><div class="fl">🇪🇸</div><div><p class="t">Surfíky v Baskicku</p><p class="d tab">3. – 10. 8. 2026</p></div><span class="r cap">Proběhlo</span></div>
+          <div class="trip"><div class="fl">🇬🇧</div><div><p class="t">Londýn na otočku</p><p class="d tab">14. – 17. 3. 2026</p></div><span class="r cap">Proběhlo</span></div>
+          <div class="trip"><div class="fl">🇵🇹</div><div><p class="t">Porto</p><p class="d tab">2. – 6. 10. 2025</p></div><span class="r cap">Proběhlo</span></div>
+        </div>
+        <div><h3>Vyrovnání</h3>
+          <div class="bal"><p style="margin:0;color:#065f46">Petr vám dluží</p><p class="a tab">1 240 Kč</p><p>Za Surfíky v Baskicku · 3 nevyrovnané výdaje</p><button class="btn"><i data-lucide="arrow-right"></i> Otevřít vyrovnání</button></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script>fetch('sidebar.html').then(r=>r.text()).then(h=>{document.getElementById('side').outerHTML=h;lucide.createIcons()})</script>
+</body></html>

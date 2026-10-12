@@ -20,6 +20,114 @@
         ],
         "createdAt": "2026-10-06T14:55:09.137Z",
         "reason": "model triage: gray text only pairs with gray disabled bg or turns red on red-50 hover; no gray-on-color state renders"
+      },
+      {
+        "rule": "overused-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/friends/a-spolucestujici.html"
+        ],
+        "createdAt": "2026-10-12T21:53:18.197Z",
+        "reason": "model triage: throwaway decision-page comp fixture, already rendered to PNG, never shipped; Inter is mandated by DESIGN.md"
+      },
+      {
+        "rule": "undersized-ui-text",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/friends/a-spolucestujici.html"
+        ],
+        "createdAt": "2026-10-12T21:53:18.226Z",
+        "reason": "model triage: throwaway decision-page comp fixture, already rendered to PNG, never shipped; Inter is mandated by DESIGN.md"
+      },
+      {
+        "rule": "skipped-heading",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/friends/a-spolucestujici.html"
+        ],
+        "createdAt": "2026-10-12T21:53:18.248Z",
+        "reason": "model triage: throwaway decision-page comp fixture, already rendered to PNG, never shipped; Inter is mandated by DESIGN.md"
+      },
+      {
+        "rule": "nested-cards",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/friends/a-spolucestujici.html"
+        ],
+        "createdAt": "2026-10-12T21:53:18.270Z",
+        "reason": "model triage: throwaway decision-page comp fixture, already rendered to PNG, never shipped; Inter is mandated by DESIGN.md"
+      },
+      {
+        "rule": "overused-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/friends/b-seznam-detail.html"
+        ],
+        "createdAt": "2026-10-12T21:53:18.293Z",
+        "reason": "model triage: throwaway decision-page comp fixture, already rendered to PNG, never shipped; Inter is mandated by DESIGN.md"
+      },
+      {
+        "rule": "undersized-ui-text",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/friends/b-seznam-detail.html"
+        ],
+        "createdAt": "2026-10-12T21:53:18.316Z",
+        "reason": "model triage: throwaway decision-page comp fixture, already rendered to PNG, never shipped; Inter is mandated by DESIGN.md"
+      },
+      {
+        "rule": "skipped-heading",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/friends/b-seznam-detail.html"
+        ],
+        "createdAt": "2026-10-12T21:53:18.339Z",
+        "reason": "model triage: throwaway decision-page comp fixture, already rendered to PNG, never shipped; Inter is mandated by DESIGN.md"
+      },
+      {
+        "rule": "nested-cards",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/friends/b-seznam-detail.html"
+        ],
+        "createdAt": "2026-10-12T21:53:18.369Z",
+        "reason": "model triage: throwaway decision-page comp fixture, already rendered to PNG, never shipped; Inter is mandated by DESIGN.md"
+      },
+      {
+        "rule": "overused-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/friends/c-mapa-party.html"
+        ],
+        "createdAt": "2026-10-12T21:53:18.388Z",
+        "reason": "model triage: throwaway decision-page comp fixture, already rendered to PNG, never shipped; Inter is mandated by DESIGN.md"
+      },
+      {
+        "rule": "undersized-ui-text",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/friends/c-mapa-party.html"
+        ],
+        "createdAt": "2026-10-12T21:53:18.412Z",
+        "reason": "model triage: throwaway decision-page comp fixture, already rendered to PNG, never shipped; Inter is mandated by DESIGN.md"
+      },
+      {
+        "rule": "skipped-heading",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/friends/c-mapa-party.html"
+        ],
+        "createdAt": "2026-10-12T21:53:18.431Z",
+        "reason": "model triage: throwaway decision-page comp fixture, already rendered to PNG, never shipped; Inter is mandated by DESIGN.md"
+      },
+      {
+        "rule": "nested-cards",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/friends/c-mapa-party.html"
+        ],
+        "createdAt": "2026-10-12T21:53:18.454Z",
+        "reason": "model triage: throwaway decision-page comp fixture, already rendered to PNG, never shipped; Inter is mandated by DESIGN.md"
       }
     ]
   }

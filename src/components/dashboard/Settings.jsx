@@ -9,6 +9,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useDialog } from '../ui/DialogModal';
 import UserAvatar from '../ui/UserAvatar';
+import { Group, Row } from '../ui/GroupedList';
 import { avatarPresets } from '../ui/avatarPresets';
 import api from '../../services/api';
 
@@ -109,30 +110,6 @@ const Segmented = ({ labelledBy, value, options, onChange }) => {
     </div>
   );
 };
-
-const Group = ({ title, children }) => {
-  const id = useId();
-  return (
-    <section aria-labelledby={id} className="space-y-2">
-      <h2 id={id} className="px-1 text-[13px] font-semibold text-muted">{title}</h2>
-      <div className="bg-page border border-default rounded-soft shadow-card [&>*+*]:border-t [&>*+*]:border-subtle">
-        {children}
-      </div>
-    </section>
-  );
-};
-
-const Row = ({ title, titleId, htmlFor, hint, hintId, align = 'center', children }) => (
-  <div className={`px-5 sm:px-6 py-4 sm:py-5 flex flex-col gap-3 sm:flex-row sm:justify-between sm:gap-8 ${align === 'start' ? 'sm:items-start' : 'sm:items-center'}`}>
-    <div className="min-w-0">
-      {htmlFor
-        ? <label htmlFor={htmlFor} id={titleId} className="block text-[14px] font-semibold text-primary">{title}</label>
-        : <p id={titleId} className="text-[14px] font-semibold text-primary">{title}</p>}
-      {hint && <p id={hintId} className="mt-0.5 text-[13px] font-medium text-muted max-w-[60ch]">{hint}</p>}
-    </div>
-    {children && <div className="sm:shrink-0">{children}</div>}
-  </div>
-);
 
 const fieldClass =
   'w-full rounded-control bg-page border border-default px-3.5 text-primary placeholder:text-placeholder transition-[background-color,border-color,box-shadow] duration-200 hover:border-strong focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/25';
@@ -390,7 +367,7 @@ const Settings = ({ onConvertCurrency }) => {
     <div className="w-full max-w-6xl pb-16">
       {ModalPortal}
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-8 xl:gap-10 lg:items-start">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-8 xl:gap-10 lg:items-start">
         <div className="lg:sticky lg:top-0 lg:z-10">
         <header className="flex items-end justify-between gap-4 mb-8 sm:mb-10">
           <h1 className="text-3xl sm:text-4xl text-primary tracking-tight font-bold" style={{ textWrap: 'balance' }}>

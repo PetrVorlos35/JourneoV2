@@ -21,7 +21,74 @@ router.get('/', async (req, res) => {
       [userId, userId, userId]
     );
 
-    res.json({ friends: rows });
+    // Společné cestování: výlety, kde jsme oba členové (vlastník nebo
+    // spolupracovník), z nich země z uložených míst, dny na cestě
+    // (jen to, co už proběhlo) a nejbližší společný výlet.
+    const friendIds = rows.map((r) => r.id);
+    const sharedByFriend = new Map(friendIds.map((id) => [Number(id), []]));
+    const countriesByTrip = new Map();
+    if (friendIds.length > 0) {
+      const [sharedRows] = await pool.query(
+        `WITH my_trips AS (
+           SELECT id FROM trips WHERE user_id = ? AND deleted_at IS NULL
+           UNION
+           SELECT t.id FROM trips t
+           JOIN trip_collaborators tc ON tc.trip_id = t.id AND tc.user_id = ?
+           WHERE t.deleted_at IS NULL
+         ),
+         members AS (
+           SELECT t.id AS trip_id, t.user_id AS member_id FROM trips t WHERE t.id IN (SELECT id FROM my_trips)
+           UNION
+           SELECT tc.trip_id, tc.user_id FROM trip_collaborators tc WHERE tc.trip_id IN (SELECT id FROM my_trips)
+         )
+         SELECT m.member_id AS friendId, t.id, t.title,
+                DATE_FORMAT(t.start_date, '%Y-%m-%d') AS startDate,
+                DATE_FORMAT(t.end_date, '%Y-%m-%d') AS endDate,
+                LEAST(GREATEST(DATEDIFF(LEAST(t.end_date, CURDATE()), t.start_date) + 1, 0),
+                      DATEDIFF(t.end_date, t.start_date) + 1) AS daysTraveled,
+                t.end_date >= CURDATE() AS isUpcoming
+         FROM members m
+         JOIN trips t ON t.id = m.trip_id
+         WHERE m.member_id IN (?)`,
+        [userId, userId, friendIds]
+      );
+
+      const sharedTripIds = [...new Set(sharedRows.map((r) => r.id))];
+      if (sharedTripIds.length > 0) {
+        const [placeRows] = await pool.query(
+          `SELECT DISTINCT trip_id AS tripId, UPPER(country_code) AS code
+           FROM trip_places WHERE trip_id IN (?) AND country_code IS NOT NULL`,
+          [sharedTripIds]
+        );
+        for (const p of placeRows) {
+          if (!countriesByTrip.has(p.tripId)) countriesByTrip.set(p.tripId, []);
+          countriesByTrip.get(p.tripId).push(p.code);
+        }
+      }
+
+      for (const r of sharedRows) sharedByFriend.get(Number(r.friendId))?.push(r);
+    }
+
+    const friends = rows.map((friend) => {
+      const trips = sharedByFriend.get(Number(friend.id)) || [];
+      const countries = [...new Set(trips.flatMap((tr) => countriesByTrip.get(tr.id) || []))];
+      const next = trips
+        .filter((tr) => Number(tr.isUpcoming) === 1)
+        .sort((a, b) => a.startDate.localeCompare(b.startDate))[0];
+      return {
+        ...friend,
+        shared: {
+          trips: trips.length,
+          days: trips.reduce((sum, tr) => sum + Number(tr.daysTraveled || 0), 0),
+          countries,
+          nextTrip: next
+            ? { id: next.id.toString(), title: next.title, startDate: next.startDate, endDate: next.endDate }
+            : null,
+        },
+      };
+    });
+
+    res.json({ friends });
   } catch (err) {
     console.error('Get friends error:', err);
     res.status(500).json({ error: 'Chyba při načítání přátel.' });

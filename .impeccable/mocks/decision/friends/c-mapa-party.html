@@ -1,0 +1,52 @@
+<!doctype html><html lang="cs"><head><meta charset="utf-8"><title>Parta na mapě</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<link rel="stylesheet" href="base.css">
+<style>
+main{display:flex;flex-direction:column;gap:20px}
+.head{display:flex;align-items:flex-end;justify-content:space-between}
+.mapbox{position:relative;height:500px;border-radius:28px;overflow:hidden;border:1px solid var(--hair);box-shadow:0 1px 2px rgba(17,24,39,.04),0 12px 32px -16px rgba(17,24,39,.12)}
+#map{position:absolute;inset:0}
+.leaflet-control-attribution{font-size:9px}
+.pin{display:flex;align-items:center;gap:6px;background:#fff;border-radius:999px;padding:3px 10px 3px 3px;box-shadow:0 6px 18px -6px rgba(17,24,39,.35);font:600 12px Inter;white-space:nowrap;color:var(--ink)}
+.pin .av{width:26px;height:26px;font-size:10px;border-width:1.5px}
+.pin .av svg.lucide{width:14px;height:14px}
+.pin .stack{display:flex}.pin .stack .av+.av{margin-left:-8px}
+.overlay{position:absolute;left:20px;top:20px;width:300px;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-radius:20px;padding:18px;border:1px solid var(--hair);box-shadow:0 12px 32px -12px rgba(17,24,39,.25)}
+.overlay .big{font-size:30px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.overlay dl{display:grid;grid-template-columns:repeat(3,1fr);margin-top:12px}
+.overlay dt{font-size:12px;color:var(--muted);margin-top:4px}
+.filter{position:absolute;right:20px;top:20px;display:flex;gap:4px;padding:4px;border-radius:16px;background:#fff;border:1px solid var(--hair);box-shadow:0 12px 32px -12px rgba(17,24,39,.25)}
+.filter span{height:32px;padding:0 12px;border-radius:12px;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:6px;color:var(--muted-strong)}
+.filter span.on{background:var(--active);color:var(--active-ink)}
+.people{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.p{background:#fff;border:1px solid var(--hair);border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:12px}
+.p .n{font-size:14px;font-weight:600}.p .s{font-size:12px;color:var(--muted);font-weight:500}
+.p.on{border-color:#155dfc66;box-shadow:0 0 0 3px #155dfc1a}
+.p .r{margin-left:auto}
+</style></head><body>
+<div id="side"></div>
+<main>
+  <div class="head"><h1>Přátelé</h1><div style="display:flex;gap:8px"><button class="btn s"><i data-lucide="search"></i> Najít přítele</button><button class="btn s"><i data-lucide="link"></i> Pozvat odkazem</button></div></div>
+  <div class="mapbox"><div id="map"></div>
+    <div class="overlay"><p class="lbl">Kde jste byli s partou</p><dl class="tab"><div><dd class="big">6</dd><dt>výletů</dt></div><div><dd class="big">4</dd><dt>země</dt></div><div><dd class="big">32</dd><dt>dní</dt></div></dl>
+      <p class="cap" style="margin-top:12px">Klikněte na přítele níže a mapa ukáže jen vaše společná místa.</p></div>
+    <div class="filter"><span class="on">Všichni</span><span>Petr Vorel</span><span>Petr Vorlito</span></div>
+  </div>
+  <div class="people">
+    <div class="p" style="border-color:#fde68a;background:var(--amber-wash)"><div class="av md">PV</div><div><p class="n">Petr Vorlicek</p><p class="s">Žádost o přátelství</p></div><div class="r" style="display:flex;gap:6px"><button class="btn g">Odmítnout</button><button class="btn p">Přijmout</button></div></div>
+    <div class="p on"><div class="av md"><i data-lucide="mountain"></i></div><div><p class="n">Petr Vorel</p><p class="s tab">4 výlety · 🇵🇹🇪🇸🇬🇧</p></div><span class="r chip tab" style="background:var(--success-wash);color:var(--success)">+1 240 Kč</span></div>
+    <div class="p"><div class="av md"><i data-lucide="palmtree"></i></div><div><p class="n">Petr Vorlito</p><p class="s tab">2 výlety · 🇫🇷</p></div><span class="r chip" style="background:var(--subtle);color:var(--muted-strong)">Vyrovnáno</span></div>
+  </div>
+</main>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script>
+const map=new maplibregl.Map({container:'map',style:'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',center:[-1.5,45],zoom:4.15,attributionControl:{compact:true}});
+const a1='<span class="av"><i data-lucide="mountain"></i></span>',a2='<span class="av"><i data-lucide="palmtree"></i></span>';
+[[38.72,-9.14,'Lisabon',a1],[37.02,-7.93,'Algarve',a1],[43.32,-1.98,'Baskicko',a1],[51.5,-0.12,'Londýn',a1],[41.15,-8.61,'Porto',a1],[48.86,2.35,'Paříž',a2],[43.7,7.26,'Nice',a2]].forEach(([la,lo,n,a])=>{
+  const el=document.createElement('div');el.innerHTML=`<div class="pin"><span class="stack">${a}</span>${n}</div>`;
+  new maplibregl.Marker({element:el.firstChild}).setLngLat([lo,la]).addTo(map)});
+fetch('sidebar.html').then(r=>r.text()).then(h=>{document.getElementById('side').outerHTML=h;lucide.createIcons()});
+</script>
+</body></html>
