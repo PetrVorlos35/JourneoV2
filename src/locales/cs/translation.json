@@ -1243,30 +1243,46 @@
     }
   },
   "settings": {
-    "subtitle": "Správa profilu",
     "title": "Nastavení",
+    "status": {
+      "saving": "Ukládám…",
+      "saved": "Uloženo",
+      "error": "Neuloženo · zkusit znovu"
+    },
     "profile": {
-      "title": "Můj profil",
-      "avatarLabel": "Vyberte si avatar",
-      "avatarDefault": "Použít iniciály",
+      "title": "Váš pas",
+      "description": "Takhle vás vidí přátelé a spolucestující.",
       "firstName": "Jméno",
-      "firstNamePlaceholder": "např. Jan",
+      "firstNamePlaceholder": "Jan",
       "lastName": "Příjmení",
-      "lastNamePlaceholder": "např. Novák",
-      "bio": "Napište něco o sobě (Bio)",
-      "bioPlaceholder": "např. Milovník hor a dobrodružství...",
-      "bankAccount": "Číslo účtu / IBAN",
-      "bankAccountPlaceholder": "např. 123456789/0100 nebo IBAN",
-      "bankAccountHint": "Slouží k tomu, aby vám spolucestující mohli poslat peníze při vyrovnání dluhů.",
-      "emailLabel": "E-mail (nelze změnit)",
-      "saveUnsaved": "Uložit změny",
-      "save": "Uložit profil",
-      "saveSuccess": "Profil byl úspěšně uložen.",
-      "saveError": "Nepodařilo se uložit profil."
+      "lastNamePlaceholder": "Novák",
+      "bio": "O mně",
+      "bioPlaceholder": "Milovník hor a dobrodružství…",
+      "avatarLabel": "Obrázek",
+      "avatars": {
+        "none": "Iniciály",
+        "mountain": "Hory",
+        "beach": "Pláž",
+        "city": "Kompas",
+        "forest": "Mapa",
+        "travel": "Letadlo",
+        "photography": "Fotoaparát"
+      },
+      "charsLeft": "Zbývá {{count}} znaků",
+      "saveError": "Profil se nepodařilo uložit."
+    },
+    "settle": {
+      "title": "Vyrovnání",
+      "bankAccount": "Číslo účtu nebo IBAN",
+      "bankAccountPlaceholder": "123456789/0100",
+      "bankAccountHint": "Aby vám spolucestující mohli poslat peníze, až se budete vyrovnávat."
+    },
+    "preferences": {
+      "title": "Předvolby"
     },
     "currency": {
-      "title": "Měna rozpočtu",
-      "subtitle": "Zvolte si výchozí měnu pro sledování výdajů na vašich cestách.",
+      "title": "Měna",
+      "subtitle": "Ve které měně sledujete výdaje.",
       "changeTitle": "Změnit měnu?",
       "changeMessage": "Přejete si přepočítat stávající výdaje do nové měny ({{newCurr}}) pomocí kurzu, nebo jen změnit symbol měny a nechat částky beze změny?",
       "yes": "Ano, přepočítat",
@@ -1275,58 +1291,57 @@
       "symbolChanged": "Symbol měny změněn na {{currency}}"
     },
     "appearance": {
-      "title": "Vzhled aplikace",
-      "subtitle": "Vyberte si motiv, který vám nejvíce vyhovuje."
+      "title": "Vzhled",
+      "subtitle": "Systémový se řídí nastavením zařízení."
     },
     "theme": {
       "light": "Světlý",
       "dark": "Tmavý",
       "system": "Systémový"
     },
-    "password": {
-      "title": "Změna hesla",
-      "subtitle": "Doporučujeme používat silné heslo. Pokud změníte heslo, zůstanete přihlášeni.",
-      "current": "Současné heslo",
-      "new": "Nové heslo",
-      "confirm": "Potvrďte nové heslo",
-      "submit": "Změnit heslo",
-      "submitting": "Měním heslo...",
-      "mismatch": "Hesla se neshodují.",
-      "weak": "Nové heslo nesplňuje bezpečnostní požadavky.",
-      "req": {
-        "length": "Alespoň 8 znaků",
-        "uppercase": "Obsahuje velké písmeno",
-        "digit": "Obsahuje číslici"
-      }
-    },
     "language": {
-      "title": "Jazyk aplikace",
-      "subtitle": "Vyberte si preferovaný jazyk rozhraní.",
+      "title": "Jazyk",
+      "subtitle": "Jazyk rozhraní aplikace.",
       "cs": "Čeština",
       "en": "English"
     },
-    "danger": {
-      "title": "Nebezpečná zóna",
-      "description": "Tato akce trvale smaže všechny vaše uložené výlety, dny i statistiky. Nelze ji vzít zpět.",
-      "button": "Smazat všechna data",
-      "confirmTitle": "Smazat všechna data?",
-      "confirmMessage": "Tato akce trvale smaže všechny výlety, dny i statistiky.",
-      "confirmLabel": "Pro potvrzení napište 'SMAZAT VŠE'",
-      "placeholder": "SMAZAT VŠE",
-      "requiredPhrase": "SMAZAT VŠE",
-      "confirmBtn": "Trvale smazat",
-      "successMessage": "Všechna data byla úspěšně smazána.",
-      "account": {
-        "title": "Smazat účet",
-        "description": "Trvale smaže váš účet, přátele, oznámení a nastavení. Výlety, které vlastníte a sdílíte s někým, kdo je může upravovat, se předají jemu. Ostatní vaše výlety se smažou i lidem, kteří je mohou jen číst. Výdaje, které jste platili ve výletech jiných lidí, v nich zůstanou bez vašeho jména. Nelze vzít zpět.",
-        "button": "Smazat účet",
-        "confirmTitle": "Opravdu smazat účet?",
-        "confirmMessage": "Účet a všechna vaše data budou nenávratně smazána a budete odhlášeni.",
-        "confirmLabel": "Pro potvrzení napište svůj e-mail",
-        "confirmBtn": "Trvale smazat účet",
-        "successMessage": "Váš účet byl smazán.",
-        "error": "Účet se nepodařilo smazat."
-      }
+    "account": {
+      "title": "Účet",
+      "email": "E-mail",
+      "emailHint": "E-mail nejde změnit.",
+      "logout": "Odhlásit se",
+      "logoutHint": "Odhlásí vás na tomto zařízení."
+    },
+    "password": {
+      "title": "Heslo",
+      "subtitle": "Po změně zůstanete na tomto zařízení přihlášeni.",
+      "open": "Změnit heslo",
+      "cancel": "Zrušit",
+      "current": "Současné heslo",
+      "new": "Nové heslo",
+      "confirm": "Nové heslo znovu",
+      "submit": "Uložit nové heslo",
+      "submitting": "Ukládám…",
+      "mismatch": "Hesla se neshodují.",
+      "weak": "Nové heslo nesplňuje požadavky níže.",
+      "req": {
+        "length": "Alespoň 8 znaků",
+        "uppercase": "Velké písmeno",
+        "digit": "Číslice"
+      },
+      "reqMet": "splněno",
+      "reqUnmet": "nesplněno"
+    },
+    "delete": {
+      "title": "Smazat účet",
+      "description": "Trvale smaže váš účet, přátele, oznámení a nastavení. Výlety, které vlastníte a sdílíte s někým, kdo je může upravovat, se předají jemu. Ostatní vaše výlety se smažou i lidem, kteří je mohou jen číst. Výdaje, které jste platili ve výletech jiných lidí, v nich zůstanou bez vašeho jména. Nelze vzít zpět.",
+      "button": "Smazat účet…",
+      "confirmTitle": "Opravdu smazat účet?",
+      "confirmMessage": "Účet a všechna vaše data budou nenávratně smazána a budete odhlášeni.",
+      "confirmLabel": "Pro potvrzení napište svůj e-mail",
+      "confirmBtn": "Trvale smazat účet",
+      "successMessage": "Váš účet byl smazán.",
+      "error": "Účet se nepodařilo smazat."
     }
   },
   "friends": {
@@ -1535,7 +1550,6 @@
     "createError": "Nepodařilo se vytvořit výlet.",
     "deleteError": "Nepodařilo se smazat výlet.",
     "updateError": "Nepodařilo se aktualizovat výlet.",
-    "clearError": "Nepodařilo se smazat data.",
     "currencyError": "Chyba při přepočtu měny.",
     "tripDeleted": "Výlet byl přesunut do koše",
     "undo": "Vrátit zpět",

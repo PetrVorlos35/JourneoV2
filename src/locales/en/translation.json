@@ -1227,30 +1227,46 @@
     }
   },
   "settings": {
-    "subtitle": "Profile management",
     "title": "Settings",
+    "status": {
+      "saving": "Saving…",
+      "saved": "Saved",
+      "error": "Not saved · try again"
+    },
     "profile": {
-      "title": "My profile",
-      "avatarLabel": "Choose an avatar",
-      "avatarDefault": "Use initials",
+      "title": "Your passport",
+      "description": "This is how friends and trip mates see you.",
       "firstName": "First name",
-      "firstNamePlaceholder": "e.g. John",
+      "firstNamePlaceholder": "John",
       "lastName": "Last name",
-      "lastNamePlaceholder": "e.g. Smith",
-      "bio": "Write something about yourself (Bio)",
-      "bioPlaceholder": "e.g. Mountain lover and adventurer...",
-      "bankAccount": "Bank account / IBAN",
-      "bankAccountPlaceholder": "e.g. 123456789/0100 or IBAN",
-      "bankAccountHint": "Used so trip mates can pay you back when settling up.",
-      "emailLabel": "Email (cannot be changed)",
-      "saveUnsaved": "Save changes",
-      "save": "Save profile",
-      "saveSuccess": "Profile saved successfully.",
-      "saveError": "Failed to save profile."
+      "lastNamePlaceholder": "Smith",
+      "bio": "About me",
+      "bioPlaceholder": "Mountain lover and adventurer…",
+      "avatarLabel": "Picture",
+      "avatars": {
+        "none": "Initials",
+        "mountain": "Mountains",
+        "beach": "Beach",
+        "city": "Compass",
+        "forest": "Map",
+        "travel": "Plane",
+        "photography": "Camera"
+      },
+      "charsLeft": "{{count}} characters left",
+      "saveError": "Could not save your profile."
+    },
+    "settle": {
+      "title": "Settling up",
+      "bankAccount": "Bank account or IBAN",
+      "bankAccountPlaceholder": "123456789/0100",
+      "bankAccountHint": "So trip mates can send you money when you settle up."
+    },
+    "preferences": {
+      "title": "Preferences"
     },
     "currency": {
-      "title": "Budget currency",
-      "subtitle": "Choose your default currency for tracking expenses on your travels.",
+      "title": "Currency",
+      "subtitle": "The currency you track expenses in.",
       "changeTitle": "Change currency?",
       "changeMessage": "Would you like to recalculate existing expenses to the new currency ({{newCurr}}) using the exchange rate, or just change the currency symbol and leave amounts unchanged?",
       "yes": "Yes, recalculate",
@@ -1259,58 +1275,57 @@
       "symbolChanged": "Currency symbol changed to {{currency}}"
     },
     "appearance": {
-      "title": "App appearance",
-      "subtitle": "Choose the theme that suits you best."
+      "title": "Appearance",
+      "subtitle": "System follows your device setting."
     },
     "theme": {
       "light": "Light",
       "dark": "Dark",
       "system": "System"
     },
-    "password": {
-      "title": "Change password",
-      "subtitle": "We recommend using a strong password. If you change your password, you will remain logged in.",
-      "current": "Current password",
-      "new": "New password",
-      "confirm": "Confirm new password",
-      "submit": "Change password",
-      "submitting": "Changing password...",
-      "mismatch": "Passwords do not match.",
-      "weak": "New password does not meet security requirements.",
-      "req": {
-        "length": "At least 8 characters",
-        "uppercase": "Contains uppercase letter",
-        "digit": "Contains a digit"
-      }
-    },
     "language": {
-      "title": "App language",
-      "subtitle": "Choose your preferred interface language.",
-      "cs": "Czech",
+      "title": "Language",
+      "subtitle": "The app's interface language.",
+      "cs": "Čeština",
       "en": "English"
     },
-    "danger": {
-      "title": "Danger zone",
-      "description": "This action will permanently delete all your saved trips, days, and statistics. It cannot be undone.",
-      "button": "Delete all data",
-      "confirmTitle": "Delete all data?",
-      "confirmMessage": "This action will permanently delete all trips, days, and statistics.",
-      "confirmLabel": "Type 'DELETE ALL' to confirm",
-      "placeholder": "DELETE ALL",
-      "requiredPhrase": "DELETE ALL",
-      "confirmBtn": "Permanently delete",
-      "successMessage": "All data was successfully deleted.",
-      "account": {
-        "title": "Delete account",
-        "description": "Permanently deletes your account, friends, notifications and settings. Trips you own and share with someone who can edit them are handed over to that person. Your other trips are deleted, including for people who can only view them. Expenses you paid in other people's trips stay there without your name. This cannot be undone.",
-        "button": "Delete account",
-        "confirmTitle": "Really delete your account?",
-        "confirmMessage": "Your account and all your data will be permanently deleted and you will be signed out.",
-        "confirmLabel": "Type your email to confirm",
-        "confirmBtn": "Permanently delete account",
-        "successMessage": "Your account has been deleted.",
-        "error": "Could not delete the account."
-      }
+    "account": {
+      "title": "Account",
+      "email": "Email",
+      "emailHint": "Email can't be changed.",
+      "logout": "Sign out",
+      "logoutHint": "Signs you out on this device."
+    },
+    "password": {
+      "title": "Password",
+      "subtitle": "You stay signed in on this device after changing it.",
+      "open": "Change password",
+      "cancel": "Cancel",
+      "current": "Current password",
+      "new": "New password",
+      "confirm": "New password again",
+      "submit": "Save new password",
+      "submitting": "Saving…",
+      "mismatch": "Passwords do not match.",
+      "weak": "The new password doesn't meet the requirements below.",
+      "req": {
+        "length": "At least 8 characters",
+        "uppercase": "An uppercase letter",
+        "digit": "A digit"
+      },
+      "reqMet": "met",
+      "reqUnmet": "not met"
+    },
+    "delete": {
+      "title": "Delete account",
+      "description": "Permanently deletes your account, friends, notifications and settings. Trips you own and share with someone who can edit them are handed over to that person. Your other trips are deleted, including for people who can only view them. Expenses you paid in other people's trips stay there without your name. This cannot be undone.",
+      "button": "Delete account…",
+      "confirmTitle": "Really delete your account?",
+      "confirmMessage": "Your account and all your data will be permanently deleted and you will be signed out.",
+      "confirmLabel": "Type your email to confirm",
+      "confirmBtn": "Permanently delete account",
+      "successMessage": "Your account has been deleted.",
+      "error": "Could not delete the account."
     }
   },
   "friends": {
@@ -1519,7 +1534,6 @@
     "createError": "Failed to create trip.",
     "deleteError": "Failed to delete trip.",
     "updateError": "Failed to update trip.",
-    "clearError": "Failed to delete data.",
     "currencyError": "Error converting currency.",
     "tripDeleted": "Trip moved to Trash",
     "undo": "Undo",

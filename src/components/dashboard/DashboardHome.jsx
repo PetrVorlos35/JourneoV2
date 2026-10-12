@@ -187,16 +187,6 @@ const DashboardHome = () => {
     }
   };
 
-  const handleClearData = async () => {
-    try {
-      // Delete all trips one by one
-      await Promise.all(trips.map(trip => api.trips.delete(trip.id)));
-      setTrips([]);
-    } catch (err) {
-      toast.error(t('dashboardHome.clearError'));
-    }
-  };
-
   // Converting rewrites every expense amount in the DB irreversibly, so the
   // rate comes from the server (live ECB data) and the whole operation fails
   // closed — no conversion happens if the current rate can't be fetched.
@@ -284,7 +274,7 @@ const DashboardHome = () => {
         />
         <Route
           path="/settings"
-          element={withSuspense(<Settings onClearData={handleClearData} onConvertCurrency={handleConvertCurrency} />, <SettingsSkeleton />)}
+          element={withSuspense(<Settings onConvertCurrency={handleConvertCurrency} />, <SettingsSkeleton />)}
         />
         <Route
           path="/budget"
