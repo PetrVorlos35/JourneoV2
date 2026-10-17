@@ -26,6 +26,18 @@ const TripMap = lazy(() => import('./TripMap'));
 const TOOL_VIEWS = ['packing', 'documents', 'map', 'budget'];
 const AUTOSAVE_DELAY = 800;
 
+// Stránky programu pro každý den výletu, doplněné o uložené aktivity.
+const buildDailyPlans = (trip) => {
+  const days = eachDayOfInterval({ start: new Date(trip.startDate), end: new Date(trip.endDate) });
+  const existing = trip.activities || [];
+  return days.map((date, index) => ({
+    date,
+    title: existing[index]?.title || `Den ${index + 1}`,
+    plan: existing[index]?.plan || '',
+    location: existing[index]?.location || '',
+  }));
+};
+
 const isEditableTarget = (el) =>
   el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable);
 
@@ -121,7 +133,29 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           documents: s.documents,
         });
         if (!pendingRef.current) setSaveState('saved');
-      } catch {
+      } catch (err) {
+        // Někdo výlet mezitím uložil jinde: převezmi jeho verzi (hlášku ukáže
+        // DashboardHome). latestRef se přepisuje hned, protože další uložení
+        // ve frontě může běžet dřív, než React překreslí, a poslalo by staré
+        // rozepsané údaje, které by cizí změny znovu přepsaly.
+        if (err?.code === 'TRIP_CONFLICT' && err.trip) {
+          const plans = buildDailyPlans(err.trip);
+          const fresh = err.trip;
+          latestRef.current = {
+            trip: fresh,
+            tripTitle: fresh.title,
+            dailyPlans: plans,
+            packingList: fresh.packingList || [],
+            documents: fresh.documents || [],
+          };
+          pendingRef.current = false;
+          setTripTitle(fresh.title);
+          setDailyPlans(plans);
+          setPackingList(fresh.packingList || []);
+          setDocuments(fresh.documents || []);
+          setSaveState('idle');
+          return;
+        }
         setSaveState('error');
       }
     });
@@ -153,14 +187,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
 
   useEffect(() => {
     if (!trip) return;
-    const days = eachDayOfInterval({ start: new Date(trip.startDate), end: new Date(trip.endDate) });
-    const existing = trip.activities || [];
-    const plans = days.map((date, index) => ({
-      date,
-      title: existing[index]?.title || `Den ${index + 1}`,
-      plan: existing[index]?.plan || '',
-      location: existing[index]?.location || '',
-    }));
+    const plans = buildDailyPlans(trip);
     setDailyPlans(plans);
     setPackingList(trip.packingList || []);
     setDocuments(trip.documents || []);

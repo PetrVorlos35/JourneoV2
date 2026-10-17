@@ -101,7 +101,8 @@ router.get('/', async (req, res) => {
          'owner' AS role,
          (SELECT COUNT(*) FROM votes v WHERE v.trip_id = t.id AND v.value = 1) AS likes,
          t.share_token AS shareToken,
-         t.budget_target AS budgetTarget
+         t.budget_target AS budgetTarget,
+         t.version
        FROM trips t
        WHERE t.user_id = ? AND t.deleted_at IS NULL
        UNION
@@ -112,7 +113,8 @@ router.get('/', async (req, res) => {
          tc.role,
          NULL AS likes,
          NULL AS shareToken,
-         t.budget_target AS budgetTarget
+         t.budget_target AS budgetTarget,
+         t.version
        FROM trips t
        JOIN trip_collaborators tc ON tc.trip_id = t.id AND tc.user_id = ?
        WHERE t.user_id != ? AND t.deleted_at IS NULL
@@ -263,6 +265,7 @@ router.post('/', async (req, res) => {
         startDate,
         endDate,
         role: 'owner',
+        version: 0,
         activities: [],
         expenses: [],
         packingList: [],
@@ -275,8 +278,53 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Celý výlet ve tvaru, jaký vrací GET /api/trips (pro odpověď PUT i 409).
+const fetchFullTrip = async (tripId, userId, role) => {
+  const [updatedTrips] = await pool.query(
+    "SELECT id, title, DATE_FORMAT(start_date, '%Y-%m-%d') AS startDate, DATE_FORMAT(end_date, '%Y-%m-%d') AS endDate, budget_target AS budgetTarget, version FROM trips WHERE id = ?",
+    [tripId]
+  );
+  const [updatedActivities] = await pool.query(
+    "SELECT id, day_index AS dayIndex, DATE_FORMAT(date, '%Y-%m-%d') AS date, title, plan, location FROM trip_activities WHERE trip_id = ? ORDER BY day_index ASC",
+    [tripId]
+  );
+  const updatedExpenses = await fetchExpensesWithSplits(tripId);
+  const [updatedPacking] = await pool.query(
+    'SELECT id, text, checked FROM trip_packing_items WHERE trip_id = ? ORDER BY created_at ASC',
+    [tripId]
+  );
+  const [updatedDocs] = await pool.query(
+    'SELECT id, title, content FROM trip_documents WHERE trip_id = ? ORDER BY created_at ASC',
+    [tripId]
+  );
+  const [voteScore] = await pool.query(
+    'SELECT COUNT(*) AS likes FROM votes WHERE trip_id = ? AND value = 1',
+    [tripId]
+  );
+  const [userVote] = await pool.query(
+    'SELECT value FROM votes WHERE user_id = ? AND trip_id = ?',
+    [userId, tripId]
+  );
+
+  return {
+    ...updatedTrips[0],
+    id: updatedTrips[0].id.toString(),
+    budgetTarget: updatedTrips[0].budgetTarget != null ? parseFloat(updatedTrips[0].budgetTarget) : null,
+    role,
+    activities: updatedActivities.map(a => ({ ...a, id: a.id.toString() })),
+    expenses: updatedExpenses,
+    packingList: updatedPacking.map(p => ({ id: p.id.toString(), text: p.text, checked: !!p.checked })),
+    documents: updatedDocs.map(d => ({ id: d.id.toString(), title: d.title, content: d.content })),
+    likes: parseInt(voteScore[0].likes),
+    isLiked: userVote.length > 0 && userVote[0].value === 1,
+  };
+};
+
 // ── PUT /api/trips/:id ──────────────────────────────────────
-// Owners and editors can update; viewers are blocked with 403
+// Owners and editors can update; viewers are blocked with 403.
+// Ochrana proti přepsání: klient posílá `version`, ze které vycházel. Pokud
+// se výlet mezitím uložil jinde, vrátí se 409 TRIP_CONFLICT s aktuálním
+// stavem a nic se nepřepíše. Bez `version` (starší klient) se ukládá jako dřív.
 router.put('/:id', async (req, res) => {
   const connection = await pool.getConnection();
   try {
@@ -284,7 +332,7 @@ router.put('/:id', async (req, res) => {
 
     const userId = req.userId;
     const tripId = parseInt(req.params.id);
-    const { title, startDate, endDate, activities, expenses, packingList, documents, budgetTarget } = req.body;
+    const { title, startDate, endDate, activities, expenses, packingList, documents, budgetTarget, version } = req.body;
 
     const role = await getTripRole(tripId, userId);
     if (!role) {
@@ -294,6 +342,18 @@ router.put('/:id', async (req, res) => {
     if (role === 'viewer') {
       await connection.rollback();
       return res.status(403).json({ error: 'Nemáte oprávnění upravovat tento výlet.' });
+    }
+
+    // FOR UPDATE zamkne řádek do konce transakce, takže dvě souběžná uložení
+    // se stejnou verzí neprojdou obě.
+    const [[current]] = await connection.query('SELECT version FROM trips WHERE id = ? FOR UPDATE', [tripId]);
+    if (version !== undefined && version !== null && Number(version) !== current.version) {
+      await connection.rollback();
+      return res.status(409).json({
+        error: 'Výlet mezitím upravil někdo jiný.',
+        code: 'TRIP_CONFLICT',
+        trip: await fetchFullTrip(tripId, userId, role),
+      });
     }
 
     if (startDate || endDate) {
@@ -372,48 +432,11 @@ router.put('/:id', async (req, res) => {
       }
     }
 
+    await connection.query('UPDATE trips SET version = version + 1 WHERE id = ?', [tripId]);
+
     await connection.commit();
 
-    const [updatedTrips] = await pool.query(
-      "SELECT id, title, DATE_FORMAT(start_date, '%Y-%m-%d') AS startDate, DATE_FORMAT(end_date, '%Y-%m-%d') AS endDate, budget_target AS budgetTarget FROM trips WHERE id = ?",
-      [tripId]
-    );
-    const [updatedActivities] = await pool.query(
-      "SELECT id, day_index AS dayIndex, DATE_FORMAT(date, '%Y-%m-%d') AS date, title, plan, location FROM trip_activities WHERE trip_id = ? ORDER BY day_index ASC",
-      [tripId]
-    );
-    const updatedExpenses = await fetchExpensesWithSplits(tripId);
-    const [updatedPacking] = await pool.query(
-      'SELECT id, text, checked FROM trip_packing_items WHERE trip_id = ? ORDER BY created_at ASC',
-      [tripId]
-    );
-    const [updatedDocs] = await pool.query(
-      'SELECT id, title, content FROM trip_documents WHERE trip_id = ? ORDER BY created_at ASC',
-      [tripId]
-    );
-    const [voteScore] = await pool.query(
-      'SELECT COUNT(*) AS likes FROM votes WHERE trip_id = ? AND value = 1',
-      [tripId]
-    );
-    const [userVote] = await pool.query(
-      'SELECT value FROM votes WHERE user_id = ? AND trip_id = ?',
-      [userId, tripId]
-    );
-
-    res.json({
-      trip: {
-        ...updatedTrips[0],
-        id: updatedTrips[0].id.toString(),
-        budgetTarget: updatedTrips[0].budgetTarget != null ? parseFloat(updatedTrips[0].budgetTarget) : null,
-        role,
-        activities: updatedActivities.map(a => ({ ...a, id: a.id.toString() })),
-        expenses: updatedExpenses,
-        packingList: updatedPacking.map(p => ({ id: p.id.toString(), text: p.text, checked: !!p.checked })),
-        documents: updatedDocs.map(d => ({ id: d.id.toString(), title: d.title, content: d.content })),
-        likes: parseInt(voteScore[0].likes),
-        isLiked: userVote.length > 0 && userVote[0].value === 1,
-      }
-    });
+    res.json({ trip: await fetchFullTrip(tripId, userId, role) });
   } catch (err) {
     await connection.rollback();
     console.error('Update trip error:', err);

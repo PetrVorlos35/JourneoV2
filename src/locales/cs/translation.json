@@ -1589,6 +1589,7 @@
     "createError": "Nepodařilo se vytvořit výlet.",
     "deleteError": "Nepodařilo se smazat výlet.",
     "updateError": "Nepodařilo se aktualizovat výlet.",
+    "conflict": "Výlet mezitím upravil někdo jiný. Načetli jsme jeho verzi a tvoje poslední úprava se neuložila, zkus ji prosím zopakovat.",
     "currencyError": "Chyba při přepočtu měny.",
     "tripDeleted": "Výlet byl přesunut do koše",
     "undo": "Vrátit zpět",

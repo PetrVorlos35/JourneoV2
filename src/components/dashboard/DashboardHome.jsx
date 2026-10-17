@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useState, useEffect, useCallback } from 'react';
+import React, { Suspense, lazy, useState, useEffect, useCallback, useRef } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
@@ -57,6 +57,17 @@ const DashboardHome = () => {
   const [loadError, setLoadError] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+  // Ochrana proti přepsání: ke každému výletu si pamatujeme verzi, se kterou
+  // jsou naše data v souladu, a server odmítne uložení ze starší verze (409).
+  // Verze je v refu, ne ve stavu, aby druhé uložení hned po prvním neposlalo
+  // starou verzi dřív, než React překreslí, a nedostalo 409 samo od sebe.
+  // Uložení jednoho výletu jdou za sebou (TripDetail i Budget sdílí frontu)
+  // a ta, která čekala ve frontě během konfliktu, se zahodí, protože by
+  // přepsala právě načtené cizí změny.
+  const versionsRef = useRef(new Map());
+  const saveChainsRef = useRef(new Map());
+  const conflictGenRef = useRef(new Map());
+
   // Load trips from API on mount. A failure is tracked in state, not just
   // toasted — otherwise the overview renders an empty dashboard and reads as
   // "you have no trips" when the truth is "we couldn't load them".
@@ -64,6 +75,7 @@ const DashboardHome = () => {
     if (!silent) setLoading(true);
     try {
       const data = await api.trips.getAll();
+      versionsRef.current = new Map(data.trips.map(tr => [tr.id, tr.version]));
       setTrips(data.trips);
       setLoadError(false);
     } catch (err) {
@@ -88,6 +100,7 @@ const DashboardHome = () => {
       });
       
       const createdTrip = data.trip;
+      versionsRef.current.set(createdTrip.id, createdTrip.version);
       setTrips(prev => [...prev, createdTrip]);
       toast.success(t('dashboardHome.tripReady'));
 
@@ -176,15 +189,36 @@ const DashboardHome = () => {
     );
   };
 
-  const handleUpdateTrip = async (updatedTrip) => {
-    try {
-      const data = await api.trips.update(updatedTrip.id, updatedTrip);
-      setTrips(prev => prev.map(trip => trip.id === data.trip.id ? data.trip : trip));
-      return data.trip;
-    } catch (err) {
-      toast.error(err.message || t('dashboardHome.updateError'));
-      throw err;
-    }
+  const handleUpdateTrip = (updatedTrip) => {
+    const id = updatedTrip.id;
+    const gen = conflictGenRef.current.get(id) || 0;
+    const previous = saveChainsRef.current.get(id) || Promise.resolve();
+
+    const run = previous.catch(() => {}).then(async () => {
+      if ((conflictGenRef.current.get(id) || 0) !== gen) return null;
+      try {
+        const data = await api.trips.update(id, {
+          ...updatedTrip,
+          version: versionsRef.current.get(id) ?? updatedTrip.version,
+        });
+        versionsRef.current.set(id, data.trip.version);
+        setTrips(prev => prev.map(trip => trip.id === data.trip.id ? data.trip : trip));
+        return data.trip;
+      } catch (err) {
+        if (err.code === 'TRIP_CONFLICT' && err.trip) {
+          conflictGenRef.current.set(id, gen + 1);
+          versionsRef.current.set(id, err.trip.version);
+          setTrips(prev => prev.map(trip => trip.id === id ? err.trip : trip));
+          toast.error(t('dashboardHome.conflict'), { id: `trip-conflict-${id}`, duration: 7000 });
+        } else {
+          toast.error(err.message || t('dashboardHome.updateError'));
+        }
+        throw err;
+      }
+    });
+
+    saveChainsRef.current.set(id, run);
+    return run;
   };
 
   // Converting rewrites every expense amount in the DB irreversibly, so the
@@ -207,12 +241,14 @@ const DashboardHome = () => {
         };
       });
 
-      await Promise.all(
+      const saved = await Promise.all(
         convertedTrips
           .filter(trip => trip.expenses && trip.expenses.length > 0)
-          .map(trip => api.trips.update(trip.id, trip))
+          .map(trip => api.trips.update(trip.id, { ...trip, version: versionsRef.current.get(trip.id) ?? trip.version }))
       );
-      setTrips(convertedTrips);
+      const savedById = new Map(saved.map(({ trip }) => [trip.id, trip]));
+      savedById.forEach((trip, id) => versionsRef.current.set(id, trip.version));
+      setTrips(convertedTrips.map(trip => savedById.get(trip.id) || trip));
       return true;
     } catch (err) {
       toast.error(err.message || t('dashboardHome.currencyError'));

@@ -34,6 +34,9 @@ async function request(endpoint, options = {}) {
     const headerRetry = Number(response.headers.get('Retry-After')) || null;
     error.retryAfter = data.retryAfter ?? headerRetry;
     error.needsVerification = !!data.needsVerification;
+    // 409 TRIP_CONFLICT nese aktuální stav výletu ze serveru
+    error.code = data.code;
+    error.trip = data.trip;
     throw error;
   }
 

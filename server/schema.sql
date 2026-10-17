@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS trips (
     end_date DATE NOT NULL,
     share_token VARCHAR(64) UNIQUE NULL DEFAULT NULL,
     budget_target DECIMAL(12,2) NULL DEFAULT NULL,
+    version INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Zvyšuje se při každém PUT /api/trips/:id (ochrana proti přepsání)',
     deleted_at DATETIME NULL DEFAULT NULL COMMENT 'Non-NULL = výlet je v koši; po 30 dnech se maže natvrdo',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

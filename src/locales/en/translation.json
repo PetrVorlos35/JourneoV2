@@ -1561,6 +1561,7 @@
     "createError": "Failed to create trip.",
     "deleteError": "Failed to delete trip.",
     "updateError": "Failed to update trip.",
+    "conflict": "Someone else edited this trip in the meantime. We loaded their version and your last change wasn't saved, please make it again.",
     "currencyError": "Error converting currency.",
     "tripDeleted": "Trip moved to Trash",
     "undo": "Undo",
