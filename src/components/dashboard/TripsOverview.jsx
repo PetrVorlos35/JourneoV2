@@ -117,19 +117,19 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal, onCreateStarter
   }
 
   return (
-    <div className="space-y-6 sm:space-y-8 w-full pb-10">
+    <div className="space-y-5 sm:space-y-8 w-full pb-6 sm:pb-10">
       <div className="space-y-1">
-        <h1 className="text-3xl sm:text-4xl text-primary tracking-tight font-bold" style={{ textWrap: 'balance' }}>
+        <h1 className="text-[28px] sm:text-4xl text-primary tracking-tight font-bold" style={{ textWrap: 'balance' }}>
           {t('tripsOverview.title')}
         </h1>
-        <p className="text-[14px] sm:text-[15px] font-medium text-muted">
+        <p className="hidden sm:block text-[15px] font-medium text-muted">
           {t('tripsOverview.subtitle')}
         </p>
       </div>
 
       <FriendRequestsRow count={friendRequests} />
 
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-6">
         <div className={heroTrip ? 'md:col-span-8' : 'md:col-span-12'}>
           <HeroCard
             trip={heroTrip}
@@ -154,20 +154,16 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal, onCreateStarter
 
       {listedTrips.length > 0 && (
         <>
-          {/* Sticks under the mobile topbar while the list scrolls. The glass
-              backdrop is a separate md:hidden layer rather than a class on the
-              header itself — `.glass` is unlayered CSS, so md: utilities can't
-              cascade it away. The negative margin lets it reach the screen
-              edges inside the padded scroll container. */}
-          <div className="sticky top-0 z-20 -mx-4 px-4 py-3 md:static md:mx-0 md:px-0 md:py-0 md:pt-2 flex items-center justify-between gap-4">
-            <span className="absolute inset-0 -z-10 glass md:hidden" aria-hidden="true" />
+          {/* Obyčejný nadpis sekce — lepicí pruh na mobilu za klidu vypadal
+              jako cizí pás přes stránku a seznam je stejně krátký (max 6). */}
+          <div className="flex items-center justify-between gap-4 pt-1 md:pt-2 -mb-2 md:mb-0">
             <h2 className="text-[15px] sm:text-lg font-bold text-primary tracking-tight truncate">
               {t('tripsOverview.yourTrips')}
               <span className="ml-2 text-gray-400 dark:text-gray-500 font-semibold">{listedTrips.length}</span>
             </h2>
             <Link
               to="/dashboard/all-trips"
-              className="inline-flex items-center gap-1.5 shrink-0 text-[13px] font-semibold text-accent hover:text-blue-500 transition-colors"
+              className="inline-flex items-center gap-1.5 shrink-0 min-h-[44px] text-[13px] font-semibold text-accent hover:text-blue-500 transition-colors"
             >
               {t('tripsOverview.allTrips')}
               <ArrowRight size={14} strokeWidth={2.5} aria-hidden="true" />
@@ -181,7 +177,7 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal, onCreateStarter
               hidden: { opacity: 0 },
               visible: { opacity: 1, transition: { staggerChildren: shouldReduceMotion ? 0 : 0.05 } },
             }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-6"
           >
             {listedTrips.map((trip) => (
               <TripCard key={trip.id} trip={trip} onDeleteTrip={onDeleteTrip} />

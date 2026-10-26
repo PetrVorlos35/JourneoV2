@@ -14,13 +14,13 @@ const MetricCard = ({ icon: Icon, label, value, suffix = '', glowColor, delay = 
       initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}
-      className="rounded-[2rem] border border-gray-200/60 dark:border-white/[0.07] p-5 sm:p-6 flex items-center gap-4 sm:gap-5"
+      className="rounded-[1.5rem] sm:rounded-[2rem] border border-gray-200/60 dark:border-white/[0.07] p-4 sm:p-6 flex flex-col items-start sm:flex-row sm:items-center gap-3 sm:gap-5"
     >
       <div
-        className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shrink-0"
+        className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0"
         style={{ backgroundColor: `${glowColor}15`, boxShadow: `0 0 20px ${glowColor}20` }}
       >
-        <Icon size={22} strokeWidth={2} style={{ color: glowColor }} aria-hidden="true" />
+        <Icon size={20} strokeWidth={2} style={{ color: glowColor }} aria-hidden="true" />
       </div>
       <div className="min-w-0">
         <p className="text-[11px] text-muted font-medium mb-0.5">{label}</p>

@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { format } from 'date-fns';
-import { Trash2, Calendar, ArrowLeft, RotateCcw, Clock } from 'lucide-react';
+import { Trash2, Calendar, ArrowLeft, RotateCcw, Clock, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import { useDialog } from '../ui/DialogModal';
 import api from '../../services/api';
 import { ContentSkeleton } from '../ui/Skeletons';
+import { getTripColor } from '../../utils/tripColor';
 
 const RETENTION_DAYS = 30;
 
@@ -95,25 +96,25 @@ const Trash = ({ onTripsChanged }) => {
   if (loading) return <ContentSkeleton />;
 
   return (
-    <div className="space-y-8 w-full pb-10">
+    <div className="space-y-4 md:space-y-8 w-full pb-6 md:pb-10">
       {ModalPortal}
 
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div className="space-y-1 sm:space-y-2">
           <Link
             to="/dashboard/all-trips"
-            className="inline-flex items-center gap-1.5 text-[13px] text-muted font-medium hover:text-primary transition-colors"
+            className="inline-flex items-center gap-1.5 min-h-[44px] md:min-h-0 -my-2 md:my-0 text-[13px] text-muted font-medium hover:text-primary transition-colors"
           >
             <ArrowLeft size={14} strokeWidth={2.5} aria-hidden="true" /> {t('trash.backToTrips')}
           </Link>
-          <h1 className="text-3xl sm:text-4xl text-primary tracking-tight font-bold">{t('trash.title')}</h1>
+          <h1 className="text-[28px] sm:text-4xl text-primary tracking-tight font-bold">{t('trash.title')}</h1>
           <p className="text-[13px] text-muted font-medium">{t('trash.subtitle')}</p>
         </div>
 
         {trips.length > 0 && (
           <button
             onClick={handleEmptyTrash}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-danger-wash text-red-500 font-semibold text-[14px] hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors shrink-0 cursor-pointer min-h-[44px]"
+            className="hidden md:inline-flex w-auto items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-danger-wash text-red-500 font-semibold text-[14px] hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors shrink-0 cursor-pointer min-h-[44px]"
           >
             <Trash2 size={16} strokeWidth={2.5} aria-hidden="true" />
             {t('trash.emptyTrash')}
@@ -130,13 +131,72 @@ const Trash = ({ onTripsChanged }) => {
           <p className="text-[15px] text-muted font-medium max-w-md">{t('trash.empty.description')}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <>
+        {/* Mobil: hlavička seznamu s tlumeným „Vysypat koš“ a řádky, kde je
+            hlavní akcí obnovení. Trvalé smazání je jen ikona (s potvrzením). */}
+        <div className="md:hidden">
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <p className="text-[13px] font-semibold text-muted">{t('trash.count', { count: trips.length })}</p>
+            <button
+              type="button"
+              onClick={handleEmptyTrash}
+              className="inline-flex items-center gap-1.5 min-h-[44px] -mr-2 px-2 text-[13px] font-semibold text-red-500 active:opacity-70 cursor-pointer"
+            >
+              <Trash2 size={14} strokeWidth={2.5} aria-hidden="true" />
+              {t('trash.emptyTrash')}
+            </button>
+          </div>
+          <ul className="space-y-2.5">
+            {trips.map((trip) => {
+              const remaining = daysLeft(trip.deletedAt);
+              const busy = busyId === trip.id;
+              const color = getTripColor(trip.title);
+              return (
+                <li key={trip.id} className={`glass-card flex items-center gap-2.5 p-3 pr-1.5 transition-opacity ${busy ? 'opacity-50' : ''}`}>
+                  <span className={`w-10 h-10 rounded-[0.8rem] ${color.bg} ${color.icon} opacity-50 grayscale flex items-center justify-center shrink-0`}>
+                    <MapPin size={20} strokeWidth={2} aria-hidden="true" />
+                  </span>
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-[15px] font-bold text-primary tracking-tight truncate">{trip.title}</span>
+                    <span className="block mt-0.5 text-[12px] font-medium text-muted truncate tabular-nums">
+                      {format(new Date(trip.startDate), 'd. M.')} – {format(new Date(trip.endDate), 'd. M. yyyy')}
+                    </span>
+                    <span className={`flex items-center gap-1 mt-0.5 text-[12px] font-semibold ${remaining <= 7 ? 'text-red-500' : 'text-amber-600 dark:text-amber-400'}`}>
+                      <Clock size={11} strokeWidth={2.5} aria-hidden="true" />
+                      {t('trash.daysLeft', { count: remaining })}
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleRestore(trip)}
+                    disabled={busy}
+                    className="shrink-0 inline-flex items-center gap-1 min-h-[40px] px-2.5 rounded-xl bg-active text-active text-[13px] font-semibold active:scale-[0.97] transition-transform cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    <RotateCcw size={14} strokeWidth={2.5} aria-hidden="true" />
+                    {t('trash.restore')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteForever(trip)}
+                    disabled={busy}
+                    aria-label={`${t('trash.deleteForever')}: ${trip.title}`}
+                    className="shrink-0 w-10 h-11 flex items-center justify-center rounded-xl text-gray-400 dark:text-gray-500 active:bg-danger-wash active:text-red-500 transition-colors cursor-pointer disabled:cursor-not-allowed"
+                  >
+                    <Trash2 size={17} strokeWidth={2} aria-hidden="true" />
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+
+        <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-6">
           {trips.map(trip => {
             const remaining = daysLeft(trip.deletedAt);
             const busy = busyId === trip.id;
 
             return (
-              <div key={trip.id} className="glass-card p-6 sm:p-8 flex flex-col min-h-[200px]">
+              <div key={trip.id} className="glass-card p-8 flex flex-col min-h-[200px]">
                 <div className="flex justify-between items-start mb-5">
                   <div className="w-12 h-12 rounded-[1rem] bg-gray-100 dark:bg-white/5 text-gray-400 flex items-center justify-center shrink-0">
                     <Trash2 size={22} strokeWidth={2} aria-hidden="true" />
@@ -178,6 +238,7 @@ const Trash = ({ onTripsChanged }) => {
             );
           })}
         </div>
+        </>
       )}
     </div>
   );

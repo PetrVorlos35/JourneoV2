@@ -143,6 +143,9 @@ const MapCanvas = ({
       resizeObserver.disconnect();
       map.remove();
       mapRef.current = null;
+      // Nová instance mapy (StrictMode, změna `interactive`) potřebuje nové
+      // doladění výřezu — jinak zůstane na výchozím středu.
+      fittedKeyRef.current = null;
     };
     // onMapReady se předává jako stabilní callback; mapa se kvůli němu
     // nesmí přestavovat.
@@ -238,9 +241,12 @@ const MapCanvas = ({
     if (!map || places.length === 0 || fittedKeyRef.current === fitKey) return;
 
     const bounds = L.latLngBounds(places.map((p) => [p.lat, p.lng]));
+    // Na úzkém telefonu by 56 px z každé strany spolklo čtvrtinu šířky
+    // a zoom by kvůli celočíselným úrovním spadl o stupeň níž.
+    const padX = map.getSize().x < 640 ? 28 : 56;
     map.fitBounds(bounds, {
-      paddingTopLeft: [56 + overlayRef.current.fitPaddingLeft, 56],
-      paddingBottomRight: [56, 56 + overlayRef.current.fitPaddingBottom],
+      paddingTopLeft: [padX + overlayRef.current.fitPaddingLeft, 56],
+      paddingBottomRight: [padX, 56 + overlayRef.current.fitPaddingBottom],
       maxZoom: 13,
       animate: false,
     });
@@ -261,7 +267,9 @@ const MapCanvas = ({
     const { focusOffsetY, focusOffsetX } = overlayRef.current;
     let target = L.latLng(focus.lat, focus.lng);
     if (focusOffsetY || focusOffsetX) {
-      const point = map.project(target, zoom).subtract([focusOffsetX / 2, focusOffsetY / 2]);
+      // X: střed doleva od cíle → cíl vyjde vpravo od panelu.
+      // Y: střed pod cíl → cíl vyjde nad sheetem.
+      const point = map.project(target, zoom).add([-focusOffsetX / 2, focusOffsetY / 2]);
       target = map.unproject(point, zoom);
     }
 

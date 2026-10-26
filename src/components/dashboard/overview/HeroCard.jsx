@@ -13,13 +13,13 @@ const EASE = [0.22, 1, 0.36, 1];
 const HeroAction = ({ to, icon: Icon, label, primary = false }) => (
   <Link
     to={to}
-    className={`inline-flex items-center gap-2 rounded-2xl px-4 min-h-[44px] text-[14px] font-semibold transition-all active:scale-[0.97] ${
+    className={`inline-flex items-center justify-center gap-1.5 sm:gap-2 rounded-2xl px-2 sm:px-4 min-h-[44px] text-[14px] font-semibold whitespace-nowrap transition-all active:scale-[0.97] ${
       primary
         ? 'bg-accent text-white hover:bg-accent-hover shadow-[0_4px_16px_rgba(37,99,235,0.3)]'
         : 'bg-gray-100 dark:bg-white/[0.08] text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-white/[0.14]'
     }`}
   >
-    <Icon size={16} strokeWidth={2.2} aria-hidden="true" />
+    <Icon size={16} strokeWidth={2.2} className="shrink-0" aria-hidden="true" />
     {label}
   </Link>
 );
@@ -39,7 +39,7 @@ const HeroCard = ({ trip, state, placeCount, onCreate }) => {
   const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
 
   const card =
-    'glass-card p-6 sm:p-10 rounded-[2rem] relative overflow-hidden flex flex-col min-h-[220px] sm:min-h-[280px]';
+    'glass-card p-5 sm:p-10 rounded-[1.75rem] sm:rounded-[2rem] relative overflow-hidden flex flex-col sm:min-h-[280px]';
 
   const animation = {
     initial: shouldReduceMotion ? false : { opacity: 0, y: 20 },
@@ -93,7 +93,7 @@ const HeroCard = ({ trip, state, placeCount, onCreate }) => {
 
     return (
       <motion.div {...animation} className={card}>
-        <div className="inline-flex items-center gap-2 self-start rounded-full bg-success-wash px-3 py-1.5 mb-5">
+        <div className="inline-flex items-center gap-2 self-start rounded-full bg-success-wash px-3 py-1.5 mb-3 sm:mb-5">
           <span className="relative flex w-2 h-2" aria-hidden="true">
             {!shouldReduceMotion && (
               <span className="absolute inline-flex w-full h-full rounded-full bg-emerald-400 opacity-70 animate-ping" />
@@ -112,7 +112,7 @@ const HeroCard = ({ trip, state, placeCount, onCreate }) => {
         </h2>
 
         {todayActivity?.title || todayActivity?.plan ? (
-          <div className="mb-6">
+          <div className="sm:mb-6">
             <p className="text-[12px] font-semibold text-gray-500 dark:text-gray-500 mb-1">
               {t('tripsOverview.hero.today')}
             </p>
@@ -134,12 +134,12 @@ const HeroCard = ({ trip, state, placeCount, onCreate }) => {
             )}
           </div>
         ) : (
-          <p className="text-[14px] font-medium text-muted mb-6">
+          <p className="text-[14px] font-medium text-muted sm:mb-6">
             {t('tripsOverview.hero.noPlanToday')}
           </p>
         )}
 
-        <div className="mt-auto flex flex-wrap gap-2.5">
+        <div className="mt-5 sm:mt-auto grid grid-cols-3 sm:flex sm:flex-wrap gap-2 sm:gap-2.5">
           <HeroAction to={tripHref} icon={CalendarRange} label={t('tripsOverview.hero.openItinerary')} primary />
           <HeroAction to={`${tripHref}&view=map`} icon={MapPinned} label={t('tripsOverview.hero.map')} />
           <HeroAction to={`${tripHref}&view=budget`} icon={Wallet} label={t('tripsOverview.hero.expenses')} />

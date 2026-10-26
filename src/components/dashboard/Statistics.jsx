@@ -63,7 +63,7 @@ const HighlightCard =({ icon: Icon, label, mainValue, subValue, glowColor, delay
       initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}
-      className="glass-card p-5 sm:p-6 flex flex-col justify-between min-h-[140px]"
+      className="glass-card p-4 sm:p-6 flex flex-col justify-between min-h-[128px] sm:min-h-[140px] min-w-0"
     >
       <div className="flex items-center gap-3 mb-4">
         <div
@@ -79,7 +79,7 @@ const HighlightCard =({ icon: Icon, label, mainValue, subValue, glowColor, delay
           {mainValue || emptyText}
         </p>
         {subValue && (
-          <p className="text-[12px] sm:text-[13px] text-muted font-medium mt-1">{subValue}</p>
+          <p className="text-[12px] sm:text-[13px] text-muted font-medium mt-1 line-clamp-2 break-words">{subValue}</p>
         )}
       </div>
     </motion.div>
@@ -265,7 +265,7 @@ const Statistics = ({ trips }) => {
         {t('statistics.title')}
       </motion.h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <MetricCard icon={Globe} label={t('statistics.metrics.trips')} value={totalTrips} glowColor="#3b82f6" delay={0} />
         <MetricCard icon={CalendarDays} label={t('statistics.metrics.days')} value={totalDays} glowColor="#8b5cf6" delay={0.05} />
         <MetricCard icon={MapPin} label={t('statistics.metrics.places')} value={stats?.travelHabits?.uniqueLocations ?? 0} glowColor="#10b981" delay={0.1} />
@@ -381,7 +381,7 @@ const Statistics = ({ trips }) => {
         <ExpenseBar breakdown={stats?.financial?.expenseBreakdown} />
       </motion.div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <HighlightCard
           icon={TrendingUp}
           label={t('statistics.highlights.longestTrip')}

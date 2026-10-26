@@ -273,10 +273,10 @@ const FriendProfile = () => {
                   initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={shouldReduceMotion ? { duration: 0 } : { delay: index * 0.05, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                  className="glass-card p-6 sm:p-8 hover:-translate-y-1 transition-transform duration-300 flex flex-col min-h-[220px] group relative"
+                  className="glass-card p-5 sm:p-8 hover:-translate-y-1 transition-transform duration-300 flex flex-col sm:min-h-[220px] group relative"
                 >
-                  <div className="flex justify-between items-start mb-6">
-                    <div className={`w-12 h-12 rounded-[1rem] ${tripColor.accent} ${tripColor.icon} flex items-center justify-center`}>
+                  <div className="flex justify-between items-start mb-4 sm:mb-6">
+                    <div className={`w-11 h-11 sm:w-12 sm:h-12 rounded-[1rem] ${tripColor.accent} ${tripColor.icon} flex items-center justify-center`}>
                       <MapPin size={24} strokeWidth={2} />
                     </div>
                     {!isSelf && (
@@ -297,7 +297,7 @@ const FriendProfile = () => {
                     )}
                   </div>
 
-                  <h3 className="text-2xl font-bold mb-2 text-primary tracking-tight break-words">{trip.title}</h3>
+                  <h3 className="text-xl sm:text-2xl font-bold mb-2 text-primary tracking-tight break-words">{trip.title}</h3>
 
                   <div className="flex items-center text-[13px] font-bold text-gray-500 gap-2 mb-4">
                     <Calendar size={16} strokeWidth={2} />
@@ -305,7 +305,7 @@ const FriendProfile = () => {
                   </div>
 
                   {trip.locations && trip.locations.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-6">
+                    <div className="flex flex-wrap gap-1.5 mb-4 sm:mb-6">
                       {trip.locations.slice(0, 3).map((loc, i) => (
                         <span key={i} className="px-2.5 py-1 bg-gray-100 dark:bg-white/5 text-muted text-[11px] font-medium rounded-full">
                           {loc}
@@ -319,7 +319,7 @@ const FriendProfile = () => {
                     </div>
                   )}
 
-                  <div className="mt-auto flex items-center justify-between pt-6 border-t border-subtle">
+                  <div className="mt-auto flex items-center justify-between pt-4 sm:pt-6 border-t border-subtle">
                     <div className="flex items-center gap-2 text-gray-400 text-[12px] font-medium">
                       <span>{t('friendProfile.activities', { count: trip.activityCount || 0 })}</span>
                     </div>

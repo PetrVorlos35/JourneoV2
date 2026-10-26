@@ -421,7 +421,7 @@ const MapWorkspaceView = ({
       // Po výběru sedí panel u kraje mapy — o jeho rozměr posuneme střed, aby
       // vybraný špendlík zůstal vidět (na mobilu nad sheetem, na desktopu
       // vpravo od panelu).
-      focusOffsetY={isDesktop ? 0 : SNAP_HEIGHTS.peek()}
+      focusOffsetY={isDesktop ? 0 : SNAP_HEIGHTS.detail()}
       fitPaddingBottom={isDesktop ? 0 : SNAP_HEIGHTS.peek()}
       focusOffsetX={sidebarInset + panelInset}
       fitPaddingLeft={sidebarInset + panelInset}
@@ -455,7 +455,9 @@ const MapWorkspaceView = ({
   // Na desktopu je šipka jen pro couvání v rámci mapy — na přehledu, odkud by
   // musela mapu zavřít, se skryje (odejdeš navigací). Na mobilu je vždy, tam
   // slouží i jako východ z celoobrazovkové mapy.
-  const showBack = !isDesktop || mode !== 'list';
+  // Globální mapa má na mobilu spodní lištu — šipka zpět by jen ubírala
+  // místo hledání. Uvnitř výletu (bez lišty) ji potřebujeme.
+  const showBack = mode !== 'list' || (!isDesktop && Boolean(tripId));
 
   const controls = (
     // Lišta je průhledná a na desktopu překrývá horní část panelu — proto

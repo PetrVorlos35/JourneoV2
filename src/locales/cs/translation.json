@@ -619,6 +619,8 @@
       "placeCount_other": "{{count}} míst"
     },
     "readiness": {
+      "doneCount": "· hotovo {{done}} ze {{total}}",
+      "allDone": "Na cestu je všechno připravené.",
       "label": "Připravenost",
       "itinerary": "Naplánováno {{planned}} z {{total}} dní",
       "packing": "Sbaleno {{packed}} z {{total}}",
@@ -940,6 +942,15 @@
     "signOff": "Šťastnou cestu!"
   },
   "allTrips": {
+    "startsIn_one": "Za {{count}} den",
+    "startsIn_few": "Za {{count}} dny",
+    "startsIn_other": "Za {{count}} dní",
+    "count_one": "{{count}} výlet",
+    "count_few": "{{count}} výlety",
+    "count_other": "{{count}} výletů",
+    "dayCount_one": "{{count}} den",
+    "dayCount_few": "{{count}} dny",
+    "dayCount_other": "{{count}} dní",
     "subtitle": "Vše na jednom místě",
     "title": "Moje výlety",
     "search": {
@@ -1010,7 +1021,7 @@
       "wishlist": "Chci navštívit"
     },
     "filters": {
-      "searchPlaceholder": "Najít místo na mapě…",
+      "searchPlaceholder": "Hledat místo…",
       "locate": "Moje poloha",
       "toggle": "Filtry",
       "all": "Vše",
@@ -1189,6 +1200,18 @@
       "success": "Výdaj smazán"
     },
     "addModal": {
+      "splitSummaryYou": "Platíš ty · děleno mezi {{count}}",
+      "splitSummaryCustomYou": "Platíš ty · vlastní částky",
+      "forWhatPlaceholder": "Za co? Třeba Večeře u oceánu",
+      "amountError": "Zadej částku.",
+      "today": "Dnes",
+      "yesterday": "Včera",
+      "otherDay": "Jiný den",
+      "tripDay": "{{day}}. den výletu",
+      "splitSummary": "Platí {{name}} · děleno mezi {{count}}",
+      "splitSummaryCustom": "Platí {{name}} · vlastní částky",
+      "submitAmount": "Přidat {{amount}}",
+      "saveAndAddAnother": "Uložit a přidat další",
       "title": "Přidat výdaj",
       "descriptionLabel": "Popis",
       "descriptionPlaceholder": "např. Letenka Praha → Londýn",
@@ -1431,7 +1454,7 @@
     "defaultName": "tohoto uživatele",
     "search": {
       "label": "Najít přítele",
-      "placeholder": "Najít podle jména nebo e-mailu",
+      "placeholder": "Jméno nebo e-mail…",
       "clear": "Vymazat hledání",
       "noResults": "Nikoho takového jsme nenašli."
     },
@@ -1952,6 +1975,9 @@
     }
   },
   "trash": {
+    "count_one": "{{count}} výlet",
+    "count_few": "{{count}} výlety",
+    "count_other": "{{count}} výletů",
     "title": "Koš",
     "subtitle": "Smazané výlety tu zůstanou 30 dní, pak se trvale odstraní.",
     "backToTrips": "Moje výlety",
@@ -2006,7 +2032,7 @@
     "title": "Kam to bude?",
     "subtitle": "Napiš, kam jedeš, a za minutu máš výlet připravený: program po dnech, seznam na balení i místo na mapě.",
     "destinationLabel": "Kam jedeš",
-    "destinationPlaceholder": "Třeba Lisabon, Krkonoše nebo Chorvatsko",
+    "destinationPlaceholder": "Lisabon, Krkonoše, Chorvatsko…",
     "whenLabel": "Kdy?",
     "dates": {
       "thisWeekend": "Tento víkend",

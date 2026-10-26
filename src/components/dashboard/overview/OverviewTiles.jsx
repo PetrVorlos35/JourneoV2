@@ -23,7 +23,7 @@ const Tile = ({ icon: Icon, accent, label, value, sub, to, delay = 0, children }
       initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.45, delay, ease: EASE }}
-      className={`relative snap-start shrink-0 min-w-[158px] md:min-w-0 md:shrink rounded-[1.5rem] border border-gray-200/60 dark:border-white/[0.07] p-4 sm:p-5 flex flex-col justify-center min-h-[112px] transition-colors ${
+      className={`relative min-w-0 rounded-[1.5rem] border border-gray-200/60 dark:border-white/[0.07] p-4 sm:p-5 flex flex-col justify-start md:justify-center min-h-[104px] sm:min-h-[112px] transition-colors ${
         to ? 'hover:bg-gray-50 dark:hover:bg-white/[0.03] hover:border-gray-300/70 dark:hover:border-white/[0.14]' : ''
       }`}
     >
@@ -49,7 +49,7 @@ const Tile = ({ icon: Icon, accent, label, value, sub, to, delay = 0, children }
         {value}
       </p>
       {sub && (
-        <p className="text-[12px] font-medium text-muted mt-1.5 truncate">{sub}</p>
+        <p className="text-[12px] font-medium text-muted mt-1.5 line-clamp-2 break-words md:truncate">{sub}</p>
       )}
       {children}
     </motion.div>
@@ -57,9 +57,9 @@ const Tile = ({ icon: Icon, accent, label, value, sub, to, delay = 0, children }
 };
 
 /**
- * The metric strip under the hero. A four-column grid on desktop; on mobile it
- * becomes a full-bleed horizontal snap rail so all four stay reachable with a
- * thumb instead of pushing the trip list a screen and a half down.
+ * The metric strip under the hero. Four columns on desktop, 2×2 on mobile —
+ * a horizontal rail hid half the tiles behind a swipe nobody discovers, while
+ * a compact grid shows all four at a glance.
  */
 const OverviewTiles = ({ budget, balances, places, tripCounts }) => {
   const { t, i18n } = useTranslation();
@@ -119,7 +119,7 @@ const OverviewTiles = ({ budget, balances, places, tripCounts }) => {
   })();
 
   return (
-    <div className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
       <Tile
         icon={Wallet}
         accent="var(--color-icon-tone-blue)"

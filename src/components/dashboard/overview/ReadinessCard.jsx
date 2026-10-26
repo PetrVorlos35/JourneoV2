@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Check } from 'lucide-react';
+import { Check, ChevronRight } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion, useReducedMotion } from 'framer-motion';
 import { computeReadiness } from './readiness';
@@ -46,15 +46,67 @@ const ReadinessCard = ({ trip, placeCount }) => {
     }
   };
 
+  const pending = items.filter((item) => !item.done);
+  const doneCount = items.length - pending.length;
+
   return (
     <motion.div
       initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.5, delay: 0.08, ease: EASE }}
-      className="glass-card p-6 sm:p-8 rounded-[2rem] flex flex-row md:flex-col items-center md:items-start gap-6 md:gap-0 min-h-[220px] sm:min-h-[280px]"
+      className="md:h-full"
     >
-      <div className="shrink-0 md:mb-6">
-        <p className="hidden md:block text-[12px] font-semibold text-gray-500 dark:text-gray-500 mb-4">
+      {/* Mobil: jen to, co ještě chybí. Čtyři řádky s fajfkami by zabraly
+          půl obrazovky, přitom akci vyžaduje obvykle jedna věc. */}
+      <div className="md:hidden glass-card rounded-[1.75rem] p-4">
+        <div className="flex items-center gap-3">
+          <div className="relative w-12 h-12 shrink-0">
+            <svg viewBox="0 0 80 80" className="w-full h-full -rotate-90" aria-hidden="true">
+              <circle cx="40" cy="40" r={RADIUS} fill="none" strokeWidth="9" className="stroke-gray-200/70 dark:stroke-white/[0.08]" />
+              <circle
+                cx="40" cy="40" r={RADIUS} fill="none" strokeWidth="9" strokeLinecap="round"
+                className="stroke-blue-600 dark:stroke-blue-400"
+                strokeDasharray={CIRCUMFERENCE}
+                strokeDashoffset={CIRCUMFERENCE * (1 - score / 100)}
+              />
+            </svg>
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[12px] font-semibold text-muted">{t('tripsOverview.readiness.label')}</p>
+            <p className="text-[17px] font-bold text-primary tracking-tight tabular-nums leading-tight">
+              {score} %
+              {doneCount > 0 && pending.length > 0 && (
+                <span className="ml-2 text-[12px] font-medium text-muted">{t('tripsOverview.readiness.doneCount', { done: doneCount, total: items.length })}</span>
+              )}
+            </p>
+          </div>
+        </div>
+        {pending.length > 0 ? (
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {pending.map((item) => (
+              <li key={item.key}>
+                <Link
+                  to={item.view ? `${tripHref}&view=${item.view}` : tripHref}
+                  className="inline-flex items-center gap-2 min-h-[40px] pl-3 pr-2.5 rounded-xl bg-field text-[13px] font-semibold text-primary active:scale-[0.97] transition-transform outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                >
+                  <span className="w-3.5 h-3.5 shrink-0 rounded-full border-[1.5px] border-check" aria-hidden="true" />
+                  {labelFor(item)}
+                  <ChevronRight size={14} strokeWidth={2.5} className="text-gray-400" aria-hidden="true" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-2 flex items-center gap-1.5 text-[13px] font-medium text-success">
+            <Check size={14} strokeWidth={3} aria-hidden="true" />
+            {t('tripsOverview.readiness.allDone')}
+          </p>
+        )}
+      </div>
+
+      <div className="hidden md:flex glass-card p-8 rounded-[2rem] flex-col items-start min-h-[280px] h-full">
+      <div className="shrink-0 mb-6">
+        <p className="text-[12px] font-semibold text-gray-500 dark:text-gray-500 mb-4">
           {t('tripsOverview.readiness.label')}
         </p>
         <div className="relative w-[88px] h-[88px]">
@@ -80,10 +132,7 @@ const ReadinessCard = ({ trip, placeCount }) => {
         </div>
       </div>
 
-      <ul className="flex-1 min-w-0 w-full space-y-1 md:mt-auto">
-        <li className="md:hidden text-[12px] font-semibold text-gray-500 dark:text-gray-500 mb-2">
-          {t('tripsOverview.readiness.label')}
-        </li>
+      <ul className="flex-1 min-w-0 w-full space-y-1 mt-auto">
         {items.map((item) => (
           <li key={item.key}>
             <Link
@@ -109,6 +158,7 @@ const ReadinessCard = ({ trip, placeCount }) => {
           </li>
         ))}
       </ul>
+      </div>
     </motion.div>
   );
 };

@@ -615,6 +615,8 @@
       "placeCount_other": "{{count}} places"
     },
     "readiness": {
+      "doneCount": "· {{done}} of {{total}} done",
+      "allDone": "Everything’s ready to go.",
       "label": "Readiness",
       "itinerary": "{{planned}} of {{total}} days planned",
       "packing": "{{packed}} of {{total}} packed",
@@ -926,6 +928,12 @@
     "signOff": "Bon voyage!"
   },
   "allTrips": {
+    "startsIn_one": "In {{count}} day",
+    "startsIn_other": "In {{count}} days",
+    "count_one": "{{count}} trip",
+    "count_other": "{{count}} trips",
+    "dayCount_one": "{{count}} day",
+    "dayCount_other": "{{count}} days",
     "subtitle": "Everything in one place",
     "title": "My Trips",
     "search": {
@@ -995,7 +1003,7 @@
       "wishlist": "Want to go"
     },
     "filters": {
-      "searchPlaceholder": "Find a place on the map…",
+      "searchPlaceholder": "Search places…",
       "locate": "My location",
       "toggle": "Filters",
       "all": "All",
@@ -1172,6 +1180,18 @@
       "success": "Expense deleted"
     },
     "addModal": {
+      "splitSummaryYou": "Paid by you · split {{count}} ways",
+      "splitSummaryCustomYou": "Paid by you · custom amounts",
+      "forWhatPlaceholder": "What for? e.g. Dinner by the ocean",
+      "amountError": "Enter an amount.",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "otherDay": "Other day",
+      "tripDay": "Day {{day}} of the trip",
+      "splitSummary": "Paid by {{name}} · split {{count}} ways",
+      "splitSummaryCustom": "Paid by {{name}} · custom amounts",
+      "submitAmount": "Add {{amount}}",
+      "saveAndAddAnother": "Save and add another",
       "title": "Add expense",
       "descriptionLabel": "Description",
       "descriptionPlaceholder": "e.g. Flight Prague → London",
@@ -1923,6 +1943,8 @@
     }
   },
   "trash": {
+    "count_one": "{{count}} trip",
+    "count_other": "{{count}} trips",
     "title": "Trash",
     "subtitle": "Deleted trips stay here for 30 days, then they're removed forever.",
     "backToTrips": "My trips",

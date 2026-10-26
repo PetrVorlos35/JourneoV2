@@ -6,7 +6,7 @@ import {
   Scale, ArrowRight, Split, HandCoins, Copy, CheckCircle2,
 } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { format, differenceInDays, isToday, isYesterday, parseISO } from 'date-fns';
+import { format, differenceInDays, differenceInCalendarDays, isToday, isYesterday, parseISO, startOfDay, subDays } from 'date-fns';
 import { cs } from 'date-fns/locale';
 import { enUS } from 'date-fns/locale';
 import { DayPicker } from 'react-day-picker';
@@ -19,7 +19,7 @@ import { useCurrency } from '../../contexts/CurrencyContext';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import UserAvatar from '../ui/UserAvatar';
-import { formatCurrency } from '../../utils/currency';
+import { formatCurrency, currencySymbol } from '../../utils/currency';
 import { PlanFirstTripButton } from './EmptyShowcase';
 
 const CATEGORIES = [
@@ -363,26 +363,26 @@ const ExpenseRow = ({ expense, compact = false, flush = false, currency, locale,
       <motion.div
         initial={shouldReduceMotion ? false : { opacity: 0, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
-        onClick={flush && !isViewer ? (e) => { if (!e.target.closest('button')) onEdit(expense); } : undefined}
-        className={`flex items-center gap-3 sm:gap-4 ${flush ? `px-0 ${isViewer ? '' : 'cursor-pointer md:cursor-default'}` : 'px-4 sm:px-5'} py-3.5 border-b border-gray-100/70 dark:border-white/[0.05] last:border-0 ${flush ? '' : 'hover:bg-gray-50/60 dark:hover:bg-white/[0.02]'} transition-colors group`}
+        onClick={!isViewer ? (e) => { if (!e.target.closest('button')) onEdit(expense); } : undefined}
+        className={`flex items-center gap-3 sm:gap-4 ${flush ? 'px-0' : 'px-4 sm:px-5'} ${isViewer ? '' : 'cursor-pointer md:cursor-default'} py-3.5 border-b border-gray-100/70 dark:border-white/[0.05] last:border-0 ${flush ? '' : 'hover:bg-gray-50/60 dark:hover:bg-white/[0.02]'} transition-colors group`}
       >
         <div className={`w-8 h-8 sm:w-9 sm:h-9 ${cat.lightBgClass} ${cat.textClass} rounded-[0.65rem] flex items-center justify-center shrink-0`}>
           <Icon size={14} strokeWidth={2.5} />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[12px] font-medium text-muted mb-0.5 leading-none">{t('budget.categories.' + expense.category)}</p>
-          <p className={`text-[14px] font-semibold text-primary leading-tight ${flush ? 'line-clamp-2 break-words' : 'truncate'}`}>{expense.description}</p>
+          <p className={`text-[14px] font-semibold text-primary leading-tight line-clamp-2 break-words md:line-clamp-1`}>{expense.description}</p>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <p className="font-bold text-[15px] tracking-tight tabular-nums text-primary">
             {formatCurrency(expense.amount, currency, locale)}
           </p>
           {!isViewer && (
-            <div className={`flex items-center gap-0.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity ${flush ? 'order-first' : ''}`}>
+            <div className={`flex items-center gap-0.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity ${flush ? 'md:order-first' : ''}`}>
               <button
                 onClick={() => onEdit(expense)}
                 aria-label={t('budget.expenseEdit')}
-                className={`${flush ? 'hidden md:flex' : 'flex'} w-10 h-10 md:w-7 md:h-7 items-center justify-center text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-active cursor-pointer`}
+                className={`hidden md:flex w-10 h-10 md:w-7 md:h-7 items-center justify-center text-gray-400 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400 transition-colors rounded-lg hover:bg-active cursor-pointer`}
               >
                 <Pencil size={13} strokeWidth={2.5} />
               </button>
@@ -461,7 +461,7 @@ const CategoryBar = ({ expenses, currency, locale, onCategoryClick, activeCatego
     .filter(c => c.amount > 0);
 
   return (
-    <div className="space-y-5 sm:space-y-6">
+    <div className="space-y-3 sm:space-y-6">
       <div className="flex h-3 w-full gap-0.5 rounded-full overflow-hidden">
         {byCategory.map((c) => (
           <button
@@ -484,7 +484,7 @@ const CategoryBar = ({ expenses, currency, locale, onCategoryClick, activeCatego
               key={c.id}
               type="button"
               onClick={() => onCategoryClick(c.id === activeCategory ? 'all' : c.id)}
-              className={`flex items-center justify-between p-3 rounded-xl text-left transition-all cursor-pointer ${
+              className={`flex items-center justify-between px-3 py-2 sm:p-3 min-h-[44px] rounded-xl text-left transition-all cursor-pointer ${
                 isActive
                   ? `${c.lightBgClass} ring-1 ring-current ${c.textClass}`
                   : 'hover:bg-field'
@@ -496,11 +496,11 @@ const CategoryBar = ({ expenses, currency, locale, onCategoryClick, activeCatego
                   {t('budget.categories.' + c.id)}
                 </span>
               </div>
-              <div className="text-right shrink-0 ml-2">
+              <div className="text-right shrink-0 ml-2 flex items-baseline gap-2 sm:block">
                 <p className="font-bold text-[13px] tracking-tight tabular-nums text-primary">
                   {formatCurrency(c.amount, currency, locale)}
                 </p>
-                <p className="text-[10px] text-gray-400 dark:text-gray-500">{c.percent.toFixed(0)}%</p>
+                <p className="text-[11px] sm:text-[10px] text-gray-400 dark:text-gray-500 tabular-nums w-8 sm:w-auto">{c.percent.toFixed(0)}%</p>
               </div>
             </button>
           );
@@ -531,10 +531,13 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
     customAmounts: {},
   });
   const [showCalendar, setShowCalendar] = useState(false);
+  const [showSplit, setShowSplit] = useState(false);
+  const amountRef = useRef(null);
 
   useEffect(() => {
     if (!isOpen) return;
     setShowCalendar(false);
+    setShowSplit(false);
 
     const allParticipants = {};
     members.forEach((m) => { allParticipants[m.id] = true; });
@@ -597,7 +600,9 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
     );
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
-    first?.focus();
+    // Částka je první, co člověk zná — kurzor rovnou do ní (na mobilu tím
+    // naskočí číselná klávesnice).
+    (modal.querySelector('[data-autofocus]') || first)?.focus();
     const trapFocus = (e) => {
       if (e.key !== 'Tab') return;
       if (e.shiftKey) {
@@ -618,7 +623,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
 
   // Live preview of equal shares for the currently selected participants.
   const selectedIds = members.filter((m) => form.participants[m.id]).map((m) => m.id);
-  const amountNum = parseFloat(form.amount) || 0;
+  const amountNum = parseFloat(String(form.amount).replace(/\s/g, '').replace(',', '.')) || 0;
   const equalSplits = computeEqualSplits(selectedIds, amountNum);
   const equalShareFor = (id) => equalSplits.find((s) => Number(s.userId) === Number(id))?.amount ?? 0;
   const customSum = selectedIds.reduce((sum, id) => sum + (parseFloat(form.customAmounts[id]) || 0), 0);
@@ -626,20 +631,24 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
   const toggleParticipant = (id) =>
     setForm((f) => ({ ...f, participants: { ...f.participants, [id]: !f.participants[id] } }));
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!form.description || !form.amount || parseFloat(form.amount) <= 0) {
-      toast.error(t('budget.addModal.error'));
+  const parseAmount = (value) => parseFloat(String(value).replace(/\s/g, '').replace(',', '.'));
+
+  const handleSubmit = (e, { addAnother = false } = {}) => {
+    e?.preventDefault();
+    const amount = parseAmount(form.amount);
+    if (!amount || amount <= 0) {
+      toast.error(t('budget.addModal.amountError'));
+      amountRef.current?.focus();
       return;
     }
 
-    const amount = parseFloat(form.amount);
     let paidBy = null;
     let splits = [];
 
     if (canSplit && !form.isPersonal) {
       const participantIds = members.filter((m) => form.participants[m.id]).map((m) => m.id);
       if (participantIds.length === 0) {
+        setShowSplit(true);
         toast.error(t('budget.addModal.splitError'));
         return;
       }
@@ -649,6 +658,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
         splits = participantIds.map((id) => ({ userId: id, amount: parseFloat(form.customAmounts[id]) || 0 }));
         const sum = splits.reduce((s, x) => s + x.amount, 0);
         if (Math.abs(sum - amount) > 0.01) {
+          setShowSplit(true);
           toast.error(t('budget.addModal.splitSumError', { amount: formatCurrency(amount, currency, i18n.language) }));
           return;
         }
@@ -658,16 +668,66 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
 
     onAdd({
       id: initialExpense?.id || Date.now().toString(),
-      description: form.description,
+      // Popis je nepovinný — bez něj stačí název kategorie, ať zápis
+      // „kafe za 80“ nezdržuje vymýšlením textu.
+      description: form.description.trim() || t('budget.categories.' + form.category),
       amount,
       category: form.category,
       date: form.date,
       paidBy,
       splits,
     });
-    onClose();
     toast.success(isEditing ? t('budget.addModal.editSuccess') : t('budget.addModal.success'));
+
+    if (addAnother) {
+      // Další výdaj: stejný den, plátce i dělení, jen čistá částka a popis.
+      setForm((f) => ({ ...f, description: '', amount: '', customAmounts: {} }));
+      setShowCalendar(false);
+      requestAnimationFrame(() => amountRef.current?.focus());
+      return;
+    }
+    onClose();
   };
+
+  // ── Datum: rychlé volby místo kalendáře ──
+  const todayIso = format(new Date(), 'yyyy-MM-dd');
+  const yesterdayIso = format(subDays(new Date(), 1), 'yyyy-MM-dd');
+  const isOtherDate = form.date !== todayIso && form.date !== yesterdayIso;
+  const selectedDate = parseISO(form.date);
+  const tripDayNumber = tripStart && tripEnd && selectedDate >= startOfDay(tripStart) && selectedDate <= tripEnd
+    ? differenceInCalendarDays(selectedDate, tripStart) + 1
+    : null;
+  const pickDate = (iso) => {
+    setForm((f) => ({ ...f, date: iso }));
+    setShowCalendar(false);
+  };
+
+  // ── Dělení: jedna souhrnná věta, detail až na požádání ──
+  const payer = members.find((m) => Number(m.id) === Number(form.paidBy));
+  // „Platí Vy“ by zní špatně — pro sebe vlastní tvar věty.
+  const payerKey = Number(form.paidBy) === Number(currentUserId) ? 'You' : '';
+  const splitSummary = form.isPersonal
+    ? t('budget.addModal.personalExpense')
+    : form.splitMode === 'custom'
+      ? t(`budget.addModal.splitSummaryCustom${payerKey}`, { name: getMemberName(payer) })
+      : t(`budget.addModal.splitSummary${payerKey}`, { name: getMemberName(payer), count: selectedIds.length });
+
+  const chip = (active) =>
+    `inline-flex items-center gap-1.5 min-h-[40px] px-3.5 rounded-full text-[13px] font-semibold border transition-colors active:scale-[0.97] cursor-pointer ${
+      active
+        ? 'bg-active text-active border-blue-200 dark:border-blue-400/30'
+        : 'bg-page border-gray-200/80 dark:border-white/10 text-soft hover:bg-field hover:text-primary'
+    }`;
+
+  const handleKeyDown = (e) => {
+    // ⌘/Ctrl+Enter = uložit a rovnou zapsat další.
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey) && !isEditing) {
+      e.preventDefault();
+      handleSubmit(null, { addAnother: true });
+    }
+  };
+
+  const amountLabel = amountNum > 0 ? formatCurrency(amountNum, currency, i18n.language) : null;
 
   return createPortal(
     <AnimatePresence>
@@ -690,91 +750,127 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
             animate={{ opacity: 1, y: 0 }}
             exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: '100%' }}
             transition={shouldReduceMotion ? { duration: 0.2 } : { ease: [0.22, 1, 0.36, 1], duration: 0.35 }}
-            className="relative w-full max-w-lg bg-page border border-subtle rounded-t-[2rem] sm:rounded-[2rem] p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:p-8 shadow-2xl max-h-[85dvh] overflow-y-auto overscroll-contain sm:max-h-none sm:overflow-visible z-10"
+            className="relative w-full sm:max-w-[480px] bg-page border border-subtle rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl max-h-[92dvh] sm:max-h-[88dvh] flex flex-col z-10"
           >
-            <div className="flex justify-between items-center mb-5 sm:mb-6 pb-4 sm:pb-5 border-b border-default">
-              <h3 id="add-expense-title" className="font-bold text-2xl sm:text-3xl tracking-tight text-primary">
-                {isEditing ? t('budget.addModal.editTitle') : t('budget.addModal.title')}
-              </h3>
-              <button
-                onClick={onClose}
-                aria-label={t('budget.addModal.close')}
-                className="w-10 h-10 bg-subtle rounded-full flex items-center justify-center text-muted hover:text-primary transition-colors cursor-pointer"
-              >
-                <X size={20} strokeWidth={2.5} aria-hidden="true" />
-              </button>
-            </div>
+            <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-col min-h-0">
+              {/* Hlavička */}
+              <div className="flex items-center justify-between gap-3 px-5 sm:px-6 pt-4 sm:pt-5">
+                <h3 id="add-expense-title" className="text-[17px] font-bold tracking-tight text-primary">
+                  {isEditing ? t('budget.addModal.editTitle') : t('budget.addModal.title')}
+                </h3>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  aria-label={t('budget.addModal.close')}
+                  className="w-10 h-10 -mr-2 rounded-full flex items-center justify-center text-muted hover:text-primary hover:bg-subtle transition-colors cursor-pointer"
+                >
+                  <X size={20} strokeWidth={2.5} aria-hidden="true" />
+                </button>
+              </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div className="space-y-4">
-                <div>
-                  <label className="text-[11px] font-medium text-muted mb-2 block">{t('budget.addModal.descriptionLabel')}</label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={255}
-                    placeholder={t('budget.addModal.descriptionPlaceholder')}
-                    value={form.description}
-                    onChange={e => setForm({ ...form, description: e.target.value })}
-                    className="glass-input"
-                  />
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-6 pb-4">
+                {/* Částka — hlavní věc formuláře */}
+                <label className="block pt-2 pb-4 text-center cursor-text">
+                  <span className="sr-only">{t('budget.addModal.amountLabel')} ({currency})</span>
+                  <span className="flex items-baseline justify-center gap-2">
+                    <input
+                      ref={amountRef}
+                      data-autofocus
+                      type="text"
+                      inputMode="decimal"
+                      autoComplete="off"
+                      placeholder="0"
+                      value={form.amount}
+                      onChange={(e) => setForm({ ...form, amount: e.target.value.replace(/[^\d.,\s]/g, '') })}
+                      style={{ width: `${Math.max(String(form.amount).length, 1) + 0.3}ch` }}
+                      className="min-w-[2ch] max-w-full bg-transparent text-center text-[48px] sm:text-[52px] leading-none font-bold tracking-tight tabular-nums text-primary placeholder:text-gray-300 dark:placeholder:text-white/20 focus:outline-none"
+                    />
+                    <span className="text-[22px] font-bold text-muted">{currencySymbol(currency)}</span>
+                  </span>
+                </label>
+
+                {/* Za co */}
+                <input
+                  type="text"
+                  maxLength={255}
+                  aria-label={t('budget.addModal.descriptionLabel')}
+                  placeholder={t('budget.addModal.forWhatPlaceholder')}
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  className="w-full h-12 px-4 rounded-2xl bg-field border border-transparent focus:bg-page focus:border-blue-500/40 focus:ring-4 focus:ring-blue-500/15 focus:outline-none text-base sm:text-[15px] font-medium text-primary placeholder:text-placeholder transition-colors"
+                />
+                {form.description.length > 200 && (
                   <div className="flex justify-end mt-1.5 pr-1">
                     <CharCount value={form.description} max={255} />
                   </div>
-                </div>
-                <div className="grid grid-cols-2 gap-6">
-                  <div>
-                    <label className="text-[11px] font-medium text-muted mb-2 block">{t('budget.addModal.amountLabel')} ({currency})</label>
-                    <input
-                      type="number"
-                      required
-                      min="0.01"
-                      step="0.01"
-                      placeholder="0.00"
-                      value={form.amount}
-                      onChange={e => setForm({ ...form, amount: e.target.value })}
-                      className="glass-input"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-medium text-muted mb-2 block">{t('budget.addModal.categoryLabel')}</label>
-                    <div className="relative">
-                      <select
-                        value={form.category}
-                        onChange={e => setForm({ ...form, category: e.target.value })}
-                        className="glass-input appearance-none cursor-pointer pr-10"
-                      >
-                        {CATEGORIES.map(c => (
-                          <option key={c.id} value={c.id} className="text-primary dark:bg-[#1C1C1E]">
+                )}
+
+                {/* Kategorie */}
+                <fieldset className="mt-5">
+                  <legend className="sr-only">{t('budget.addModal.categoryLabel')}</legend>
+                  <div className="grid grid-cols-5 gap-1.5">
+                    {CATEGORIES.map((c) => {
+                      const Icon = c.icon;
+                      const active = form.category === c.id;
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => setForm({ ...form, category: c.id })}
+                          aria-pressed={active}
+                          className="flex flex-col items-center gap-1.5 py-1 rounded-2xl cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                        >
+                          <span className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${
+                            active
+                              ? `${c.lightBgClass} ${c.textClass} ring-2 ring-current scale-105`
+                              : `bg-field ${c.textClass} opacity-70 group-hover:opacity-100`
+                          }`}>
+                            <Icon size={20} strokeWidth={2.25} aria-hidden="true" />
+                          </span>
+                          <span className={`text-[11px] font-semibold leading-tight text-center ${active ? 'text-primary' : 'text-muted'}`}>
                             {t('budget.categories.' + c.id)}
-                          </option>
-                        ))}
-                      </select>
-                      <ChevronRight size={16} strokeWidth={2.5} className="absolute right-4 top-1/2 -translate-y-1/2 rotate-90 text-gray-400 pointer-events-none" />
-                    </div>
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
-                </div>
-                <div className="relative">
-                  <label className="text-[11px] font-medium text-muted mb-2 block">{t('budget.addModal.dateLabel')}</label>
-                  <button
-                    type="button"
-                    onClick={() => setShowCalendar(!showCalendar)}
-                    className="glass-input flex items-center justify-between text-left cursor-pointer"
-                  >
-                    <span>{format(parseISO(form.date), 'dd. MM. yyyy', { locale: dateLocale })}</span>
-                    <Calendar className="text-blue-500 shrink-0" size={20} strokeWidth={2} />
-                  </button>
+                </fieldset>
+
+                {/* Kdy */}
+                <fieldset className="mt-5">
+                  <legend className="sr-only">{t('budget.addModal.dateLabel')}</legend>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={() => pickDate(todayIso)} aria-pressed={form.date === todayIso} className={chip(form.date === todayIso)}>
+                      {t('budget.addModal.today')}
+                    </button>
+                    <button type="button" onClick={() => pickDate(yesterdayIso)} aria-pressed={form.date === yesterdayIso} className={chip(form.date === yesterdayIso)}>
+                      {t('budget.addModal.yesterday')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowCalendar((v) => !v)}
+                      aria-expanded={showCalendar}
+                      aria-pressed={isOtherDate}
+                      className={chip(isOtherDate)}
+                    >
+                      <Calendar size={14} strokeWidth={2.5} aria-hidden="true" />
+                      {isOtherDate
+                        ? format(selectedDate, 'EEEEEE d. M.', { locale: dateLocale })
+                        : t('budget.addModal.otherDay')}
+                    </button>
+                  </div>
+                  {tripDayNumber && (
+                    <p className="mt-2 text-[12px] font-medium text-muted">
+                      {t('budget.addModal.tripDay', { day: tripDayNumber })}
+                    </p>
+                  )}
                   {showCalendar && (
-                    <div className="static mt-3 max-w-full overflow-x-auto sm:mt-0 sm:max-w-none sm:overflow-visible sm:absolute sm:bottom-full sm:left-0 sm:mb-4 z-[200] glass-card p-3 sm:p-6 shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-200">
+                    <div className="mt-3 glass-card p-3 sm:p-4 overflow-x-auto">
                       <DayPicker
                         mode="single"
-                        selected={parseISO(form.date)}
-                        onSelect={(date) => {
-                          if (date) {
-                            setForm({ ...form, date: format(date, 'yyyy-MM-dd') });
-                            setShowCalendar(false);
-                          }
-                        }}
+                        selected={selectedDate}
+                        defaultMonth={selectedDate}
+                        onSelect={(date) => { if (date) pickDate(format(date, 'yyyy-MM-dd')); }}
                         locale={dateLocale}
                         modifiers={modifiers}
                         modifiersClassNames={{ trip: 'bg-blue-500/10 text-accent font-bold border border-blue-500/20' }}
@@ -782,153 +878,165 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
                       />
                     </div>
                   )}
-                </div>
-              </div>
+                </fieldset>
 
-              {/* ── Splitting section (shared trips only) ── */}
-              {canSplit && (
-                <div className="space-y-3 pt-4 border-t border-default">
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-7 h-7 bg-success-wash text-success rounded-lg flex items-center justify-center shrink-0">
-                        <Split size={14} strokeWidth={2} />
-                      </div>
-                      <span className="text-[14px] font-bold text-primary">{t('budget.addModal.splitLabel')}</span>
-                    </div>
-                    {/* Toggle: ON = split among members · OFF = personal expense */}
+                {/* Dělení — jen ve sdílených výletech, sbalené do jedné věty */}
+                {canSplit && (
+                  <div className="mt-5 rounded-2xl border border-default">
                     <button
                       type="button"
-                      role="switch"
-                      aria-checked={!form.isPersonal}
-                      aria-label={t('budget.addModal.splitLabel')}
-                      onClick={() => setForm((f) => ({ ...f, isPersonal: !f.isPersonal }))}
-                      className="shrink-0 cursor-pointer p-2.5 -m-2.5"
+                      onClick={() => setShowSplit((v) => !v)}
+                      aria-expanded={showSplit}
+                      className="w-full flex items-center gap-3 px-4 min-h-[52px] text-left cursor-pointer"
                     >
-                      <span className={`relative block w-11 h-6 rounded-full transition-colors ${form.isPersonal ? 'bg-gray-300 dark:bg-white/15' : 'bg-blue-600'}`}>
-                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${form.isPersonal ? '' : 'translate-x-5'}`} />
+                      <span className="w-8 h-8 rounded-xl bg-success-wash text-success flex items-center justify-center shrink-0">
+                        <Split size={15} strokeWidth={2} aria-hidden="true" />
                       </span>
+                      <span className="flex-1 min-w-0 text-[14px] font-semibold text-primary truncate">{splitSummary}</span>
+                      <ChevronRight size={16} strokeWidth={2.5} className={`shrink-0 text-gray-400 transition-transform ${showSplit ? 'rotate-90' : ''}`} aria-hidden="true" />
                     </button>
-                  </div>
 
-                  {form.isPersonal ? (
-                    <p className="text-[12px] text-gray-400 dark:text-gray-500 font-medium pl-[2.375rem]">
-                      {t('budget.addModal.personalExpense')}
-                    </p>
-                  ) : (
-                    <>
-                      {/* Who paid — inline label + select */}
-                      <div className="flex items-center gap-3">
-                        <label className="text-[12px] font-medium text-muted shrink-0">{t('budget.addModal.paidByLabel')}</label>
-                        <div className="relative flex-1 min-w-0">
-                          <select
-                            value={form.paidBy ?? ''}
-                            onChange={(e) => setForm({ ...form, paidBy: parseInt(e.target.value) })}
-                            className="w-full appearance-none cursor-pointer pl-3 pr-9 py-2.5 bg-gray-100/60 dark:bg-white/5 border border-gray-200/60 dark:border-white/10 rounded-xl text-base sm:text-[13px] font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:bg-[#1C1C1E]"
-                          >
-                            {members.map((m) => (
-                              <option key={m.id} value={m.id} className="text-primary dark:bg-[#1C1C1E]">
-                                {memberLabel(m, currentUserId, t)}
-                              </option>
-                            ))}
-                          </select>
-                          <ChevronRight size={15} strokeWidth={2.5} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-gray-400 pointer-events-none" />
-                        </div>
-                      </div>
-
-                      {/* Split mode segmented control (thin) */}
-                      <div className="flex p-0.5 bg-gray-100 dark:bg-white/5 rounded-lg">
-                        {[
-                          { id: 'equal', label: t('budget.addModal.splitEqually') },
-                          { id: 'custom', label: t('budget.addModal.splitCustom') },
-                        ].map((opt) => (
+                    {showSplit && (
+                      <div className="px-4 pb-4 space-y-3 border-t border-default pt-3">
+                        <div className="flex items-center justify-between gap-4">
+                          <span className="text-[13px] font-semibold text-primary">{t('budget.addModal.splitLabel')}</span>
                           <button
-                            key={opt.id}
                             type="button"
-                            onClick={() => setForm({ ...form, splitMode: opt.id })}
-                            className={`flex-1 py-2.5 sm:py-1.5 rounded-md text-[13px] sm:text-[12px] font-bold transition-all cursor-pointer ${
-                              form.splitMode === opt.id
-                                ? 'bg-white dark:bg-white/10 text-primary shadow-sm'
-                                : 'text-muted hover:text-gray-700 dark:hover:text-gray-200'
-                            }`}
+                            role="switch"
+                            aria-checked={!form.isPersonal}
+                            aria-label={t('budget.addModal.splitLabel')}
+                            onClick={() => setForm((f) => ({ ...f, isPersonal: !f.isPersonal }))}
+                            className="shrink-0 cursor-pointer p-2.5 -m-2.5"
                           >
-                            {opt.label}
+                            <span className={`relative block w-11 h-6 rounded-full transition-colors ${form.isPersonal ? 'bg-gray-300 dark:bg-white/15' : 'bg-blue-600'}`}>
+                              <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${form.isPersonal ? '' : 'translate-x-5'}`} />
+                            </span>
                           </button>
-                        ))}
-                      </div>
+                        </div>
 
-                      {/* Participants — compact rows */}
-                      <div className="space-y-0.5">
-                        {members.map((m) => {
-                          const checked = !!form.participants[m.id];
-                          return (
-                            <div
-                              key={m.id}
-                              className={`flex items-center gap-2.5 py-1 px-1.5 rounded-lg transition-colors ${
-                                checked ? '' : 'opacity-45'
-                              }`}
-                            >
-                              <button
-                                type="button"
-                                onClick={() => toggleParticipant(m.id)}
-                                aria-pressed={checked}
-                                aria-label={getMemberName(m)}
-                                className="flex items-center gap-2.5 flex-1 min-w-0 py-1.5 text-left cursor-pointer"
-                              >
-                                <span
-                                  aria-hidden="true"
-                                  className={`w-[18px] h-[18px] rounded-md flex items-center justify-center shrink-0 transition-colors ${
-                                    checked ? 'bg-accent text-white' : 'bg-gray-200 dark:bg-white/10'
+                        {!form.isPersonal && (
+                          <>
+                            <div className="flex items-center gap-3">
+                              <label htmlFor="expense-paid-by" className="text-[12px] font-medium text-muted shrink-0">{t('budget.addModal.paidByLabel')}</label>
+                              <div className="relative flex-1 min-w-0">
+                                <select
+                                  id="expense-paid-by"
+                                  value={form.paidBy ?? ''}
+                                  onChange={(e) => setForm({ ...form, paidBy: parseInt(e.target.value) })}
+                                  className="w-full appearance-none cursor-pointer pl-3 pr-9 py-2.5 bg-field border border-transparent rounded-xl text-base sm:text-[13px] font-semibold text-primary focus:outline-none focus:ring-2 focus:ring-blue-500/40 dark:bg-[#1C1C1E]"
+                                >
+                                  {members.map((m) => (
+                                    <option key={m.id} value={m.id} className="text-primary dark:bg-[#1C1C1E]">
+                                      {memberLabel(m, currentUserId, t)}
+                                    </option>
+                                  ))}
+                                </select>
+                                <ChevronRight size={15} strokeWidth={2.5} className="absolute right-3 top-1/2 -translate-y-1/2 rotate-90 text-gray-400 pointer-events-none" />
+                              </div>
+                            </div>
+
+                            <div className="flex p-0.5 bg-field rounded-xl">
+                              {[
+                                { id: 'equal', label: t('budget.addModal.splitEqually') },
+                                { id: 'custom', label: t('budget.addModal.splitCustom') },
+                              ].map((opt) => (
+                                <button
+                                  key={opt.id}
+                                  type="button"
+                                  onClick={() => setForm({ ...form, splitMode: opt.id })}
+                                  className={`flex-1 min-h-[40px] rounded-[0.6rem] text-[13px] font-bold transition-all cursor-pointer ${
+                                    form.splitMode === opt.id
+                                      ? 'bg-white dark:bg-white/10 text-primary shadow-sm'
+                                      : 'text-muted hover:text-gray-700 dark:hover:text-gray-200'
                                   }`}
                                 >
-                                  {checked && <Check size={12} strokeWidth={3} />}
-                                </span>
-                                <UserAvatar user={toAvatarUser(m)} size="sm" />
-                                <span className="text-[13px] font-semibold text-primary truncate flex-1 min-w-0">
-                                  {memberLabel(m, currentUserId, t)}
-                                </span>
-                              </button>
-                              {checked && (
-                                form.splitMode === 'equal' ? (
-                                  <span className="text-[13px] font-bold text-muted tabular-nums shrink-0">
-                                    {formatCurrency(equalShareFor(m.id), currency, i18n.language)}
-                                  </span>
-                                ) : (
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    placeholder="0.00"
-                                    value={form.customAmounts[m.id] ?? ''}
-                                    onChange={(e) => setForm((f) => ({ ...f, customAmounts: { ...f.customAmounts, [m.id]: e.target.value } }))}
-                                    className="w-24 px-3 py-2 sm:py-1.5 bg-white dark:bg-white/5 border border-default rounded-lg text-base sm:text-[13px] font-semibold text-right text-primary focus:outline-none focus:ring-2 focus:ring-blue-500/50 tabular-nums shrink-0"
-                                  />
-                                )
-                              )}
+                                  {opt.label}
+                                </button>
+                              ))}
                             </div>
-                          );
-                        })}
+
+                            <div className="space-y-0.5">
+                              {members.map((m) => {
+                                const checked = !!form.participants[m.id];
+                                return (
+                                  <div key={m.id} className={`flex items-center gap-2.5 px-1 rounded-lg transition-opacity ${checked ? '' : 'opacity-45'}`}>
+                                    <button
+                                      type="button"
+                                      onClick={() => toggleParticipant(m.id)}
+                                      aria-pressed={checked}
+                                      aria-label={getMemberName(m)}
+                                      className="flex items-center gap-2.5 flex-1 min-w-0 min-h-[44px] text-left cursor-pointer"
+                                    >
+                                      <span
+                                        aria-hidden="true"
+                                        className={`w-[18px] h-[18px] rounded-md flex items-center justify-center shrink-0 transition-colors ${checked ? 'bg-accent text-white' : 'bg-gray-200 dark:bg-white/10'}`}
+                                      >
+                                        {checked && <Check size={12} strokeWidth={3} />}
+                                      </span>
+                                      <UserAvatar user={toAvatarUser(m)} size="sm" />
+                                      <span className="text-[13px] font-semibold text-primary truncate flex-1 min-w-0">
+                                        {memberLabel(m, currentUserId, t)}
+                                      </span>
+                                    </button>
+                                    {checked && (
+                                      form.splitMode === 'equal' ? (
+                                        <span className="text-[13px] font-bold text-muted tabular-nums shrink-0">
+                                          {formatCurrency(equalShareFor(m.id), currency, i18n.language)}
+                                        </span>
+                                      ) : (
+                                        <input
+                                          type="text"
+                                          inputMode="decimal"
+                                          placeholder="0"
+                                          aria-label={getMemberName(m)}
+                                          value={form.customAmounts[m.id] ?? ''}
+                                          onChange={(e) => setForm((f) => ({ ...f, customAmounts: { ...f.customAmounts, [m.id]: e.target.value.replace(/[^\d.,]/g, '').replace(',', '.') } }))}
+                                          className="w-24 px-3 py-2 bg-page border border-default rounded-lg text-base sm:text-[13px] font-semibold text-right text-primary focus:outline-none focus:ring-2 focus:ring-blue-500/50 tabular-nums shrink-0"
+                                        />
+                                      )
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+
+                            {form.splitMode === 'custom' && amountNum > 0 && (
+                              <div className={`flex items-center justify-between text-[12px] font-semibold px-1 ${Math.abs(customSum - amountNum) > 0.01 ? 'text-danger' : 'text-success'}`}>
+                                <span>{formatCurrency(customSum, currency, i18n.language)} / {formatCurrency(amountNum, currency, i18n.language)}</span>
+                                {Math.abs(customSum - amountNum) <= 0.01 && <Check size={14} strokeWidth={2.5} />}
+                              </div>
+                            )}
+                          </>
+                        )}
                       </div>
+                    )}
+                  </div>
+                )}
+              </div>
 
-                      {/* Custom-mode running total vs target */}
-                      {form.splitMode === 'custom' && amountNum > 0 && (
-                        <div className={`flex items-center justify-between text-[12px] font-semibold px-1 ${
-                          Math.abs(customSum - amountNum) > 0.01 ? 'text-danger' : 'text-success'
-                        }`}>
-                          <span>{formatCurrency(customSum, currency, i18n.language)} / {formatCurrency(amountNum, currency, i18n.language)}</span>
-                          {Math.abs(customSum - amountNum) <= 0.01 && <Check size={14} strokeWidth={2.5} />}
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                className="w-full py-4 bg-accent text-white rounded-2xl font-bold hover:bg-accent-hover transition-colors duration-300 shadow-md shadow-blue-500/20 active:scale-95 cursor-pointer"
-              >
-                {isEditing ? t('budget.addModal.editSubmit') : t('budget.addModal.submit')}
-              </button>
+              {/* Patička drží akce vždy na dosah palce, i když se obsah posouvá */}
+              <div className="px-5 sm:px-6 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:pb-5 border-t border-subtle bg-page rounded-b-none sm:rounded-b-[2rem]">
+                <button
+                  type="submit"
+                  className="w-full min-h-[52px] bg-accent text-white rounded-2xl text-[16px] font-bold hover:bg-accent-hover transition-colors shadow-md shadow-blue-500/20 active:scale-[0.98] cursor-pointer"
+                >
+                  {isEditing
+                    ? t('budget.addModal.editSubmit')
+                    : amountLabel
+                      ? t('budget.addModal.submitAmount', { amount: amountLabel })
+                      : t('budget.addModal.submit')}
+                </button>
+                {!isEditing && (
+                  <button
+                    type="button"
+                    onClick={() => handleSubmit(null, { addAnother: true })}
+                    className="w-full min-h-[44px] mt-1 inline-flex items-center justify-center gap-2 text-[14px] font-semibold text-accent hover:text-blue-500 transition-colors cursor-pointer"
+                  >
+                    {t('budget.addModal.saveAndAddAnother')}
+                    <kbd className="hidden md:inline text-[11px] font-mono font-medium px-1.5 py-0.5 rounded bg-subtle text-secondary">⌘↵</kbd>
+                  </button>
+                )}
+              </div>
             </form>
           </motion.div>
         </div>
@@ -1489,7 +1597,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
           {/* ── Shrnutí (vložené do stránky výletu): věta, ne metrikový panel ── */}
           {hideHeader ? (
             <div className="pb-2">
-              <p className="text-[20px] sm:text-[22px] font-medium text-secondary leading-snug">
+              <p className="text-[18px] sm:text-[22px] font-medium text-secondary leading-snug">
                 {t('tripDetail.notebook.spent')}{' '}
                 <span className="font-bold text-primary tabular-nums whitespace-nowrap">{formatCurrency(total, currency, i18n.language)}</span>
                 {budgetTarget && (
@@ -1508,7 +1616,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                   </p>
                 </div>
               )}
-              <dl className="mt-5 flex flex-wrap gap-x-8 gap-y-3 text-[14px]">
+              <dl className="mt-5 grid grid-cols-3 gap-x-3 sm:flex sm:flex-wrap sm:gap-x-8 gap-y-3 text-[13px] sm:text-[14px]">
                 <div>
                   <dt className="text-muted">{t('budget.summary.avgPerDay')}</dt>
                   <dd className="font-semibold text-primary tabular-nums">{avgPerDay > 0 ? formatCurrency(Math.round(avgPerDay), currency, i18n.language) : '—'}</dd>
@@ -1724,8 +1832,8 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
 
           {/* ── Category Breakdown ── */}
           {expenses.length > 0 && (
-            <div className="glass-card p-6 sm:p-8">
-              <h3 className="font-bold text-primary text-[15px] sm:text-lg mb-5 sm:mb-6 flex items-center gap-3">
+            <div className="glass-card p-5 sm:p-8">
+              <h3 className="font-bold text-primary text-[15px] sm:text-lg mb-4 sm:mb-6 flex items-center gap-3">
                 <div className="w-9 h-9 bg-active text-accent rounded-xl flex items-center justify-center shrink-0">
                   <TrendingUp size={16} strokeWidth={2} />
                 </div>

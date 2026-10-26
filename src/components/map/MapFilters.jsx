@@ -100,7 +100,7 @@ const MapFilters = ({
             onFocus={() => query.length >= MIN_QUERY_LENGTH && setShowResults(true)}
             placeholder={t('map.filters.searchPlaceholder')}
             aria-label={t('map.filters.searchPlaceholder')}
-            className="w-full min-h-[44px] pl-11 pr-11 rounded-2xl glass-card border border-default text-base sm:text-[14px] font-medium text-primary placeholder:text-placeholder focus:outline-none focus:border-blue-500 transition-colors"
+            className="w-full min-h-[44px] pl-11 pr-9 rounded-2xl glass-card border border-default text-base sm:text-[14px] font-medium text-primary placeholder:text-placeholder focus:outline-none focus:border-blue-500 transition-colors"
           />
           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
             {isSearching ? (

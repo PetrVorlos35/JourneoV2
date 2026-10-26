@@ -16,7 +16,7 @@ const PREVIEW_DAYS = 5;
 const PREVIEW_PACKING = 6;
 
 const chipClass = (active) =>
-  `inline-flex items-center gap-2 rounded-2xl px-4 min-h-[44px] text-[14px] font-semibold border transition-all active:scale-[0.97] cursor-pointer ${
+  `inline-flex items-center gap-2 rounded-2xl px-3.5 sm:px-4 min-h-[44px] text-[14px] font-semibold border transition-all active:scale-[0.97] cursor-pointer ${
     active
       ? 'bg-active text-active border-blue-200 dark:border-blue-400/30'
       : 'bg-page border-gray-200/80 dark:border-white/10 text-soft hover:bg-field hover:text-primary'
@@ -259,26 +259,26 @@ const TripComposer = ({ variant = 'first', firstName, initialDestination = '', o
         <button
           type="button"
           onClick={leave}
-          className="mb-6 -ml-1 inline-flex items-center gap-2 py-2 pr-2 text-[13px] font-semibold text-muted hover:text-primary transition-colors cursor-pointer"
+          className="mb-2 sm:mb-6 -ml-1 inline-flex items-center gap-2 py-2 pr-2 text-[13px] font-semibold text-muted hover:text-primary transition-colors cursor-pointer"
         >
           <ArrowLeft size={16} strokeWidth={2.5} aria-hidden="true" />
           {t('onboarding.back')}
-          <kbd className="ml-1 text-[11px] font-mono font-medium px-1.5 py-0.5 rounded bg-subtle text-secondary">Esc</kbd>
+          <kbd className="hidden md:inline ml-1 text-[11px] font-mono font-medium px-1.5 py-0.5 rounded bg-subtle text-secondary">Esc</kbd>
         </button>
       )}
-      <p className="text-[14px] font-semibold text-muted mb-3">
+      <p className={`text-[14px] font-semibold text-muted mb-3 ${isFirst ? '' : 'hidden sm:block'}`}>
         {!isFirst
           ? t('onboarding.newEyebrow')
           : firstName ? t('onboarding.greetingName', { name: firstName }) : t('onboarding.greeting')}
       </p>
-      <h1 className="text-[40px] sm:text-6xl font-bold tracking-tight text-primary leading-[1.05]" style={{ textWrap: 'balance' }}>
+      <h1 className="text-[34px] sm:text-6xl font-bold tracking-tight text-primary leading-[1.05]" style={{ textWrap: 'balance' }}>
         {t(isFirst ? 'onboarding.title' : 'onboarding.newTitle')}
       </h1>
-      <p className="mt-4 text-[16px] sm:text-[17px] font-medium text-muted max-w-lg leading-relaxed" style={{ textWrap: 'pretty' }}>
+      <p className={`mt-3 sm:mt-4 text-[15px] sm:text-[17px] font-medium text-muted max-w-lg leading-relaxed ${hasDestination ? 'hidden sm:block' : ''}`} style={{ textWrap: 'pretty' }}>
         {t('onboarding.subtitle')}
       </p>
 
-      <div className="mt-8 sm:mt-10">
+      <div className="mt-5 sm:mt-10">
         <LocationAutocomplete
           value={destination}
           onChange={handleDestination}
@@ -287,16 +287,16 @@ const TripComposer = ({ variant = 'first', firstName, initialDestination = '', o
           maxLength={255}
           autoFocus={!initialDestination}
           searchOnMount={!!initialDestination}
-          className="w-full h-16 px-6 rounded-2xl bg-page border border-default text-primary text-[19px] font-semibold placeholder:text-placeholder placeholder:font-medium shadow-[0_1px_2px_rgba(17,24,39,0.04),0_12px_32px_-16px_rgba(17,24,39,0.12)] focus:outline-none focus:border-blue-500/40 focus:ring-4 focus:ring-blue-500/15 transition-colors"
+          className="w-full h-14 sm:h-16 px-5 sm:px-6 rounded-2xl bg-page border border-default text-primary text-[17px] sm:text-[19px] font-semibold placeholder:text-placeholder placeholder:font-medium shadow-[0_1px_2px_rgba(17,24,39,0.04),0_12px_32px_-16px_rgba(17,24,39,0.12)] focus:outline-none focus:border-blue-500/40 focus:ring-4 focus:ring-blue-500/15 transition-colors"
         />
       </div>
 
       <AnimatePresence initial={false}>
         {hasDestination && (
           <motion.div key="details" {...reveal} className="overflow-hidden">
-            <div className="pt-8 space-y-7">
+            <div className="pt-5 sm:pt-8 space-y-5 sm:space-y-7">
               <fieldset>
-                <legend className="text-[13px] font-semibold text-muted mb-3">{t('onboarding.whenLabel')}</legend>
+                <legend className="text-[13px] font-semibold text-muted mb-2 sm:mb-3">{t('onboarding.whenLabel')}</legend>
                 <div className="flex flex-wrap gap-2">
                   {QUICK_DATES.map((key) => (
                     <button key={key} type="button" onClick={() => setDateKey(key)} aria-pressed={dateKey === key} className={chipClass(dateKey === key)}>
@@ -347,7 +347,7 @@ const TripComposer = ({ variant = 'first', firstName, initialDestination = '', o
               </fieldset>
 
               <fieldset>
-                <legend className="text-[13px] font-semibold text-muted mb-3">{t('onboarding.typeLabel')}</legend>
+                <legend className="text-[13px] font-semibold text-muted mb-2 sm:mb-3">{t('onboarding.typeLabel')}</legend>
                 <div className="flex flex-wrap gap-2">
                   <button type="button" onClick={() => setType(null)} aria-pressed={type === null} className={chipClass(type === null)}>
                     <PenLine size={16} strokeWidth={2.25} aria-hidden="true" />
@@ -365,7 +365,7 @@ const TripComposer = ({ variant = 'first', firstName, initialDestination = '', o
                 </div>
               </fieldset>
 
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-5">
                 <button
                   type="button"
                   onClick={handleSubmit}
@@ -393,7 +393,10 @@ const TripComposer = ({ variant = 'first', firstName, initialDestination = '', o
       initial={reduceMotion ? false : { opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: EASE }}
-      className={`min-h-[calc(100dvh-8rem)] md:min-h-[calc(100dvh-5rem)] grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] xl:grid-cols-[minmax(0,1fr)_minmax(0,480px)] items-center gap-10 lg:gap-16 xl:gap-24 py-4 lg:py-8`}
+      // flex-1 místo min-h přes 100dvh: sekce vyplní přesně plochu mezi lištami,
+      // takže stránka sama o sobě nescrolluje. Na mobilu nahoře, ať formulář
+      // neposkakuje, když se pod polem rozbalí detaily.
+      className={`flex-1 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] xl:grid-cols-[minmax(0,1fr)_minmax(0,480px)] content-start pt-2 sm:content-center sm:items-center gap-10 lg:gap-16 xl:gap-24 sm:py-4 lg:py-8`}
     >
       <div className="max-w-xl w-full">{status === 'creating' ? progress : form}</div>
       {/* Na mobilu by náhled odsunul tlačítko pod ohyb, tak se ukáže až na širších displejích. */}
