@@ -114,6 +114,14 @@ const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLeng
           type="text"
           value={inputValue}
           onChange={handleInputChange}
+          onKeyDown={(e) => {
+            // Esc nejdřív zavře jen návrhy; stránka (např. zakládání výletu)
+            // ho pak nedostane a nezavře se celá.
+            if (e.key === 'Escape' && showSuggestions && suggestions.length > 0) {
+              e.stopPropagation();
+              setShowSuggestions(false);
+            }
+          }}
           onFocus={() => {
             if (inputValue.length >= 3) setShowSuggestions(true);
           }}

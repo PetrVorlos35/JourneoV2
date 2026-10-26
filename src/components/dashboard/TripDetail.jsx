@@ -382,7 +382,10 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   };
   const welcomeTasks = welcome && !isViewer ? [
     { id: 'created', label: t(welcome.source === 'copy' ? 'onboarding.checklist.copied' : 'onboarding.checklist.created'), done: true },
-    { id: 'packing', label: t('onboarding.checklist.packing'), done: packingList.some(i => i.checked), onClick: () => openView('packing') },
+    // Předvyplněné balení se odškrtává, prázdné se teprve píše.
+    welcome.prefilledPacking === false
+      ? { id: 'packing', label: t('onboarding.checklist.packingOwn'), done: packingList.length > 0, onClick: () => openView('packing') }
+      : { id: 'packing', label: t('onboarding.checklist.packing'), done: packingList.some(i => i.checked), onClick: () => openView('packing') },
     { id: 'plan', label: t('onboarding.checklist.plan'), done: dailyPlans.some(d => d.plan?.trim()), onClick: () => goToDay(0) },
     ...(isOwner ? [{ id: 'invite', label: t('onboarding.checklist.invite'), done: !!welcome.invited, onClick: () => setShowShareModal(true) }] : []),
   ] : null;

@@ -85,7 +85,7 @@ router.post('/register', async (req, res) => {
       // Create default settings
       await pool.query(
         'INSERT INTO user_settings (user_id, theme, currency) VALUES (?, ?, ?)',
-        [result.insertId, 'dark', 'CZK']
+        [result.insertId, 'light', 'CZK']
       );
     }
 
@@ -367,7 +367,7 @@ router.post('/google', async (req, res) => {
 
       await pool.query(
         'INSERT INTO user_settings (user_id, theme, currency) VALUES (?, ?, ?)',
-        [userId, 'dark', 'CZK']
+        [userId, 'light', 'CZK']
       );
 
       finalUser = {

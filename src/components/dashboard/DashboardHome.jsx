@@ -1,10 +1,9 @@
 import React, { Suspense, lazy, useState, useEffect, useCallback, useRef } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import DashboardLayout from './DashboardLayout';
 import DashboardNotFound from './DashboardNotFound';
-import CreateTripModal from './CreateTripModal';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { Trash2 } from 'lucide-react';
@@ -29,6 +28,7 @@ import {
 // Lazy load dashboard sub-components
 const TripsOverview = lazy(() => import('./TripsOverview'));
 const TripDetail = lazy(() => import('./TripDetail'));
+const TripComposer = lazy(() => import('./TripComposer'));
 const AdminHome = lazy(() => import('../admin/AdminHome'));
 const Statistics = lazy(() => import('./Statistics'));
 const Settings = lazy(() => import('./Settings'));
@@ -57,7 +57,13 @@ const DashboardHome = () => {
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+
+  // Zakládání výletu je vlastní stránka (/dashboard/new), takže funguje
+  // šipka zpět i odkaz a sidebar zůstává na místě.
+  const openNewTrip = (destination = '') => {
+    navigate(destination ? `/dashboard/new?plan=${encodeURIComponent(destination)}` : '/dashboard/new');
+  };
 
   // Ochrana proti přepsání: ke každému výletu si pamatujeme verzi, se kterou
   // jsou naše data v souladu, a server odmítne uložení ze starší verze (409).
@@ -93,33 +99,19 @@ const DashboardHome = () => {
     fetchTrips();
   }, [fetchTrips]);
 
-  const handleAddTrip = async (newTrip) => {
-    try {
-      const data = await api.trips.create({
-        title: newTrip.title,
-        startDate: newTrip.startDate,
-        endDate: newTrip.endDate,
-      });
-      
-      const createdTrip = data.trip;
-      versionsRef.current.set(createdTrip.id, createdTrip.version);
-      setTrips(prev => [...prev, createdTrip]);
-      toast.success(t('dashboardHome.tripReady'));
-
-      return createdTrip;
-    } catch (err) {
-      toast.error(err.message || t('dashboardHome.createError'));
-      throw err;
-    }
-  };
-
-  // První výlet z onboardingu: založí se rovnou vyplněný (dny, balení podle
-  // typu výletu, destinace na mapě), aby nový uživatel neotevřel prázdný
-  // zápisník. Každý hotový krok se hlásí přes onStep, kroky mají krátké
-  // minimum, ať je průběh vidět, i když server odpoví hned.
+  // Každý nový výlet (z onboardingu i z „+ Vytvořit výlet“) se založí rovnou
+  // vyplněný: dny, balení podle typu výletu, destinace na mapě. Každý hotový
+  // krok se hlásí přes onStep, kroky mají krátké minimum, ať je průběh vidět,
+  // i když server odpoví hned. Uvítací checklist dostane jen první výlet.
   const handleCreateStarterTrip = async ({ title, startDate, endDate, place, type }, onStep) => {
     const beat = () => new Promise(resolve => setTimeout(resolve, 350));
+    const isFirstTrip = trips.length === 0;
     let created = null;
+    const finish = (trip) => {
+      setTrips(prev => (prev.some(tr => tr.id === trip.id) ? prev : [...prev, trip]));
+      // replace: šipka zpět z nového výletu nemá vést znovu na zakládání.
+      navigate(`/dashboard/trip/${trip.id}?from=dashboard`, { replace: true });
+    };
     try {
       [{ trip: created }] = await Promise.all([api.trips.create({ title, startDate, endDate }), beat()]);
       // Do seznamu výletů až na konci: s prvním výletem by přehled hned
@@ -131,9 +123,10 @@ const DashboardHome = () => {
       await beat();
       onStep('days');
 
-      const packingList = buildStarterPacking(t, type);
+      // Balení jen když si uživatel vybral typ výletu, jinak si ho napíše sám.
+      const packingList = type ? buildStarterPacking(t, type) : [];
       const [filled] = await Promise.all([handleUpdateTrip({ ...created, activities, packingList }), beat()]);
-      onStep('packing');
+      if (type) onStep('packing');
 
       if (place) {
         // Místo k prvnímu dni jako z itineráře, takže ho pozdější import
@@ -155,16 +148,14 @@ const DashboardHome = () => {
         onStep('map');
       }
 
-      startWelcome(created.id, 'starter');
+      if (isFirstTrip) startWelcome(created.id, 'starter', { prefilledPacking: !!type });
       await beat();
-      setTrips(prev => [...prev, filled || created]);
-      navigate(`/dashboard/trip/${created.id}?from=dashboard`);
+      finish(filled || created);
     } catch (err) {
       // Výlet už existuje, jen se nepovedlo ho vyplnit: pustit uživatele
       // dovnitř, ať druhým pokusem nevznikne duplikát.
       if (created) {
-        setTrips(prev => (prev.some(tr => tr.id === created.id) ? prev : [...prev, created]));
-        navigate(`/dashboard/trip/${created.id}?from=dashboard`);
+        finish(created);
         return;
       }
       toast.error(err.message || t('dashboardHome.createError'));
@@ -317,6 +308,15 @@ const DashboardHome = () => {
     }
   };
 
+  // ?plan=… z landing page: kdo už výlety má, jde rovnou na zakládání
+  // s předvyplněnou destinací (bez výletů to řeší onboarding na přehledu).
+  const planParam = searchParams.get('plan');
+  useEffect(() => {
+    if (loading || !planParam || trips.length === 0) return;
+    navigate(`/dashboard/new?plan=${encodeURIComponent(planParam.slice(0, 255))}`, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, planParam]);
+
   if (loading) {
     return (
       <DashboardLayout trips={trips}>
@@ -326,12 +326,7 @@ const DashboardHome = () => {
   }
 
   return (
-    <DashboardLayout trips={trips} onOpenCreateModal={() => setIsCreateModalOpen(true)}>
-      <CreateTripModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onAddTrip={handleAddTrip}
-      />
+    <DashboardLayout trips={trips} onOpenCreateModal={() => openNewTrip()}>
       {/* Per-route Suspense boundaries: navigating mounts a fresh boundary,
           so the matching skeleton shows instantly instead of the page freezing
           on the previous view while the lazy chunk downloads. */}
@@ -342,12 +337,24 @@ const DashboardHome = () => {
             <TripsOverview
               trips={trips}
               onDeleteTrip={handleDeleteTrip}
-              onOpenCreateModal={() => setIsCreateModalOpen(true)}
+              onOpenCreateModal={() => openNewTrip()}
               onCreateStarterTrip={handleCreateStarterTrip}
               error={loadError}
               onRetry={() => fetchTrips()}
             />,
             <TripsOverviewSkeleton />
+          )}
+        />
+        <Route
+          path="/new"
+          element={withSuspense(
+            <TripComposer
+              key={planParam || 'new'}
+              variant="new"
+              initialDestination={(planParam || '').slice(0, 255)}
+              onCreate={handleCreateStarterTrip}
+            />,
+            <ContentSkeleton />
           )}
         />
         <Route

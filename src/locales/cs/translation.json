@@ -658,51 +658,6 @@
       "places": "Míst"
     }
   },
-  "createTripModal": {
-    "planning": "Plánování",
-    "title": "Nový výlet",
-    "steps": {
-      "destination": "Destinace",
-      "dates": "Termín",
-      "details": "Detaily"
-    },
-    "step1": {
-      "title": "Kam se chystáte?",
-      "subtitle": "Pojmenujte svůj výlet nebo zadejte cílovou destinaci.",
-      "placeholder": "např. Víkend v Římě",
-      "hint": "Povinné pole · např. Víkend v Římě"
-    },
-    "step2": {
-      "title": "Kdy vyrážíte?",
-      "subtitle": "Vyberte termín vaší cesty.",
-      "departure": "Odjezd",
-      "return": "Návrat",
-      "select": "Vyberte"
-    },
-    "step3": {
-      "title": "Vše připraveno?",
-      "subtitle": "Zkontrolujte si údaje a můžete vyrazit.",
-      "destinationLabel": "Destinace",
-      "datesLabel": "Termín"
-    },
-    "nav": {
-      "back": "Zpět",
-      "edit": "Upravit",
-      "continue": "Pokračovat",
-      "nextStep": "Další krok",
-      "creating": "Vytvářím...",
-      "create": "Vytvořit výlet"
-    },
-    "errors": {
-      "nameRequired": "Zadejte prosím název nebo cíl cesty.",
-      "datesRequired": "Vyberte prosím datum odjezdu i návratu.",
-      "durationExceeded": "Výlet nemůže být delší než 100 dní."
-    },
-    "toasts": {
-      "noName": "Zadejte prosím název nebo cíl cesty.",
-      "noDates": "Vyberte prosím datum od i do."
-    }
-  },
   "tripCard": {
     "sharedTrip": "Sdílený výlet"
   },
@@ -1608,7 +1563,6 @@
     "typeExactly": "Napište přesně:"
   },
   "dashboardHome": {
-    "tripReady": "Výlet byl úspěšně připraven!",
     "loadError": "Nepodařilo se načíst výlety.",
     "createError": "Nepodařilo se vytvořit výlet.",
     "deleteError": "Nepodařilo se smazat výlet.",
@@ -1962,13 +1916,13 @@
     "dayCount_one": "{{count}} den",
     "dayCount_few": "{{count}} dny",
     "dayCount_other": "{{count}} dní",
-    "typeLabel": "Jaký to bude výlet?",
-    "optional": "nepovinné, podle toho ti předvyplníme balení",
+    "typeLabel": "Předvyplnit balení?",
     "types": {
       "city": "Město",
       "mountains": "Hory",
       "sea": "Moře",
-      "roadtrip": "Roadtrip"
+      "roadtrip": "Roadtrip",
+      "own": "Sbalím si sám"
     },
     "submit": "Naplánovat výlet",
     "changeLater": "Všechno půjde kdykoli změnit.",
@@ -2037,8 +1991,25 @@
       "invite": "Pozvi parťáky",
       "done": "hotovo",
       "doneTitle": "Hotovo, máš to pohromadě",
-      "doneSubtitle": "Program, balení i parta jsou na jednom místě. Další dny dopiš, až budeš chtít."
-    }
+      "doneSubtitle": "Program, balení i parta jsou na jednom místě. Další dny dopiš, až budeš chtít.",
+      "packingOwn": "Napiš, co si zabalit"
+    },
+    "pickDates": "Vyber, kdy jedeš.",
+    "preview": {
+      "label": "Náhled výletu",
+      "untitled": "Tvůj další výlet",
+      "days": "Program po dnech",
+      "packing": "Balení",
+      "more_one": "a {{count}} další věc",
+      "more_few": "a {{count}} další věci",
+      "more_other": "a {{count}} dalších věcí",
+      "mapEmpty": "Místo na mapě",
+      "mapHint": "Vyber destinaci z návrhů a připíchneme ji",
+      "packingOwn": "Seznam si napíšeš sám"
+    },
+    "newEyebrow": "Nový výlet",
+    "newTitle": "Kam pojedeš příště?",
+    "back": "Zpět"
   },
   "joinTrip": {
     "invitedBy": "{{name}} tě zve na výlet",

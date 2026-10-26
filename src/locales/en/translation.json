@@ -648,51 +648,6 @@
       "places": "Places"
     }
   },
-  "createTripModal": {
-    "planning": "Planning",
-    "title": "New trip",
-    "steps": {
-      "destination": "Destination",
-      "dates": "Dates",
-      "details": "Details"
-    },
-    "step1": {
-      "title": "Where are you headed?",
-      "subtitle": "Name your trip or enter your destination.",
-      "placeholder": "e.g. Weekend in Rome",
-      "hint": "Required · e.g. Weekend in Rome"
-    },
-    "step2": {
-      "title": "When are you leaving?",
-      "subtitle": "Select the dates of your journey.",
-      "departure": "Departure",
-      "return": "Return",
-      "select": "Select"
-    },
-    "step3": {
-      "title": "All ready?",
-      "subtitle": "Check your details and you're good to go.",
-      "destinationLabel": "Destination",
-      "datesLabel": "Dates"
-    },
-    "nav": {
-      "back": "Back",
-      "edit": "Edit",
-      "continue": "Continue",
-      "nextStep": "Next step",
-      "creating": "Creating...",
-      "create": "Create trip"
-    },
-    "errors": {
-      "nameRequired": "Please enter a trip name or destination.",
-      "datesRequired": "Please select both a start and end date.",
-      "durationExceeded": "Trip cannot exceed 100 days."
-    },
-    "toasts": {
-      "noName": "Please enter a trip name or destination.",
-      "noDates": "Please select both start and end dates."
-    }
-  },
   "tripCard": {
     "sharedTrip": "Shared trip"
   },
@@ -1580,7 +1535,6 @@
     "typeExactly": "Type exactly:"
   },
   "dashboardHome": {
-    "tripReady": "Trip is ready!",
     "loadError": "Failed to load trips.",
     "createError": "Failed to create trip.",
     "deleteError": "Failed to delete trip.",
@@ -1932,13 +1886,13 @@
     },
     "dayCount_one": "{{count}} day",
     "dayCount_other": "{{count}} days",
-    "typeLabel": "What kind of trip?",
-    "optional": "optional, it pre-fills your packing list",
+    "typeLabel": "Pre-fill the packing list?",
     "types": {
       "city": "City",
       "mountains": "Mountains",
       "sea": "Seaside",
-      "roadtrip": "Road trip"
+      "roadtrip": "Road trip",
+      "own": "I’ll pack myself"
     },
     "submit": "Plan the trip",
     "changeLater": "You can change anything later.",
@@ -2006,8 +1960,24 @@
       "invite": "Invite your travel buddies",
       "done": "done",
       "doneTitle": "Done, it’s all in one place",
-      "doneSubtitle": "Plan, packing and crew sit together now. Fill in the other days whenever you like."
-    }
+      "doneSubtitle": "Plan, packing and crew sit together now. Fill in the other days whenever you like.",
+      "packingOwn": "Write what to pack"
+    },
+    "pickDates": "Pick when you’re going.",
+    "preview": {
+      "label": "Trip preview",
+      "untitled": "Your next trip",
+      "days": "Day by day",
+      "packing": "Packing",
+      "more_one": "and {{count}} more item",
+      "more_other": "and {{count}} more items",
+      "mapEmpty": "Pin on the map",
+      "mapHint": "Pick a destination from the suggestions to pin it",
+      "packingOwn": "You’ll write the list yourself"
+    },
+    "newEyebrow": "New trip",
+    "newTitle": "Where to next?",
+    "back": "Back"
   },
   "joinTrip": {
     "invitedBy": "{{name}} invites you on a trip",

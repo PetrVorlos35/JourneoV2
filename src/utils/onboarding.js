@@ -70,8 +70,8 @@ const writeWelcome = (value) => {
   } catch { /* soukromé okno apod. */ }
 };
 
-export const startWelcome = (tripId, source = 'starter') =>
-  writeWelcome({ tripId: String(tripId), source, invited: false, dismissed: false });
+export const startWelcome = (tripId, source = 'starter', extra = {}) =>
+  writeWelcome({ tripId: String(tripId), source, invited: false, dismissed: false, ...extra });
 
 export const getWelcome = (tripId) => {
   const w = readWelcome();

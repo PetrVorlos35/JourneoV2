@@ -7,7 +7,7 @@ const ThemeContext = createContext();
 export const ThemeProvider = ({ children }) => {
   const { user } = useAuth();
   const [theme, setThemeState] = useState(() => {
-    return localStorage.getItem('journeo_theme') || 'dark';
+    return localStorage.getItem('journeo_theme') || 'light';
   });
   // Public pages (landing, auth, legal) force light mode while mounted via
   // useForceLightTheme; a counter so nested/overlapping locks compose.

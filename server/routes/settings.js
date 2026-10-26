@@ -53,9 +53,9 @@ router.get('/', async (req, res) => {
       // Create default settings if they don't exist
       await pool.query(
         'INSERT INTO user_settings (user_id, theme, currency, language) VALUES (?, ?, ?, ?)',
-        [req.userId, 'dark', 'CZK', 'cs']
+        [req.userId, 'light', 'CZK', 'cs']
       );
-      return res.json({ settings: { theme: 'dark', currency: 'CZK', language: 'cs' } });
+      return res.json({ settings: { theme: 'light', currency: 'CZK', language: 'cs' } });
     }
 
     res.json({ settings: rows[0] });

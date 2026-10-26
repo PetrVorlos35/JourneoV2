@@ -8,7 +8,7 @@ import HeroCard from './overview/HeroCard';
 import ReadinessCard from './overview/ReadinessCard';
 import OverviewTiles, { FriendRequestsRow } from './overview/OverviewTiles';
 import TripCard from './overview/TripCard';
-import FirstTripComposer from './overview/FirstTripComposer';
+import TripComposer from './TripComposer';
 import { useAuth } from '../../contexts/AuthContext';
 import useOverviewData from './overview/useOverviewData';
 import { categorizeTrip, tripSpend } from '../../utils/trip';
@@ -104,9 +104,10 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal, onCreateStarter
   // ze které je za pár vteřin hotový výlet.
   if (trips.length === 0) {
     return (
-      <div className="space-y-6 sm:space-y-8 w-full pb-10 max-w-4xl">
+      <div className="w-full space-y-6">
         <FriendRequestsRow count={friendRequests} />
-        <FirstTripComposer
+        <TripComposer
+          variant="first"
           firstName={user?.first_name}
           initialDestination={(searchParams.get('plan') || '').slice(0, 255)}
           onCreate={onCreateStarterTrip}
