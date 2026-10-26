@@ -11,6 +11,24 @@
     "current": "Current version",
     "empty": "There are no release notes yet.",
     "releases": {
+      "v1_6": {
+        "title": "Quick start and trip invites",
+        "summary": "Start a new trip in a minute: type where you’re going, pick the dates and watch the trip take shape. Invite your crew with one link, even before they have an account, and copy someone’s shared trip into your own. Plus a new share window, a new What’s new and friendlier empty screens.",
+        "highlights": [
+          "Creating a trip is now a full page: destination, quick dates (this weekend, next weekend…) and a live preview of the days, packing and map pin",
+          "New trips start filled in: named days and the destination pinned on the map",
+          "Pre-fill the packing list by trip type (city, mountains, seaside, road trip), or write it yourself",
+          "Trip invite link: whoever opens it joins as an editor, creating an account on the way if needed",
+          "You get a notification when someone joins your trip",
+          "Copy a shared trip into your account with one button: plan, packing and places",
+          "New share window: who’s going on the left, the invite and a read-only link toggle on the right",
+          "New users start with “Where to?” and a short checklist of first steps",
+          "You can type a destination on the home page before signing up",
+          "Empty budget, trips, statistics and map now show what you’ll see there and offer a first step",
+          "Redesigned What’s new window with every release at a glance",
+          "Close trip creation with Esc, and new accounts start in light mode"
+        ]
+      },
       "v1_5": {
         "title": "A new trip page and navigation",
         "summary": "A trip is now a notebook: every day has its own page, you flip between days with the date strip, arrow keys or a swipe, and packing, links, map and budget sit as tabs on the page edge. Everything saves by itself, logging an expense on mobile is one tap away, and the whole app got new, unified navigation.",
@@ -94,7 +112,10 @@
           "Light and dark mode, available in English and Czech"
         ]
       }
-    }
+    },
+    "versions": "Versions",
+    "version": "Version {{version}}",
+    "highlights": "What changed"
   },
   "landing": {
     "hero": {
@@ -658,7 +679,7 @@
     "linkDisable": "Revoke link",
     "linkCopy": "Copy link",
     "linkCopied": "Link copied!",
-    "linkHint": "Anyone with the link will be able to view this trip.",
+    "linkHint": "Anyone with the link sees the plan, packing and links. They can’t edit.",
     "addSection": "Add collaborator",
     "searchPlaceholder": "Search a friend...",
     "onlyFriendsHint": "You can only share trips with accepted friends.",
@@ -686,6 +707,16 @@
       "retry": "Try again",
       "copyError": "Couldn’t copy the link.",
       "shareText": "Come plan {{trip}} with me on Journeo"
+    },
+    "copy": "Copy",
+    "copied": "Copied",
+    "people": {
+      "title": "Who’s going",
+      "you": "you",
+      "empty": "Just you so far. Send your crew the invite, or add them from friends.",
+      "roleFor": "Role for {{name}}",
+      "remove": "Remove {{name}}",
+      "newRole": "Role for the new travel buddy"
     }
   },
   "publicTrip": {
@@ -920,8 +951,25 @@
       "description": "No trips match your search. Try changing the filters."
     },
     "noTrips": {
-      "title": "No trips yet",
-      "description": "Create your first trip and start planning an adventure."
+      "title": "All your trips will live here",
+      "description": "Upcoming, in progress and the ones behind you. In one place, with search and filters.",
+      "samples": {
+        "upcoming": {
+          "title": "Lisbon",
+          "meta": "Nov 12–18 · 7 days",
+          "status": "In 12 days"
+        },
+        "ongoing": {
+          "title": "The Alps",
+          "meta": "Oct 25–27 · 3 days",
+          "status": "Day 2 of 3"
+        },
+        "past": {
+          "title": "Vienna",
+          "meta": "Sep 4–7 · 4 days",
+          "status": "Done"
+        }
+      }
     },
     "delete": {
       "title": "Delete trip"
@@ -984,7 +1032,16 @@
     "empty": {
       "title": "No places yet",
       "filtered": "No place matches the filter.",
-      "hint": "Click anywhere on the map to save your first place."
+      "hint": "Click anywhere on the map to save your first place.",
+      "globalTitle": "Your map of the world",
+      "globalLead": "Save places you want to see and tick off where you’ve been. Visited places fill the countries in your passport.",
+      "tripTitle": "Places for this trip",
+      "tripLead": "Pin your stay, sights and spots. Grouped by day, they become your route.",
+      "tips": {
+        "search": "Search for a place in the box above",
+        "click": "Or click anywhere on the map",
+        "add": "Or use the Add button"
+      }
     },
     "confirmDelete": {
       "title": "Delete place?",
@@ -1080,7 +1137,33 @@
       "noExpenses": "No expenses yet. Add the first one!",
       "noResults": "No results",
       "noResultsDesc": "No expenses match your search. Try changing the filters.",
-      "noExpensesDesc": "Track your spending as you go — add your first expense to get started."
+      "noExpensesDesc": "Track your spending as you go — add your first expense to get started.",
+      "title": "What will the trip cost?",
+      "viewerTitle": "No expenses yet",
+      "lead": "Log expenses as you travel. Journeo adds them up by day and category, and when someone pays for the group it works out who owes whom.",
+      "quickStart": "What did you pay for first?",
+      "setLimit": "Set a budget limit",
+      "limitSet": "Limit {{amount}} · edit",
+      "sample": "Example",
+      "splitWays_one": "for {{count}}",
+      "splitWays_other": "split {{count}} ways",
+      "sampleSettle": "Tomáš sends Anna {{amount}}",
+      "samples": {
+        "stay": {
+          "title": "Apartment, 3 nights",
+          "paidBy": "Paid by Anna"
+        },
+        "train": {
+          "title": "Train there and back",
+          "paidBy": "Paid by you"
+        },
+        "dinner": {
+          "title": "Dinner by the harbour",
+          "paidBy": "Paid by Tomáš"
+        }
+      },
+      "noTripsTitle": "Expenses and settling up, no spreadsheets",
+      "noTripsLead": "Once you have a trip, log what you spend here. Journeo adds it up by day and category and works out who owes whom."
     },
     "delete": {
       "title": "Delete expense?",
@@ -1202,6 +1285,26 @@
       "title": "Couldn't load statistics",
       "subtitle": "There was a problem fetching your data.",
       "retry": "Try again"
+    },
+    "emptyState": {
+      "title": "Your travels in numbers",
+      "lead": "After your first trip you’ll see how many days you’ve spent travelling, how many countries you’ve visited, when you travel most and what it cost.",
+      "samples": {
+        "countries": {
+          "value": "3",
+          "label": "Countries"
+        },
+        "trips": {
+          "value": "5",
+          "label": "Trips"
+        },
+        "days": {
+          "value": "26",
+          "label": "Days away"
+        },
+        "byMonth": "Trips by month",
+        "peak": "You travel most in August."
+      }
     }
   },
   "settings": {
@@ -2011,5 +2114,9 @@
       "desc": "The link is invalid or the trip owner revoked it. Ask them for a new one.",
       "cta": "Go to Journeo"
     }
+  },
+  "emptyStates": {
+    "sample": "Example",
+    "planFirst": "Plan your first trip"
   }
 }

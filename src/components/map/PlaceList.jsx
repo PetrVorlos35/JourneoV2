@@ -4,10 +4,11 @@ import { getCategory, categoryLabelKey } from './placeConfig';
 
 // Seznam míst vedle mapy. Klik na řádek na místo přeletí, tužka ho otevře
 // k úpravě — stejné rozdělení jako u ostatních seznamů v dashboardu.
-const PlaceList = ({ places, selectedId, onSelect, onEdit, emptyLabel, canEdit = true }) => {
+const PlaceList = ({ places, selectedId, onSelect, onEdit, emptyLabel, emptyContent = null, canEdit = true }) => {
   const { t } = useTranslation();
 
   if (places.length === 0) {
+    if (emptyContent) return emptyContent;
     return (
       <p className="px-4 py-8 text-center text-[13px] font-medium text-gray-400 dark:text-gray-500">
         {emptyLabel}

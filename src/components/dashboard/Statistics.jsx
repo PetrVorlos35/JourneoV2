@@ -10,6 +10,7 @@ import { StatisticsSkeleton } from '../ui/Skeletons';
 import AnimatedValue from '../ui/AnimatedValue';
 import MetricCard from '../ui/MetricCard';
 import { countryFlag } from '../../utils/country';
+import EmptyShowcase, { PreviewPaper, PlanFirstTripButton } from './EmptyShowcase';
 
 const CATEGORY_CONFIG = {
   accommodation: { color: '#818cf8' },
@@ -23,6 +24,37 @@ const CURRENCY_SYMBOLS = { CZK: 'Kč', EUR: '€', USD: '$', GBP: '£' };
 
 // Náhled mapy se stahuje až s Leafletem — statistiky se otevírají i bez něj.
 const MapCanvas = lazy(() => import('../map/MapCanvas'));
+
+// Ukázka statistik pro prázdný stav: tři čísla a cesty po měsících.
+const SAMPLE_MONTHS = [0, 1, 0, 2, 1, 3, 4, 6, 2, 1, 0, 2];
+
+const StatsPreview = ({ t }) => {
+  const max = Math.max(...SAMPLE_MONTHS);
+  const peak = SAMPLE_MONTHS.indexOf(max);
+  return (
+    <PreviewPaper>
+      <dl className="mt-3 grid grid-cols-3 gap-3">
+        {['countries', 'trips', 'days'].map((key) => (
+          <div key={key} className="rounded-2xl bg-field px-3 py-3">
+            <dd className="text-[26px] font-bold leading-none tabular-nums text-primary">{t(`statistics.emptyState.samples.${key}.value`)}</dd>
+            <dt className="mt-1.5 text-[12px] font-medium text-muted">{t(`statistics.emptyState.samples.${key}.label`)}</dt>
+          </div>
+        ))}
+      </dl>
+      <p className="mt-5 text-[13px] font-semibold text-muted">{t('statistics.emptyState.samples.byMonth')}</p>
+      <div className="mt-2 h-20 flex items-end gap-1.5">
+        {SAMPLE_MONTHS.map((v, i) => (
+          <span
+            key={i}
+            className={`flex-1 rounded-t-md ${i === peak ? 'bg-accent' : 'bg-blue-200 dark:bg-blue-400/30'}`}
+            style={{ height: `${Math.max(8, (v / max) * 100)}%` }}
+          />
+        ))}
+      </div>
+      <p className="mt-3 text-[13px] font-medium text-secondary">{t('statistics.emptyState.samples.peak')}</p>
+    </PreviewPaper>
+  );
+};
 
 const HighlightCard =({ icon: Icon, label, mainValue, subValue, glowColor, delay = 0, emptyText = '—' }) => {
   const shouldReduceMotion = useReducedMotion();
@@ -203,9 +235,12 @@ const Statistics = ({ trips }) => {
     return (
       <div className="w-full space-y-8 pb-24 sm:pb-10">
         <h1 className="text-2xl sm:text-4xl text-primary tracking-tight font-bold" style={{ textWrap: 'balance' }}>{t('statistics.title')}</h1>
-        <div className="text-center p-16 glass-card">
-          <p className="text-muted font-medium text-[15px]">{t('statistics.empty')}</p>
-        </div>
+        <EmptyShowcase
+          title={t('statistics.emptyState.title')}
+          lead={t('statistics.emptyState.lead')}
+          actions={<PlanFirstTripButton />}
+          preview={<StatsPreview t={t} />}
+        />
       </div>
     );
   }

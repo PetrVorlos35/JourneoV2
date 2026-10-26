@@ -4,6 +4,33 @@ import { MapPin, Calendar, Trash2, ArrowRight, Search, Filter, X, Users, Heart, 
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getTripColor } from '../../utils/tripColor';
+import EmptyShowcase, { PreviewPaper, PlanFirstTripButton } from './EmptyShowcase';
+
+// Ukázka seznamu výletů pro prázdný stav.
+const SAMPLE_TRIPS = [
+  { id: 'upcoming', dot: 'bg-blue-500', chip: 'bg-active text-active' },
+  { id: 'ongoing', dot: 'bg-emerald-500', chip: 'bg-success-wash text-success' },
+  { id: 'past', dot: 'bg-gray-400', chip: 'bg-subtle text-secondary' },
+];
+
+const TripsPreview = ({ t }) => (
+  <PreviewPaper>
+    <ul className="mt-3 divide-y divide-gray-100 dark:divide-white/5">
+      {SAMPLE_TRIPS.map((trip) => (
+        <li key={trip.id} className="flex items-center gap-3 py-3">
+          <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${trip.dot}`} />
+          <span className="flex-1 min-w-0">
+            <span className="block text-[15px] font-semibold text-primary truncate">{t(`allTrips.noTrips.samples.${trip.id}.title`)}</span>
+            <span className="block text-[12px] font-medium text-muted truncate">{t(`allTrips.noTrips.samples.${trip.id}.meta`)}</span>
+          </span>
+          <span className={`shrink-0 text-[12px] font-semibold px-2.5 py-1 rounded-full ${trip.chip}`}>
+            {t(`allTrips.noTrips.samples.${trip.id}.status`)}
+          </span>
+        </li>
+      ))}
+    </ul>
+  </PreviewPaper>
+);
 
 const AllTrips = ({ trips, onDeleteTrip }) => {
   const { t } = useTranslation();
@@ -54,7 +81,8 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
         </Link>
       </div>
 
-      {/* Filter Bar */}
+      {/* Filter Bar — bez výletů nemá co filtrovat */}
+      {trips.length > 0 && (
       <div className="glass-card p-3 sm:p-4 rounded-2xl flex flex-col sm:flex-row gap-3 sm:gap-4">
         <div className="relative flex-1">
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -115,13 +143,16 @@ const AllTrips = ({ trips, onDeleteTrip }) => {
           )}
         </div>
       </div>
+      )}
 
       {/* Grid */}
       {trips.length === 0 ? (
-        <div className="py-14 sm:py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none px-4">
-          <p className="text-2xl text-primary font-bold tracking-tight">{t('allTrips.noTrips.title')}</p>
-          <p className="text-[15px] text-muted font-medium max-w-md">{t('allTrips.noTrips.description')}</p>
-        </div>
+        <EmptyShowcase
+          title={t('allTrips.noTrips.title')}
+          lead={t('allTrips.noTrips.description')}
+          actions={<PlanFirstTripButton />}
+          preview={<TripsPreview t={t} />}
+        />
       ) : filteredTrips.length === 0 ? (
         <div className="py-14 sm:py-20 text-center glass-card rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-none px-4">
           <p className="text-2xl text-primary font-bold tracking-tight">{t('allTrips.empty.title')}</p>

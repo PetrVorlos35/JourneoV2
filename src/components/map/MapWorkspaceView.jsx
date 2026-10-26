@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ArrowLeft, Plus, Pencil, Move, Trash2, Crosshair, MapPin } from 'lucide-react';
+import { ArrowLeft, Plus, Pencil, Move, Trash2, Crosshair, MapPin, Search, MousePointerClick, Globe } from 'lucide-react';
 import UserAvatar from '../ui/UserAvatar';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
@@ -30,6 +30,35 @@ const DESKTOP_PANEL_WIDTH = 360;
  * viditelné části mapy drží křížek a uživatel pod něj posouvá mapu. Prst ani
  * kurzor tak nikdy nezakrývá cíl — stejná interakce na obou zařízeních.
  */
+// Prázdná mapa: k čemu je a tři cesty, jak uložit první místo.
+const MapEmptyState = ({ inTrip, t }) => (
+  <div className="px-2 py-4">
+    <span className="w-11 h-11 rounded-2xl bg-active text-accent flex items-center justify-center">
+      {inTrip ? <MapPin size={20} strokeWidth={2.25} /> : <Globe size={20} strokeWidth={2.25} />}
+    </span>
+    <h3 className="mt-4 text-[18px] font-bold tracking-tight text-primary">
+      {t(inTrip ? 'map.empty.tripTitle' : 'map.empty.globalTitle')}
+    </h3>
+    <p className="mt-1.5 text-[14px] font-medium text-muted leading-relaxed">
+      {t(inTrip ? 'map.empty.tripLead' : 'map.empty.globalLead')}
+    </p>
+    <ul className="mt-5 space-y-3">
+      {[
+        { id: 'search', Icon: Search },
+        { id: 'click', Icon: MousePointerClick },
+        { id: 'add', Icon: Plus },
+      ].map(({ id, Icon }) => (
+        <li key={id} className="flex items-start gap-3 text-[14px] font-medium text-secondary">
+          <span className="w-8 h-8 rounded-xl bg-subtle text-secondary flex items-center justify-center shrink-0">
+            <Icon size={15} strokeWidth={2.25} />
+          </span>
+          <span className="pt-1.5">{t(`map.empty.tips.${id}`)}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
 const MapWorkspaceView = ({
   workspace,
   trips = [],
@@ -369,6 +398,7 @@ const MapWorkspaceView = ({
           onEdit={editPlace}
           canEdit={canEdit}
           emptyLabel={places.length === 0 ? t('map.empty.title') : t('map.empty.filtered')}
+          emptyContent={places.length === 0 && canEdit ? <MapEmptyState inTrip={Boolean(tripId)} t={t} /> : null}
         />
       </div>
     );

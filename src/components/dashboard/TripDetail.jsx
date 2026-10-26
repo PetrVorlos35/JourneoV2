@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, Suspense, lazy } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Pencil, PackageOpen, Link as LinkIcon, Users, Eye, Heart, Wallet, FileDown, MapPinned, NotebookText, Plus, X, Check, Loader2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Pencil, PackageOpen, Link as LinkIcon, Share2, Eye, Heart, Wallet, FileDown, MapPinned, NotebookText, Plus, X, Check, Loader2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { format, eachDayOfInterval, differenceInCalendarDays, startOfDay } from 'date-fns';
 import { cs, enUS } from 'date-fns/locale';
@@ -425,7 +425,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                 aria-label={t('shareModal.shareButton')}
                 className="h-11 w-11 sm:w-auto sm:px-5 flex items-center justify-center gap-2 rounded-2xl bg-ink text-white dark:text-gray-900 text-[14px] font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 active:scale-95 transition-all cursor-pointer shrink-0"
               >
-                <Users size={17} strokeWidth={2.5} />
+                <Share2 size={17} strokeWidth={2.5} />
                 <span className="hidden sm:inline">{t('shareModal.shareButton')}</span>
               </button>
             )}

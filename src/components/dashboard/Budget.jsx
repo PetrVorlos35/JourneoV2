@@ -20,6 +20,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import UserAvatar from '../ui/UserAvatar';
 import { formatCurrency } from '../../utils/currency';
+import { PlanFirstTripButton } from './EmptyShowcase';
 
 const CATEGORIES = [
   { id: 'transport',      icon: Car,          colorClass: 'bg-blue-500',    lightBgClass: 'bg-active',     textClass: 'text-accent' },
@@ -510,7 +511,7 @@ const CategoryBar = ({ expenses, currency, locale, onCategoryClick, activeCatego
 };
 
 /* ─── Add / Edit Expense Modal ─── */
-const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialExpense = null, members = [], currentUserId = null }) => {
+const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialExpense = null, initialCategory = null, members = [], currentUserId = null }) => {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
@@ -569,7 +570,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
       setForm({
         description: '',
         amount: '',
-        category: 'transport',
+        category: initialCategory || 'transport',
         date: new Date().toISOString().split('T')[0],
         paidBy: currentUserId,
         isPersonal: false,
@@ -938,6 +939,155 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
 };
 
 /* ─── Budget ─── */
+// Ukázkové výdaje do náhledu prázdného rozpočtu. Částky jsou v Kč, pro
+// ostatní měny se přepočtou zhruba kurzem, ať ukázka nepůsobí absurdně.
+const SAMPLE_EXPENSES = [
+  { id: 'stay', category: 'accommodation', amount: 9600, split: 4 },
+  { id: 'train', category: 'transport', amount: 2480, split: 4 },
+  { id: 'dinner', category: 'food', amount: 1650, split: 3 },
+];
+const SAMPLE_SCALE = { CZK: 1, EUR: 1 / 25, USD: 1 / 23, GBP: 1 / 29 };
+
+/**
+ * Prázdný rozpočet: místo nul a pomlček vysvětlí, co rozpočet umí, ukáže
+ * to na náhledu a nabídne první výdaj rovnou podle kategorie. Sdílí ho
+ * rozpočet ve výletu (embedded, bez karty) i stránka Výdaje.
+ */
+const BudgetEmptyState = ({
+  embedded, isViewer, noTrips = false, onAdd, currency, locale, t,
+  budgetTarget, editingTarget, targetInput, setTargetInput, onEditTarget, onSaveTarget, onCancelTarget,
+}) => {
+  const scale = SAMPLE_SCALE[currency] ?? 1;
+  const amount = (czk) => formatCurrency(Math.round(czk * scale), currency, locale);
+  const sampleTotal = SAMPLE_EXPENSES.reduce((sum, e) => sum + e.amount, 0);
+
+  return (
+    <div className={embedded ? 'pt-2' : 'glass-card p-6 sm:p-10'}>
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] gap-10 lg:gap-14 items-center">
+        <div className="max-w-lg">
+          <h2 className="text-[24px] sm:text-[30px] font-bold tracking-tight text-primary leading-tight" style={{ textWrap: 'balance' }}>
+            {t(noTrips ? 'budget.empty.noTripsTitle' : isViewer ? 'budget.empty.viewerTitle' : 'budget.empty.title')}
+          </h2>
+          <p className="mt-3 text-[15px] font-medium text-muted leading-relaxed" style={{ textWrap: 'pretty' }}>
+            {t(noTrips ? 'budget.empty.noTripsLead' : 'budget.empty.lead')}
+          </p>
+
+          {noTrips && (
+            <div className="mt-7"><PlanFirstTripButton /></div>
+          )}
+
+          {!isViewer && !noTrips && (
+            <>
+              <p className="mt-7 text-[13px] font-semibold text-muted">{t('budget.empty.quickStart')}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {CATEGORIES.map((c) => {
+                  const CatIcon = c.icon;
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => onAdd(c.id)}
+                      className="inline-flex items-center gap-2 rounded-2xl px-3.5 min-h-[44px] bg-page border border-gray-200/80 dark:border-white/10 text-[14px] font-semibold text-soft hover:bg-field hover:text-primary active:scale-[0.97] transition-all cursor-pointer"
+                    >
+                      <CatIcon size={16} strokeWidth={2.25} className={c.textClass} aria-hidden="true" />
+                      {t('budget.categories.' + c.id)}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+                <button
+                  type="button"
+                  onClick={() => onAdd(null)}
+                  className="inline-flex items-center gap-2 px-5 min-h-[44px] bg-accent text-white rounded-2xl text-[14px] font-semibold hover:bg-accent-hover shadow-[0_6px_16px_-8px_rgba(37,99,235,0.7)] active:scale-95 transition-all cursor-pointer"
+                >
+                  <Plus size={17} strokeWidth={2.5} /> {t('budget.addExpense')}
+                </button>
+
+                {editingTarget ? (
+                  <form
+                    onSubmit={(e) => { e.preventDefault(); onSaveTarget(); }}
+                    className="flex items-center gap-2"
+                  >
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min="0"
+                      autoFocus
+                      value={targetInput}
+                      onChange={(e) => setTargetInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Escape') onCancelTarget(); }}
+                      placeholder={t('budget.target.placeholder')}
+                      aria-label={t('budget.target.set')}
+                      className="w-36 h-11 px-3 rounded-xl bg-field border border-default text-[16px] sm:text-[14px] font-semibold tabular-nums text-primary focus:outline-none focus:bg-page focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/20"
+                    />
+                    <button type="submit" className="h-11 px-4 rounded-xl bg-ink text-white dark:text-gray-900 text-[14px] font-semibold cursor-pointer">
+                      {t('budget.target.save')}
+                    </button>
+                  </form>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={onEditTarget}
+                    className="inline-flex items-center gap-1.5 min-h-[44px] text-[14px] font-semibold text-secondary hover:text-primary transition-colors cursor-pointer"
+                  >
+                    <Target size={16} strokeWidth={2.25} />
+                    {budgetTarget
+                      ? t('budget.empty.limitSet', { amount: formatCurrency(budgetTarget, currency, locale) })
+                      : t('budget.empty.setLimit')}
+                  </button>
+                )}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Náhled: jak rozpočet vypadá s daty */}
+        <div className="relative" aria-hidden="true">
+          <div className="absolute inset-x-5 -bottom-2.5 top-5 rounded-[1.5rem] bg-page/70 border border-gray-200/70 dark:border-white/5 rotate-[1.5deg]" />
+          <div className="relative rounded-[1.5rem] bg-page border border-gray-200/80 dark:border-white/10 shadow-[0_1px_2px_rgba(17,24,39,0.04),0_24px_48px_-24px_rgba(17,24,39,0.18)] p-5 sm:p-6">
+            <p className="text-[12px] font-semibold text-muted">{t('budget.empty.sample')}</p>
+            <p className="mt-1 text-[15px] font-medium text-secondary">
+              {t('tripDetail.notebook.spent')}{' '}
+              <span className="text-[22px] font-bold text-primary tabular-nums">{amount(sampleTotal)}</span>
+            </p>
+            <div className="mt-3 h-2 rounded-full bg-subtle overflow-hidden flex">
+              {SAMPLE_EXPENSES.map((e) => (
+                <span key={e.id} className={`h-full ${catInfo(e.category).colorClass}`} style={{ width: `${(e.amount / sampleTotal) * 100}%` }} />
+              ))}
+            </div>
+            <ul className="mt-4 divide-y divide-gray-100 dark:divide-white/5">
+              {SAMPLE_EXPENSES.map((e) => {
+                const info = catInfo(e.category);
+                const CatIcon = info.icon;
+                return (
+                  <li key={e.id} className="flex items-center gap-3 py-2.5">
+                    <span className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${info.lightBgClass} ${info.textClass}`}>
+                      <CatIcon size={15} strokeWidth={2.25} />
+                    </span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-[14px] font-semibold text-primary truncate">{t(`budget.empty.samples.${e.id}.title`)}</span>
+                      <span className="block text-[12px] font-medium text-muted truncate">
+                        {t(`budget.empty.samples.${e.id}.paidBy`)} · {t('budget.empty.splitWays', { count: e.split })}
+                      </span>
+                    </span>
+                    <span className="text-[14px] font-semibold tabular-nums text-primary whitespace-nowrap">{amount(e.amount)}</span>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="mt-2 pt-3 border-t border-gray-100 dark:border-white/5 flex items-center gap-2 text-[13px] font-medium text-secondary">
+              <HandCoins size={15} strokeWidth={2.25} className="text-success shrink-0" />
+              <span className="truncate">{t('budget.empty.sampleSettle', { amount: amount(1840) })}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
@@ -945,6 +1095,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
 
   const [selectedTripId, setSelectedTripId] = useState(trips[0]?.id || null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [addCategory, setAddCategory] = useState(null);
   const [editingExpense, setEditingExpense] = useState(null);
   const [sortBy, setSortBy] = useState('date-desc');
   const [editingTarget, setEditingTarget] = useState(false);
@@ -1091,7 +1242,8 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
   }, [addRequest]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const modalOpen = isAddModalOpen || !!editingExpense;
-  const closeModal = () => { setIsAddModalOpen(false); setEditingExpense(null); };
+  const closeModal = () => { setIsAddModalOpen(false); setEditingExpense(null); setAddCategory(null); };
+  const openAdd = (category = null) => { setAddCategory(category); setIsAddModalOpen(true); };
 
   const rowProps = {
     currency,
@@ -1273,6 +1425,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
         currency={currency}
         tripRange={{ start: trip?.startDate, end: trip?.endDate }}
         initialExpense={editingExpense}
+        initialCategory={addCategory}
         members={members}
         currentUserId={currentUserId}
       />
@@ -1314,10 +1467,23 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
       )}
 
       {trips.length === 0 ? (
-        <div className="text-center py-20 glass-card flex flex-col items-center justify-center space-y-4">
-          <p className="font-bold text-2xl text-primary tracking-tight">{t('budget.empty.noTrips')}</p>
-          <p className="text-[15px] font-medium text-muted max-w-md">{t('budget.empty.noTripsDesc')}</p>
-        </div>
+        <BudgetEmptyState noTrips embedded={hideHeader} currency={currency} locale={i18n.language} t={t} />
+      ) : trip && expenses.length === 0 ? (
+        <BudgetEmptyState
+          embedded={hideHeader}
+          isViewer={isViewer}
+          onAdd={openAdd}
+          currency={currency}
+          locale={i18n.language}
+          t={t}
+          budgetTarget={budgetTarget}
+          editingTarget={editingTarget}
+          targetInput={targetInput}
+          setTargetInput={setTargetInput}
+          onEditTarget={() => { setTargetInput(budgetTarget ? String(budgetTarget) : ''); setEditingTarget(true); }}
+          onSaveTarget={handleSaveTarget}
+          onCancelTarget={() => setEditingTarget(false)}
+        />
       ) : trip ? (
         <>
           {/* ── Shrnutí (vložené do stránky výletu): věta, ne metrikový panel ── */}

@@ -3,6 +3,52 @@
 All notable changes to Journeo are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [1.6.0] – 2026-10-26
+
+### Added — Quick start and trip invites
+
+- **Trip composer** (`TripComposer`) — one component for every new trip: the
+  first-run view on the empty overview (`variant="first"`, "Kam to bude?") and
+  the `/dashboard/new` page behind "+ Vytvořit výlet" and the N shortcut
+  (`variant="new"`). Destination autocomplete, quick dates (this weekend, next
+  weekend, a week next month, custom), optional packing prefill by trip type
+  and a live `TripPreview` of days, packing and map pin. Esc leaves the page
+  (the first Esc only closes destination suggestions).
+- **Prefilled trips** — `handleCreateStarterTrip` creates the trip, then fills
+  named days (arrival / … / heading home), the packing template when a type is
+  picked, and the destination as an itinerary place for day 0. Steps report
+  progress; a half-filled trip is opened instead of retried, so no duplicates.
+- **Welcome checklist** (`trip/WelcomeChecklist`) on the first trip only:
+  pack, plan day one, invite the crew; ticks off from real actions
+  (`utils/onboarding.js`, localStorage `journeo_welcome`).
+- **Trip invite links** — `trips.invite_token` (migration
+  `009_trip_invite.sql`), `POST|DELETE /api/trips/:id/invite-link`,
+  `POST /api/trips/join/:token` (joins as editor, keeps an existing role),
+  public preview `GET /api/public/invite/:token` (shape only, no contents),
+  `/join/:token` page that finishes the join after sign-up (`?accept=1`), OG
+  tags and image for invite links, `TRIP_JOINED` notification for the owner.
+- **Copy a shared trip** — `POST /api/trips/copy/:shareToken` copies plan,
+  packing (unchecked) and places (no stays) into the caller's account; past
+  trips move to start in 30 days. "Zkopírovat si výlet" on `/share/:token`,
+  now visible on mobile too.
+- **Landing hero** asks "Kam jedeš?" and carries the destination through
+  sign-up (`/dashboard?plan=…`).
+- **Empty states** — shared `EmptyShowcase` (copy, one action, labelled sample
+  preview) for All trips, Statistics and Budget without trips;
+  `BudgetEmptyState` with category quick-start and inline limit for a trip
+  without expenses; a map side-panel intro with three ways to add a place.
+
+### Changed
+
+- `CreateTripModal` removed in favour of the composer page.
+- Share modal redesigned: 880 px, "Kdo jede" on the left, invite link as the
+  primary action and the read-only link as a switch on the right. The trip
+  header Share button uses the share icon.
+- What's new modal redesigned: version rail plus release detail; indigo
+  accents removed per the one-blue rule.
+- New accounts default to the light theme (register, Google sign-up, settings
+  fallback, client default).
+
 ## [1.5.0] – 2026-10-06
 
 ### Changed — Trip detail redesigned as a notebook

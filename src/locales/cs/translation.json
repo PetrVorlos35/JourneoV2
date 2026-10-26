@@ -11,6 +11,24 @@
     "current": "Aktuální verze",
     "empty": "Zatím tu nejsou žádné novinky.",
     "releases": {
+      "v1_6": {
+        "title": "Rychlý start a pozvánky do výletu",
+        "summary": "Nový výlet založíte za minutu: napíšete, kam jedete, vyberete termín a hned vidíte, jak se výlet skládá. Partu do výletu pozvete jedním odkazem, i když ještě nemá účet, a cizí sdílený výlet si můžete zkopírovat k sobě. K tomu nové okno sdílení, novinky a přívětivější prázdné obrazovky.",
+        "highlights": [
+          "Zakládání výletu na celé stránce: destinace, rychlý termín (tento víkend, příští víkend…) a vpravo živý náhled dnů, balení a místa na mapě",
+          "Výlet se založí rovnou vyplněný: dny s názvy a destinace připíchnutá na mapě",
+          "Balení si můžete předvyplnit podle typu výletu (město, hory, moře, roadtrip), nebo si ho napsat sami",
+          "Pozvánka do výletu odkazem: kdo ho otevře, připojí se jako editor, a účet si případně založí cestou",
+          "Když se někdo připojí k vašemu výletu, přijde vám notifikace",
+          "Sdílený výlet si můžete jedním tlačítkem zkopírovat k sobě: program, balení i místa",
+          "Nové okno sdílení: vlevo kdo jede, vpravo pozvánka a odkaz jen pro čtení jako přepínač",
+          "Noví uživatelé začínají otázkou „Kam to bude?“ a krátkým checklistem prvních kroků",
+          "Na úvodní stránce můžete napsat destinaci ještě před registrací",
+          "Prázdný rozpočet, seznam výletů, statistiky a mapa ukazují, co v nich uvidíte, a nabídnou první krok",
+          "Přepracované okno novinek s přehledem všech verzí",
+          "Stránku zakládání zavřete klávesou Esc a noví uživatelé mají výchozí světlý vzhled"
+        ]
+      },
       "v1_5": {
         "title": "Nový detail výletu a navigace",
         "summary": "Výlet je teď zápisník: každý den má svou stránku, mezi dny listujete pásem dat nahoře, šipkami nebo přejetím prstem a balení, odkazy, mapa i rozpočet visí jako záložky na okraji stránky. Všechno se ukládá samo, výdaj zapíšete na mobilu jedním ťuknutím a celá aplikace dostala novou, sjednocenou navigaci.",
@@ -94,7 +112,10 @@
           "Světlý i tmavý režim a čeština s angličtinou"
         ]
       }
-    }
+    },
+    "versions": "Verze",
+    "version": "Verze {{version}}",
+    "highlights": "Co je nového"
   },
   "landing": {
     "hero": {
@@ -668,7 +689,7 @@
     "linkDisable": "Zrušit odkaz",
     "linkCopy": "Kopírovat odkaz",
     "linkCopied": "Odkaz zkopírován!",
-    "linkHint": "Kdokoli s odkazem si bude moci výlet prohlédnout.",
+    "linkHint": "Kdokoli s odkazem uvidí program, balení a odkazy. Upravovat nemůže.",
     "addSection": "Přidat spolupracovníka",
     "searchPlaceholder": "Hledat přítele...",
     "onlyFriendsHint": "Výlet lze sdílet pouze s přijatými přáteli.",
@@ -696,6 +717,16 @@
       "retry": "Zkusit znovu",
       "copyError": "Zkopírovat se nepovedlo.",
       "shareText": "Pojď se mnou plánovat výlet {{trip}} v Journeu"
+    },
+    "copy": "Kopírovat",
+    "copied": "Zkopírováno",
+    "people": {
+      "title": "Kdo jede",
+      "you": "ty",
+      "empty": "Zatím jen ty. Pošli parťákům pozvánku, nebo je přidej z přátel.",
+      "roleFor": "Role pro {{name}}",
+      "remove": "Odebrat {{name}}",
+      "newRole": "Role nového spolucestujícího"
     }
   },
   "publicTrip": {
@@ -934,8 +965,25 @@
       "description": "Vašemu vyhledávání neodpovídají žádné výlety. Zkuste změnit filtry."
     },
     "noTrips": {
-      "title": "Zatím žádné výlety",
-      "description": "Vytvořte svůj první výlet a začněte plánovat dobrodružství."
+      "title": "Tady budou všechny tvoje výlety",
+      "description": "Nadcházející, právě probíhající i ty, co už máš za sebou. Na jednom místě, s hledáním a filtry.",
+      "samples": {
+        "upcoming": {
+          "title": "Lisabon",
+          "meta": "12.–18. 11. · 7 dní",
+          "status": "Za 12 dní"
+        },
+        "ongoing": {
+          "title": "Krkonoše",
+          "meta": "25.–27. 10. · 3 dny",
+          "status": "Den 2 ze 3"
+        },
+        "past": {
+          "title": "Vídeň",
+          "meta": "4.–7. 9. · 4 dny",
+          "status": "Proběhlo"
+        }
+      }
     },
     "delete": {
       "title": "Smazat výlet"
@@ -999,7 +1047,16 @@
     "empty": {
       "title": "Zatím žádná místa",
       "filtered": "Filtru neodpovídá žádné místo.",
-      "hint": "Klikni kamkoli do mapy a ulož si první místo."
+      "hint": "Klikni kamkoli do mapy a ulož si první místo.",
+      "globalTitle": "Tvoje mapa světa",
+      "globalLead": "Ukládej místa, kam se chceš podívat, a odškrtávej, kde už jsi byl. Z navštívených míst se ti skládají země v pasu.",
+      "tripTitle": "Místa k tomuhle výletu",
+      "tripLead": "Připíchni si ubytování, památky a podniky. Podle dnů z nich vznikne trasa.",
+      "tips": {
+        "search": "Vyhledej místo v poli nahoře",
+        "click": "Nebo klikni kamkoli do mapy",
+        "add": "Případně použij tlačítko Přidat"
+      }
     },
     "confirmDelete": {
       "title": "Smazat místo?",
@@ -1096,7 +1153,34 @@
       "noExpenses": "Zatím žádné výdaje. Přidejte první!",
       "noResults": "Žádné výsledky",
       "noResultsDesc": "Vašemu vyhledávání neodpovídají žádné výdaje. Zkuste změnit filtry.",
-      "noExpensesDesc": "Sledujte výdaje za pochodu — přidejte první výdaj a začněte."
+      "noExpensesDesc": "Sledujte výdaje za pochodu — přidejte první výdaj a začněte.",
+      "title": "Kolik vás výlet vyjde?",
+      "viewerTitle": "Zatím tu nejsou žádné výdaje",
+      "lead": "Zapisuj výdaje během cesty. Journeo je sečte po dnech i podle kategorií, a když platíte za ostatní, spočítá, kdo komu kolik dluží.",
+      "quickStart": "Za co jste platili jako první?",
+      "setLimit": "Nastavit limit rozpočtu",
+      "limitSet": "Limit {{amount}} · upravit",
+      "sample": "Ukázka",
+      "splitWays_one": "pro {{count}}",
+      "splitWays_few": "rozděleno na {{count}}",
+      "splitWays_other": "rozděleno na {{count}}",
+      "sampleSettle": "Tomáš posílá Anně {{amount}}",
+      "samples": {
+        "stay": {
+          "title": "Apartmán na 3 noci",
+          "paidBy": "Platila Anna"
+        },
+        "train": {
+          "title": "Vlak tam a zpět",
+          "paidBy": "Platil jsi ty"
+        },
+        "dinner": {
+          "title": "Večeře u přístavu",
+          "paidBy": "Platil Tomáš"
+        }
+      },
+      "noTripsTitle": "Výdaje a vyrovnání bez tabulek",
+      "noTripsLead": "Jakmile máš výlet, zapisuješ sem útraty. Journeo je sečte po dnech i kategoriích a spočítá, kdo komu kolik dluží."
     },
     "delete": {
       "title": "Smazat výdaj?",
@@ -1218,6 +1302,26 @@
       "title": "Statistiky se nepodařilo načíst",
       "subtitle": "Při načítání dat došlo k chybě.",
       "retry": "Zkusit znovu"
+    },
+    "emptyState": {
+      "title": "Tvoje cestování v číslech",
+      "lead": "Po prvním výletu tu uvidíš, kolik dní jsi strávil na cestách, kolik zemí máš za sebou, kdy jezdíš nejčastěji a kolik tě to stálo.",
+      "samples": {
+        "countries": {
+          "value": "3",
+          "label": "Země"
+        },
+        "trips": {
+          "value": "5",
+          "label": "Výletů"
+        },
+        "days": {
+          "value": "26",
+          "label": "Dní na cestách"
+        },
+        "byMonth": "Výlety po měsících",
+        "peak": "Nejčastěji cestuješ v srpnu."
+      }
     }
   },
   "settings": {
@@ -2050,5 +2154,9 @@
       "desc": "Odkaz je neplatný, nebo ho vlastník výletu zrušil. Požádej o nový.",
       "cta": "Přejít na Journeo"
     }
+  },
+  "emptyStates": {
+    "sample": "Ukázka",
+    "planFirst": "Naplánovat první výlet"
   }
 }
