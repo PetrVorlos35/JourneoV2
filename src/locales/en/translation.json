@@ -105,7 +105,10 @@
       "secondary": "See how it works",
       "microcopy": "Free to use · No credit card needed",
       "note": "your next trip, sorted",
-      "newBadge": "New in"
+      "newBadge": "New in",
+      "planLabel": "Where are you going?",
+      "planPlaceholder": "Where to? Lisbon, maybe",
+      "planCta": "Plan it"
     },
     "float": {
       "packing": {
@@ -695,7 +698,7 @@
   },
   "shareModal": {
     "title": "Share Trip",
-    "linkSection": "Share via link",
+    "linkSection": "Read-only link",
     "linkEnable": "Create link",
     "linkDisable": "Revoke link",
     "linkCopy": "Copy link",
@@ -715,6 +718,19 @@
       "owner": "Owner",
       "editor": "Editor",
       "viewer": "Viewer"
+    },
+    "invite": {
+      "section": "Invite your travel buddies",
+      "hint": "Anyone who opens the link can edit the trip with you. They’ll create an account on the way.",
+      "loading": "Preparing the link…",
+      "copy": "Copy invite",
+      "share": "Share",
+      "revoke": "Revoke invite",
+      "revoked": "Invite revoked. People who already joined stay.",
+      "create": "Create invite",
+      "retry": "Try again",
+      "copyError": "Couldn’t copy the link.",
+      "shareText": "Come plan {{trip}} with me on Journeo"
     }
   },
   "publicTrip": {
@@ -746,11 +762,18 @@
       "signup": "Get started free"
     },
     "cta": {
-      "title": "Plan trips with Journeo",
-      "desc": "Itineraries, budget and sharing in one place. Free.",
+      "title": "Like this plan?",
+      "desc": "Copy it and make it your own. Journeo is free.",
       "button": "Create free account"
     },
-    "footer": "Trip shared via Journeo"
+    "footer": "Trip shared via Journeo",
+    "copy": {
+      "cta": "Copy this trip",
+      "busy": "Copying…",
+      "hint": "The plan, packing list and places are copied into your own account.",
+      "done": "Trip copied. Make it your own.",
+      "error": "Couldn’t copy the trip."
+    }
   },
   "tripDetail": {
     "backToDashboard": "Back to overview",
@@ -1445,7 +1468,8 @@
     "messages": {
       "friendRequest": "{{name}} sent you a friend request.",
       "friendAccepted": "{{name}} accepted your friend request.",
-      "tripTransferred": "{{name}} deleted their account — the trip “{{trip}}” is now yours."
+      "tripTransferred": "{{name}} deleted their account — the trip “{{trip}}” is now yours.",
+      "tripJoined": "{{name}} joined your trip “{{trip}}”."
     }
   },
   "friendProfile": {
@@ -1888,5 +1912,134 @@
     "save": "Save choice",
     "customize": "Customize",
     "openSettings": "Change cookie settings"
+  },
+  "onboarding": {
+    "greeting": "Welcome to Journeo",
+    "greetingName": "Welcome to Journeo, {{name}}",
+    "title": "Where to?",
+    "subtitle": "Type where you’re going and your trip is ready in a minute: a day-by-day plan, a packing list and a pin on the map.",
+    "destinationLabel": "Where are you going",
+    "destinationPlaceholder": "Lisbon, the Alps, Croatia…",
+    "whenLabel": "When?",
+    "dates": {
+      "thisWeekend": "This weekend",
+      "nextWeekend": "Next weekend",
+      "inMonth": "A week, next month",
+      "custom": "Pick dates",
+      "from": "From",
+      "to": "To",
+      "tooLong": "A trip can be at most {{max}} days long."
+    },
+    "dayCount_one": "{{count}} day",
+    "dayCount_other": "{{count}} days",
+    "typeLabel": "What kind of trip?",
+    "optional": "optional, it pre-fills your packing list",
+    "types": {
+      "city": "City",
+      "mountains": "Mountains",
+      "sea": "Seaside",
+      "roadtrip": "Road trip"
+    },
+    "submit": "Plan the trip",
+    "changeLater": "You can change anything later.",
+    "error": "Something went wrong, please try again.",
+    "progress": {
+      "title": "Getting {{place}} ready",
+      "trip": "Creating the trip",
+      "days_one": "Laying out {{count}} day",
+      "days_other": "Laying out {{count}} days",
+      "packing": "Pre-filling the packing list",
+      "map": "Pinning {{place}} on the map"
+    },
+    "days": {
+      "arrival": "Arrival",
+      "departure": "Heading home",
+      "day": "Day {{n}}"
+    },
+    "packing": {
+      "base": [
+        "ID or passport",
+        "Card and some cash",
+        "Charger and power bank",
+        "Meds and plasters",
+        "Toothbrush and toothpaste",
+        "Underwear and socks",
+        "Comfy shoes"
+      ],
+      "city": [
+        "Tickets or bookings",
+        "Light jacket",
+        "Small day pack"
+      ],
+      "mountains": [
+        "Hiking boots",
+        "Rain jacket",
+        "Fleece",
+        "Hat and gloves",
+        "Water bottle",
+        "Map or offline maps"
+      ],
+      "sea": [
+        "Swimsuit",
+        "Sunscreen",
+        "Sunglasses",
+        "Beach towel",
+        "Flip-flops",
+        "Sun hat"
+      ],
+      "roadtrip": [
+        "Driving licence and car papers",
+        "Toll vignettes",
+        "Car charger",
+        "Snacks and water",
+        "Road trip playlist"
+      ]
+    },
+    "checklist": {
+      "title": "Your trip is ready. A few quick steps",
+      "titleCopy": "The trip is yours. Make it your own",
+      "progress": "{{done}} of {{total}} done",
+      "created": "Trip created",
+      "copied": "Trip copied",
+      "packing": "Tick off what you’ve packed",
+      "plan": "Write what you want to do on day one",
+      "invite": "Invite your travel buddies",
+      "done": "done",
+      "doneTitle": "Done, it’s all in one place",
+      "doneSubtitle": "Plan, packing and crew sit together now. Fill in the other days whenever you like."
+    }
+  },
+  "joinTrip": {
+    "invitedBy": "{{name}} invites you on a trip",
+    "someone": "A friend",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "countdown_one": "in {{count}} day",
+    "countdown_other": "in {{count}} days",
+    "crew_one": "{{name}} and {{count}} other are going",
+    "crew_other": "{{name}} and {{count}} others are going",
+    "crewSolo": "Just {{name}} so far. Be the first to join.",
+    "stats": {
+      "plannedDays_one": "{{count}} day planned",
+      "plannedDays_other": "{{count}} days planned",
+      "places_one": "{{count}} place on the map",
+      "places_other": "{{count}} places on the map",
+      "packing_one": "{{count}} item to pack",
+      "packing_other": "{{count}} items to pack",
+      "expenses_one": "{{count}} expense",
+      "expenses_other": "{{count}} expenses"
+    },
+    "pitch": "Plan it together: a day-by-day plan, a map of places, who brings what, and a budget that works out who owes whom.",
+    "cta": "Join the trip",
+    "joining": "Joining…",
+    "microcopy": "Free. Creating an account takes seconds.",
+    "signedInAs": "Account: {{email}}",
+    "joined": "You’re in! You’re now planning “{{trip}}” together.",
+    "error": "Couldn’t join the trip.",
+    "invalid": {
+      "title": "This invite has expired",
+      "desc": "The link is invalid or the trip owner revoked it. Ask them for a new one.",
+      "cta": "Go to Journeo"
+    }
   }
 }

@@ -181,6 +181,21 @@ export const api = {
 
     revokeShareLink: (id) =>
       request(`/trips/${id}/share-link`, { method: 'DELETE' }),
+
+    // Zvací odkaz /join/:token: kdo ho přijme, je editor. POST vrátí
+    // existující odkaz, nebo ho založí.
+    getInviteLink: (id) =>
+      request(`/trips/${id}/invite-link`, { method: 'POST' }),
+
+    revokeInviteLink: (id) =>
+      request(`/trips/${id}/invite-link`, { method: 'DELETE' }),
+
+    join: (token) =>
+      request(`/trips/join/${token}`, { method: 'POST' }),
+
+    // Zkopíruje veřejně sdílený výlet do vlastního účtu.
+    copyFromShare: (shareToken) =>
+      request(`/trips/copy/${shareToken}`, { method: 'POST' }),
   },
 
   // ── Places (mapa) ──────────────────────────────────────────
@@ -235,6 +250,13 @@ export const api = {
       const res = await fetch(`${API_BASE}/public/trips/${token}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Nepodařilo se načíst výlet.');
+      return data;
+    },
+
+    getInvite: async (token) => {
+      const res = await fetch(`${API_BASE}/public/invite/${token}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Nepodařilo se načíst pozvánku.');
       return data;
     },
   },

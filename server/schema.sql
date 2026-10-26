@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS trips (
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     share_token VARCHAR(64) UNIQUE NULL DEFAULT NULL,
+    invite_token CHAR(64) UNIQUE NULL DEFAULT NULL COMMENT 'Zvací odkaz /join/:token, kdo ho přijme, je editor',
     budget_target DECIMAL(12,2) NULL DEFAULT NULL,
     version INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Zvyšuje se při každém PUT /api/trips/:id (ochrana proti přepsání)',
     deleted_at DATETIME NULL DEFAULT NULL COMMENT 'Non-NULL = výlet je v koši; po 30 dnech se maže natvrdo',
@@ -218,7 +219,7 @@ CREATE TABLE IF NOT EXISTS friendships (
 CREATE TABLE IF NOT EXISTS notifications (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
-    type ENUM('FRIEND_REQUEST', 'FRIEND_ACCEPTED', 'TRIP_VOTED', 'TRIP_TRANSFERRED') NOT NULL,
+    type ENUM('FRIEND_REQUEST', 'FRIEND_ACCEPTED', 'TRIP_VOTED', 'TRIP_TRANSFERRED', 'TRIP_JOINED') NOT NULL,
     reference_id INT UNSIGNED DEFAULT NULL COMMENT 'ID přátelství nebo výletu',
     message TEXT DEFAULT NULL,
     is_read TINYINT(1) DEFAULT 0,

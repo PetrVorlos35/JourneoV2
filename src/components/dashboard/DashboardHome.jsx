@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useState, useEffect, useCallback, useRef } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTranslation } from 'react-i18next';
 import DashboardLayout from './DashboardLayout';
@@ -11,6 +11,7 @@ import { Trash2 } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { pushUndo, clearUndo } from '../../hooks/undoStack';
+import { buildStarterDays, buildStarterPacking, startWelcome } from '../../utils/onboarding';
 import {
   TripsOverviewSkeleton,
   AllTripsSkeleton,
@@ -52,6 +53,7 @@ const withSuspense = (element, fallback) => (
 const DashboardHome = () => {
   const { isAdmin } = useAuth();
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -106,6 +108,65 @@ const DashboardHome = () => {
 
       return createdTrip;
     } catch (err) {
+      toast.error(err.message || t('dashboardHome.createError'));
+      throw err;
+    }
+  };
+
+  // První výlet z onboardingu: založí se rovnou vyplněný (dny, balení podle
+  // typu výletu, destinace na mapě), aby nový uživatel neotevřel prázdný
+  // zápisník. Každý hotový krok se hlásí přes onStep, kroky mají krátké
+  // minimum, ať je průběh vidět, i když server odpoví hned.
+  const handleCreateStarterTrip = async ({ title, startDate, endDate, place, type }, onStep) => {
+    const beat = () => new Promise(resolve => setTimeout(resolve, 350));
+    let created = null;
+    try {
+      [{ trip: created }] = await Promise.all([api.trips.create({ title, startDate, endDate }), beat()]);
+      // Do seznamu výletů až na konci: s prvním výletem by přehled hned
+      // vyměnil průběh za běžný dashboard.
+      versionsRef.current.set(created.id, created.version);
+      onStep('trip');
+
+      const activities = buildStarterDays(t, startDate, endDate, title);
+      await beat();
+      onStep('days');
+
+      const packingList = buildStarterPacking(t, type);
+      const [filled] = await Promise.all([handleUpdateTrip({ ...created, activities, packingList }), beat()]);
+      onStep('packing');
+
+      if (place) {
+        // Místo k prvnímu dni jako z itineráře, takže ho pozdější import
+        // z programu nezaloží podruhé. Bez mapy se výlet obejde.
+        await Promise.all([
+          api.places.create({
+            tripId: created.id,
+            dayIndex: 0,
+            name: place.name,
+            address: place.address,
+            lat: place.lat,
+            lng: place.lng,
+            countryCode: place.countryCode,
+            city: place.city,
+            source: 'itinerary',
+          }).catch(err => console.error('Starter place failed:', err)),
+          beat(),
+        ]);
+        onStep('map');
+      }
+
+      startWelcome(created.id, 'starter');
+      await beat();
+      setTrips(prev => [...prev, filled || created]);
+      navigate(`/dashboard/trip/${created.id}?from=dashboard`);
+    } catch (err) {
+      // Výlet už existuje, jen se nepovedlo ho vyplnit: pustit uživatele
+      // dovnitř, ať druhým pokusem nevznikne duplikát.
+      if (created) {
+        setTrips(prev => (prev.some(tr => tr.id === created.id) ? prev : [...prev, created]));
+        navigate(`/dashboard/trip/${created.id}?from=dashboard`);
+        return;
+      }
       toast.error(err.message || t('dashboardHome.createError'));
       throw err;
     }
@@ -282,6 +343,7 @@ const DashboardHome = () => {
               trips={trips}
               onDeleteTrip={handleDeleteTrip}
               onOpenCreateModal={() => setIsCreateModalOpen(true)}
+              onCreateStarterTrip={handleCreateStarterTrip}
               error={loadError}
               onRetry={() => fetchTrips()}
             />,

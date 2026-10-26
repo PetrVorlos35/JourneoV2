@@ -12,6 +12,7 @@ const DashboardHome = lazy(() => import('./components/dashboard/DashboardHome'))
 const PrivacyPolicy = lazy(() => import('./components/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('./components/TermsOfService'));
 const PublicTripView = lazy(() => import('./components/public/PublicTripView'));
+const JoinTripView = lazy(() => import('./components/public/JoinTripView'));
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center">
@@ -84,6 +85,7 @@ function App() {
             }
           />
           <Route path="/share/:token" element={<PublicTripView />} />
+          <Route path="/join/:token" element={<JoinTripView />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="*" element={<NotFound />} />

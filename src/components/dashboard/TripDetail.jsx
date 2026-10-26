@@ -16,6 +16,8 @@ import DayStrip from './trip/DayStrip';
 import DayPage from './trip/DayPage';
 import PackingTool from './trip/PackingTool';
 import NotesTool from './trip/NotesTool';
+import WelcomeChecklist from './trip/WelcomeChecklist';
+import { getWelcome, updateWelcome } from '../../utils/onboarding';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import { formatCurrency } from '../../utils/currency';
 
@@ -95,6 +97,8 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   const [editingTitle, setEditingTitle] = useState(false);
 
   const [showShareModal, setShowShareModal] = useState(false);
+  // Uvítací checklist u výletu založeného v onboardingu nebo zkopírovaného.
+  const [welcome, setWelcome] = useState(() => getWelcome(id));
   const [showPdfOptions, setShowPdfOptions] = useState(false);
   const [pdfSections, setPdfSections] = useState(null);
   const [addExpenseRequest, setAddExpenseRequest] = useState(0);
@@ -184,6 +188,10 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   useEffect(() => {
     if (trip) setTripTitle(trip.title);
   }, [trip?.id]);
+
+  useEffect(() => {
+    setWelcome(getWelcome(id));
+  }, [id]);
 
   useEffect(() => {
     if (!trip) return;
@@ -364,6 +372,21 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
 
   const day = dailyPlans[dayIndex];
 
+  const markInvited = () => {
+    updateWelcome(trip.id, { invited: true });
+    setWelcome(w => (w ? { ...w, invited: true } : w));
+  };
+  const dismissWelcome = () => {
+    updateWelcome(trip.id, { dismissed: true });
+    setWelcome(null);
+  };
+  const welcomeTasks = welcome && !isViewer ? [
+    { id: 'created', label: t(welcome.source === 'copy' ? 'onboarding.checklist.copied' : 'onboarding.checklist.created'), done: true },
+    { id: 'packing', label: t('onboarding.checklist.packing'), done: packingList.some(i => i.checked), onClick: () => openView('packing') },
+    { id: 'plan', label: t('onboarding.checklist.plan'), done: dailyPlans.some(d => d.plan?.trim()), onClick: () => goToDay(0) },
+    ...(isOwner ? [{ id: 'invite', label: t('onboarding.checklist.invite'), done: !!welcome.invited, onClick: () => setShowShareModal(true) }] : []),
+  ] : null;
+
   const headerActions = (
     <>
             <div className="hidden sm:flex items-center mr-2">
@@ -409,7 +432,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   return (
     <div className="w-full flex flex-col pb-40 lg:pb-12">
       {ModalPortal}
-      <ShareTripModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} trip={trip} />
+      <ShareTripModal isOpen={showShareModal} onClose={() => setShowShareModal(false)} trip={trip} onInvited={markInvited} />
       <TripPdfOptionsModal
         isOpen={showPdfOptions}
         onClose={() => setShowPdfOptions(false)}
@@ -503,6 +526,17 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           </p>
         )}
       </header>
+
+      <AnimatePresence initial={false}>
+        {welcomeTasks && (
+          <WelcomeChecklist
+            key="welcome"
+            title={t(welcome.source === 'copy' ? 'onboarding.checklist.titleCopy' : 'onboarding.checklist.title')}
+            tasks={welcomeTasks}
+            onDismiss={dismissWelcome}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ── Pás dnů ── */}
       <div className="mb-4 sm:mb-5 lg:pr-[176px]">

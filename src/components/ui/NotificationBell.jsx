@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, UserPlus, UserCheck, Heart, Check, X, ArrowRightLeft } from 'lucide-react';
+import { Bell, UserPlus, UserCheck, Heart, Check, X, ArrowRightLeft, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -12,6 +12,7 @@ const notifIcons = {
   FRIEND_ACCEPTED: UserCheck,
   TRIP_VOTED: Heart,
   TRIP_TRANSFERRED: ArrowRightLeft,
+  TRIP_JOINED: Users,
 };
 
 // `placement="sidebar"`: zvonek sedí v levém panelu, panel notifikací se
@@ -191,7 +192,7 @@ const NotificationBell = ({ placement = 'right' }) => {
                         <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                           n.type === 'FRIEND_REQUEST'
                             ? 'bg-blue-100 dark:bg-blue-500/10 text-accent'
-                            : n.type === 'FRIEND_ACCEPTED'
+                            : n.type === 'FRIEND_ACCEPTED' || n.type === 'TRIP_JOINED'
                               ? 'bg-green-100 dark:bg-green-500/10 text-green-600 dark:text-green-400'
                               : n.type === 'TRIP_TRANSFERRED'
                                 ? 'bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400'
@@ -210,6 +211,17 @@ const NotificationBell = ({ placement = 'right' }) => {
                               className={`text-left text-sm leading-tight break-words hover:underline cursor-pointer ${!n.isRead ? 'font-bold text-primary' : 'font-medium text-gray-600 dark:text-gray-400'}`}
                             >
                               {t('notifications.messages.friendRequest', { name: n.actorName || '?' })}
+                            </button>
+                          ) : n.type === 'TRIP_JOINED' && n.referenceId ? (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsOpen(false);
+                                navigate(`/dashboard/trip/${n.referenceId}`);
+                              }}
+                              className={`text-left text-sm leading-tight break-words hover:underline cursor-pointer ${!n.isRead ? 'font-bold text-primary' : 'font-medium text-gray-600 dark:text-gray-400'}`}
+                            >
+                              {t('notifications.messages.tripJoined', { name: n.actorName || '?', trip: n.tripTitle || '?' })}
                             </button>
                           ) : (
                             <p className={`text-sm leading-tight break-words ${!n.isRead ? 'font-bold text-primary' : 'font-medium text-gray-600 dark:text-gray-400'}`}>

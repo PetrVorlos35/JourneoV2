@@ -1,10 +1,13 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   MapPin, Calendar, PackageOpen, Link as LinkIcon,
   ExternalLink, Heart, Check, AlertCircle,
-  Layout, Info, ArrowRight, Sun, Moon
+  Layout, Info, ArrowRight, Sun, Moon, CopyPlus, Loader2
 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
+import { startWelcome } from '../../utils/onboarding';
 import { format, eachDayOfInterval } from 'date-fns';
 import { cs, enUS } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +31,49 @@ const PublicTripView = () => {
   const [isDark, setIsDark] = useState(() => localStorage.getItem('ptv-theme') !== 'light');
 
   const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { user, loading: authLoading } = useAuth();
+  const [copying, setCopying] = useState(false);
+  const autoCopyRef = useRef(false);
+
+  // „Zkopírovat si výlet“: bez účtu přes registraci a zpět s ?copy=1, které
+  // kopii dokončí samo. Hotová kopie se pamatuje v sessionStorage, aby obnovení
+  // stránky s ?copy=1 nezaložilo druhou.
+  const copyKey = `journeo_copied_${token}`;
+  const copyTrip = async () => {
+    if (!user) {
+      navigate('/auth', { state: { from: `/share/${token}?copy=1` } });
+      return;
+    }
+    let existing = null;
+    try { existing = sessionStorage.getItem(copyKey); } catch { /* bez úložiště */ }
+    if (existing) {
+      navigate(`/dashboard/trip/${existing}`);
+      return;
+    }
+    setCopying(true);
+    try {
+      const { trip: copy } = await api.trips.copyFromShare(token);
+      try { sessionStorage.setItem(copyKey, copy.id); } catch { /* bez úložiště */ }
+      startWelcome(copy.id, 'copy');
+      toast.success(t('publicTrip.copy.done'));
+      navigate(`/dashboard/trip/${copy.id}`);
+    } catch (err) {
+      toast.error(err.message || t('publicTrip.copy.error'));
+      setCopying(false);
+    }
+  };
+
+  useEffect(() => {
+    if (autoCopyRef.current || authLoading || !user || !trip) return;
+    if (searchParams.get('copy') !== '1') return;
+    autoCopyRef.current = true;
+    copyTrip();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, user, trip, searchParams]);
+
+  const copyBusy = copying || (searchParams.get('copy') === '1' && !!user);
 
   const toggleTheme = () => {
     const next = !isDark;
@@ -209,6 +255,17 @@ const PublicTripView = () => {
                   <Calendar size={14} strokeWidth={2.5} />
                   {format(new Date(trip.startDate), 'dd.MM.yyyy')} — {format(new Date(trip.endDate), 'dd.MM.yyyy')}
                 </p>
+                <div className="mt-5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                  <button
+                    onClick={copyTrip}
+                    disabled={copyBusy}
+                    className="inline-flex items-center justify-center gap-2 rounded-2xl px-5 min-h-[48px] bg-accent text-white text-[15px] font-semibold hover:bg-accent-hover shadow-[0_6px_16px_-8px_rgba(37,99,235,0.7)] active:scale-[0.97] transition-all cursor-pointer disabled:opacity-80 disabled:cursor-wait"
+                  >
+                    {copyBusy ? <Loader2 size={17} className="animate-spin" aria-hidden="true" /> : <CopyPlus size={17} strokeWidth={2.25} aria-hidden="true" />}
+                    {copyBusy ? t('publicTrip.copy.busy') : t('publicTrip.copy.cta')}
+                  </button>
+                  <p className="text-[12px] font-medium text-gray-500 dark:text-white/40">{t('publicTrip.copy.hint')}</p>
+                </div>
               </div>
               <div className="flex items-center gap-1.5 text-gray-300 dark:text-white/25 select-none shrink-0 mt-1">
                 <Heart size={15} strokeWidth={2} />
@@ -474,13 +531,14 @@ const PublicTripView = () => {
                 <h3 className="text-lg font-bold text-primary tracking-tight mb-1">{t('publicTrip.cta.title')}</h3>
                 <p className="text-gray-400 dark:text-white/40 text-[14px]">{t('publicTrip.cta.desc')}</p>
               </div>
-              <Link
-                to="/auth"
-                className="shrink-0 inline-flex items-center gap-2 px-6 py-3.5 bg-ink hover:bg-gray-700 dark:hover:bg-white/90 active:scale-95 text-white dark:text-black font-bold rounded-2xl transition-all duration-200 text-[14px] cursor-pointer whitespace-nowrap"
+              <button
+                onClick={copyTrip}
+                disabled={copyBusy}
+                className="shrink-0 inline-flex items-center gap-2 px-6 py-3.5 bg-ink hover:bg-gray-700 dark:hover:bg-white/90 active:scale-95 text-white dark:text-black font-bold rounded-2xl transition-all duration-200 text-[14px] cursor-pointer whitespace-nowrap disabled:opacity-80 disabled:cursor-wait"
               >
-                {t('publicTrip.cta.button')}
+                {t('publicTrip.copy.cta')}
                 <ArrowRight size={16} strokeWidth={2.5} />
-              </Link>
+              </button>
             </div>
             <p className="text-[11px] text-gray-300 dark:text-white/20 font-medium mt-8">
               © {new Date().getFullYear()} Journeo · {t('publicTrip.footer')}

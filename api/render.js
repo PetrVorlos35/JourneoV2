@@ -49,6 +49,29 @@ async function resolveMeta(pathname, origin, lang) {
     return null;
   }
 
+  const joinMatch = pathname.match(/^\/join\/([a-f0-9]{64})/i);
+  if (joinMatch) {
+    const token = joinMatch[1];
+    try {
+      const data = await (await fetch(`${origin}/api/public/invite/${token}`)).json();
+      const trip = data?.trip;
+      if (trip?.title) {
+        const ownerName = `${data.owner?.first_name || ''} ${data.owner?.last_name || ''}`.trim();
+        const range = formatDateRange(trip.startDate, trip.endDate, lang);
+        return {
+          title: en
+            ? `${ownerName || 'A friend'} invites you to “${trip.title}” — Journeo`
+            : `${ownerName || 'Kamarád'} tě zve na výlet „${trip.title}" — Journeo`,
+          description: en
+            ? `Join the trip${range ? ` (${range})` : ''} and plan it together — day plan, map, packing list and shared budget in one place.`
+            : `Připoj se k výletu${range ? ` (${range})` : ''} a plánujte ho spolu — program po dnech, mapa, balení i společný rozpočet na jednom místě.`,
+          image: `${origin}/api/og/invite?token=${token}&lang=${lang}`,
+        };
+      }
+    } catch { /* fall back */ }
+    return null;
+  }
+
   const inviteMatch = pathname.match(/\/add-friend\/([a-f0-9]{16,64})/i);
   if (inviteMatch) {
     const token = inviteMatch[1];

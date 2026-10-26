@@ -68,6 +68,68 @@ router.get('/trips/:token', async (req, res) => {
   }
 });
 
+// ── GET /api/public/invite/:token ───────────────────────────
+// Preview of a trip invite for someone who may not have an account yet.
+// The trip itself isn't public, so this shows only its shape — title, dates,
+// who's going (first names) and how much is planned — never the contents.
+router.get('/invite/:token', async (req, res) => {
+  try {
+    const { token } = req.params;
+    if (!token || token.length !== 64) {
+      return res.status(404).json({ error: 'Pozvánka není platná.' });
+    }
+
+    const [[trip]] = await pool.query(
+      `SELECT t.id, t.title,
+         DATE_FORMAT(t.start_date, '%Y-%m-%d') AS startDate,
+         DATE_FORMAT(t.end_date, '%Y-%m-%d') AS endDate,
+         t.user_id AS ownerId
+       FROM trips t
+       WHERE t.invite_token = ? AND t.deleted_at IS NULL`,
+      [token]
+    );
+
+    if (!trip) return res.status(404).json({ error: 'Pozvánka není platná nebo ji vlastník zrušil.' });
+
+    const [[[owner]], [members], [[counts]]] = await Promise.all([
+      pool.query('SELECT first_name, last_name, avatar_url FROM users WHERE id = ?', [trip.ownerId]),
+      pool.query(
+        `SELECT u.first_name, u.avatar_url
+         FROM trip_collaborators tc JOIN users u ON u.id = tc.user_id
+         WHERE tc.trip_id = ? ORDER BY tc.created_at ASC`,
+        [trip.id]
+      ),
+      pool.query(
+        `SELECT
+           (SELECT COUNT(*) FROM trip_places WHERE trip_id = ?) AS places,
+           (SELECT COUNT(*) FROM trip_packing_items WHERE trip_id = ?) AS packing,
+           (SELECT COUNT(*) FROM trip_activities WHERE trip_id = ? AND plan != '') AS plannedDays,
+           (SELECT COUNT(*) FROM trip_expenses WHERE trip_id = ?) AS expenses`,
+        [trip.id, trip.id, trip.id, trip.id]
+      ),
+    ]);
+
+    res.json({
+      trip: {
+        title: trip.title,
+        startDate: trip.startDate,
+        endDate: trip.endDate,
+      },
+      owner: owner || null,
+      members,
+      counts: {
+        places: parseInt(counts.places),
+        packing: parseInt(counts.packing),
+        plannedDays: parseInt(counts.plannedDays),
+        expenses: parseInt(counts.expenses),
+      },
+    });
+  } catch (err) {
+    console.error('Public invite error:', err);
+    res.status(500).json({ error: 'Chyba serveru.' });
+  }
+});
+
 // ── GET /api/public/profile/:token ──────────────────────────
 // Minimal public profile data for share/OG previews — no auth required
 router.get('/profile/:token', async (req, res) => {

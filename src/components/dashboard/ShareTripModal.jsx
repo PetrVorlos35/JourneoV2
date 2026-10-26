@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Users, Search, Trash2, Shield, Eye, Loader2, ChevronDown, Link as LinkIcon, Copy, Check, RefreshCw } from 'lucide-react';
+import { X, Users, Search, Trash2, Shield, Eye, Loader2, ChevronDown, Link as LinkIcon, Copy, Check, RefreshCw, UserPlus, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
@@ -49,7 +49,7 @@ const RoleSelect = ({ value, onChange, disabled, t, fullWidthMobile = false }) =
   </div>
 );
 
-const ShareTripModal = ({ isOpen, onClose, trip }) => {
+const ShareTripModal = ({ isOpen, onClose, trip, onInvited }) => {
   const { t } = useTranslation();
   const [friends, setFriends] = useState([]);
   const [collaborators, setCollaborators] = useState([]);
@@ -64,6 +64,9 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
   const [isRevokingLink, setIsRevokingLink] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [inviteToken, setInviteToken] = useState(null);
+  const [inviteState, setInviteState] = useState('idle'); // idle | loading | error
+  const [inviteCopied, setInviteCopied] = useState(false);
 
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -84,6 +87,27 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
       setIsLoadingData(false);
     }
   }, [trip?.id]);
+
+  // Zvací odkaz se načte (případně založí) hned při otevření: pozvat partu
+  // je hlavní důvod, proč sem lidi chodí, tak ať je odkaz rovnou po ruce.
+  const loadInvite = useCallback(async () => {
+    if (!trip?.id) return;
+    setInviteState('loading');
+    try {
+      const { token } = await api.trips.getInviteLink(trip.id);
+      setInviteToken(token);
+      setInviteState('idle');
+    } catch {
+      setInviteState('error');
+    }
+  }, [trip?.id]);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadInvite();
+      setInviteCopied(false);
+    }
+  }, [isOpen, loadInvite]);
 
   useEffect(() => {
     if (isOpen) {
@@ -133,6 +157,7 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
       setCollaborators(updated);
       setSearchQuery('');
       setShowDropdown(false);
+      onInvited?.();
       toast.success(t('shareModal.addedSuccess', { name: `${friend.first_name} ${friend.last_name}` }));
     } catch (err) {
       toast.error(err.message);
@@ -163,6 +188,50 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
       toast.error(err.message);
     } finally {
       setRemovingId(null);
+    }
+  };
+
+  const inviteUrl = inviteToken ? `${window.location.origin}/join/${inviteToken}` : null;
+  const canNativeShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
+
+  const handleCopyInvite = async () => {
+    if (!inviteUrl) return;
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+    } catch {
+      toast.error(t('shareModal.invite.copyError'));
+      return;
+    }
+    setInviteCopied(true);
+    onInvited?.();
+    toast.success(t('shareModal.linkCopied'));
+    setTimeout(() => setInviteCopied(false), 2000);
+  };
+
+  const handleNativeShare = async () => {
+    if (!inviteUrl) return;
+    try {
+      await navigator.share({
+        title: trip?.title,
+        text: t('shareModal.invite.shareText', { trip: trip?.title }),
+        url: inviteUrl,
+      });
+      onInvited?.();
+    } catch {
+      // Zavřený systémový dialog není chyba.
+    }
+  };
+
+  const handleRevokeInvite = async () => {
+    setInviteState('loading');
+    try {
+      await api.trips.revokeInviteLink(trip.id);
+      setInviteToken(null);
+      setInviteState('idle');
+      toast.success(t('shareModal.invite.revoked'));
+    } catch (err) {
+      setInviteState('idle');
+      toast.error(err.message);
     }
   };
 
@@ -248,6 +317,64 @@ const ShareTripModal = ({ isOpen, onClose, trip }) => {
 
             {/* Scrollable body */}
             <div className="flex-1 overflow-y-auto custom-scrollbar">
+
+              {/* Invite the group — joins as editor */}
+              <div className="px-6 py-5 border-b border-subtle">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <UserPlus size={13} className="text-gray-400 dark:text-white/50" strokeWidth={2.5} />
+                  <p className="text-gray-500 dark:text-white/50 text-[12px] font-semibold">
+                    {t('shareModal.invite.section')}
+                  </p>
+                </div>
+                <p className="text-secondary text-[13px] font-medium mb-3">{t('shareModal.invite.hint')}</p>
+
+                {inviteState === 'loading' ? (
+                  <div className="flex items-center gap-2 h-11 text-muted text-[13px] font-medium">
+                    <Loader2 size={14} className="animate-spin" /> {t('shareModal.invite.loading')}
+                  </div>
+                ) : inviteUrl ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 min-w-0 bg-field border border-default rounded-2xl px-3 sm:px-4 py-1.5 sm:py-2.5">
+                      <span className="flex-1 min-w-0 text-[12px] text-gray-600 dark:text-white/60 font-mono truncate select-all">
+                        {inviteUrl}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={handleCopyInvite}
+                        className="inline-flex items-center gap-2 px-4 min-h-[44px] rounded-2xl bg-accent text-white text-[14px] font-semibold hover:bg-accent-hover shadow-[0_6px_16px_-8px_rgba(37,99,235,0.7)] active:scale-95 transition-all cursor-pointer"
+                      >
+                        {inviteCopied ? <Check size={15} strokeWidth={2.5} /> : <Copy size={15} strokeWidth={2.25} />}
+                        {t('shareModal.invite.copy')}
+                      </button>
+                      {canNativeShare && (
+                        <button
+                          onClick={handleNativeShare}
+                          className="inline-flex items-center gap-2 px-4 min-h-[44px] rounded-2xl bg-subtle border border-default text-gray-800 dark:text-white/80 text-[14px] font-semibold hover:bg-gray-200 dark:hover:bg-white/15 active:scale-95 transition-all cursor-pointer"
+                        >
+                          <Share2 size={15} strokeWidth={2.25} />
+                          {t('shareModal.invite.share')}
+                        </button>
+                      )}
+                    </div>
+                    <button
+                      onClick={handleRevokeInvite}
+                      className="flex items-center gap-2 min-h-[44px] sm:min-h-0 sm:pt-1 text-[11px] font-bold text-red-500/80 hover:text-danger dark:text-red-400/70 transition-colors cursor-pointer"
+                    >
+                      <X size={12} strokeWidth={2.5} />
+                      {t('shareModal.invite.revoke')}
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={loadInvite}
+                    className="flex items-center gap-2 px-4 py-3 sm:py-2.5 min-h-[44px] sm:min-h-0 bg-subtle hover:bg-gray-200 border border-default text-gray-800 hover:text-primary dark:hover:bg-white/15 rounded-2xl text-[13px] font-bold dark:text-white/80 transition-all cursor-pointer"
+                  >
+                    {inviteState === 'error' ? <RefreshCw size={14} strokeWidth={2} /> : <UserPlus size={14} strokeWidth={2} />}
+                    {inviteState === 'error' ? t('shareModal.invite.retry') : t('shareModal.invite.create')}
+                  </button>
+                )}
+              </div>
 
               {/* Share via link */}
               <div className="px-6 py-5 border-b border-subtle">

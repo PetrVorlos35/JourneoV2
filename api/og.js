@@ -114,6 +114,8 @@ export default async function handler(request) {
     ? 'Your personal travel journal'
     : 'Váš osobní cestovatelský deník';
   let body;
+  // Text, který se kreslí a není v titleText/subtitle (font se stahuje jen s použitými znaky).
+  let extraGlyphs = '';
 
   try {
     if (type === 'trip' && token) {
@@ -142,6 +144,38 @@ export default async function handler(request) {
               : null
           ),
         ], lang.startsWith('en') ? 'View trip' : 'Zobrazit výlet');
+      }
+    } else if (type === 'invite' && token) {
+      const data = await (await fetch(`${origin}/api/public/invite/${token}`)).json();
+      const trip = data?.trip;
+      if (trip) {
+        titleText = trip.title || titleText;
+        const en = lang.startsWith('en');
+        const ownerName = data.owner?.first_name || '';
+        extraGlyphs = ownerName;
+        const range = formatDateRange(trip.startDate, trip.endDate, lang);
+        body = shell([
+          brandRow(origin),
+          h(
+            'div',
+            { style: { display: 'flex', flexDirection: 'column', marginTop: 'auto', gap: '24px' } },
+            h(
+              'div',
+              { style: { fontSize: 26, fontWeight: 600, color: ACCENT, letterSpacing: '0.06em', textTransform: 'uppercase' } },
+              ownerName
+                ? (en ? `${ownerName} invites you` : `${ownerName} tě zve`)
+                : (en ? 'Trip invite' : 'Pozvánka na výlet')
+            ),
+            h(
+              'div',
+              { style: { fontSize: 76, fontWeight: 700, color: FG, lineHeight: 1.05, letterSpacing: '-0.03em', maxWidth: '1000px' } },
+              titleText
+            ),
+            range
+              ? h('div', { style: { fontSize: 34, color: MUTED } }, range)
+              : null
+          ),
+        ], en ? 'Join the trip' : 'Připojit se');
       }
     } else if (type === 'profile' && token) {
       const user = await (await fetch(`${origin}/api/public/profile/${token}`)).json();
@@ -234,8 +268,8 @@ export default async function handler(request) {
   }
 
   const glyphText =
-    `Journeo Výlet Trip na on ${titleText} ${subtitle} 0123456789–→ ` +
-    `Zobrazit výlet Přidat mezi přátele Začít plánovat View trip Add friend Start planning ` +
+    `Journeo Výlet Trip na on ${titleText} ${subtitle} ${extraGlyphs} 0123456789–→ ` +
+    `Zobrazit výlet Přidat mezi přátele Začít plánovat View trip Add friend Start planning Připojit se tě zve Pozvánka na výlet Join the trip invites you Trip invite ` +
     `Plánujte, zaznamenávejte a sdílejte svá dobrodružství. Plan, journal and share your adventures.`;
   const [regular, bold] = await Promise.all([
     loadFont('Inter', 400, glyphText),

@@ -1,5 +1,6 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import {
   ArrowRight, Home, Map, BarChart2, Users, Wallet, Plane, Plus, Mail,
   CalendarDays, CheckSquare, FileText, MapPin, Check, ChevronDown, Sun,
@@ -31,19 +32,53 @@ const Reveal = ({ children, delay = 0, className = '' }) => {
   );
 };
 
-const PrimaryCta = ({ children, className = '' }) => (
-  <Link
-    to="/auth"
-    className={`group inline-flex items-center justify-center gap-2 bg-accent text-white font-semibold rounded-full px-8 py-4 shadow-lg shadow-blue-600/25 hover:bg-accent-hover active:scale-[0.98] transition-all duration-300 ${className}`}
-  >
-    {children}
-    <ArrowRight
-      size={17}
-      strokeWidth={2.5}
-      className="transition-transform duration-300 group-hover:translate-x-0.5 motion-reduce:transition-none"
-    />
-  </Link>
-);
+// Hero začíná otázkou místo tlačítka: napsaná destinace projde registrací
+// (/dashboard?plan=…) a onboarding z ní rovnou založí výlet.
+const HeroPlanForm = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [destination, setDestination] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const plan = destination.trim().slice(0, 255);
+    const target = plan ? `/dashboard?plan=${encodeURIComponent(plan)}` : '/dashboard';
+    if (user) navigate(target);
+    else navigate('/auth', { state: { from: target } });
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="w-full max-w-md flex flex-col sm:flex-row items-stretch gap-2 sm:gap-0 sm:p-1.5 sm:bg-white sm:border sm:border-gray-200 sm:rounded-full sm:shadow-lg sm:shadow-blue-600/10 focus-within:sm:border-blue-300 transition-colors"
+    >
+      <label htmlFor="hero-destination" className="sr-only">{t('landing.hero.planLabel')}</label>
+      <input
+        id="hero-destination"
+        type="text"
+        value={destination}
+        onChange={(e) => setDestination(e.target.value)}
+        placeholder={t('landing.hero.planPlaceholder')}
+        maxLength={255}
+        autoComplete="off"
+        enterKeyHint="go"
+        className="flex-1 min-w-0 h-14 sm:h-auto px-6 sm:px-5 rounded-full sm:rounded-none bg-white sm:bg-transparent border border-gray-200 sm:border-0 text-[16px] font-medium text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-blue-300"
+      />
+      <button
+        type="submit"
+        className="group inline-flex items-center justify-center gap-2 bg-accent text-white font-semibold rounded-full px-7 py-4 sm:py-3.5 shadow-lg shadow-blue-600/25 sm:shadow-none hover:bg-accent-hover active:scale-[0.98] transition-all duration-300 cursor-pointer"
+      >
+        {t('landing.hero.planCta')}
+        <ArrowRight
+          size={17}
+          strokeWidth={2.5}
+          className="transition-transform duration-300 group-hover:translate-x-0.5 motion-reduce:transition-none"
+        />
+      </button>
+    </form>
+  );
+};
 
 // ── Hand-drawn margin doodles, desktop only ──────────────────────────────────
 // Sketches scattered through the page margins, like notes in a travel journal.
@@ -1013,17 +1048,14 @@ const LandingPage = () => {
           </motion.p>
 
           <motion.div {...heroEntrance(0.4)} className="mt-8 sm:mt-10 flex flex-col items-center gap-4">
-            <div className="flex flex-col sm:flex-row items-center gap-3">
-              <PrimaryCta>{t('landing.hero.cta')}</PrimaryCta>
-              <a
-                href="#features"
-                onClick={scrollToId('features')}
-                className="inline-flex items-center justify-center font-semibold text-gray-700 rounded-full px-7 py-4 border border-gray-200 bg-white/60 hover:bg-white hover:border-gray-300 transition-colors duration-300"
-              >
+            <HeroPlanForm />
+            <p className="text-[13px] font-medium text-gray-500">
+              {t('landing.hero.microcopy')}
+              <span className="mx-2 text-gray-300" aria-hidden="true">·</span>
+              <a href="#features" onClick={scrollToId('features')} className="font-semibold text-gray-700 hover:text-gray-900 underline-offset-4 hover:underline">
                 {t('landing.hero.secondary')}
               </a>
-            </div>
-            <p className="text-[13px] font-medium text-gray-500">{t('landing.hero.microcopy')}</p>
+            </p>
           </motion.div>
         </section>
 

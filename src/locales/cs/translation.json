@@ -105,7 +105,10 @@
       "secondary": "Jak to funguje",
       "microcopy": "Zdarma · Bez platební karty",
       "note": "vaše další cesta, přehledně",
-      "newBadge": "Novinka ve"
+      "newBadge": "Novinka ve",
+      "planLabel": "Kam jedeš?",
+      "planPlaceholder": "Kam jedeš? Třeba Lisabon",
+      "planCta": "Naplánovat"
     },
     "float": {
       "packing": {
@@ -705,7 +708,7 @@
   },
   "shareModal": {
     "title": "Sdílet výlet",
-    "linkSection": "Sdílet odkazem",
+    "linkSection": "Odkaz jen pro čtení",
     "linkEnable": "Vytvořit odkaz",
     "linkDisable": "Zrušit odkaz",
     "linkCopy": "Kopírovat odkaz",
@@ -725,6 +728,19 @@
       "owner": "Vlastník",
       "editor": "Editor",
       "viewer": "Prohlížeč"
+    },
+    "invite": {
+      "section": "Pozvat parťáky",
+      "hint": "Kdo otevře odkaz, může výlet upravovat s tebou. Účet si založí cestou.",
+      "loading": "Připravuju odkaz…",
+      "copy": "Zkopírovat pozvánku",
+      "share": "Sdílet",
+      "revoke": "Zrušit pozvánku",
+      "revoked": "Pozvánka je zrušená. Kdo už se připojil, zůstává.",
+      "create": "Vytvořit pozvánku",
+      "retry": "Zkusit znovu",
+      "copyError": "Zkopírovat se nepovedlo.",
+      "shareText": "Pojď se mnou plánovat výlet {{trip}} v Journeu"
     }
   },
   "publicTrip": {
@@ -756,11 +772,18 @@
       "signup": "Začít zdarma"
     },
     "cta": {
-      "title": "Plánuj výlety s Journeo",
-      "desc": "Itineráře, rozpočet a sdílení na jednom místě. Zdarma.",
+      "title": "Líbí se ti tenhle plán?",
+      "desc": "Zkopíruj si ho a uprav podle sebe. Journeo je zdarma.",
       "button": "Vytvořit účet zdarma"
     },
-    "footer": "Výlet sdílený přes Journeo"
+    "footer": "Výlet sdílený přes Journeo",
+    "copy": {
+      "cta": "Zkopírovat si výlet",
+      "busy": "Kopíruju…",
+      "hint": "Program, balení a místa se ti zkopírují do vlastního účtu.",
+      "done": "Výlet je zkopírovaný. Uprav si ho podle sebe.",
+      "error": "Zkopírovat výlet se nepovedlo."
+    }
   },
   "tripDetail": {
     "backToDashboard": "Zpět na přehled",
@@ -1473,7 +1496,8 @@
     "messages": {
       "friendRequest": "{{name}} vám poslal/a žádost o přátelství.",
       "friendAccepted": "{{name}} přijal/a vaši žádost o přátelství.",
-      "tripTransferred": "{{name}} smazal/a svůj účet a výlet „{{trip}}“ teď patří vám."
+      "tripTransferred": "{{name}} smazal/a svůj účet a výlet „{{trip}}“ teď patří vám.",
+      "tripJoined": "{{name}} se připojil/a k výletu „{{trip}}“."
     }
   },
   "friendProfile": {
@@ -1917,5 +1941,143 @@
     "save": "Uložit volbu",
     "customize": "Nastavení",
     "openSettings": "Změnit nastavení cookies"
+  },
+  "onboarding": {
+    "greeting": "Vítej v Journeu",
+    "greetingName": "Vítej v Journeu, {{name}}",
+    "title": "Kam to bude?",
+    "subtitle": "Napiš, kam jedeš, a za minutu máš výlet připravený: program po dnech, seznam na balení i místo na mapě.",
+    "destinationLabel": "Kam jedeš",
+    "destinationPlaceholder": "Třeba Lisabon, Krkonoše nebo Chorvatsko",
+    "whenLabel": "Kdy?",
+    "dates": {
+      "thisWeekend": "Tento víkend",
+      "nextWeekend": "Příští víkend",
+      "inMonth": "Za měsíc na týden",
+      "custom": "Vlastní termín",
+      "from": "Od",
+      "to": "Do",
+      "tooLong": "Výlet může mít nejvýš {{max}} dní."
+    },
+    "dayCount_one": "{{count}} den",
+    "dayCount_few": "{{count}} dny",
+    "dayCount_other": "{{count}} dní",
+    "typeLabel": "Jaký to bude výlet?",
+    "optional": "nepovinné, podle toho ti předvyplníme balení",
+    "types": {
+      "city": "Město",
+      "mountains": "Hory",
+      "sea": "Moře",
+      "roadtrip": "Roadtrip"
+    },
+    "submit": "Naplánovat výlet",
+    "changeLater": "Všechno půjde kdykoli změnit.",
+    "error": "Nepovedlo se to, zkus to prosím znovu.",
+    "progress": {
+      "title": "Chystám výlet: {{place}}",
+      "trip": "Zakládám výlet",
+      "days_one": "Připravuju program na {{count}} den",
+      "days_few": "Připravuju program na {{count}} dny",
+      "days_other": "Připravuju program na {{count}} dní",
+      "packing": "Předvyplňuju seznam na balení",
+      "map": "Přidávám {{place}} na mapu"
+    },
+    "days": {
+      "arrival": "Příjezd",
+      "departure": "Cesta domů",
+      "day": "Den {{n}}"
+    },
+    "packing": {
+      "base": [
+        "Občanka nebo pas",
+        "Platební karta a trocha hotovosti",
+        "Nabíječka a powerbanka",
+        "Léky a náplasti",
+        "Kartáček a pasta",
+        "Spodní prádlo a ponožky",
+        "Pohodlné boty"
+      ],
+      "city": [
+        "Jízdenky nebo rezervace",
+        "Lehká bunda",
+        "Malý batoh na den"
+      ],
+      "mountains": [
+        "Turistické boty",
+        "Bunda do deště",
+        "Fleecová mikina",
+        "Čepice a rukavice",
+        "Láhev na vodu",
+        "Mapa nebo offline mapy"
+      ],
+      "sea": [
+        "Plavky",
+        "Opalovací krém",
+        "Sluneční brýle",
+        "Ručník na pláž",
+        "Žabky",
+        "Pokrývka hlavy"
+      ],
+      "roadtrip": [
+        "Řidičák a doklady od auta",
+        "Dálniční známky",
+        "Nabíječka do auta",
+        "Svačiny a voda na cestu",
+        "Playlist na cestu"
+      ]
+    },
+    "checklist": {
+      "title": "Výlet je připravený. Ještě pár rychlých kroků",
+      "titleCopy": "Výlet je tvůj. Uprav si ho podle sebe",
+      "progress": "{{done}} ze {{total}} hotovo",
+      "created": "Výlet je založený",
+      "copied": "Výlet je zkopírovaný",
+      "packing": "Odškrtni, co už máš sbalené",
+      "plan": "Napiš, co chceš dělat první den",
+      "invite": "Pozvi parťáky",
+      "done": "hotovo",
+      "doneTitle": "Hotovo, máš to pohromadě",
+      "doneSubtitle": "Program, balení i parta jsou na jednom místě. Další dny dopiš, až budeš chtít."
+    }
+  },
+  "joinTrip": {
+    "invitedBy": "{{name}} tě zve na výlet",
+    "someone": "Kamarád",
+    "days_one": "{{count}} den",
+    "days_few": "{{count}} dny",
+    "days_other": "{{count}} dní",
+    "countdown_one": "za {{count}} den",
+    "countdown_few": "za {{count}} dny",
+    "countdown_other": "za {{count}} dní",
+    "crew_one": "{{name}} a {{count}} další už jsou v partě",
+    "crew_few": "{{name}} a {{count}} další už jsou v partě",
+    "crew_other": "{{name}} a {{count}} dalších už jsou v partě",
+    "crewSolo": "Zatím jen {{name}}. Buď první, kdo se přidá.",
+    "stats": {
+      "plannedDays_one": "{{count}} den s programem",
+      "plannedDays_few": "{{count}} dny s programem",
+      "plannedDays_other": "{{count}} dní s programem",
+      "places_one": "{{count}} místo na mapě",
+      "places_few": "{{count}} místa na mapě",
+      "places_other": "{{count}} míst na mapě",
+      "packing_one": "{{count}} věc na balení",
+      "packing_few": "{{count}} věci na balení",
+      "packing_other": "{{count}} věcí na balení",
+      "expenses_one": "{{count}} výdaj",
+      "expenses_few": "{{count}} výdaje",
+      "expenses_other": "{{count}} výdajů"
+    },
+    "pitch": "Plánujte spolu: program po dnech, mapa míst, kdo co veze a rozpočet, který sám spočítá, kdo komu kolik dluží.",
+    "cta": "Připojit se k výletu",
+    "joining": "Připojuju…",
+    "microcopy": "Zdarma. Účet si založíš za pár vteřin.",
+    "signedInAs": "Účet: {{email}}",
+    "joined": "Jsi v partě! Výlet „{{trip}}“ teď plánujete spolu.",
+    "error": "Připojit se k výletu se nepovedlo.",
+    "invalid": {
+      "title": "Pozvánka už neplatí",
+      "desc": "Odkaz je neplatný, nebo ho vlastník výletu zrušil. Požádej o nový.",
+      "cta": "Přejít na Journeo"
+    }
   }
 }

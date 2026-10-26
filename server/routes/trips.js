@@ -1002,4 +1002,174 @@ router.delete('/:id/share-link', async (req, res) => {
   }
 });
 
+// ── POST /api/trips/:id/invite-link ────────────────────────
+// Owner gets the trip's invite link (/join/:token), creating it on first use.
+// Whoever accepts it joins as an editor — unlike the read-only share link.
+router.post('/:id/invite-link', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const tripId = parseInt(req.params.id);
+    const role = await getTripRole(tripId, userId);
+    if (!role) return res.status(404).json({ error: 'Výlet nenalezen.' });
+    if (role !== 'owner') return res.status(403).json({ error: 'Pozvánku může vytvořit jen vlastník.' });
+
+    const [[row]] = await pool.query('SELECT invite_token AS token FROM trips WHERE id = ?', [tripId]);
+    if (row?.token) return res.json({ token: row.token });
+
+    const token = randomBytes(32).toString('hex');
+    await pool.query('UPDATE trips SET invite_token = ? WHERE id = ?', [token, tripId]);
+    res.json({ token });
+  } catch (err) {
+    console.error('Generate invite link error:', err);
+    res.status(500).json({ error: 'Chyba při vytváření pozvánky.' });
+  }
+});
+
+// ── DELETE /api/trips/:id/invite-link ──────────────────────
+// Owner revokes the invite link. People who already joined stay.
+router.delete('/:id/invite-link', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const tripId = parseInt(req.params.id);
+    const role = await getTripRole(tripId, userId);
+    if (!role) return res.status(404).json({ error: 'Výlet nenalezen.' });
+    if (role !== 'owner') return res.status(403).json({ error: 'Pozvánku může zrušit jen vlastník.' });
+
+    await pool.query('UPDATE trips SET invite_token = NULL WHERE id = ?', [tripId]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Revoke invite link error:', err);
+    res.status(500).json({ error: 'Chyba při rušení pozvánky.' });
+  }
+});
+
+// ── POST /api/trips/join/:token ────────────────────────────
+// Accept an invite link: the caller becomes an editor of the trip. Someone
+// who's already in keeps their role (the owner may have set them to viewer
+// on purpose), so accepting twice is harmless.
+router.post('/join/:token', async (req, res) => {
+  try {
+    const userId = req.userId;
+    const { token } = req.params;
+    if (!token || token.length !== 64) return res.status(404).json({ error: 'Pozvánka není platná.' });
+
+    const [[trip]] = await pool.query(
+      'SELECT id, title, user_id AS ownerId FROM trips WHERE invite_token = ? AND deleted_at IS NULL',
+      [token]
+    );
+    if (!trip) return res.status(404).json({ error: 'Pozvánka není platná nebo ji vlastník zrušil.' });
+
+    if (trip.ownerId === userId) return res.json({ tripId: trip.id.toString(), status: 'owner' });
+
+    const [result] = await pool.query(
+      `INSERT IGNORE INTO trip_collaborators (trip_id, user_id, role) VALUES (?, ?, 'editor')`,
+      [trip.id, userId]
+    );
+    if (result.affectedRows === 0) return res.json({ tripId: trip.id.toString(), status: 'member' });
+
+    // Jméno se ukládá do zprávy, notifikace ho pak čte odtud (jako TRIP_TRANSFERRED).
+    const [[joiner]] = await pool.query('SELECT first_name, last_name FROM users WHERE id = ?', [userId]);
+    const name = `${joiner?.first_name || ''} ${joiner?.last_name || ''}`.trim() || 'Někdo';
+    await pool.query(
+      `INSERT INTO notifications (user_id, type, reference_id, message) VALUES (?, 'TRIP_JOINED', ?, ?)`,
+      [trip.ownerId, trip.id, name]
+    );
+
+    res.status(201).json({ tripId: trip.id.toString(), status: 'joined' });
+  } catch (err) {
+    console.error('Join trip error:', err);
+    res.status(500).json({ error: 'Chyba při připojování k výletu.' });
+  }
+});
+
+// Posune YYYY-MM-DD o daný počet dní (v UTC, ať nehraje roli časové pásmo).
+const shiftIsoDate = (iso, days) => {
+  if (!iso) return iso;
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+};
+
+const COPY_LEAD_DAYS = 30;
+
+// ── POST /api/trips/copy/:shareToken ───────────────────────
+// Copies a publicly shared trip into the caller's account as a new trip they
+// own: the day plan, the packing list (unchecked) and the map places. Expenses,
+// documents and collaborators stay with the original — they're personal.
+// Accommodation places are skipped too, since they can reveal where the
+// original travellers stayed. A trip that already happened is moved to start
+// a month from now, keeping its length.
+router.post('/copy/:shareToken', async (req, res) => {
+  const { shareToken } = req.params;
+  if (!shareToken || shareToken.length !== 64) return res.status(404).json({ error: 'Odkaz není platný.' });
+
+  const connection = await pool.getConnection();
+  try {
+    const userId = req.userId;
+
+    const [[source]] = await connection.query(
+      `SELECT id, title,
+         DATE_FORMAT(start_date, '%Y-%m-%d') AS startDate,
+         DATE_FORMAT(end_date, '%Y-%m-%d') AS endDate
+       FROM trips WHERE share_token = ? AND deleted_at IS NULL`,
+      [shareToken]
+    );
+    if (!source) return res.status(404).json({ error: 'Výlet nenalezen nebo odkaz byl zrušen.' });
+
+    const today = new Date().toISOString().slice(0, 10);
+    const shift = source.startDate < today
+      ? Math.round((new Date(`${shiftIsoDate(today, COPY_LEAD_DAYS)}T00:00:00Z`) - new Date(`${source.startDate}T00:00:00Z`)) / 86400000)
+      : 0;
+
+    const [[activities], [packing], [places]] = await Promise.all([
+      connection.query(
+        "SELECT day_index AS dayIndex, DATE_FORMAT(date, '%Y-%m-%d') AS date, title, plan, location FROM trip_activities WHERE trip_id = ? ORDER BY day_index ASC",
+        [source.id]
+      ),
+      connection.query('SELECT text FROM trip_packing_items WHERE trip_id = ? ORDER BY created_at ASC', [source.id]),
+      connection.query(
+        `SELECT day_index, name, address, lat, lng, category, country_code, city, sort_order
+         FROM trip_places WHERE trip_id = ? AND category != 'stay' ORDER BY sort_order ASC, id ASC`,
+        [source.id]
+      ),
+    ]);
+
+    await connection.beginTransaction();
+
+    const [result] = await connection.query(
+      'INSERT INTO trips (user_id, title, start_date, end_date) VALUES (?, ?, ?, ?)',
+      [userId, source.title, shiftIsoDate(source.startDate, shift), shiftIsoDate(source.endDate, shift)]
+    );
+    const tripId = result.insertId;
+
+    for (const a of activities) {
+      await connection.query(
+        'INSERT INTO trip_activities (trip_id, day_index, date, title, plan, location) VALUES (?, ?, ?, ?, ?, ?)',
+        [tripId, a.dayIndex, shiftIsoDate(a.date, shift), a.title, a.plan || '', a.location || '']
+      );
+    }
+    for (const p of packing) {
+      await connection.query('INSERT INTO trip_packing_items (trip_id, text, checked) VALUES (?, ?, 0)', [tripId, p.text]);
+    }
+    for (const p of places) {
+      await connection.query(
+        `INSERT INTO trip_places
+          (user_id, trip_id, day_index, name, address, lat, lng, category, status, country_code, city, source, sort_order)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'wishlist', ?, ?, 'manual', ?)`,
+        [userId, tripId, p.day_index, p.name, p.address, p.lat, p.lng, p.category, p.country_code, p.city, p.sort_order]
+      );
+    }
+
+    await connection.commit();
+
+    res.status(201).json({ trip: await fetchFullTrip(tripId, userId, 'owner') });
+  } catch (err) {
+    await connection.rollback();
+    console.error('Copy trip error:', err);
+    res.status(500).json({ error: 'Chyba při kopírování výletu.' });
+  } finally {
+    connection.release();
+  }
+});
+
 export default router;

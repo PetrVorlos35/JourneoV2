@@ -7,7 +7,9 @@ import api from '../../services/api';
 // `onChange` dostává (text, place | null). Druhý argument je vyplněný jen
 // při výběru ze seznamu a nese souřadnice — volající, který je nepotřebuje,
 // ho prostě ignoruje.
-const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLength }) => {
+// `searchOnMount` rovnou vyhledá předvyplněný text (destinace přenesená
+// z landing page), aby stačilo kliknout na návrh.
+const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLength, autoFocus = false, searchOnMount = false, ariaLabel }) => {
   const { t, i18n } = useTranslation();
   const [inputValue, setInputValue] = useState(value || '');
   const [suggestions, setSuggestions] = useState([]);
@@ -63,6 +65,15 @@ const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLeng
     }
   };
 
+  useEffect(() => {
+    if (searchOnMount && (value || '').trim().length >= 3) {
+      setShowSuggestions(true);
+      searchLocations(value.trim());
+    }
+    // Jen při připojení: další hledání spouští psaní.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleInputChange = (e) => {
     const val = e.target.value;
     setInputValue(val);
@@ -108,6 +119,9 @@ const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLeng
           }}
           placeholder={placeholder}
           maxLength={maxLength}
+          autoFocus={autoFocus}
+          aria-label={ariaLabel}
+          autoComplete="off"
           className={`${className || ''} !pr-12`}
         />
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center">

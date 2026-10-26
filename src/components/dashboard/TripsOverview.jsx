@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AlertCircle, ArrowRight } from 'lucide-react';
 // eslint-disable-next-line no-unused-vars
@@ -8,6 +8,8 @@ import HeroCard from './overview/HeroCard';
 import ReadinessCard from './overview/ReadinessCard';
 import OverviewTiles, { FriendRequestsRow } from './overview/OverviewTiles';
 import TripCard from './overview/TripCard';
+import FirstTripComposer from './overview/FirstTripComposer';
+import { useAuth } from '../../contexts/AuthContext';
 import useOverviewData from './overview/useOverviewData';
 import { categorizeTrip, tripSpend } from '../../utils/trip';
 
@@ -16,8 +18,11 @@ import { categorizeTrip, tripSpend } from '../../utils/trip';
 // and sorting all live on the All trips page, in a better form.
 const MAX_TRIPS = 6;
 
-const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal, error, onRetry }) => {
+const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal, onCreateStarterTrip, error, onRetry }) => {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  // ?plan=Lisabon přichází z pole „Kam jedeš?“ na landing page.
+  const [searchParams] = useSearchParams();
   const shouldReduceMotion = useReducedMotion();
   const { places, balances, friendRequests } = useOverviewData();
 
@@ -91,6 +96,21 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal, error, onRetry 
             {t('tripsOverview.error.retry')}
           </button>
         </div>
+      </div>
+    );
+  }
+
+  // První spuštění: místo prázdného přehledu s pomlčkami jedna otázka,
+  // ze které je za pár vteřin hotový výlet.
+  if (trips.length === 0) {
+    return (
+      <div className="space-y-6 sm:space-y-8 w-full pb-10 max-w-4xl">
+        <FriendRequestsRow count={friendRequests} />
+        <FirstTripComposer
+          firstName={user?.first_name}
+          initialDestination={(searchParams.get('plan') || '').slice(0, 255)}
+          onCreate={onCreateStarterTrip}
+        />
       </div>
     );
   }
