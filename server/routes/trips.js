@@ -5,20 +5,44 @@ import pool from '../config/db.js';
 import { getTripRole } from '../lib/tripAccess.js';
 import { calculateBalances } from '../lib/balances.js';
 import { sendSettlementEmail } from '../lib/mailer.js';
+import { getRate, getUserCurrency, isSupportedCurrency, makeConverter } from '../lib/rates.js';
 
 const router = Router();
 
-const CURRENCY_SYMBOLS = { CZK: 'Kč', EUR: '€', USD: '$', GBP: '£' };
+const CURRENCY_SYMBOLS = { CZK: 'Kč', EUR: '€', USD: '$', GBP: '£', PLN: 'zł', HUF: 'Ft' };
 const formatAmountLabel = (amount, currency = 'CZK', locale = 'cs') => {
   const symbol = CURRENCY_SYMBOLS[currency] || currency;
   return `${Number(amount).toLocaleString(locale)} ${symbol}`;
 };
 
+// Sloupce výdaje včetně původní měny (výdaj zadaný v cizí měně).
+const EXPENSE_COLUMNS = `id, description, amount, category, DATE_FORMAT(date, '%Y-%m-%d') AS date, paid_by AS paidBy,
+  original_amount AS originalAmount, original_currency AS originalCurrency, exchange_rate AS exchangeRate,
+  DATE_FORMAT(rate_date, '%Y-%m-%d') AS rateDate, rate_source AS rateSource`;
+
+// Výdaj ve tvaru API; cizí měna jen tam, kde výdaj nebyl zadaný v měně výletu.
+const shapeExpense = (e, splits) => ({
+  id: e.id.toString(),
+  description: e.description,
+  amount: parseFloat(e.amount),
+  category: e.category,
+  date: e.date,
+  paidBy: e.paidBy != null ? e.paidBy : null,
+  splits,
+  ...(e.originalCurrency ? {
+    originalAmount: parseFloat(e.originalAmount),
+    originalCurrency: e.originalCurrency,
+    exchangeRate: parseFloat(e.exchangeRate),
+    rateDate: e.rateDate,
+    rateSource: e.rateSource,
+  } : {}),
+});
+
 // Loads a trip's expenses together with their splits, shaped for the API.
 // `db` may be the pool or an active transaction connection.
 const fetchExpensesWithSplits = async (tripId, db = pool) => {
   const [expenses] = await db.query(
-    "SELECT id, description, amount, category, DATE_FORMAT(date, '%Y-%m-%d') AS date, paid_by AS paidBy FROM trip_expenses WHERE trip_id = ? ORDER BY created_at DESC",
+    `SELECT ${EXPENSE_COLUMNS} FROM trip_expenses WHERE trip_id = ? ORDER BY created_at DESC`,
     [tripId]
   );
 
@@ -36,15 +60,7 @@ const fetchExpensesWithSplits = async (tripId, db = pool) => {
     splitsByExpense.get(s.expenseId).push({ userId: s.userId, amount: parseFloat(s.amount) });
   }
 
-  return expenses.map((e) => ({
-    id: e.id.toString(),
-    description: e.description,
-    amount: parseFloat(e.amount),
-    category: e.category,
-    date: e.date,
-    paidBy: e.paidBy != null ? e.paidBy : null,
-    splits: splitsByExpense.get(e.id) || [],
-  }));
+  return expenses.map((e) => shapeExpense(e, splitsByExpense.get(e.id) || []));
 };
 
 // Loads recorded settle-up payments for a trip (compensating transactions).
@@ -102,6 +118,7 @@ router.get('/', async (req, res) => {
          (SELECT COUNT(*) FROM votes v WHERE v.trip_id = t.id AND v.value = 1) AS likes,
          t.share_token AS shareToken,
          t.budget_target AS budgetTarget,
+         t.currency,
          t.version
        FROM trips t
        WHERE t.user_id = ? AND t.deleted_at IS NULL
@@ -114,6 +131,7 @@ router.get('/', async (req, res) => {
          NULL AS likes,
          NULL AS shareToken,
          t.budget_target AS budgetTarget,
+         t.currency,
          t.version
        FROM trips t
        JOIN trip_collaborators tc ON tc.trip_id = t.id AND tc.user_id = ?
@@ -145,7 +163,7 @@ router.get('/', async (req, res) => {
         [tripIds]
       ),
       pool.query(
-        "SELECT id, trip_id AS tripId, description, amount, category, DATE_FORMAT(date, '%Y-%m-%d') AS date, paid_by AS paidBy FROM trip_expenses WHERE trip_id IN (?) ORDER BY created_at DESC",
+        `SELECT trip_id AS tripId, ${EXPENSE_COLUMNS} FROM trip_expenses WHERE trip_id IN (?) ORDER BY created_at DESC`,
         [tripIds]
       ),
       pool.query(
@@ -196,15 +214,7 @@ router.get('/', async (req, res) => {
     const expensesByTrip = new Map();
     for (const e of expenses) {
       if (!expensesByTrip.has(e.tripId)) expensesByTrip.set(e.tripId, []);
-      expensesByTrip.get(e.tripId).push({
-        id: e.id.toString(),
-        description: e.description,
-        amount: parseFloat(e.amount),
-        category: e.category,
-        date: e.date,
-        paidBy: e.paidBy != null ? e.paidBy : null,
-        splits: splitsByExpense.get(e.id) || [],
-      });
+      expensesByTrip.get(e.tripId).push(shapeExpense(e, splitsByExpense.get(e.id) || []));
     }
 
     const likesByTrip = new Map(voteCounts.map((v) => [v.tripId, parseInt(v.likes)]));
@@ -240,7 +250,7 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const userId = req.userId;
-    const { title, startDate, endDate } = req.body;
+    const { title, startDate, endDate, currency: requestedCurrency } = req.body;
 
     if (!title || !startDate || !endDate) {
       return res.status(400).json({ error: 'Název, datum od a datum do jsou povinné.' });
@@ -251,9 +261,12 @@ router.post('/', async (req, res) => {
       return res.status(dateValidationError.status).json({ error: dateValidationError.error });
     }
 
+    // Nový výlet je v hlavní měně uživatele, pokud klient neřekne jinak.
+    const currency = isSupportedCurrency(requestedCurrency) ? requestedCurrency : await getUserCurrency(pool, userId);
+
     const [result] = await pool.query(
-      'INSERT INTO trips (user_id, title, start_date, end_date) VALUES (?, ?, ?, ?)',
-      [userId, title, formatDateForDb(startDate), formatDateForDb(endDate)]
+      'INSERT INTO trips (user_id, title, start_date, end_date, currency) VALUES (?, ?, ?, ?, ?)',
+      [userId, title, formatDateForDb(startDate), formatDateForDb(endDate), currency]
     );
 
     const tripId = result.insertId;
@@ -264,6 +277,7 @@ router.post('/', async (req, res) => {
         title,
         startDate,
         endDate,
+        currency,
         role: 'owner',
         version: 0,
         activities: [],
@@ -278,10 +292,27 @@ router.post('/', async (req, res) => {
   }
 });
 
+// Původní měna výdaje z těla PUT. Kurz počítá klient (ECB nebo ručně) a
+// server ho jen uloží; nesmyslné hodnoty se zahodí a výdaj zůstane
+// v měně výletu.
+const foreignExpenseFields = (e) => {
+  const none = { originalAmount: null, originalCurrency: null, exchangeRate: null, rateDate: null, rateSource: null };
+  const originalAmount = Number(e.originalAmount);
+  const exchangeRate = Number(e.exchangeRate);
+  if (!isSupportedCurrency(e.originalCurrency) || !(originalAmount > 0) || !(exchangeRate > 0)) return none;
+  return {
+    originalAmount,
+    originalCurrency: e.originalCurrency,
+    exchangeRate,
+    rateDate: formatDateForDb(e.rateDate) || null,
+    rateSource: e.rateSource === 'manual' ? 'manual' : 'ecb',
+  };
+};
+
 // Celý výlet ve tvaru, jaký vrací GET /api/trips (pro odpověď PUT i 409).
 const fetchFullTrip = async (tripId, userId, role) => {
   const [updatedTrips] = await pool.query(
-    "SELECT id, title, DATE_FORMAT(start_date, '%Y-%m-%d') AS startDate, DATE_FORMAT(end_date, '%Y-%m-%d') AS endDate, budget_target AS budgetTarget, version FROM trips WHERE id = ?",
+    "SELECT id, title, DATE_FORMAT(start_date, '%Y-%m-%d') AS startDate, DATE_FORMAT(end_date, '%Y-%m-%d') AS endDate, budget_target AS budgetTarget, currency, version FROM trips WHERE id = ?",
     [tripId]
   );
   const [updatedActivities] = await pool.query(
@@ -332,7 +363,7 @@ router.put('/:id', async (req, res) => {
 
     const userId = req.userId;
     const tripId = parseInt(req.params.id);
-    const { title, startDate, endDate, activities, expenses, packingList, documents, budgetTarget, version } = req.body;
+    const { title, startDate, endDate, activities, expenses, packingList, documents, budgetTarget, version, dayShift } = req.body;
 
     const role = await getTripRole(tripId, userId);
     if (!role) {
@@ -366,6 +397,20 @@ router.put('/:id', async (req, res) => {
       }
     }
 
+    // Změna termínu: místa přiřazená ke dnům se posunou o `dayShift` (klient
+    // drží program u stejných kalendářních dnů) a místa ze dnů, které po
+    // zkrácení zmizely, zůstanou ve výletu bez dne.
+    if (startDate && endDate) {
+      const shift = Number.isInteger(dayShift) ? dayShift : 0;
+      const lastIndex = Math.round((new Date(`${formatDateForDb(endDate)}T00:00:00Z`) - new Date(`${formatDateForDb(startDate)}T00:00:00Z`)) / 86400000);
+      await connection.query(
+        `UPDATE trip_places
+         SET day_index = CASE WHEN CAST(day_index AS SIGNED) - ? BETWEEN 0 AND ? THEN CAST(day_index AS SIGNED) - ? ELSE NULL END
+         WHERE trip_id = ? AND day_index IS NOT NULL`,
+        [shift, lastIndex, shift, tripId]
+      );
+    }
+
     if (title || startDate || endDate || budgetTarget !== undefined) {
       const budgetClause = budgetTarget !== undefined ? ', budget_target = ?' : '';
       const budgetParams = budgetTarget !== undefined ? [budgetTarget] : [];
@@ -392,9 +437,13 @@ router.put('/:id', async (req, res) => {
       await connection.query('DELETE FROM trip_expenses WHERE trip_id = ?', [tripId]);
       for (const e of expenses) {
         const paidBy = e.paidBy != null && e.paidBy !== '' ? parseInt(e.paidBy) : null;
+        const fx = foreignExpenseFields(e);
         const [insertResult] = await connection.query(
-          'INSERT INTO trip_expenses (trip_id, description, amount, category, date, paid_by) VALUES (?, ?, ?, ?, ?, ?)',
-          [tripId, e.description, e.amount, e.category || 'other', formatDateForDb(e.date), paidBy]
+          `INSERT INTO trip_expenses (trip_id, description, amount, category, date, paid_by,
+             original_amount, original_currency, exchange_rate, rate_date, rate_source)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [tripId, e.description, e.amount, e.category || 'other', formatDateForDb(e.date), paidBy,
+            fx.originalAmount, fx.originalCurrency, fx.exchangeRate, fx.rateDate, fx.rateSource]
         );
 
         const expenseId = insertResult.insertId;
@@ -490,17 +539,20 @@ router.get('/balances-summary', async (req, res) => {
     const userId = req.userId;
 
     const [tripRows] = await pool.query(
-      `SELECT t.id, t.title FROM trips t
+      `SELECT t.id, t.title, t.currency FROM trips t
        WHERE t.user_id = ? AND t.deleted_at IS NULL
        UNION
-       SELECT t.id, t.title FROM trips t
+       SELECT t.id, t.title, t.currency FROM trips t
        JOIN trip_collaborators tc ON tc.trip_id = t.id AND tc.user_id = ?
        WHERE t.deleted_at IS NULL`,
       [userId, userId]
     );
 
-    const empty = { owedToMe: 0, iOwe: 0, net: 0, counterparties: [], trips: [] };
+    // Výlety mají každý svou měnu; souhrn je v hlavní měně uživatele.
+    const currency = await getUserCurrency(pool, userId);
+    const empty = { currency, owedToMe: 0, iOwe: 0, net: 0, counterparties: [], trips: [] };
     if (tripRows.length === 0) return res.json(empty);
+    const toMain = await makeConverter(currency, tripRows.map((t) => t.currency));
 
     const tripIds = tripRows.map((t) => t.id);
 
@@ -562,6 +614,9 @@ router.get('/balances-summary', async (req, res) => {
     for (const trip of tripRows) {
       const expenses = expensesByTrip.get(trip.id) || [];
       if (expenses.length === 0) continue;
+      // Bez kurzu (výpadek ECB) se výlet v cizí měně do souhrnu nepočítá.
+      if (toMain(1, trip.currency) == null) continue;
+      const inMain = (v) => toMain(Number(v || 0), trip.currency);
 
       const { balances, settlements } = calculateBalances(
         expenses,
@@ -569,7 +624,7 @@ router.get('/balances-summary', async (req, res) => {
       );
 
       const myNet = balances.find((b) => Number(b.userId) === me);
-      const myNetCents = myNet ? toCents(myNet.net) : 0;
+      const myNetCents = myNet ? toCents(inMain(myNet.net)) : 0;
       if (myNetCents === 0) continue;
 
       if (myNetCents > 0) owedCents += myNetCents;
@@ -584,7 +639,7 @@ router.get('/balances-summary', async (req, res) => {
       // The simplified ledger already says who pays whom; keep only the
       // legs the caller is on and roll them up per person.
       for (const s of settlements) {
-        const cents = toCents(s.amount);
+        const cents = toCents(inMain(s.amount));
         if (Number(s.to) === me) {
           const other = Number(s.from);
           byCounterparty.set(other, (byCounterparty.get(other) || 0) + cents);
@@ -621,6 +676,7 @@ router.get('/balances-summary', async (req, res) => {
       .sort((a, b) => b.amount - a.amount);
 
     res.json({
+      currency,
       owedToMe: owedCents / 100,
       iOwe: owingCents / 100,
       net: (owedCents - owingCents) / 100,
@@ -798,7 +854,7 @@ router.post('/:id/settle', async (req, res) => {
   try {
     const userId = req.userId;
     const tripId = parseInt(req.params.id);
-    const { toUserId, amount, currency, locale } = req.body;
+    const { toUserId, amount, locale } = req.body;
 
     const role = await getTripRole(tripId, userId);
     if (!role) return res.status(404).json({ error: 'Výlet nenalezen.' });
@@ -834,7 +890,7 @@ router.post('/:id/settle', async (req, res) => {
       'SELECT first_name AS firstName, last_name AS lastName FROM users WHERE id = ?',
       [userId]
     );
-    const [[trip]] = await pool.query('SELECT title FROM trips WHERE id = ?', [tripId]);
+    const [[trip]] = await pool.query('SELECT title, currency FROM trips WHERE id = ?', [tripId]);
 
     // Notify the person who was owed money (non-blocking, fire-and-forget).
     if (receiver?.email) {
@@ -842,7 +898,7 @@ router.post('/:id/settle', async (req, res) => {
       waitUntil(
         sendSettlementEmail(receiver.email, {
           payerName,
-          amountLabel: formatAmountLabel(amt, currency, locale),
+          amountLabel: formatAmountLabel(amt, trip?.currency, locale),
           tripName: trip?.title || '',
           locale,
         }).catch((err) => console.error('Settlement email error:', err))
@@ -1134,11 +1190,14 @@ router.post('/copy/:shareToken', async (req, res) => {
       ),
     ]);
 
+    // Výdaje se nekopírují, takže kopie je rovnou v hlavní měně toho, kdo kopíruje.
+    const currency = await getUserCurrency(connection, userId);
+
     await connection.beginTransaction();
 
     const [result] = await connection.query(
-      'INSERT INTO trips (user_id, title, start_date, end_date) VALUES (?, ?, ?, ?)',
-      [userId, source.title, shiftIsoDate(source.startDate, shift), shiftIsoDate(source.endDate, shift)]
+      'INSERT INTO trips (user_id, title, start_date, end_date, currency) VALUES (?, ?, ?, ?, ?)',
+      [userId, source.title, shiftIsoDate(source.startDate, shift), shiftIsoDate(source.endDate, shift), currency]
     );
     const tripId = result.insertId;
 
@@ -1167,6 +1226,130 @@ router.post('/copy/:shareToken', async (req, res) => {
     await connection.rollback();
     console.error('Copy trip error:', err);
     res.status(500).json({ error: 'Chyba při kopírování výletu.' });
+  } finally {
+    connection.release();
+  }
+});
+
+// ── POST /api/trips/:id/currency ────────────────────────────
+// Změna měny výletu. S `convert` se všechny částky výletu (výdaje, dělení,
+// vyrovnání, limit) přepočtou posledním kurzem ECB; výdaj zadaný v nové
+// měně se vrátí přesně na původní částku a výdaj zadaný ve staré měně si
+// ji zapamatuje jako původní. Bez `convert` se jen přejmenuje měna (oprava
+// špatně zvolené měny). Hlídá `version` stejně jako PUT.
+router.post('/:id/currency', async (req, res) => {
+  const userId = req.userId;
+  const tripId = parseInt(req.params.id);
+  const { currency, convert, version } = req.body;
+
+  if (!isSupportedCurrency(currency)) return res.status(400).json({ error: 'Nepodporovaná měna.' });
+
+  let role;
+  let before;
+  let fx = null;
+  try {
+    role = await getTripRole(tripId, userId);
+    if (!role) return res.status(404).json({ error: 'Výlet nenalezen.' });
+    if (role === 'viewer') return res.status(403).json({ error: 'Nemáte oprávnění upravovat tento výlet.' });
+
+    [[before]] = await pool.query('SELECT currency FROM trips WHERE id = ?', [tripId]);
+    if (before.currency === currency) {
+      return res.json({ trip: await fetchFullTrip(tripId, userId, role) });
+    }
+  } catch (err) {
+    console.error('Change trip currency error:', err);
+    return res.status(500).json({ error: 'Chyba při změně měny výletu.' });
+  }
+
+  // Kurz se stahuje před transakcí, ať zámek řádku nečeká na síť.
+  if (convert) {
+    try {
+      fx = await getRate(before.currency, currency);
+    } catch (err) {
+      console.error('Trip currency rate error:', err);
+      return res.status(502).json({ error: 'Aktuální kurz se nepodařilo načíst. Zkuste to prosím později.' });
+    }
+  }
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [[current]] = await connection.query('SELECT currency, version FROM trips WHERE id = ? FOR UPDATE', [tripId]);
+    const stale = version !== undefined && version !== null && Number(version) !== current.version;
+    if (stale || current.currency !== before.currency) {
+      await connection.rollback();
+      return res.status(409).json({
+        error: 'Výlet mezitím upravil někdo jiný.',
+        code: 'TRIP_CONFLICT',
+        trip: await fetchFullTrip(tripId, userId, role),
+      });
+    }
+
+    if (fx) {
+      const round2 = (v) => Math.round(v * 100) / 100;
+      const [expenses] = await connection.query(
+        'SELECT id, amount, original_amount AS originalAmount, original_currency AS originalCurrency, exchange_rate AS exchangeRate FROM trip_expenses WHERE trip_id = ?',
+        [tripId]
+      );
+      const [splits] = await connection.query(
+        'SELECT es.id, es.expense_id AS expenseId, es.amount FROM expense_splits es JOIN trip_expenses te ON te.id = es.expense_id WHERE te.trip_id = ?',
+        [tripId]
+      );
+
+      for (const e of expenses) {
+        const oldAmount = parseFloat(e.amount);
+        let amount;
+        if (e.originalCurrency === currency) {
+          amount = parseFloat(e.originalAmount);
+          await connection.query(
+            'UPDATE trip_expenses SET amount = ?, original_amount = NULL, original_currency = NULL, exchange_rate = NULL, rate_date = NULL, rate_source = NULL WHERE id = ?',
+            [amount, e.id]
+          );
+        } else if (e.originalCurrency) {
+          amount = round2(oldAmount * fx.rate);
+          await connection.query(
+            'UPDATE trip_expenses SET amount = ?, exchange_rate = ? WHERE id = ?',
+            [amount, parseFloat(e.exchangeRate) * fx.rate, e.id]
+          );
+        } else {
+          amount = round2(oldAmount * fx.rate);
+          await connection.query(
+            `UPDATE trip_expenses SET amount = ?, original_amount = ?, original_currency = ?, exchange_rate = ?,
+               rate_date = ?, rate_source = 'ecb' WHERE id = ?`,
+            [amount, oldAmount, current.currency, fx.rate, fx.date, e.id]
+          );
+        }
+
+        // Podíly se škálují stejným poměrem a zaokrouhlovací zbytek dostane
+        // největší z nich, aby součet seděl na haléř s částkou výdaje.
+        const own = splits.filter((s) => s.expenseId === e.id);
+        if (own.length === 0) continue;
+        const ratio = oldAmount > 0 ? amount / oldAmount : 0;
+        const scaled = own.map((s) => ({ id: s.id, amount: round2(parseFloat(s.amount) * ratio) }));
+        const drift = round2(amount - scaled.reduce((sum, s) => sum + s.amount, 0));
+        const oldSum = own.reduce((sum, s) => sum + parseFloat(s.amount), 0);
+        if (drift !== 0 && Math.abs(oldSum - oldAmount) < 0.011) {
+          const largest = scaled.reduce((a, b) => (b.amount > a.amount ? b : a));
+          largest.amount = round2(largest.amount + drift);
+        }
+        for (const s of scaled) {
+          await connection.query('UPDATE expense_splits SET amount = ? WHERE id = ?', [s.amount, s.id]);
+        }
+      }
+
+      await connection.query('UPDATE trip_settlements SET amount = ROUND(amount * ?, 2) WHERE trip_id = ?', [fx.rate, tripId]);
+      await connection.query('UPDATE trips SET budget_target = ROUND(budget_target * ?, 2) WHERE id = ? AND budget_target IS NOT NULL', [fx.rate, tripId]);
+    }
+
+    await connection.query('UPDATE trips SET currency = ?, version = version + 1 WHERE id = ?', [currency, tripId]);
+    await connection.commit();
+
+    res.json({ trip: await fetchFullTrip(tripId, userId, role) });
+  } catch (err) {
+    await connection.rollback();
+    console.error('Change trip currency error:', err);
+    res.status(500).json({ error: 'Chyba při změně měny výletu.' });
   } finally {
     connection.release();
   }

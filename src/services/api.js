@@ -196,6 +196,13 @@ export const api = {
     // Zkopíruje veřejně sdílený výlet do vlastního účtu.
     copyFromShare: (shareToken) =>
       request(`/trips/copy/${shareToken}`, { method: 'POST' }),
+
+    // Změna měny výletu; s convert: true se přepočtou všechny částky.
+    changeCurrency: (id, payload) =>
+      request(`/trips/${id}/currency`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }),
   },
 
   // ── Places (mapa) ──────────────────────────────────────────
@@ -265,8 +272,13 @@ export const api = {
   settings: {
     get: () => request('/settings'),
 
-    getExchangeRate: (from, to) =>
-      request(`/settings/exchange-rate?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`),
+    // Kurz ECB k datu výdaje (bez data poslední vyhlášený).
+    getExchangeRate: (from, to, date) =>
+      request(`/settings/exchange-rate?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}${date ? `&date=${encodeURIComponent(date)}` : ''}`),
+
+    // Poslední kurzy všech měn vůči hlavní měně (souhrny napříč výlety).
+    getExchangeRates: (base) =>
+      request(`/settings/exchange-rates?base=${encodeURIComponent(base)}`),
 
     update: (settings) =>
       request('/settings', {

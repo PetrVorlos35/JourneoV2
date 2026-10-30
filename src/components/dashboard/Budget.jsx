@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Plus, Trash2, TrendingUp, TrendingDown, Calendar, Car, Home, Utensils,
   Palmtree, MoreHorizontal, ChevronRight, Wallet, X, Search, Pencil, Check, Target,
-  Scale, ArrowRight, Split, HandCoins, Copy, CheckCircle2,
+  Scale, ArrowRight, Split, HandCoins, Copy, CheckCircle2, Loader2,
 } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { format, differenceInDays, differenceInCalendarDays, isToday, isYesterday, parseISO, startOfDay, subDays } from 'date-fns';
@@ -12,6 +12,8 @@ import { enUS } from 'date-fns/locale';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import toast from 'react-hot-toast';
+import { pushUndo, clearUndo } from '../../hooks/undoStack';
+import { showUndoToast } from '../ui/undoToast';
 import CharCount from '../ui/CharCount';
 import { useTranslation } from 'react-i18next';
 import { useDialog } from '../ui/DialogModal';
@@ -19,7 +21,8 @@ import { useCurrency } from '../../contexts/CurrencyContext';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import UserAvatar from '../ui/UserAvatar';
-import { formatCurrency, currencySymbol } from '../../utils/currency';
+import { formatCurrency, formatRate, currencySymbol } from '../../utils/currency';
+import { CurrencyList, TripCurrencyControl, getRecentCurrencies, rememberCurrency } from './CurrencyPicker';
 import { PlanFirstTripButton } from './EmptyShowcase';
 
 const CATEGORIES = [
@@ -357,6 +360,11 @@ const Balances = ({ balanceData, currency, locale, currentUserId, tripId, hasSha
 const ExpenseRow = ({ expense, compact = false, flush = false, currency, locale, isViewer, shouldReduceMotion, t, dateLocale, onEdit, onDelete }) => {
   const cat = catInfo(expense.category);
   const Icon = cat.icon;
+  // Výdaj zadaný v cizí měně ukáže i původní částku a kurz (v tooltipu).
+  const original = expense.originalCurrency && expense.originalCurrency !== currency ? {
+    label: formatCurrency(expense.originalAmount, expense.originalCurrency, locale),
+    title: formatRate(expense.exchangeRate, expense.originalCurrency, currency, locale),
+  } : null;
 
   if (compact) {
     return (
@@ -374,9 +382,14 @@ const ExpenseRow = ({ expense, compact = false, flush = false, currency, locale,
           <p className={`text-[14px] font-semibold text-primary leading-tight line-clamp-2 break-words md:line-clamp-1`}>{expense.description}</p>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
-          <p className="font-bold text-[15px] tracking-tight tabular-nums text-primary">
-            {formatCurrency(expense.amount, currency, locale)}
-          </p>
+          <div className="text-right">
+            <p className="font-bold text-[15px] tracking-tight tabular-nums text-primary">
+              {formatCurrency(expense.amount, currency, locale)}
+            </p>
+            {original && (
+              <p className="text-[12px] font-medium tabular-nums text-muted leading-tight" title={original.title}>{original.label}</p>
+            )}
+          </div>
           {!isViewer && (
             <div className={`flex items-center gap-0.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100 transition-opacity ${flush ? 'md:order-first' : ''}`}>
               <button
@@ -422,7 +435,10 @@ const ExpenseRow = ({ expense, compact = false, flush = false, currency, locale,
         </div>
       </div>
       <div className="flex items-center sm:items-end justify-between sm:flex-col shrink-0 gap-2 border-t sm:border-t-0 border-gray-100 dark:border-white/5 pt-4 sm:pt-0">
-        <span className="font-bold text-2xl tracking-tight tabular-nums text-primary">{formatCurrency(expense.amount, currency, locale)}</span>
+        <span className="sm:text-right">
+          <span className="block font-bold text-2xl tracking-tight tabular-nums text-primary">{formatCurrency(expense.amount, currency, locale)}</span>
+          {original && <span className="block text-[13px] font-medium tabular-nums text-muted" title={original.title}>{original.label}</span>}
+        </span>
         {!isViewer && (
           <div className="flex items-center gap-2 sm:gap-3">
             <button
@@ -510,14 +526,56 @@ const CategoryBar = ({ expenses, currency, locale, onCategoryClick, activeCatego
   );
 };
 
+/* ─── Měna výdaje ─── */
+const round2 = (v) => Math.round(v * 100) / 100;
+// Slabé měny (Ft, ¥) se čtou líp po stovkách: „100 Ft = 6,52 Kč“.
+const rateUnitFor = (rate) => (rate < 0.1 ? 100 : 1);
+
+// Kurzy ECB se v rámci relace neměnní, tak se stejný dotaz neposílá dvakrát
+// (třeba při „Uložit a přidat další“).
+const ecbRateCache = new Map();
+const fetchEcbRate = (from, to, date) => {
+  const key = `${from}:${to}:${date}`;
+  if (!ecbRateCache.has(key)) {
+    ecbRateCache.set(key, api.settings.getExchangeRate(from, to, date).catch((err) => {
+      ecbRateCache.delete(key);
+      throw err;
+    }));
+  }
+  return ecbRateCache.get(key);
+};
+
+// Podíly zadané v cizí měně převede kurzem a zaokrouhlovací rozdíl přičte
+// největšímu, aby součet seděl s převedenou částkou výdaje.
+const convertSplits = (entries, rate, total) => {
+  const converted = entries.map((s) => ({ ...s, amount: round2(s.amount * rate) }));
+  const drift = round2(total - converted.reduce((sum, s) => sum + s.amount, 0));
+  if (drift !== 0 && converted.length > 0) {
+    const largest = converted.reduce((a, b) => (b.amount > a.amount ? b : a));
+    largest.amount = round2(largest.amount + drift);
+  }
+  return converted.filter((s) => s.amount > 0);
+};
+
+// Poslední měna výdaje ve výletu — kdo je v Maďarsku, zadává dál ve forintech.
+const expenseCurrencyKey = (tripId) => `journeo_expense_currency:${tripId}`;
+const lastExpenseCurrency = (tripId) => {
+  try { return tripId ? localStorage.getItem(expenseCurrencyKey(tripId)) : null; } catch { return null; }
+};
+const rememberExpenseCurrency = (tripId, code, isForeign) => {
+  if (isForeign) rememberCurrency(code);
+  try { if (tripId) localStorage.setItem(expenseCurrencyKey(tripId), code); } catch { /* jen pohodlí */ }
+};
+
 /* ─── Add / Edit Expense Modal ─── */
-const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialExpense = null, initialCategory = null, members = [], currentUserId = null }) => {
+const AddExpenseModal = ({ isOpen, onClose, onAdd, currency: tripCurrency, tripId, tripRange, initialExpense = null, initialCategory = null, members = [], currentUserId = null }) => {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
   const modalRef = useRef(null);
   const isEditing = !!initialExpense;
   const canSplit = members.length > 1;
+  const { currency: mainCurrency } = useCurrency();
 
   const [form, setForm] = useState({
     description: '',
@@ -529,15 +587,32 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
     splitMode: 'equal',
     participants: {},
     customAmounts: {},
+    currency: tripCurrency,
+    rateSource: 'ecb',
+    rateInput: '',
   });
   const [showCalendar, setShowCalendar] = useState(false);
   const [showSplit, setShowSplit] = useState(false);
+  const [showCurrencies, setShowCurrencies] = useState(false);
+  const [editingRate, setEditingRate] = useState(false);
+  // Stav kurzu před „Upravit kurz“, ať ho Esc vrátí.
+  const rateSnapshotRef = useRef(null);
+  const currencyButtonRef = useRef(null);
+  const currencyPopoverRef = useRef(null);
+  const scrollRef = useRef(null);
+  const [popoverBox, setPopoverBox] = useState(null);
+  // Kurz ECB pro aktuální měnu a den výdaje ({ key, rate, date }).
+  const [ecbRate, setEcbRate] = useState(null);
+  const [rateStatus, setRateStatus] = useState('idle');
   const amountRef = useRef(null);
 
   useEffect(() => {
     if (!isOpen) return;
     setShowCalendar(false);
     setShowSplit(false);
+    setShowCurrencies(false);
+    setEditingRate(false);
+    setRateStatus('idle');
 
     const allParticipants = {};
     members.forEach((m) => { allParticipants[m.id] = true; });
@@ -547,10 +622,18 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
       const participants = {};
       const customAmounts = {};
       members.forEach((m) => { participants[m.id] = false; customAmounts[m.id] = ''; });
+      // Výdaj v cizí měně se upravuje v ní; podíly jsou uložené v měně
+      // výletu, tak se pro úpravu převedou zpět jeho kurzem.
+      const foreign = !!initialExpense.originalCurrency;
+      const rate = foreign ? initialExpense.exchangeRate : 1;
       (initialExpense.splits || []).forEach((s) => {
         participants[s.userId] = true;
-        customAmounts[s.userId] = String(s.amount);
+        customAmounts[s.userId] = String(foreign ? Math.round((s.amount / rate) * 100) / 100 : s.amount);
       });
+      const manual = foreign && initialExpense.rateSource === 'manual';
+      setEcbRate(foreign && !manual
+        ? { key: `${initialExpense.originalCurrency}:${initialExpense.date}`, rate, date: initialExpense.rateDate }
+        : null);
       // Detect whether the saved split was an even share or custom amounts.
       const partIds = (initialExpense.splits || []).map((s) => s.userId);
       const even = computeEqualSplits(partIds, parseFloat(initialExpense.amount));
@@ -560,7 +643,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
       });
       setForm({
         description: initialExpense.description,
-        amount: String(initialExpense.amount),
+        amount: String(foreign ? initialExpense.originalAmount : initialExpense.amount),
         category: initialExpense.category,
         date: initialExpense.date,
         paidBy: initialExpense.paidBy ?? currentUserId,
@@ -568,6 +651,9 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
         splitMode: isEqual ? 'equal' : 'custom',
         participants: hasSplit ? participants : allParticipants,
         customAmounts,
+        currency: foreign ? initialExpense.originalCurrency : tripCurrency,
+        rateSource: manual ? 'manual' : 'ecb',
+        rateInput: manual ? String(rate * rateUnitFor(rate)) : '',
       });
     } else {
       setForm({
@@ -580,17 +666,124 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
         splitMode: 'equal',
         participants: allParticipants,
         customAmounts: {},
+        // Kdo platí v cizině, zadává většinou pořád ve stejné měně.
+        currency: lastExpenseCurrency(tripId) || tripCurrency,
+        rateSource: 'ecb',
+        rateInput: '',
       });
     }
   }, [isOpen, initialExpense, members, currentUserId]);
 
+  // ── Měna a kurz ──
+  // Kurz ECB ke dni výdaje se stáhne jen pro nový výdaj nebo při změně měny
+  // či dne; uložený výdaj si svůj kurz drží.
+  const isForeign = form.currency !== tripCurrency;
+  const rateKey = `${form.currency}:${form.date}`;
   useEffect(() => {
+    if (!isOpen || !isForeign || form.rateSource === 'manual' || ecbRate?.key === rateKey) return;
+    let cancelled = false;
+    setRateStatus('loading');
+    fetchEcbRate(form.currency, tripCurrency, form.date)
+      .then(({ rate, date }) => {
+        if (cancelled) return;
+        setEcbRate({ key: rateKey, rate, date });
+        setRateStatus('idle');
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setRateStatus('error');
+        rateSnapshotRef.current = { rateSource: 'ecb', rateInput: '' };
+        setEditingRate(true);
+      });
+    return () => { cancelled = true; };
+  }, [isOpen, isForeign, rateKey, form.rateSource, tripCurrency, ecbRate?.key]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const currentEcb = ecbRate?.key === rateKey ? ecbRate : null;
+  const rateUnit = rateUnitFor(currentEcb?.rate ?? initialExpense?.exchangeRate ?? 1);
+  const manualRate = parseFloat(String(form.rateInput).replace(/\s/g, '').replace(',', '.')) / rateUnit;
+  const rate = !isForeign ? 1
+    : form.rateSource === 'manual' ? (manualRate > 0 ? manualRate : null)
+    : currentEcb?.rate ?? null;
+
+  const pickCurrency = (code) => {
+    setForm((f) => ({ ...f, currency: code, rateSource: 'ecb', rateInput: '' }));
+    setShowCurrencies(false);
+    setEditingRate(false);
+    setRateStatus('idle');
+    requestAnimationFrame(() => amountRef.current?.focus());
+  };
+
+  const startRateEdit = () => {
+    rateSnapshotRef.current = { rateSource: form.rateSource, rateInput: form.rateInput };
+    setForm((f) => ({
+      ...f,
+      rateInput: f.rateInput || (rate * rateUnit).toLocaleString(i18n.language, { useGrouping: false, maximumFractionDigits: 4 }),
+    }));
+    setEditingRate(true);
+  };
+
+  // Esc: vrátí kurz, jaký byl před úpravou.
+  const cancelRateEdit = () => {
+    const snapshot = rateSnapshotRef.current;
+    if (snapshot) setForm((f) => ({ ...f, ...snapshot }));
+    rateSnapshotRef.current = null;
+    setEditingRate(false);
+  };
+
+  // Enter: potvrdí ruční kurz (jen platný), formulář se tím neodešle.
+  const confirmRateEdit = () => {
+    if (form.rateSource === 'manual' && !(manualRate > 0)) return;
+    rateSnapshotRef.current = null;
+    setEditingRate(false);
+  };
+
+  useEffect(() => {
+    // Esc zavírá postupně: nejdřív otevřený výběr (měna, kurz, kalendář),
+    // až pak celý formulář.
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape' && isOpen) onClose();
+      if (e.key !== 'Escape' || !isOpen) return;
+      if (showCurrencies) {
+        setShowCurrencies(false);
+        currencyButtonRef.current?.focus();
+      } else if (editingRate) {
+        cancelRateEdit();
+      } else if (showCalendar) {
+        setShowCalendar(false);
+      } else {
+        onClose();
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, showCurrencies, editingRate, showCalendar]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Výběr měny visí pod tlačítkem měny, ale je ukotvený k celému modalu,
+  // aby ho neusekla posuvná část a mohl překrýt i patičku.
+  useLayoutEffect(() => {
+    if (!showCurrencies) { setPopoverBox(null); return; }
+    const modal = modalRef.current?.getBoundingClientRect();
+    const button = currencyButtonRef.current?.getBoundingClientRect();
+    if (!modal || !button) return;
+    const top = button.bottom - modal.top + 8;
+    setPopoverBox({ top, maxHeight: Math.max(modal.height - top - 16, 180) });
+  }, [showCurrencies]);
+
+  // Výběr měny je vrstva nad formulářem; klik mimo ni nebo posun obsahu ji zavře.
+  useEffect(() => {
+    if (!showCurrencies) return;
+    const onPointerDown = (e) => {
+      if (currencyPopoverRef.current?.contains(e.target) || currencyButtonRef.current?.contains(e.target)) return;
+      setShowCurrencies(false);
+    };
+    const onScroll = () => setShowCurrencies(false);
+    const scroller = scrollRef.current;
+    document.addEventListener('pointerdown', onPointerDown);
+    scroller?.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      scroller?.removeEventListener('scroll', onScroll);
+    };
+  }, [showCurrencies]);
 
   useEffect(() => {
     if (!isOpen || !modalRef.current) return;
@@ -635,12 +828,19 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
 
   const handleSubmit = (e, { addAnother = false } = {}) => {
     e?.preventDefault();
-    const amount = parseAmount(form.amount);
-    if (!amount || amount <= 0) {
+    const entered = parseAmount(form.amount);
+    if (!entered || entered <= 0) {
       toast.error(t('budget.addModal.amountError'));
       amountRef.current?.focus();
       return;
     }
+    if (isForeign && !rate) {
+      toast.error(t('budget.addModal.rateMissing'));
+      setEditingRate(true);
+      return;
+    }
+    // Do rozpočtu jde částka v měně výletu; zadaná zůstane jako původní.
+    const amount = isForeign ? round2(entered * rate) : entered;
 
     let paidBy = null;
     let splits = [];
@@ -655,13 +855,16 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
       if (form.splitMode === 'equal') {
         splits = computeEqualSplits(participantIds, amount);
       } else {
-        splits = participantIds.map((id) => ({ userId: id, amount: parseFloat(form.customAmounts[id]) || 0 }));
-        const sum = splits.reduce((s, x) => s + x.amount, 0);
-        if (Math.abs(sum - amount) > 0.01) {
+        // Vlastní podíly se zadávají v měně výdaje a kontrolují proti
+        // zadané částce; převod je pak srovná na haléř s převedenou.
+        const entries = participantIds.map((id) => ({ userId: id, amount: parseFloat(form.customAmounts[id]) || 0 }));
+        const sum = entries.reduce((s, x) => s + x.amount, 0);
+        if (Math.abs(sum - entered) > 0.01) {
           setShowSplit(true);
-          toast.error(t('budget.addModal.splitSumError', { amount: formatCurrency(amount, currency, i18n.language) }));
+          toast.error(t('budget.addModal.splitSumError', { amount: formatCurrency(entered, form.currency, i18n.language) }));
           return;
         }
+        splits = isForeign ? convertSplits(entries, rate, amount) : entries;
       }
       paidBy = form.paidBy != null ? parseInt(form.paidBy) : currentUserId;
     }
@@ -676,7 +879,15 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
       date: form.date,
       paidBy,
       splits,
+      ...(isForeign ? {
+        originalAmount: entered,
+        originalCurrency: form.currency,
+        exchangeRate: rate,
+        rateDate: form.rateSource === 'manual' ? null : currentEcb?.date,
+        rateSource: form.rateSource,
+      } : {}),
     });
+    rememberExpenseCurrency(tripId, form.currency, isForeign);
     toast.success(isEditing ? t('budget.addModal.editSuccess') : t('budget.addModal.success'));
 
     if (addAnother) {
@@ -727,7 +938,8 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
     }
   };
 
-  const amountLabel = amountNum > 0 ? formatCurrency(amountNum, currency, i18n.language) : null;
+  const amountLabel = amountNum > 0 ? formatCurrency(amountNum, form.currency, i18n.language) : null;
+  const convertedNum = isForeign && rate && amountNum > 0 ? round2(amountNum * rate) : null;
 
   return createPortal(
     <AnimatePresence>
@@ -753,6 +965,21 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
             className="relative w-full sm:max-w-[480px] bg-page border border-subtle rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl max-h-[92dvh] sm:max-h-[88dvh] flex flex-col z-10"
           >
             <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="flex flex-col min-h-0">
+              {/* Výběr měny: vrstva přes formulář, modal se při otevření nezvětší */}
+              {showCurrencies && popoverBox && (
+                <div
+                  ref={currencyPopoverRef}
+                  style={{ top: popoverBox.top }}
+                  className="absolute inset-x-5 sm:inset-x-6 z-20 rounded-2xl shadow-[0_24px_48px_-16px_rgba(17,24,39,0.28)]"
+                >
+                  <CurrencyList
+                    value={form.currency}
+                    pinned={[tripCurrency, mainCurrency, ...getRecentCurrencies()]}
+                    onSelect={pickCurrency}
+                    listMaxHeight={popoverBox.maxHeight - 70}
+                  />
+                </div>
+              )}
               {/* Hlavička */}
               <div className="flex items-center justify-between gap-3 px-5 sm:px-6 pt-4 sm:pt-5">
                 <h3 id="add-expense-title" className="text-[17px] font-bold tracking-tight text-primary">
@@ -768,12 +995,13 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
                 </button>
               </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-6 pb-4">
-                {/* Částka — hlavní věc formuláře */}
-                <label className="block pt-2 pb-4 text-center cursor-text">
-                  <span className="sr-only">{t('budget.addModal.amountLabel')} ({currency})</span>
-                  <span className="flex items-baseline justify-center gap-2">
+              <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 sm:px-6 pb-4">
+                {/* Částka — hlavní věc formuláře, měna hned vedle */}
+                <div className="pt-2 pb-4 text-center">
+                  <div className="flex items-baseline justify-center gap-1.5">
+                    <label htmlFor="expense-amount" className="sr-only">{t('budget.addModal.amountLabel')} ({form.currency})</label>
                     <input
+                      id="expense-amount"
                       ref={amountRef}
                       data-autofocus
                       type="text"
@@ -785,9 +1013,99 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
                       style={{ width: `${Math.max(String(form.amount).length, 1) + 0.3}ch` }}
                       className="min-w-[2ch] max-w-full bg-transparent text-center text-[48px] sm:text-[52px] leading-none font-bold tracking-tight tabular-nums text-primary placeholder:text-gray-300 dark:placeholder:text-white/20 focus:outline-none"
                     />
-                    <span className="text-[22px] font-bold text-muted">{currencySymbol(currency)}</span>
-                  </span>
-                </label>
+                    <button
+                      ref={currencyButtonRef}
+                      type="button"
+                      onClick={() => setShowCurrencies((v) => !v)}
+                      aria-expanded={showCurrencies}
+                      aria-label={t('currencyPicker.change', { currency: form.currency })}
+                      className={`inline-flex items-center gap-0.5 px-2 -mr-2 rounded-xl text-[22px] font-bold transition-colors cursor-pointer ${
+                        isForeign ? 'text-accent' : 'text-muted hover:text-primary'
+                      } hover:bg-field`}
+                    >
+                      {currencySymbol(form.currency)}
+                      <ChevronRight size={16} strokeWidth={2.75} className={`transition-transform ${showCurrencies ? '-rotate-90' : 'rotate-90'}`} aria-hidden="true" />
+                    </button>
+                  </div>
+
+                  {/* Převod do měny výletu: kurz ECB ke dni výdaje, nebo ruční */}
+                  {isForeign && (
+                    <div className="mt-2 text-[13px] font-medium text-muted" aria-live="polite">
+                      {convertedNum !== null && (
+                        <p className="text-[15px] font-semibold text-secondary tabular-nums">
+                          ≈ {formatCurrency(convertedNum, tripCurrency, i18n.language)}
+                        </p>
+                      )}
+                      {rateStatus === 'loading' && !rate ? (
+                        <p className="inline-flex items-center gap-1.5">
+                          <Loader2 size={13} strokeWidth={2.5} className="animate-spin" aria-hidden="true" /> {t('budget.addModal.rateLoading')}
+                        </p>
+                      ) : rateStatus === 'error' && form.rateSource !== 'manual' ? (
+                        <p className="text-danger">{t('budget.addModal.rateError')}</p>
+                      ) : rate ? (
+                        <p className="flex flex-wrap items-center justify-center gap-x-1.5">
+                          <span className="tabular-nums">{formatRate(rate, form.currency, tripCurrency, i18n.language)}</span>
+                          <span aria-hidden="true">·</span>
+                          <span>
+                            {form.rateSource === 'manual'
+                              ? t('budget.addModal.rateManual')
+                              : t('budget.addModal.rateEcb', { date: currentEcb?.date ? format(parseISO(currentEcb.date), 'd. M.', { locale: dateLocale }) : '' })}
+                          </span>
+                          {!editingRate && (
+                            <>
+                              <span aria-hidden="true">·</span>
+                              <button
+                                type="button"
+                                onClick={startRateEdit}
+                                className="min-h-[32px] font-semibold text-accent hover:underline underline-offset-2 cursor-pointer"
+                              >
+                                {t('budget.addModal.rateEdit')}
+                              </button>
+                            </>
+                          )}
+                        </p>
+                      ) : null}
+
+                      {editingRate && (
+                        <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+                          <label htmlFor="expense-rate" className="tabular-nums font-semibold text-secondary">
+                            {rateUnit} {currencySymbol(form.currency)} =
+                          </label>
+                          <input
+                            id="expense-rate"
+                            type="text"
+                            inputMode="decimal"
+                            autoComplete="off"
+                            autoFocus={rateStatus !== 'error'}
+                            value={form.rateInput}
+                            placeholder="0"
+                            onChange={(e) => setForm((f) => ({ ...f, rateInput: e.target.value.replace(/[^\d.,]/g, ''), rateSource: 'manual' }))}
+                            onKeyDown={(e) => {
+                              if (e.key !== 'Enter') return;
+                              e.preventDefault();
+                              confirmRateEdit();
+                            }}
+                            className="w-28 h-10 px-3 rounded-xl bg-field border border-transparent focus:bg-page focus:border-blue-500/40 focus:ring-2 focus:ring-blue-500/20 focus:outline-none text-base sm:text-[14px] font-semibold text-right tabular-nums text-primary"
+                          />
+                          <span className="font-semibold text-secondary">{currencySymbol(tripCurrency)}</span>
+                          {form.rateSource === 'manual' && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setForm((f) => ({ ...f, rateSource: 'ecb', rateInput: '' }));
+                                setEditingRate(false);
+                                setRateStatus('idle');
+                              }}
+                              className="min-h-[40px] px-1 font-semibold text-accent hover:underline underline-offset-2 cursor-pointer"
+                            >
+                              {t('budget.addModal.rateUseEcb')}
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
 
                 {/* Za co */}
                 <input
@@ -981,7 +1299,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
                                     {checked && (
                                       form.splitMode === 'equal' ? (
                                         <span className="text-[13px] font-bold text-muted tabular-nums shrink-0">
-                                          {formatCurrency(equalShareFor(m.id), currency, i18n.language)}
+                                          {formatCurrency(equalShareFor(m.id), form.currency, i18n.language)}
                                         </span>
                                       ) : (
                                         <input
@@ -1002,7 +1320,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency, tripRange, initialE
 
                             {form.splitMode === 'custom' && amountNum > 0 && (
                               <div className={`flex items-center justify-between text-[12px] font-semibold px-1 ${Math.abs(customSum - amountNum) > 0.01 ? 'text-danger' : 'text-success'}`}>
-                                <span>{formatCurrency(customSum, currency, i18n.language)} / {formatCurrency(amountNum, currency, i18n.language)}</span>
+                                <span>{formatCurrency(customSum, form.currency, i18n.language)} / {formatCurrency(amountNum, form.currency, i18n.language)}</span>
                                 {Math.abs(customSum - amountNum) <= 0.01 && <Check size={14} strokeWidth={2.5} />}
                               </div>
                             )}
@@ -1064,6 +1382,7 @@ const SAMPLE_SCALE = { CZK: 1, EUR: 1 / 25, USD: 1 / 23, GBP: 1 / 29 };
 const BudgetEmptyState = ({
   embedded, isViewer, noTrips = false, onAdd, currency, locale, t,
   budgetTarget, editingTarget, targetInput, setTargetInput, onEditTarget, onSaveTarget, onCancelTarget,
+  currencyControl = null,
 }) => {
   const scale = SAMPLE_SCALE[currency] ?? 1;
   const amount = (czk) => formatCurrency(Math.round(czk * scale), currency, locale);
@@ -1147,6 +1466,7 @@ const BudgetEmptyState = ({
                   </button>
                 )}
               </div>
+              {currencyControl && <div className="mt-2">{currencyControl}</div>}
             </>
           )}
         </div>
@@ -1196,7 +1516,7 @@ const BudgetEmptyState = ({
   );
 };
 
-const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => {
+const Budget = ({ trips, onUpdateTrip, onChangeCurrency, hideHeader = false, addRequest = 0 }) => {
   const { t, i18n } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
@@ -1216,7 +1536,10 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
   const total = expenses.reduce((s, e) => s + e.amount, 0);
   const isViewer = trip?.role === 'viewer';
   const { confirmDialog, ModalPortal } = useDialog();
-  const { currency } = useCurrency();
+  // Všechny částky výletu jsou v jeho měně; hlavní měna jen u výletu bez ní.
+  const { currency: mainCurrency } = useCurrency();
+  const currency = trip?.currency || mainCurrency;
+  const [currencyBusy, setCurrencyBusy] = useState(false);
   const { user } = useAuth();
   const currentUserId = user?.id ?? null;
 
@@ -1230,6 +1553,8 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
     expenses.map((e) => ({ a: e.amount, p: e.paidBy, s: e.splits }))
   );
 
+  // Výdaje se mění optimisticky dřív, než je server uloží; vyrovnání se
+  // proto načte znovu i s novou verzí výletu (po potvrzení uložení).
   useEffect(() => {
     if (!selectedTripId) { setBalanceData(null); return; }
     let cancelled = false;
@@ -1237,7 +1562,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
       .then((data) => { if (!cancelled) setBalanceData(data); })
       .catch(() => { /* keep previous data on transient errors */ });
     return () => { cancelled = true; };
-  }, [selectedTripId, expensesSignature, settleVersion]);
+  }, [selectedTripId, expensesSignature, settleVersion, trip?.version]);
 
   const refreshBalances = () => setSettleVersion((v) => v + 1);
   const members = balanceData?.members || [];
@@ -1321,17 +1646,88 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
     setEditingExpense(null);
   };
 
-  const handleDeleteExpense = async (id) => {
-    const ok = await confirmDialog({
-      title: t('budget.delete.title'),
-      message: t('budget.delete.message'),
-      variant: 'danger',
-      confirmLabel: t('budget.delete.confirm'),
+  // Mazání bez potvrzování, stejně jako u výletů: výdaj hned zmizí a toast
+  // (nebo Cmd/Ctrl+Z) ho vrátí i s dělením a původní měnou. Koš výdaje nemají.
+  const handleDeleteExpense = (id) => {
+    const expense = expenses.find(e => e.id === id);
+    if (!trip || !expense) return;
+    const tripId = trip.id;
+    let toastId;
+
+    const undoAction = {
+      undo: async () => {
+        clearUndo(undoAction);
+        toast.dismiss(toastId);
+        const saved = await deleteRequest;
+        if (!saved) return;
+        // Vrací se do aktuálního stavu výletu (mezitím mohly přibýt další
+        // změny), ne do snímku z chvíle mazání.
+        const fromProps = tripsRef.current.find(tr => tr.id === tripId);
+        const latest = fromProps && (fromProps.version ?? 0) >= (saved.version ?? 0) ? fromProps : saved;
+        try {
+          await onUpdateTrip({ ...latest, expenses: [...(latest.expenses || []), expense] });
+          toast.success(t('budget.delete.restored'));
+        } catch {
+          // chybu ukázal DashboardHome
+        }
+      },
+    };
+
+    // Uložený výlet po smazání, nebo null, když se smazání nepovedlo (pak
+    // výdaj zůstal a vrácení nemá smysl).
+    const deleteRequest = Promise.resolve(onUpdateTrip({ ...trip, expenses: expenses.filter(e => e.id !== id) }))
+      .then((savedTrip) => savedTrip || { ...trip, expenses: expenses.filter(e => e.id !== id) })
+      .catch(() => {
+        clearUndo(undoAction);
+        toast.dismiss(toastId);
+        return null;
+      });
+
+    pushUndo(undoAction);
+    toastId = showUndoToast({
+      title: expense.description,
+      message: t('budget.delete.deleted', { amount: formatCurrency(expense.amount, currency, i18n.language) }),
+      undoLabel: t('dashboardHome.undo'),
+      onUndo: () => undoAction.undo(),
     });
-    if (!ok) return;
-    onUpdateTrip({ ...trip, expenses: expenses.filter(e => e.id !== id) });
-    toast.success(t('budget.delete.success'));
   };
+
+  // Změna měny výletu: s výdaji nebo limitem se zeptá, jestli částky
+  // přepočítat kurzem ECB, nebo jen opravit špatně zvolenou měnu.
+  const handleChangeCurrency = async (next) => {
+    if (!trip || !onChangeCurrency) return;
+    let convert = false;
+    if (expenses.length > 0 || budgetTarget) {
+      const result = await confirmDialog({
+        title: t('budget.currency.changeTitle', { currency: next }),
+        message: t('budget.currency.changeMessage', { from: currency, to: next }),
+        confirmLabel: t('budget.currency.convert'),
+        cancelLabel: t('budget.currency.relabel'),
+      });
+      if (result === null) return;
+      convert = result === true;
+    }
+    setCurrencyBusy(true);
+    try {
+      await onChangeCurrency(trip, next, convert);
+      toast.success(t(convert ? 'budget.currency.converted' : 'budget.currency.changed', { currency: next }));
+    } catch {
+      // chybu ukázal DashboardHome
+    } finally {
+      setCurrencyBusy(false);
+    }
+  };
+  const currencyControl = !isViewer && onChangeCurrency ? (
+    <TripCurrencyControl
+      currency={currency}
+      mainCurrency={mainCurrency}
+      onChange={handleChangeCurrency}
+      busy={currencyBusy}
+    />
+  ) : null;
+
+  const tripsRef = useRef(trips);
+  tripsRef.current = trips;
 
   const handleSaveTarget = () => {
     const value = parseFloat(targetInput);
@@ -1531,6 +1927,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
         onClose={closeModal}
         onAdd={editingExpense ? handleEditExpense : handleAddExpense}
         currency={currency}
+        tripId={trip?.id}
         tripRange={{ start: trip?.startDate, end: trip?.endDate }}
         initialExpense={editingExpense}
         initialCategory={addCategory}
@@ -1591,6 +1988,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
           onEditTarget={() => { setTargetInput(budgetTarget ? String(budgetTarget) : ''); setEditingTarget(true); }}
           onSaveTarget={handleSaveTarget}
           onCancelTarget={() => setEditingTarget(false)}
+          currencyControl={currencyControl}
         />
       ) : trip ? (
         <>
@@ -1663,6 +2061,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                   </button>
                 )
               )}
+              {currencyControl}
             </div>
           ) : (
           <div className="glass-card p-6 sm:p-8 lg:p-10">
@@ -1776,6 +2175,7 @@ const Budget = ({ trips, onUpdateTrip, hideHeader = false, addRequest = 0 }) => 
                     </button>
                   )
                 )}
+                {currencyControl}
               </div>
 
               {/* Right: stats */}

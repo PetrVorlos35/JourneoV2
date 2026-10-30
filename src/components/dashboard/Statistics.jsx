@@ -190,7 +190,9 @@ const Statistics = ({ trips }) => {
     } catch { return acc; }
   }, 0), [trips]);
 
-  const currencySymbol = CURRENCY_SYMBOLS[currency] || currency;
+  // Server přepočítá útratu všech výletů do hlavní měny a řekne do které.
+  const statsCurrency = stats?.financial?.currency || currency;
+  const currencySymbol = CURRENCY_SYMBOLS[statsCurrency] || statsCurrency;
 
   // Názvy zemí bere prohlížeč z ICU dat — žádné vlastní překladové tabulky.
   const regionName = useMemo(() => {

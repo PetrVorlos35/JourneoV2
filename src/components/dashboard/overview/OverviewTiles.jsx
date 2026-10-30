@@ -66,7 +66,8 @@ const OverviewTiles = ({ budget, balances, places, tripCounts }) => {
   const { currency } = useCurrency();
   const locale = i18n.language || 'cs';
 
-  const money = (amount) => formatCurrencyShort(amount, currency, locale);
+  // Rozpočet nese svou měnu (měna výletu), vyrovnání je v hlavní měně.
+  const money = (amount, inCurrency = currency) => formatCurrencyShort(amount, inCurrency, locale);
 
   // ── Budget ──
   const budgetTile = (() => {
@@ -74,13 +75,13 @@ const OverviewTiles = ({ budget, balances, places, tripCounts }) => {
     if (budget.target) {
       const pct = Math.min(Math.round((budget.spent / budget.target) * 100), 999);
       return {
-        value: money(budget.spent),
-        sub: t('tripsOverview.tiles.budgetOf', { target: money(budget.target), pct }),
+        value: money(budget.spent, budget.currency),
+        sub: t('tripsOverview.tiles.budgetOf', { target: money(budget.target, budget.currency), pct }),
         pct: Math.min(pct, 100),
         over: budget.spent > budget.target,
       };
     }
-    return { value: money(budget.spent), sub: t('tripsOverview.tiles.budgetTotal') };
+    return { value: money(budget.spent, budget.currency), sub: t('tripsOverview.tiles.budgetTotal') };
   })();
 
   // ── Settle up ──
@@ -94,7 +95,7 @@ const OverviewTiles = ({ budget, balances, places, tripCounts }) => {
     const owing = iOwe >= owedToMe;
     const people = counterparties.filter((c) => c.direction === (owing ? 'iOwe' : 'owedToMe')).length;
     return {
-      value: money(owing ? iOwe : owedToMe),
+      value: money(owing ? iOwe : owedToMe, balances.currency || currency),
       sub: owing
         ? t('tripsOverview.tiles.balanceIOwe', { count: people })
         : t('tripsOverview.tiles.balanceOwedToMe', { count: people }),

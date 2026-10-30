@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import pool from '../config/db.js';
+import { getUserCurrency, makeConverter } from '../lib/rates.js';
 
 const router = Router();
 
@@ -11,9 +12,7 @@ router.get('/', async (req, res) => {
 
     // Run all queries in parallel for maximum performance
     const [
-      [totalSpentRows],
-      [expenseBreakdownRows],
-      [mostExpensiveTripRows],
+      [financeRows],
       [uniqueLocationsRows],
       [favoriteMonthRows],
       [longestTripRows],
@@ -22,46 +21,15 @@ router.get('/', async (req, res) => {
       [mostPopularTripRows],
     ] = await Promise.all([
 
-      // ─── 1. Financial: Total money spent across all trips ──────
+      // ─── 1. Financial: útrata po výletech a kategoriích ────────
+      // Každý výlet má svou měnu, takže se sčítá až v JS po přepočtu
+      // do hlavní měny uživatele.
       pool.query(`
-        SELECT COALESCE(SUM(e.amount), 0) AS total_spent
-        FROM trip_expenses e
-        JOIN trips t ON e.trip_id = t.id
-        WHERE t.user_id = ? AND t.deleted_at IS NULL
-      `, [userId]),
-
-      // ─── 2. Financial: Expense breakdown by category ───────────
-      pool.query(`
-        SELECT
-          e.category,
-          SUM(e.amount) AS category_total,
-          ROUND(
-            SUM(e.amount) * 100.0 / NULLIF((
-              SELECT SUM(e2.amount)
-              FROM trip_expenses e2
-              JOIN trips t2 ON e2.trip_id = t2.id
-              WHERE t2.user_id = ? AND t2.deleted_at IS NULL
-            ), 0),
-          1) AS percentage
-        FROM trip_expenses e
-        JOIN trips t ON e.trip_id = t.id
-        WHERE t.user_id = ? AND t.deleted_at IS NULL
-        GROUP BY e.category
-        ORDER BY category_total DESC
-      `, [userId, userId]),
-
-      // ─── 3. Financial: Most expensive trip ─────────────────────
-      pool.query(`
-        SELECT
-          t.id AS trip_id,
-          t.title,
-          COALESCE(SUM(e.amount), 0) AS trip_total
+        SELECT t.id AS trip_id, t.title, t.currency, e.category, SUM(e.amount) AS total
         FROM trips t
-        LEFT JOIN trip_expenses e ON e.trip_id = t.id
+        JOIN trip_expenses e ON e.trip_id = t.id
         WHERE t.user_id = ? AND t.deleted_at IS NULL
-        GROUP BY t.id, t.title
-        ORDER BY trip_total DESC
-        LIMIT 1
+        GROUP BY t.id, t.title, t.currency, e.category
       `, [userId]),
 
       // ─── 4. Travel Habits: Unique locations visited ────────────
@@ -135,6 +103,36 @@ router.get('/', async (req, res) => {
       `, [userId]),
     ]);
 
+    // ─── Finance v hlavní měně (výlety bez kurzu se vynechají) ───
+    const currency = await getUserCurrency(pool, userId);
+    const toMain = await makeConverter(currency, financeRows.map((r) => r.currency));
+    const byCategory = new Map();
+    const byTrip = new Map();
+    let totalSpent = 0;
+    for (const row of financeRows) {
+      const amount = toMain(parseFloat(row.total), row.currency);
+      if (amount == null) continue;
+      totalSpent += amount;
+      byCategory.set(row.category, (byCategory.get(row.category) || 0) + amount);
+      const trip = byTrip.get(row.trip_id) || { tripId: row.trip_id.toString(), title: row.title, total: 0 };
+      trip.total += amount;
+      byTrip.set(row.trip_id, trip);
+    }
+    const round2 = (v) => Math.round(v * 100) / 100;
+    const mostExpensive = [...byTrip.values()].sort((a, b) => b.total - a.total)[0];
+    const financial = {
+      currency,
+      totalSpent: round2(totalSpent),
+      expenseBreakdown: [...byCategory.entries()]
+        .map(([category, total]) => ({
+          category,
+          total: round2(total),
+          percentage: totalSpent > 0 ? Math.round((total * 1000) / totalSpent) / 10 : 0,
+        }))
+        .sort((a, b) => b.total - a.total),
+      mostExpensiveTrip: mostExpensive ? { ...mostExpensive, total: round2(mostExpensive.total) } : null,
+    };
+
     // ── Czech month names mapping ─────────────────────────────
     const monthNames = {
       1: 'Leden', 2: 'Únor', 3: 'Březen', 4: 'Duben',
@@ -144,21 +142,7 @@ router.get('/', async (req, res) => {
 
     // ── Build response ────────────────────────────────────────
     const stats = {
-      financial: {
-        totalSpent: parseFloat(totalSpentRows[0]?.total_spent ?? 0),
-        expenseBreakdown: expenseBreakdownRows.map(row => ({
-          category: row.category,
-          total: parseFloat(row.category_total),
-          percentage: parseFloat(row.percentage ?? 0),
-        })),
-        mostExpensiveTrip: mostExpensiveTripRows[0]
-          ? {
-              tripId: mostExpensiveTripRows[0].trip_id?.toString() ?? null,
-              title: mostExpensiveTripRows[0].title ?? null,
-              total: parseFloat(mostExpensiveTripRows[0].trip_total ?? 0),
-            }
-          : null,
-      },
+      financial,
       travelHabits: {
         uniqueLocations: parseInt(uniqueLocationsRows[0]?.unique_locations ?? 0),
         favoriteMonth: favoriteMonthRows[0]

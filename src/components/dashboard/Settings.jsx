@@ -148,7 +148,7 @@ const PasswordField = ({ id, label, value, onChange, autoComplete, autoFocus, in
   );
 };
 
-const Settings = ({ onConvertCurrency }) => {
+const Settings = () => {
   const { currency, setCurrency } = useCurrency();
   const { theme, setTheme } = useTheme();
   const { user, updateProfile, changePassword, deleteAccount, logout } = useAuth();
@@ -226,30 +226,13 @@ const Settings = ({ onConvertCurrency }) => {
   })();
 
   // ── Předvolby ────────────────────────────────────────────────
-  const handleCurrencyChange = async (newCurr) => {
+  // Hlavní měna jen určuje měnu nových výletů a souhrnů. Částky stávajících
+  // výletů jsou v jejich vlastní měně a nemění se (měna výletu se mění
+  // v jeho rozpočtu).
+  const handleCurrencyChange = (newCurr) => {
     if (newCurr === currency) return;
-    const oldCurr = currency;
-
-    const result = await confirmDialog({
-      title: t('settings.currency.changeTitle'),
-      message: t('settings.currency.changeMessage', { newCurr }),
-      confirmLabel: t('settings.currency.yes'),
-      cancelLabel: t('settings.currency.no'),
-    });
-
-    if (result === null) return;
-
-    if (result === true) {
-      // Conversion can fail (live rate unavailable) — only switch the
-      // displayed currency once the amounts were actually recalculated.
-      const converted = await onConvertCurrency(oldCurr, newCurr);
-      if (!converted) return;
-      setCurrency(newCurr);
-      toast.success(t('settings.currency.recalculated', { currency: newCurr }));
-    } else {
-      setCurrency(newCurr);
-      toast.success(t('settings.currency.symbolChanged', { currency: newCurr }));
-    }
+    setCurrency(newCurr);
+    toast.success(t('settings.currency.changed', { currency: newCurr }));
   };
 
   const language = i18n.language?.slice(0, 2) || 'cs';

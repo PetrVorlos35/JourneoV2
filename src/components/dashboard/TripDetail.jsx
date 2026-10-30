@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, Suspense, lazy } from 'react'
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Pencil, PackageOpen, Link as LinkIcon, Share2, Eye, Heart, Wallet, FileDown, MapPinned, NotebookText, Plus, X, Check, Loader2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { format, eachDayOfInterval, differenceInCalendarDays, startOfDay } from 'date-fns';
+import { format, eachDayOfInterval, differenceInCalendarDays, parseISO, startOfDay } from 'date-fns';
 import { cs, enUS } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 import { useDialog } from '../ui/DialogModal';
@@ -17,6 +17,7 @@ import DayPage from './trip/DayPage';
 import PackingTool from './trip/PackingTool';
 import NotesTool from './trip/NotesTool';
 import WelcomeChecklist from './trip/WelcomeChecklist';
+import TripDatesEditor from './trip/TripDatesEditor';
 import { getWelcome, updateWelcome } from '../../utils/onboarding';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import { formatCurrency } from '../../utils/currency';
@@ -27,6 +28,10 @@ const TripMap = lazy(() => import('./TripMap'));
 
 const TOOL_VIEWS = ['packing', 'documents', 'map', 'budget'];
 const AUTOSAVE_DELAY = 800;
+
+// Výchozí název dne („Den 3“) se při posunu termínu přečísluje, vlastní zůstane.
+const DEFAULT_DAY_TITLE = /^Den \d+$/;
+const dayHasContent = (d) => !!(d && (d.plan?.trim() || d.location?.trim() || (d.title && !DEFAULT_DAY_TITLE.test(d.title))));
 
 // Stránky programu pro každý den výletu, doplněné o uložené aktivity.
 const buildDailyPlans = (trip) => {
@@ -63,7 +68,7 @@ const SaveStatus = ({ state, onRetry, t }) => {
   );
 };
 
-const TripDetail = ({ trips, onUpdateTrip }) => {
+const TripDetail = ({ trips, onUpdateTrip, onChangeCurrency }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -95,6 +100,12 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   const [documents, setDocuments] = useState(trip?.documents || []);
   const [tripTitle, setTripTitle] = useState(trip?.title || '');
   const [editingTitle, setEditingTitle] = useState(false);
+  // Nový termín platí hned, ještě než ho server potvrdí; `dayShift` řekne
+  // serveru, o kolik dní posunout místa přiřazená ke dnům.
+  const [datesOverride, setDatesOverride] = useState(null);
+  const [editingDates, setEditingDates] = useState(false);
+  const pendingShiftRef = useRef(0);
+  const datesButtonRef = useRef(null);
 
   const [showShareModal, setShowShareModal] = useState(false);
   // Uvítací checklist u výletu založeného v onboardingu nebo zkopírovaného.
@@ -102,7 +113,8 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   const [showPdfOptions, setShowPdfOptions] = useState(false);
   const [pdfSections, setPdfSections] = useState(null);
   const [addExpenseRequest, setAddExpenseRequest] = useState(0);
-  const { currency } = useCurrency();
+  const { currency: mainCurrency } = useCurrency();
+  const currency = trip?.currency || mainCurrency;
 
   // ── Autosave ────────────────────────────────────────────────────────────
   // Každá úprava zvýší verzi; po krátké pauze v psaní se uloží poslední stav.
@@ -113,7 +125,8 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   const pendingRef = useRef(false);
   const chainRef = useRef(Promise.resolve());
   const latestRef = useRef(null);
-  latestRef.current = { trip, tripTitle, dailyPlans, packingList, documents };
+  const shownTrip = trip && datesOverride ? { ...trip, ...datesOverride } : trip;
+  latestRef.current = { trip: shownTrip, tripTitle, dailyPlans, packingList, documents };
 
   // Rodič předává onUpdateTrip jako novou funkci při každém renderu; přes ref
   // zůstane flushSave stabilní a debounce/flush při odchodu se neresetují.
@@ -128,6 +141,8 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
     chainRef.current = chainRef.current.then(async () => {
       const s = latestRef.current;
       if (!s?.trip) return;
+      const dayShift = pendingShiftRef.current;
+      pendingShiftRef.current = 0;
       try {
         await onUpdateTripRef.current({
           ...s.trip,
@@ -135,6 +150,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           activities: s.dailyPlans,
           packingList: s.packingList,
           documents: s.documents,
+          ...(dayShift ? { dayShift } : {}),
         });
         if (!pendingRef.current) setSaveState('saved');
       } catch (err) {
@@ -153,6 +169,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
             documents: fresh.documents || [],
           };
           pendingRef.current = false;
+          setDatesOverride(null);
           setTripTitle(fresh.title);
           setDailyPlans(plans);
           setPackingList(fresh.packingList || []);
@@ -160,6 +177,8 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
           setSaveState('idle');
           return;
         }
+        // Posun míst se pošle s dalším pokusem o uložení.
+        pendingShiftRef.current += dayShift;
         setSaveState('error');
       }
     });
@@ -192,6 +211,20 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
   useEffect(() => {
     setWelcome(getWelcome(id));
   }, [id]);
+
+  const closeDatesEditor = useCallback(() => setEditingDates(false), []);
+
+  // Jiný výlet = jiný termín; potvrzený termín ze serveru override nahradí.
+  useEffect(() => {
+    setDatesOverride(null);
+    setEditingDates(false);
+  }, [trip?.id]);
+
+  useEffect(() => {
+    if (datesOverride && trip?.startDate === datesOverride.startDate && trip?.endDate === datesOverride.endDate) {
+      setDatesOverride(null);
+    }
+  }, [trip?.startDate, trip?.endDate]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!trip) return;
@@ -306,6 +339,11 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
     markDirty();
   };
 
+  const updateDocument = (docId, title, content) => {
+    setDocuments(prev => prev.map(doc => (doc.id === docId ? { ...doc, title, content } : doc)));
+    markDirty();
+  };
+
   const deleteDocument = async (docId) => {
     const ok = await confirmDialog({
       title: t('tripDetail.documents.delete.title'),
@@ -318,9 +356,61 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
     markDirty();
   };
 
+  // ── Termín výletu ───────────────────────────────────────────────────────
+  // Překrývá-li se nový termín s původním, program zůstane u stejných
+  // kalendářních dnů (přidaný den na začátku je prázdný). Posune-li se výlet
+  // celý jinam, jede program s ním (1. den zůstane 1. dnem).
+  const planDateChange = (startIso, endIso) => {
+    const oldStart = startOfDay(new Date(shownTrip.startDate));
+    const oldEnd = startOfDay(new Date(shownTrip.endDate));
+    const newStart = parseISO(startIso);
+    const newEnd = parseISO(endIso);
+    const overlaps = newStart <= oldEnd && newEnd >= oldStart;
+    const offset = overlaps ? differenceInCalendarDays(newStart, oldStart) : 0;
+    const newLength = differenceInCalendarDays(newEnd, newStart) + 1;
+    const lost = dailyPlans
+      .map((d, i) => ({ d, day: i + 1, to: i - offset }))
+      .filter((x) => (x.to < 0 || x.to >= newLength) && dayHasContent(x.d))
+      .map((x) => x.day);
+    return { overlaps, offset, lost };
+  };
+
+  const describeDateChange = (startIso, endIso) => {
+    const { overlaps, offset, lost } = planDateChange(startIso, endIso);
+    if (lost.length) return { warn: true, text: t('tripDetail.dates.lost', { days: lost.join(', '), count: lost.length }) };
+    if (!overlaps && dailyPlans.some(dayHasContent)) return { text: t('tripDetail.dates.moved') };
+    if (overlaps && offset !== 0 && dailyPlans.some(dayHasContent)) return { text: t('tripDetail.dates.kept') };
+    return null;
+  };
+
+  const saveDates = async (startIso, endIso) => {
+    const { offset, lost } = planDateChange(startIso, endIso);
+    if (lost.length) {
+      const ok = await confirmDialog({
+        title: t('tripDetail.dates.confirmTitle'),
+        message: t('tripDetail.dates.lost', { days: lost.join(', '), count: lost.length }),
+        confirmLabel: t('tripDetail.dates.confirm'),
+        variant: 'danger',
+      });
+      if (!ok) return;
+    }
+    const days = eachDayOfInterval({ start: parseISO(startIso), end: parseISO(endIso) });
+    const plans = days.map((date, i) => {
+      const src = dailyPlans[i + offset];
+      const customTitle = src?.title && !DEFAULT_DAY_TITLE.test(src.title);
+      return { date, title: customTitle ? src.title : `Den ${i + 1}`, plan: src?.plan || '', location: src?.location || '' };
+    });
+    setDatesOverride({ startDate: startIso, endDate: endIso });
+    setDailyPlans(plans);
+    setDayIndex((i) => Math.min(Math.max(i - offset, 0), plans.length - 1));
+    pendingShiftRef.current += offset;
+    setEditingDates(false);
+    markDirty();
+  };
+
   // ── Odvozené údaje ──────────────────────────────────────────────────────
-  const start = startOfDay(new Date(trip.startDate));
-  const end = startOfDay(new Date(trip.endDate));
+  const start = startOfDay(new Date(shownTrip.startDate));
+  const end = startOfDay(new Date(shownTrip.endDate));
   const today = startOfDay(new Date());
   const tripLength = differenceInCalendarDays(end, start) + 1;
   const untilStart = differenceInCalendarDays(start, today);
@@ -445,7 +535,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
       />
       {pdfSections && (
         <TripPdfExport
-          trip={trip}
+          trip={shownTrip}
           dailyPlans={dailyPlans}
           packingList={packingList}
           documents={documents}
@@ -465,7 +555,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
         </div>
 
         <div className="mt-3 sm:mt-5 flex items-start justify-between gap-3 sm:gap-4">
-          <div className="min-w-0 flex-1">
+          <div className="relative min-w-0 flex-1">
             {!isViewer && editingTitle ? (
               <div>
                 <input
@@ -497,9 +587,24 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
 
             <div className="mt-2.5 sm:mt-3 overflow-hidden">
             <p className="meta-dots -ml-5 flex flex-wrap items-center gap-y-1 text-[14px] font-medium text-muted">
-              <span className="text-primary font-semibold">
-                {format(start, 'd. MMM', { locale: dateLocale })} – {format(end, 'd. MMM yyyy', { locale: dateLocale })}
-              </span>
+              {isViewer ? (
+                <span className="text-primary font-semibold">
+                  {format(start, 'd. MMM', { locale: dateLocale })} – {format(end, 'd. MMM yyyy', { locale: dateLocale })}
+                </span>
+              ) : (
+                <button
+                  ref={datesButtonRef}
+                  type="button"
+                  onClick={() => setEditingDates((v) => !v)}
+                  aria-expanded={editingDates}
+                  title={t('tripDetail.dates.edit')}
+                  className="group inline-flex items-center gap-1.5 -mx-1.5 px-1.5 py-0.5 rounded-lg text-primary font-semibold hover:bg-gray-100/70 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                >
+                  {format(start, 'd. MMM', { locale: dateLocale })} – {format(end, 'd. MMM yyyy', { locale: dateLocale })}
+                  <Pencil size={13} strokeWidth={2.25} className="text-gray-400 dark:text-gray-500 sm:opacity-0 sm:group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity" aria-hidden="true" />
+                  <span className="sr-only">{t('tripDetail.dates.edit')}</span>
+                </button>
+              )}
               <span className="whitespace-nowrap">{t('tripDetail.notebook.days', { count: tripLength })}</span>
               <span className="whitespace-nowrap">{timing}</span>
               {trip.role && !isOwner && (
@@ -517,6 +622,19 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
               )}
             </p>
             </div>
+            {/* Kalendář je vrstva pod datem, stránka pod ním neposkočí */}
+            {editingDates && !isViewer && (
+              <TripDatesEditor
+                anchorRef={datesButtonRef}
+                className="absolute left-0 top-full mt-2 z-40"
+                startDate={shownTrip.startDate}
+                endDate={shownTrip.endDate}
+                dateLocale={dateLocale}
+                describe={describeDateChange}
+                onSave={saveDates}
+                onCancel={closeDatesEditor}
+              />
+            )}
           </div>
 
           <div className="hidden sm:flex items-center gap-2 shrink-0 pt-1">{headerActions}</div>
@@ -591,7 +709,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
                       <PackingTool items={packingList} isViewer={isViewer} onAdd={addPackingItem} onToggle={togglePackingItem} onDelete={deletePackingItem} />
                     )}
                     {view === 'documents' && (
-                      <NotesTool documents={documents} isViewer={isViewer} onAdd={addDocument} onDelete={deleteDocument} />
+                      <NotesTool documents={documents} isViewer={isViewer} onAdd={addDocument} onUpdate={updateDocument} onDelete={deleteDocument} />
                     )}
                   </div>
                 </div>
@@ -617,7 +735,7 @@ const TripDetail = ({ trips, onUpdateTrip }) => {
 
           {/* Rozpočet zůstává namontovaný, aby šlo „+ Výdaj“ otevřít odkudkoli. */}
           <div className={view === 'budget' ? 'px-5 sm:px-10 pb-8 sm:pb-10 -mt-2' : 'hidden'}>
-            <Budget trips={[trip]} onUpdateTrip={onUpdateTrip} hideHeader addRequest={addExpenseRequest} />
+            <Budget trips={[shownTrip]} onUpdateTrip={onUpdateTrip} onChangeCurrency={onChangeCurrency} hideHeader addRequest={addExpenseRequest} />
           </div>
         </section>
 

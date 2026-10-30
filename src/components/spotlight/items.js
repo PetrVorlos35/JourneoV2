@@ -169,7 +169,7 @@ export const buildItems = ({
         icon: Receipt,
         title: label,
         subtitle: [trip.title, t(`budget.categories.${expense.category}`, expense.category)].filter(Boolean).join(' · '),
-        meta: formatCurrencyShort(expense.amount, currency, locale),
+        meta: formatCurrencyShort(expense.amount, trip.currency || currency, locale),
         keywords: `vydaj utrata expense ${expense.category} ${expense.amount}`,
         to: `/dashboard/trip/${trip.id}?view=budget`,
       }));

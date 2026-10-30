@@ -6,11 +6,11 @@ import { cs } from 'date-fns/locale';
 import { enUS } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '../../contexts/CurrencyContext';
+import { currencySymbol } from '../../utils/currency';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import JourneoLogo from '../../assets/Journeo_blacklogo.png';
 
-const CURRENCY_SYMBOLS = { CZK: 'Kč', EUR: '€', USD: '$', GBP: '£' };
 
 const CATEGORY_COLORS = {
   transport: '#3b82f6',
@@ -32,7 +32,7 @@ const memberName = (m) => {
 // The visual layer lives in index.css under "Trip PDF Export".
 const TripPdfExport = ({ trip, dailyPlans, packingList, documents, sections, onDone }) => {
   const { t, i18n } = useTranslation();
-  const { currency } = useCurrency();
+  const { currency: mainCurrency } = useCurrency();
   const { user } = useAuth();
   const [balanceData, setBalanceData] = useState(null);
   const [ready, setReady] = useState(false);
@@ -40,7 +40,7 @@ const TripPdfExport = ({ trip, dailyPlans, packingList, documents, sections, onD
   onDoneRef.current = onDone;
 
   const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
-  const currSymbol = CURRENCY_SYMBOLS[currency] || currency;
+  const currSymbol = currencySymbol(trip.currency || mainCurrency);
   const money = (amount) => `${(amount ?? 0).toLocaleString(i18n.language)} ${currSymbol}`;
 
   useEffect(() => {

@@ -3,6 +3,42 @@
 All notable changes to Journeo are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [1.7.0] – 2026-10-30
+
+### Added — Expenses in any currency
+
+- **Trip currency** — `trips.currency` (migration `010_trip_currency.sql`,
+  backfilled from the owner's settings). All trip amounts (expenses, splits,
+  settlements, budget limit) are in it, so shared trips are consistent.
+  `POST /api/trips/:id/currency` changes it, optionally converting every amount
+  at the latest ECB rate; expenses entered in the new currency go back to their
+  exact original amount. "Měna výletu" control in the budget.
+- **Foreign-currency expenses** — `trip_expenses.original_amount`,
+  `original_currency`, `exchange_rate`, `rate_date`, `rate_source`. The add
+  form has a currency picker (30 ECB currencies, search, pinned + recent,
+  keyboard combobox) and shows the converted amount; the ECB rate for the
+  expense date (`GET /api/settings/exchange-rate?date=`) is fetched only for
+  new or changed expenses and can be overridden manually. Custom splits are
+  entered in the expense currency and converted to the cent.
+- **Main currency** — the settings currency is now the default for new trips
+  and for cross-trip totals (overview, statistics, balances summary), which are
+  converted via `server/lib/rates.js` / `GET /api/settings/exchange-rates`.
+- **Editable trip dates** — `trip/TripDatesEditor` popover from the header
+  date. Overlapping ranges keep the plan on the same calendar days, a moved trip
+  shifts the plan; dropping days with content asks first. `PUT` takes
+  `dayShift` to move day-linked places.
+- **Editable links and notes** in `trip/NotesTool` (label and URL inline).
+
+### Changed
+
+- Settings currency change no longer rewrites every trip's amounts.
+- Expense delete is instant with an undo toast / Cmd+Z (shared
+  `ui/undoToast`, also used for trips); no trash for expenses.
+- Expenses and the budget limit update optimistically; the latest queued save
+  wins, client ids are kept across saves, failed saves roll back.
+- Add-expense Esc closes one layer at a time; currency pickers and the dates
+  editor are overlays, so nothing jumps when they open.
+
 ## [1.6.0] – 2026-10-26
 
 ### Added — Quick start and trip invites

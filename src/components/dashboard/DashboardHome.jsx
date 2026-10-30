@@ -6,9 +6,7 @@ import DashboardLayout from './DashboardLayout';
 import DashboardNotFound from './DashboardNotFound';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
-import { Trash2 } from 'lucide-react';
-// eslint-disable-next-line no-unused-vars
-import { motion } from 'framer-motion';
+import { showUndoToast } from '../ui/undoToast';
 import { pushUndo, clearUndo } from '../../hooks/undoStack';
 import { buildStarterDays, buildStarterPacking, startWelcome } from '../../utils/onboarding';
 import {
@@ -50,6 +48,22 @@ const withSuspense = (element, fallback) => (
   <Suspense fallback={fallback}>{element}</Suspense>
 );
 
+// Výdaje ze serveru dostanou ID výdajů, které už klient má (shoda podle
+// obsahu), aby se řádky po uložení nepřemountovaly a znovu neanimovaly.
+const expenseSignature = (e) => [e.description, Number(e.amount), e.category, e.date, e.paidBy ?? '', e.originalCurrency ?? '', Number(e.originalAmount ?? 0)].join('|');
+const keepExpenseIds = (serverExpenses = [], localExpenses = []) => {
+  const pool = new Map();
+  for (const e of localExpenses) {
+    const key = expenseSignature(e);
+    if (!pool.has(key)) pool.set(key, []);
+    pool.get(key).push(e.id);
+  }
+  return serverExpenses.map((e) => {
+    const ids = pool.get(expenseSignature(e));
+    return ids?.length ? { ...e, id: ids.shift() } : e;
+  });
+};
+
 const DashboardHome = () => {
   const { isAdmin } = useAuth();
   const { t } = useTranslation();
@@ -75,6 +89,8 @@ const DashboardHome = () => {
   const versionsRef = useRef(new Map());
   const saveChainsRef = useRef(new Map());
   const conflictGenRef = useRef(new Map());
+  const saveSeqRef = useRef(new Map());
+  const confirmedRef = useRef(new Map());
 
   // Load trips from API on mount. A failure is tracked in state, not just
   // toasted — otherwise the overview renders an empty dashboard and reads as
@@ -206,45 +222,40 @@ const DashboardHome = () => {
     );
 
     pushUndo(undoAction);
-    toastId = toast.custom(
-      (ts) => (
-        <motion.div
-          initial={{ opacity: 0, y: -8, scale: 0.95 }}
-          animate={{ opacity: ts.visible ? 1 : 0, y: 0, scale: 1 }}
-          transition={{ duration: 0.2 }}
-          className="relative w-[340px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl bg-page border border-black/5 dark:border-white/10 shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.4)]"
-        >
-          <div className="flex items-center gap-3 pl-4 pr-3 py-3.5">
-            <div className="w-9 h-9 shrink-0 rounded-full bg-danger-wash text-red-500 flex items-center justify-center">
-              <Trash2 size={16} strokeWidth={2} aria-hidden="true" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-bold text-primary truncate">{trip.title}</p>
-              <p className="text-[12px] font-medium text-muted">{t('dashboardHome.tripDeleted')}</p>
-            </div>
-            <button
-              onClick={() => undoAction.undo()}
-              className="shrink-0 px-3.5 py-1.5 rounded-xl bg-accent text-white text-[13px] font-semibold hover:bg-accent-hover transition-colors cursor-pointer"
-            >
-              {t('dashboardHome.undo')}
-            </button>
-          </div>
-          <motion.div
-            className="h-[3px] bg-blue-500/70 dark:bg-blue-400/70 origin-left"
-            initial={{ scaleX: 1 }}
-            animate={{ scaleX: 0 }}
-            transition={{ duration: 5, ease: 'linear' }}
-          />
-        </motion.div>
-      ),
-      { duration: 5000 }
-    );
+    toastId = showUndoToast({
+      title: trip.title,
+      message: t('dashboardHome.tripDeleted'),
+      undoLabel: t('dashboardHome.undo'),
+      onUndo: () => undoAction.undo(),
+    });
   };
 
+  // Výdaje a limit rozpočtu se ukážou hned (optimisticky), server je jen
+  // potvrdí. Ostatní části výletu si drží TripDetail ve vlastním stavu.
+  //  - Odpověď serveru se použije jen z posledního uložení ve frontě, jinak
+  //    by odpověď na první výdaj na chvíli schovala druhý, přidaný mezitím.
+  //  - Server dává výdajům při každém uložení nová ID; shodné výdaje si
+  //    nechají ta dosavadní, ať se řádky znovu nepřekreslují s animací.
+  //  - Když uložení selže, výdaje se vrátí na poslední potvrzený stav.
   const handleUpdateTrip = (updatedTrip) => {
     const id = updatedTrip.id;
     const gen = conflictGenRef.current.get(id) || 0;
     const previous = saveChainsRef.current.get(id) || Promise.resolve();
+    const seq = (saveSeqRef.current.get(id) || 0) + 1;
+    saveSeqRef.current.set(id, seq);
+
+    const optimistic = {};
+    if (updatedTrip.expenses !== undefined) optimistic.expenses = updatedTrip.expenses;
+    if (updatedTrip.budgetTarget !== undefined) optimistic.budgetTarget = updatedTrip.budgetTarget;
+    if (Object.keys(optimistic).length > 0) {
+      setTrips(prev => prev.map(trip => {
+        if (trip.id !== id) return trip;
+        if (!confirmedRef.current.has(id)) {
+          confirmedRef.current.set(id, { expenses: trip.expenses, budgetTarget: trip.budgetTarget });
+        }
+        return { ...trip, ...optimistic };
+      }));
+    }
 
     const run = previous.catch(() => {}).then(async () => {
       if ((conflictGenRef.current.get(id) || 0) !== gen) return null;
@@ -254,15 +265,27 @@ const DashboardHome = () => {
           version: versionsRef.current.get(id) ?? updatedTrip.version,
         });
         versionsRef.current.set(id, data.trip.version);
-        setTrips(prev => prev.map(trip => trip.id === data.trip.id ? data.trip : trip));
+        confirmedRef.current.set(id, { expenses: data.trip.expenses, budgetTarget: data.trip.budgetTarget });
+        if (saveSeqRef.current.get(id) === seq) {
+          setTrips(prev => prev.map(trip => (trip.id === id
+            ? { ...data.trip, expenses: keepExpenseIds(data.trip.expenses, trip.expenses) }
+            : trip)));
+        } else {
+          setTrips(prev => prev.map(trip => (trip.id === id ? { ...trip, version: data.trip.version } : trip)));
+        }
         return data.trip;
       } catch (err) {
         if (err.code === 'TRIP_CONFLICT' && err.trip) {
           conflictGenRef.current.set(id, gen + 1);
           versionsRef.current.set(id, err.trip.version);
+          confirmedRef.current.set(id, { expenses: err.trip.expenses, budgetTarget: err.trip.budgetTarget });
           setTrips(prev => prev.map(trip => trip.id === id ? err.trip : trip));
           toast.error(t('dashboardHome.conflict'), { id: `trip-conflict-${id}`, duration: 7000 });
         } else {
+          const confirmed = confirmedRef.current.get(id);
+          if (confirmed && Object.keys(optimistic).length > 0) {
+            setTrips(prev => prev.map(trip => (trip.id === id ? { ...trip, ...confirmed } : trip)));
+          }
           toast.error(err.message || t('dashboardHome.updateError'));
         }
         throw err;
@@ -273,39 +296,35 @@ const DashboardHome = () => {
     return run;
   };
 
-  // Converting rewrites every expense amount in the DB irreversibly, so the
-  // rate comes from the server (live ECB data) and the whole operation fails
-  // closed — no conversion happens if the current rate can't be fetched.
-  const handleConvertCurrency = async (oldCurr, newCurr) => {
-    try {
-      const { rate } = await api.settings.getExchangeRate(oldCurr, newCurr);
-      const convertedTrips = trips.map(trip => {
-        if (!trip.expenses || trip.expenses.length === 0) return trip;
-        return {
-          ...trip,
-          expenses: trip.expenses.map(exp => ({
-            ...exp,
-            amount: parseFloat((exp.amount * rate).toFixed(2)),
-            splits: Array.isArray(exp.splits)
-              ? exp.splits.map(s => ({ ...s, amount: parseFloat((s.amount * rate).toFixed(2)) }))
-              : exp.splits,
-          }))
-        };
-      });
-
-      const saved = await Promise.all(
-        convertedTrips
-          .filter(trip => trip.expenses && trip.expenses.length > 0)
-          .map(trip => api.trips.update(trip.id, { ...trip, version: versionsRef.current.get(trip.id) ?? trip.version }))
-      );
-      const savedById = new Map(saved.map(({ trip }) => [trip.id, trip]));
-      savedById.forEach((trip, id) => versionsRef.current.set(id, trip.version));
-      setTrips(convertedTrips.map(trip => savedById.get(trip.id) || trip));
-      return true;
-    } catch (err) {
-      toast.error(err.message || t('dashboardHome.currencyError'));
-      return false;
-    }
+  // Změna měny výletu jde přes vlastní endpoint (přepočet všech částek dělá
+  // server v jedné transakci), ale řadí se do stejné fronty jako ukládání.
+  const handleChangeTripCurrency = (trip, currency, convert) => {
+    const id = trip.id;
+    const previous = saveChainsRef.current.get(id) || Promise.resolve();
+    const run = previous.catch(() => {}).then(async () => {
+      try {
+        const data = await api.trips.changeCurrency(id, {
+          currency,
+          convert,
+          version: versionsRef.current.get(id) ?? trip.version,
+        });
+        versionsRef.current.set(id, data.trip.version);
+        setTrips(prev => prev.map(tr => (tr.id === id ? data.trip : tr)));
+        return data.trip;
+      } catch (err) {
+        if (err.code === 'TRIP_CONFLICT' && err.trip) {
+          conflictGenRef.current.set(id, (conflictGenRef.current.get(id) || 0) + 1);
+          versionsRef.current.set(id, err.trip.version);
+          setTrips(prev => prev.map(tr => (tr.id === id ? err.trip : tr)));
+          toast.error(t('dashboardHome.conflict'), { id: `trip-conflict-${id}`, duration: 7000 });
+        } else {
+          toast.error(err.message || t('dashboardHome.currencyError'));
+        }
+        throw err;
+      }
+    });
+    saveChainsRef.current.set(id, run);
+    return run;
   };
 
   // ?plan=… z landing page: kdo už výlety má, jde rovnou na zakládání
@@ -363,7 +382,7 @@ const DashboardHome = () => {
         />
         <Route
           path="/trip/:id"
-          element={withSuspense(<TripDetail trips={trips} onUpdateTrip={handleUpdateTrip} />, <TripDetailSkeleton />)}
+          element={withSuspense(<TripDetail trips={trips} onUpdateTrip={handleUpdateTrip} onChangeCurrency={handleChangeTripCurrency} />, <TripDetailSkeleton />)}
         />
         <Route
           path="/map"
@@ -379,11 +398,11 @@ const DashboardHome = () => {
         />
         <Route
           path="/settings"
-          element={withSuspense(<Settings onConvertCurrency={handleConvertCurrency} />, <SettingsSkeleton />)}
+          element={withSuspense(<Settings />, <SettingsSkeleton />)}
         />
         <Route
           path="/budget"
-          element={withSuspense(<Budget trips={trips} onUpdateTrip={handleUpdateTrip} />, <BudgetSkeleton />)}
+          element={withSuspense(<Budget trips={trips} onUpdateTrip={handleUpdateTrip} onChangeCurrency={handleChangeTripCurrency} />, <BudgetSkeleton />)}
         />
         <Route
           path="/friends"

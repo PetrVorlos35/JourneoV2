@@ -1,43 +1,42 @@
 import { Router } from 'express';
 import pool from '../config/db.js';
+import { getLatestRates, getRate, isSupportedCurrency } from '../lib/rates.js';
 
 const router = Router();
 
-// ── GET /api/settings/exchange-rate?from=CZK&to=EUR ─────────
-// Živý kurz z ECB (frankfurter.dev). Konverze měny přepisuje částky v DB
-// nevratně, takže při výpadku API radši selžeme, než abychom použili
-// zastaralý kurz.
-const SUPPORTED_CURRENCIES = ['CZK', 'EUR', 'USD', 'GBP'];
-const RATE_TTL_MS = 60 * 60 * 1000;
-const rateCache = new Map();
-
+// ── GET /api/settings/exchange-rate?from=EUR&to=CZK&date=2026-10-20 ──
+// Kurz ECB (frankfurter.dev) k datu výdaje; bez data nebo pro budoucí den
+// poslední vyhlášený. Při výpadku API selžeme a klient nechá kurz zadat ručně,
+// místo abychom tiše použili zastaralý.
 router.get('/exchange-rate', async (req, res) => {
-  const { from, to } = req.query;
+  const { from, to, date } = req.query;
 
-  if (!SUPPORTED_CURRENCIES.includes(from) || !SUPPORTED_CURRENCIES.includes(to)) {
+  if (!isSupportedCurrency(from) || !isSupportedCurrency(to)) {
     return res.status(400).json({ error: 'Nepodporovaná měna.' });
-  }
-  if (from === to) {
-    return res.json({ rate: 1, from, to });
-  }
-
-  const key = `${from}:${to}`;
-  const cached = rateCache.get(key);
-  if (cached && Date.now() - cached.at < RATE_TTL_MS) {
-    return res.json({ rate: cached.rate, from, to });
   }
 
   try {
-    const r = await fetch(`https://api.frankfurter.dev/v1/latest?base=${from}&symbols=${to}`);
-    if (!r.ok) throw new Error(`Frankfurter HTTP ${r.status}`);
-    const data = await r.json();
-    const rate = data?.rates?.[to];
-    if (typeof rate !== 'number' || !(rate > 0)) throw new Error('Kurz chybí v odpovědi');
-    rateCache.set(key, { rate, at: Date.now() });
-    res.json({ rate, from, to });
+    const { rate, date: rateDate } = await getRate(from, to, date);
+    res.json({ rate, from, to, date: rateDate });
   } catch (err) {
     console.error('Exchange rate fetch error:', err);
     res.status(502).json({ error: 'Aktuální kurz se nepodařilo načíst. Zkuste to prosím později.' });
+  }
+});
+
+// ── GET /api/settings/exchange-rates?base=CZK ───────────────
+// Poslední kurzy všech měn vůči hlavní měně — pro souhrny napříč výlety
+// v různých měnách (přehled, přátelé). Jeden požadavek na celou relaci.
+router.get('/exchange-rates', async (req, res) => {
+  const { base } = req.query;
+  if (!isSupportedCurrency(base)) {
+    return res.status(400).json({ error: 'Nepodporovaná měna.' });
+  }
+  try {
+    res.json({ base, rates: await getLatestRates(base) });
+  } catch (err) {
+    console.error('Exchange rates fetch error:', err);
+    res.status(502).json({ error: 'Kurzy se nepodařilo načíst.' });
   }
 });
 
@@ -69,6 +68,9 @@ router.get('/', async (req, res) => {
 router.put('/', async (req, res) => {
   try {
     const { theme, currency, language } = req.body;
+    if (currency != null && !isSupportedCurrency(currency)) {
+      return res.status(400).json({ error: 'Nepodporovaná měna.' });
+    }
 
     await pool.query(
       'UPDATE user_settings SET theme = COALESCE(?, theme), currency = COALESCE(?, currency), language = COALESCE(?, language) WHERE user_id = ?',

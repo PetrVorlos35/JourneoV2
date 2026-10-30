@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ArrowUpRight, Globe, Plus, StickyNote, Trash2 } from 'lucide-react';
+import { ArrowUpRight, Globe, Pencil, Plus, StickyNote, Trash2 } from 'lucide-react';
 
 const isUrl = (s) => /^https?:\/\//i.test(s.trim());
 const hostOf = (url) => {
@@ -17,14 +17,92 @@ const DeleteButton = ({ onClick, label }) => (
   </button>
 );
 
-const NotesTool = ({ documents, isViewer, onAdd, onDelete }) => {
+const RowButton = ({ onClick, label, children }) => (
+  <button
+    onClick={onClick}
+    aria-label={label}
+    className="w-9 h-9 shrink-0 flex items-center justify-center rounded-xl text-gray-400 hover:text-accent hover:bg-active opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-all cursor-pointer"
+  >
+    {children}
+  </button>
+);
+
+// Úprava odkazu nebo poznámky přímo v řádku: Enter uloží, Esc zruší.
+const EditRow = ({ doc, isLink, fieldClass, onSave, onCancel }) => {
+  const { t } = useTranslation();
+  const [title, setTitle] = useState(doc.title);
+  const [content, setContent] = useState(doc.content);
+  const valid = title.trim() && content.trim();
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (valid) onSave(title.trim(), content.trim());
+  };
+  const onKeyDown = (e) => { if (e.key === 'Escape') { e.stopPropagation(); onCancel(); } };
+
+  return (
+    <form onSubmit={submit} onKeyDown={onKeyDown} className="py-3 space-y-2">
+      <label htmlFor={`doc-edit-title-${doc.id}`} className="sr-only">{t(isLink ? 'tripDetail.notebook.linkTitle' : 'tripDetail.notebook.composerTitle')}</label>
+      <input
+        id={`doc-edit-title-${doc.id}`}
+        value={title}
+        maxLength={255}
+        autoFocus
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder={t(isLink ? 'tripDetail.notebook.linkTitle' : 'tripDetail.notebook.composerTitle')}
+        className={`${fieldClass} h-11`}
+      />
+      <label htmlFor={`doc-edit-content-${doc.id}`} className="sr-only">{t(isLink ? 'tripDetail.notebook.linkUrl' : 'tripDetail.notebook.composerContent')}</label>
+      {isLink ? (
+        <input
+          id={`doc-edit-content-${doc.id}`}
+          type="url"
+          value={content}
+          maxLength={2000}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="https://…"
+          className={`${fieldClass} h-11 text-secondary`}
+        />
+      ) : (
+        <textarea
+          id={`doc-edit-content-${doc.id}`}
+          value={content}
+          maxLength={2000}
+          rows={3}
+          onChange={(e) => setContent(e.target.value)}
+          className={`${fieldClass} py-3 resize-y min-h-[3rem]`}
+        />
+      )}
+      <div className="flex justify-end gap-2">
+        <button type="button" onClick={onCancel} className="h-10 px-4 rounded-xl text-[14px] font-semibold text-secondary hover:bg-field transition-colors cursor-pointer">
+          {t('tripDetail.notebook.cancelEdit')}
+        </button>
+        <button
+          type="submit"
+          disabled={!valid}
+          className="h-10 px-4 rounded-xl bg-accent text-white text-[14px] font-semibold hover:bg-accent-hover disabled:bg-gray-200 disabled:text-gray-400 dark:disabled:bg-white/5 dark:disabled:text-gray-500 transition-colors cursor-pointer disabled:cursor-not-allowed"
+        >
+          {t('tripDetail.notebook.saveEdit')}
+        </button>
+      </div>
+    </form>
+  );
+};
+
+const NotesTool = ({ documents, isViewer, onAdd, onUpdate, onDelete }) => {
   const { t } = useTranslation();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [editingId, setEditingId] = useState(null);
 
   const links = documents.filter((d) => isUrl(d.content));
   const notes = documents.filter((d) => !isUrl(d.content));
   const deleteLabel = t('tripDetail.documents.delete.title');
+  const editLabel = t('tripDetail.notebook.edit');
+  const saveEdit = (docId, newTitle, newContent) => {
+    onUpdate(docId, newTitle, newContent);
+    setEditingId(null);
+  };
 
   const submit = (e) => {
     e.preventDefault();
@@ -83,8 +161,12 @@ const NotesTool = ({ documents, isViewer, onAdd, onDelete }) => {
             {t('tripDetail.notebook.links')} <span className="tabular-nums">· {links.length}</span>
           </h3>
           <ul>
-            {links.map((doc) => (
-              <li key={doc.id} className="group flex items-center gap-2 border-b border-gray-100 dark:border-white/[0.06] last:border-b-0">
+            {links.map((doc) => (editingId === doc.id ? (
+              <li key={doc.id} className="border-b border-gray-100 dark:border-white/[0.06] last:border-b-0">
+                <EditRow doc={doc} isLink fieldClass={fieldClass} onSave={(ti, co) => saveEdit(doc.id, ti, co)} onCancel={() => setEditingId(null)} />
+              </li>
+            ) : (
+              <li key={doc.id} className="group flex items-center gap-1 border-b border-gray-100 dark:border-white/[0.06] last:border-b-0">
                 <a
                   href={doc.content.trim()}
                   target="_blank"
@@ -100,9 +182,14 @@ const NotesTool = ({ documents, isViewer, onAdd, onDelete }) => {
                   </span>
                   <ArrowUpRight size={18} strokeWidth={2} className="shrink-0 text-gray-300 group-hover:text-accent dark:text-gray-600 transition-colors" aria-hidden="true" />
                 </a>
-                {!isViewer && <DeleteButton onClick={() => onDelete(doc.id)} label={deleteLabel} />}
+                {!isViewer && (
+                  <>
+                    <RowButton onClick={() => setEditingId(doc.id)} label={editLabel}><Pencil size={15} strokeWidth={2} /></RowButton>
+                    <DeleteButton onClick={() => onDelete(doc.id)} label={deleteLabel} />
+                  </>
+                )}
               </li>
-            ))}
+            )))}
           </ul>
         </section>
       )}
@@ -113,7 +200,11 @@ const NotesTool = ({ documents, isViewer, onAdd, onDelete }) => {
             {t('tripDetail.notebook.notes')} <span className="tabular-nums">· {notes.length}</span>
           </h3>
           <ul>
-            {notes.map((doc) => (
+            {notes.map((doc) => (editingId === doc.id ? (
+              <li key={doc.id} className="border-b border-gray-100 dark:border-white/[0.06] last:border-b-0">
+                <EditRow doc={doc} isLink={false} fieldClass={fieldClass} onSave={(ti, co) => saveEdit(doc.id, ti, co)} onCancel={() => setEditingId(null)} />
+              </li>
+            ) : (
               <li key={doc.id} className="group flex items-start gap-3.5 py-3.5 border-b border-gray-100 dark:border-white/[0.06] last:border-b-0">
                 <span className="w-10 h-10 shrink-0 rounded-xl bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
                   <StickyNote size={18} strokeWidth={2} aria-hidden="true" />
@@ -122,9 +213,14 @@ const NotesTool = ({ documents, isViewer, onAdd, onDelete }) => {
                   <p className="text-[15px] font-semibold text-primary">{doc.title}</p>
                   <p className="mt-0.5 text-[14px] leading-relaxed text-secondary whitespace-pre-wrap break-words">{doc.content}</p>
                 </div>
-                {!isViewer && <DeleteButton onClick={() => onDelete(doc.id)} label={deleteLabel} />}
+                {!isViewer && (
+                  <div className="flex items-center gap-1 shrink-0">
+                    <RowButton onClick={() => setEditingId(doc.id)} label={editLabel}><Pencil size={15} strokeWidth={2} /></RowButton>
+                    <DeleteButton onClick={() => onDelete(doc.id)} label={deleteLabel} />
+                  </div>
+                )}
               </li>
-            ))}
+            )))}
           </ul>
         </section>
       )}

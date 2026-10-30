@@ -10,6 +10,7 @@ import OverviewTiles, { FriendRequestsRow } from './overview/OverviewTiles';
 import TripCard from './overview/TripCard';
 import TripComposer from './TripComposer';
 import { useAuth } from '../../contexts/AuthContext';
+import { sumInMain, useMainCurrency } from '../../contexts/CurrencyContext';
 import useOverviewData from './overview/useOverviewData';
 import { categorizeTrip, tripSpend } from '../../utils/trip';
 
@@ -25,6 +26,7 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal, onCreateStarter
   const [searchParams] = useSearchParams();
   const shouldReduceMotion = useReducedMotion();
   const { places, balances, friendRequests } = useOverviewData();
+  const { currency: mainCurrency, toMain } = useMainCurrency(trips.map((trip) => trip.currency));
 
   // Every derivation runs once per trips change instead of on every render.
   const { ongoing, upcoming, past } = useMemo(() => {
@@ -50,19 +52,21 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal, onCreateStarter
     return places.filter((p) => p.tripId === heroTrip.id).length;
   }, [places, heroTrip]);
 
+  // Rozpočet hlavního výletu je v jeho měně, součet všech výletů v hlavní.
   const budget = useMemo(() => {
+    const allSpent = () => sumInMain(trips, toMain, tripSpend);
     if (!heroTrip) {
-      const spent = trips.reduce((sum, trip) => sum + tripSpend(trip), 0);
-      return spent > 0 ? { spent, target: null } : null;
+      const spent = allSpent();
+      return spent > 0 ? { spent, target: null, currency: mainCurrency } : null;
     }
     const spent = tripSpend(heroTrip);
     const target = heroTrip.budgetTarget || null;
     if (spent === 0 && !target) {
-      const allSpent = trips.reduce((sum, trip) => sum + tripSpend(trip), 0);
-      return allSpent > 0 ? { spent: allSpent, target: null } : null;
+      const spentAll = allSpent();
+      return spentAll > 0 ? { spent: spentAll, target: null, currency: mainCurrency } : null;
     }
-    return { spent, target };
-  }, [heroTrip, trips]);
+    return { spent, target, currency: heroTrip.currency || mainCurrency };
+  }, [heroTrip, trips, toMain, mainCurrency]);
 
   // Ongoing first, then what's coming up. Only once there's neither do past
   // trips fill the list, so it's never empty while the user has any trips.

@@ -11,6 +11,22 @@
     "current": "Current version",
     "empty": "There are no release notes yet.",
     "releases": {
+      "v1_7": {
+        "title": "Expenses in any currency",
+        "summary": "Every trip now has its own currency, and you enter each expense in the currency you paid in. Journeo converts it at the ECB rate for that day and keeps the original amount. Plus editable trip dates, editable links and a snappier budget.",
+        "highlights": [
+          "Enter an expense in any of 30 currencies; it’s converted at the ECB rate for that day and the original amount stays visible",
+          "Override the rate with your own, e.g. from the exchange office or your card statement",
+          "The form remembers your last currency per trip, so you don’t switch every time abroad",
+          "Each trip has its own currency, so shared trips look the same for everyone; change it in the budget, with conversion",
+          "Settings now have a “Main currency”: new trips start in it and totals across trips use it",
+          "Change a trip’s dates by clicking the date in its header; the plan stays on the right days",
+          "Links and notes can be edited, including the link label",
+          "Delete an expense without a confirmation and bring it back from the toast or with Cmd/Ctrl+Z",
+          "Added, edited and deleted expenses show up instantly, without waiting for the save",
+          "Pick currencies with the arrow keys, and Esc closes one layer at a time"
+        ]
+      },
       "v1_6": {
         "title": "Quick start and trip invites",
         "summary": "Start a new trip in a minute: type where you’re going, pick the dates and watch the trip take shape. Invite your crew with one link, even before they have an account, and copy someone’s shared trip into your own. Plus a new share window, a new What’s new and friendlier empty screens.",
@@ -897,7 +913,26 @@
       "spent": "Spent",
       "of": "of",
       "packing": "Packing",
-      "searchExpenses": "Search expenses"
+      "searchExpenses": "Search expenses",
+      "edit": "Edit",
+      "saveEdit": "Save",
+      "cancelEdit": "Cancel",
+      "linkTitle": "Link label",
+      "linkUrl": "Link address"
+    },
+    "dates": {
+      "edit": "Change dates",
+      "pick": "Pick the first and last day of the trip",
+      "save": "Save dates",
+      "cancel": "Cancel",
+      "tooLong": "A trip can be at most {{max}} days long.",
+      "lost_one": "Day {{days}} has a plan and won't be part of the new dates. Its plan will be deleted.",
+      "lost_other": "Days {{days}} have plans and won't be part of the new dates. Their plans will be deleted.",
+      "moved": "The plan moves with the trip: day 1 stays day 1.",
+      "kept": "The plan stays on the same calendar days.",
+      "confirmTitle": "Shorten the trip?",
+      "confirm": "Change dates",
+      "pickEnd": "From {{date}}, now pick the last day"
     }
   },
   "pdf": {
@@ -1174,10 +1209,8 @@
       "noTripsLead": "Once you have a trip, log what you spend here. Journeo adds it up by day and category and works out who owes whom."
     },
     "delete": {
-      "title": "Delete expense?",
-      "message": "Are you sure you want to delete this expense? This action cannot be undone.",
-      "confirm": "Delete",
-      "success": "Expense deleted"
+      "deleted": "Expense deleted · {{amount}}",
+      "restored": "Expense restored"
     },
     "addModal": {
       "splitSummaryYou": "Paid by you · split {{count}} ways",
@@ -1215,7 +1248,14 @@
       "splitSumError": "Split amounts must add up to the total ({{amount}}).",
       "selectAll": "Select all",
       "you": "You",
-      "close": "Close"
+      "close": "Close",
+      "rateLoading": "Loading rate…",
+      "rateError": "Couldn't load the ECB rate. Enter it manually.",
+      "rateEcb": "ECB rate {{date}}",
+      "rateManual": "custom rate",
+      "rateEdit": "Edit rate",
+      "rateUseEcb": "Use ECB rate",
+      "rateMissing": "Add an exchange rate so the expense can be converted to the trip currency."
     },
     "balances": {
       "title": "Balances",
@@ -1269,6 +1309,14 @@
     "groupDate": {
       "today": "Today",
       "yesterday": "Yesterday"
+    },
+    "currency": {
+      "changeTitle": "Change trip currency to {{currency}}?",
+      "changeMessage": "I can convert expenses, settlements and the budget limit from {{from}} to {{to}} at today's ECB rate. Expenses entered directly in {{to}} go back to their exact original amount. If you just picked the wrong currency at the start, choose “Just change currency” and the amounts stay the same.",
+      "convert": "Convert",
+      "relabel": "Just change currency",
+      "converted": "The trip is now in {{currency}}, amounts converted",
+      "changed": "Trip currency changed to {{currency}}"
     }
   },
   "statistics": {
@@ -1366,14 +1414,9 @@
       "title": "Preferences"
     },
     "currency": {
-      "title": "Currency",
-      "subtitle": "The currency you track expenses in.",
-      "changeTitle": "Change currency?",
-      "changeMessage": "Would you like to recalculate existing expenses to the new currency ({{newCurr}}) using the exchange rate, or just change the currency symbol and leave amounts unchanged?",
-      "yes": "Yes, recalculate",
-      "no": "No, just symbol",
-      "recalculated": "Amounts recalculated to {{currency}}",
-      "symbolChanged": "Currency symbol changed to {{currency}}"
+      "title": "Main currency",
+      "subtitle": "New trips start in this currency and totals across trips are shown in it. Each trip has its own currency (change it in the trip budget) and expenses can be entered in any currency.",
+      "changed": "Your main currency is now {{currency}}. Existing trips keep their own currency."
     },
     "appearance": {
       "title": "Appearance",
@@ -2140,5 +2183,13 @@
   "emptyStates": {
     "sample": "Example",
     "planFirst": "Plan your first trip"
+  },
+  "currencyPicker": {
+    "search": "Search currency",
+    "frequent": "Frequently used",
+    "all": "All currencies",
+    "noResults": "No matching currency.",
+    "change": "Expense currency: {{currency}}, change",
+    "tripCurrency": "Trip currency · {{currency}}"
   }
 }

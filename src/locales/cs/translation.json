@@ -11,6 +11,22 @@
     "current": "Aktuální verze",
     "empty": "Zatím tu nejsou žádné novinky.",
     "releases": {
+      "v1_7": {
+        "title": "Výdaje v cizí měně",
+        "summary": "Každý výlet má teď vlastní měnu a výdaj zadáte v té, ve které jste platili. Journeo ho převede kurzem ECB ke dni výdaje a původní částku si pamatuje. K tomu změna termínu výletu, úprava odkazů a rychlejší, svižnější rozpočet.",
+        "highlights": [
+          "Výdaj zadáte v kterékoli z 30 měn, převede se kurzem ECB ke dni výdaje a u výdaje zůstane vidět i původní částka",
+          "Kurz můžete přepsat vlastním, třeba ze směnárny nebo z výpisu karty",
+          "Formulář si u výletu pamatuje poslední měnu, takže v cizině nemusíte pokaždé přepínat",
+          "Každý výlet má vlastní měnu, sdílené výlety jsou tak pro všechny stejné; změníte ji v rozpočtu, i s přepočtem částek",
+          "V Nastavení je teď „Hlavní měna“: v ní se zakládají nové výlety a počítají souhrny napříč výlety",
+          "Termín výletu změníte kliknutím na datum v hlavičce; program zůstane u správných dní",
+          "Odkazy a poznámky jdou upravit, včetně popisku odkazu",
+          "Výdaj smažete bez potvrzování a vrátíte ho přes toast nebo Cmd/Ctrl+Z",
+          "Přidané, upravené i smazané výdaje se ukážou hned, bez čekání na uložení",
+          "Měny jdou vybírat šipkami a Esc zavírá postupně, nejdřív seznam a až pak celé okno"
+        ]
+      },
       "v1_6": {
         "title": "Rychlý start a pozvánky do výletu",
         "summary": "Nový výlet založíte za minutu: napíšete, kam jedete, vyberete termín a hned vidíte, jak se výlet skládá. Partu do výletu pozvete jedním odkazem, i když ještě nemá účet, a cizí sdílený výlet si můžete zkopírovat k sobě. K tomu nové okno sdílení, novinky a přívětivější prázdné obrazovky.",
@@ -911,7 +927,28 @@
       "spent": "Utraceno",
       "of": "z",
       "packing": "Balení",
-      "searchExpenses": "Hledat výdaj"
+      "searchExpenses": "Hledat výdaj",
+      "edit": "Upravit",
+      "saveEdit": "Uložit",
+      "cancelEdit": "Zrušit",
+      "linkTitle": "Popisek odkazu",
+      "linkUrl": "Adresa odkazu"
+    },
+    "dates": {
+      "edit": "Změnit termín",
+      "pick": "Vyberte první a poslední den výletu",
+      "save": "Uložit termín",
+      "cancel": "Zrušit",
+      "tooLong": "Výlet může mít nejvýš {{max}} dní.",
+      "lost_one": "Den {{days}} má vyplněný program a v novém termínu už nebude. Jeho program se smaže.",
+      "lost_few": "Dny {{days}} mají vyplněný program a v novém termínu už nebudou. Jejich program se smaže.",
+      "lost_many": "Dny {{days}} mají vyplněný program a v novém termínu už nebudou. Jejich program se smaže.",
+      "lost_other": "Dny {{days}} mají vyplněný program a v novém termínu už nebudou. Jejich program se smaže.",
+      "moved": "Program se posune s výletem: 1. den zůstane 1. dnem.",
+      "kept": "Program zůstane u stejných kalendářních dnů.",
+      "confirmTitle": "Zkrátit výlet?",
+      "confirm": "Změnit termín",
+      "pickEnd": "Od {{date}}, teď vyberte poslední den"
     }
   },
   "pdf": {
@@ -1194,10 +1231,8 @@
       "noTripsLead": "Jakmile máš výlet, zapisuješ sem útraty. Journeo je sečte po dnech i kategoriích a spočítá, kdo komu kolik dluží."
     },
     "delete": {
-      "title": "Smazat výdaj?",
-      "message": "Opravdu chcete smazat tento výdaj? Tato akce nelze vrátit zpět.",
-      "confirm": "Smazat",
-      "success": "Výdaj smazán"
+      "deleted": "Výdaj smazán · {{amount}}",
+      "restored": "Výdaj je zpátky"
     },
     "addModal": {
       "splitSummaryYou": "Platíš ty · děleno mezi {{count}}",
@@ -1235,7 +1270,14 @@
       "splitSumError": "Součet částek musí odpovídat celkové částce ({{amount}}).",
       "selectAll": "Vybrat všechny",
       "you": "Vy",
-      "close": "Zavřít"
+      "close": "Zavřít",
+      "rateLoading": "Načítám kurz…",
+      "rateError": "Kurz ECB se nepodařilo načíst. Zadejte ho ručně.",
+      "rateEcb": "kurz ECB {{date}}",
+      "rateManual": "vlastní kurz",
+      "rateEdit": "Upravit kurz",
+      "rateUseEcb": "Použít kurz ECB",
+      "rateMissing": "Doplňte kurz, ať jde výdaj převést do měny výletu."
     },
     "balances": {
       "title": "Vyrovnání",
@@ -1289,6 +1331,14 @@
     "groupDate": {
       "today": "Dnes",
       "yesterday": "Včera"
+    },
+    "currency": {
+      "changeTitle": "Změnit měnu výletu na {{currency}}?",
+      "changeMessage": "Částky výdajů, vyrovnání i limit můžu přepočítat z {{from}} na {{to}} dnešním kurzem ECB. Výdaje zadané přímo v {{to}} se vrátí na přesnou původní částku. Pokud jste jen na začátku vybrali špatnou měnu, zvolte „Jen změnit měnu“ a částky zůstanou stejné.",
+      "convert": "Přepočítat",
+      "relabel": "Jen změnit měnu",
+      "converted": "Výlet je teď v {{currency}}, částky jsou přepočítané",
+      "changed": "Měna výletu změněna na {{currency}}"
     }
   },
   "statistics": {
@@ -1386,14 +1436,9 @@
       "title": "Předvolby"
     },
     "currency": {
-      "title": "Měna",
-      "subtitle": "Ve které měně sledujete výdaje.",
-      "changeTitle": "Změnit měnu?",
-      "changeMessage": "Přejete si přepočítat stávající výdaje do nové měny ({{newCurr}}) pomocí kurzu, nebo jen změnit symbol měny a nechat částky beze změny?",
-      "yes": "Ano, přepočítat",
-      "no": "Ne, jen symbol",
-      "recalculated": "Částky byly přepočítány do {{currency}}",
-      "symbolChanged": "Symbol měny změněn na {{currency}}"
+      "title": "Hlavní měna",
+      "subtitle": "Nové výlety se zakládají v této měně a v ní se sčítají souhrny napříč výlety. Každý výlet má vlastní měnu (mění se v jeho rozpočtu) a výdaj jde zadat v libovolné měně.",
+      "changed": "Hlavní měna je teď {{currency}}. Stávající výlety zůstávají ve své měně."
     },
     "appearance": {
       "title": "Vzhled",
@@ -2184,5 +2229,13 @@
   "emptyStates": {
     "sample": "Ukázka",
     "planFirst": "Naplánovat první výlet"
+  },
+  "currencyPicker": {
+    "search": "Hledat měnu",
+    "frequent": "Často používané",
+    "all": "Všechny měny",
+    "noResults": "Žádná měna neodpovídá.",
+    "change": "Měna výdaje: {{currency}}, změnit",
+    "tripCurrency": "Měna výletu · {{currency}}"
   }
 }
