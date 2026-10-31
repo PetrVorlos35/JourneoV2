@@ -5,6 +5,7 @@ import pool from '../config/db.js';
 import { getTripRole } from '../lib/tripAccess.js';
 import { calculateBalances } from '../lib/balances.js';
 import { sendSettlementEmail } from '../lib/mailer.js';
+import { wantsEmail } from '../lib/emailPrefs.js';
 import { getRate, getUserCurrency, isSupportedCurrency, makeConverter } from '../lib/rates.js';
 
 const router = Router();
@@ -893,7 +894,7 @@ router.post('/:id/settle', async (req, res) => {
     const [[trip]] = await pool.query('SELECT title, currency FROM trips WHERE id = ?', [tripId]);
 
     // Notify the person who was owed money (non-blocking, fire-and-forget).
-    if (receiver?.email) {
+    if (receiver?.email && await wantsEmail(toId, 'settlements')) {
       const payerName = [payer?.firstName, payer?.lastName].filter(Boolean).join(' ').trim() || 'Někdo';
       waitUntil(
         sendSettlementEmail(receiver.email, {

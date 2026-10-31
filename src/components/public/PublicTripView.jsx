@@ -17,6 +17,7 @@ import JourneoLogoBlack from '../../assets/Journeo_blacklogo.png';
 import LandingLanguageSwitcher from '../LandingLanguageSwitcher';
 import UserAvatar from '../ui/UserAvatar';
 import Skeleton from '../ui/Skeleton';
+import useForceLightTheme from '../../hooks/useForceLightTheme';
 
 const PublicTripView = () => {
   const { token } = useParams();
@@ -28,7 +29,10 @@ const PublicTripView = () => {
   const [error, setError] = useState(null);
   const [activeView, setActiveView] = useState(0);
   const [mobileView, setMobileView] = useState('itinerary');
-  const [isDark, setIsDark] = useState(() => localStorage.getItem('ptv-theme') !== 'light');
+  // Sdílený výlet je výchozí světlý; tmavý jen když si ho návštěvník sám přepne.
+  // Light-lock drží `dark` z motivu aplikace mimo, o tmavý režim se stará wrapper níž.
+  useForceLightTheme();
+  const [isDark, setIsDark] = useState(() => localStorage.getItem('ptv-theme') === 'dark');
 
   const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
   const navigate = useNavigate();

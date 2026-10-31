@@ -1435,6 +1435,17 @@
     "preferences": {
       "title": "Předvolby"
     },
+    "emails": {
+      "title": "E-mailová upozornění",
+      "note": "Kódy pro přihlášení a obnovení hesla chodí vždy.",
+      "friendRequests": "Žádosti o přátelství",
+      "friendRequestsHint": "Když vás někdo přidá do přátel.",
+      "settlements": "Vyrovnané dluhy",
+      "settlementsHint": "Když vám někdo ve výletu pošle, co dlužil.",
+      "tripTransfers": "Předané výlety",
+      "tripTransfersHint": "Když vám někdo před smazáním účtu předá výlet.",
+      "error": "Nastavení e-mailů se nepodařilo uložit."
+    },
     "currency": {
       "title": "Hlavní měna",
       "subtitle": "Nové výlety se zakládají v této měně a v ní se sčítají souhrny napříč výlety. Každý výlet má vlastní měnu (mění se v jeho rozpočtu) a výdaj jde zadat v libovolné měně.",

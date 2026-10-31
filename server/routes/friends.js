@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { randomBytes } from 'crypto';
 import pool from '../config/db.js';
 import { sendFriendRequestEmail } from '../lib/mailer.js';
+import { wantsEmail } from '../lib/emailPrefs.js';
 
 const router = Router();
 
@@ -171,7 +172,7 @@ router.post('/request', async (req, res) => {
 
         // Notify the addressee by email (fire-and-forget)
         const [[addressee]] = await pool.query('SELECT email FROM users WHERE id = ?', [addresseeId]);
-        if (addressee?.email) {
+        if (addressee?.email && await wantsEmail(addresseeId, 'friendRequests')) {
           sendFriendRequestEmail(addressee.email, name, f.id).catch(err =>
             console.error('Friend request email error:', err)
           );
@@ -199,7 +200,7 @@ router.post('/request', async (req, res) => {
 
     // Notify the addressee by email (fire-and-forget)
     const [[addressee]] = await pool.query('SELECT email FROM users WHERE id = ?', [addresseeId]);
-    if (addressee?.email) {
+    if (addressee?.email && await wantsEmail(addresseeId, 'friendRequests')) {
       sendFriendRequestEmail(addressee.email, name, friendshipId).catch(err =>
         console.error('Friend request email error:', err)
       );
@@ -521,7 +522,7 @@ router.post('/invite/:token/accept', async (req, res) => {
     );
 
     // Notify the inviter by email (fire-and-forget)
-    if (inviter.email) {
+    if (inviter.email && await wantsEmail(inviter.id, 'friendRequests')) {
       sendFriendRequestEmail(inviter.email, name, friendshipId).catch(err =>
         console.error('Friend request email error:', err)
       );

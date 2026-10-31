@@ -1413,6 +1413,17 @@
     "preferences": {
       "title": "Preferences"
     },
+    "emails": {
+      "title": "Email notifications",
+      "note": "Sign-in and password reset codes are always sent.",
+      "friendRequests": "Friend requests",
+      "friendRequestsHint": "When someone adds you as a friend.",
+      "settlements": "Settled debts",
+      "settlementsHint": "When someone on a trip pays you back.",
+      "tripTransfers": "Handed-over trips",
+      "tripTransfersHint": "When someone hands a trip over to you before deleting their account.",
+      "error": "Couldn't save email settings."
+    },
     "currency": {
       "title": "Main currency",
       "subtitle": "New trips start in this currency and totals across trips are shown in it. Each trip has its own currency (change it in the trip budget) and expenses can be entered in any currency.",

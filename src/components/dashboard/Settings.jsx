@@ -111,6 +111,31 @@ const Segmented = ({ labelledBy, value, options, onChange }) => {
   );
 };
 
+// Přepínač pro e-mailová upozornění; popisek nese řádek (aria-labelledby).
+const Switch = ({ checked, onChange, labelledBy, describedBy, disabled }) => (
+  <button
+    type="button"
+    role="switch"
+    aria-checked={checked}
+    aria-labelledby={labelledBy}
+    aria-describedby={describedBy}
+    disabled={disabled}
+    onClick={() => onChange(!checked)}
+    className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 ${
+      checked ? 'bg-accent' : 'bg-gray-300 dark:bg-white/20'
+    } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+  >
+    <span
+      aria-hidden="true"
+      className={`inline-block h-6 w-6 rounded-full bg-white shadow-[0_1px_3px_rgba(17,24,39,0.2)] transition-transform duration-200 motion-reduce:transition-none ${
+        checked ? 'translate-x-[22px]' : 'translate-x-0.5'
+      }`}
+    />
+  </button>
+);
+
+const EMAIL_KINDS = ['friendRequests', 'settlements', 'tripTransfers'];
+
 const fieldClass =
   'w-full rounded-control bg-page border border-default px-3.5 text-primary placeholder:text-placeholder transition-[background-color,border-color,box-shadow] duration-200 hover:border-strong focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/25';
 
@@ -156,7 +181,7 @@ const Settings = () => {
   const { promptDialog, confirmDialog, ModalPortal } = useDialog();
   const { t, i18n } = useTranslation();
   const reduceMotion = useReducedMotion();
-  const ids = { first: useId(), last: useId(), bio: useId(), bank: useId(), bankHint: useId(), avatar: useId(), currency: useId(), theme: useId(), language: useId(), pwdError: useId(), pwdReqs: useId() };
+  const ids = { first: useId(), last: useId(), bio: useId(), bank: useId(), bankHint: useId(), avatar: useId(), currency: useId(), theme: useId(), language: useId(), pwdError: useId(), pwdReqs: useId(), friendRequests: useId(), settlements: useId(), tripTransfers: useId(), friendRequestsHint: useId(), settlementsHint: useId(), tripTransfersHint: useId() };
 
   // ── Profil s automatickým ukládáním ──────────────────────────
   const [profileForm, setProfileForm] = useState(() => profileFromUser(user));
@@ -244,6 +269,27 @@ const Settings = () => {
       await api.settings.update({ language: code });
     } catch {
       // Language is already changed locally; DB sync is best-effort
+    }
+  };
+
+  // ── E-mailová upozornění ─────────────────────────────────────
+  // Přepínač se uloží hned (optimisticky); při chybě se vrátí zpět.
+  const [emails, setEmails] = useState(null);
+  useEffect(() => {
+    let cancelled = false;
+    api.settings.get()
+      .then((data) => { if (!cancelled) setEmails(data.settings?.emails ?? null); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  const handleEmailToggle = async (kind, enabled) => {
+    setEmails((prev) => ({ ...prev, [kind]: enabled }));
+    try {
+      await api.settings.update({ emails: { [kind]: enabled } });
+    } catch {
+      setEmails((prev) => ({ ...prev, [kind]: !enabled }));
+      toast.error(t('settings.emails.error'));
     }
   };
 
@@ -490,6 +536,29 @@ const Settings = () => {
             <Segmented labelledBy={ids.language} value={language} options={languageOptions} onChange={handleLanguageChange} />
           </Row>
         </Group>
+
+        <div>
+          <Group title={t('settings.emails.title')}>
+            {EMAIL_KINDS.map((kind) => (
+              <Row
+                key={kind}
+                title={t(`settings.emails.${kind}`)}
+                titleId={ids[kind]}
+                hint={t(`settings.emails.${kind}Hint`)}
+                hintId={ids[`${kind}Hint`]}
+              >
+                <Switch
+                  checked={emails?.[kind] ?? true}
+                  disabled={!emails}
+                  onChange={(enabled) => handleEmailToggle(kind, enabled)}
+                  labelledBy={ids[kind]}
+                  describedBy={ids[`${kind}Hint`]}
+                />
+              </Row>
+            ))}
+          </Group>
+          <p className="mt-2 px-1 text-[12px] font-medium text-muted">{t('settings.emails.note')}</p>
+        </div>
 
         <Group title={t('settings.account.title')}>
           <Row title={t('settings.account.email')} hint={t('settings.account.emailHint')}>

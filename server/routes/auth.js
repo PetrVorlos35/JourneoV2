@@ -610,7 +610,8 @@ router.delete('/account', auth, async (req, res) => {
 
     // Nejstarší editor každého vlastněného (nesmazaného) výletu.
     const [heirs] = await connection.query(
-      `SELECT tc.trip_id, tc.user_id, t.title, u.email, us.language
+      `SELECT tc.trip_id, tc.user_id, t.title, u.email, us.language,
+              COALESCE(us.email_trip_transfers, 1) AS wantsEmail
        FROM trip_collaborators tc
        JOIN trips t ON t.id = tc.trip_id
        JOIN users u ON u.id = tc.user_id
@@ -651,6 +652,7 @@ router.delete('/account', auth, async (req, res) => {
           [heir.user_id, heir.trip_id, ownerName]
         ).catch((err) => console.error('Trip transferred notification error:', err))
       );
+      if (!heir.wantsEmail) continue;
       waitUntil(
         sendTripTransferredEmail(heir.email, {
           previousOwnerName: ownerName,

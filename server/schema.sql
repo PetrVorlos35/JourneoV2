@@ -30,6 +30,9 @@ CREATE TABLE IF NOT EXISTS user_settings (
     user_id INT UNSIGNED NOT NULL UNIQUE,
     theme ENUM('dark', 'light', 'system') DEFAULT 'light',
     currency VARCHAR(10) DEFAULT 'CZK',
+    email_friend_requests TINYINT(1) NOT NULL DEFAULT 1,
+    email_settlements TINYINT(1) NOT NULL DEFAULT 1,
+    email_trip_transfers TINYINT(1) NOT NULL DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
