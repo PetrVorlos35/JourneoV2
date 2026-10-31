@@ -8,6 +8,7 @@ import { api } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import UserAvatar from '../ui/UserAvatar';
 import { track } from '../../utils/analytics';
+import Skeleton from '../ui/Skeleton';
 
 const ROLES = ['editor', 'viewer'];
 
@@ -339,8 +340,13 @@ const ShareTripModal = ({ isOpen, onClose, trip, onInvited }) => {
                   </li>
 
                   {isLoadingData && collaborators.length === 0 ? (
-                    <li className="flex items-center justify-center py-6">
-                      <Loader2 size={18} className="text-muted animate-spin" />
+                    <li aria-hidden="true" className="flex items-center gap-3 py-2.5">
+                      <Skeleton className="w-9 h-9 shrink-0" rounded="rounded-full" />
+                      <div className="flex-1 space-y-1.5">
+                        <Skeleton className="h-3.5 w-1/2" />
+                        <Skeleton className="h-3 w-1/3" />
+                      </div>
+                      <Skeleton className="h-8 w-20" rounded="rounded-xl" />
                     </li>
                   ) : (
                     <AnimatePresence initial={false}>
@@ -471,8 +477,8 @@ const ShareTripModal = ({ isOpen, onClose, trip, onInvited }) => {
 
                 <div className="mt-4">
                   {inviteState === 'loading' ? (
-                    <div className="flex items-center gap-2 h-[52px] text-muted text-[13px] font-medium">
-                      <Loader2 size={14} className="animate-spin" /> {t('shareModal.invite.loading')}
+                    <div role="status" aria-label={t('shareModal.invite.loading')}>
+                      <Skeleton className="h-[52px] w-full" rounded="rounded-2xl" />
                     </div>
                   ) : inviteUrl ? (
                     <>

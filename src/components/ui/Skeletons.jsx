@@ -349,6 +349,143 @@ export const AdminDashboardSkeleton = () => (
   </div>
 );
 
+const adminCard = 'bg-page border border-gray-200/80 dark:border-white/10 rounded-[1.75rem] p-5 sm:p-8';
+
+/** Řádky seznamu: avatar/ikona vlevo, dva řádky textu, čas vpravo. */
+export const AdminRowsSkeleton = ({ rows = 6, avatar = true }) => (
+  <div className="divide-y divide-gray-100 dark:divide-white/[0.06]">
+    {Array.from({ length: rows }).map((_, i) => (
+      <div key={i} className="flex items-center gap-3 py-3">
+        {avatar && <Skeleton className="w-8 h-8 shrink-0" rounded="rounded-full" />}
+        <div className="flex-1 space-y-2">
+          <Skeleton className="h-3.5" style={{ width: `${55 - (i % 3) * 12}%` }} />
+          <Skeleton className="h-3 w-1/3" />
+        </div>
+        <Skeleton className="h-3 w-16 shrink-0" />
+      </div>
+    ))}
+  </div>
+);
+
+/** Admin → Analytika: čísla, graf, funnely, žebříčky. */
+export const AdminAnalyticsSkeleton = () => (
+  <div className="space-y-5">
+    <div className={adminCard}>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-5">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="space-y-2">
+            <Skeleton className="h-7 w-16" />
+            <Skeleton className="h-3.5 w-24" />
+          </div>
+        ))}
+      </div>
+    </div>
+    <div className={adminCard}>
+      <Skeleton className="h-5 w-48 mb-6" />
+      <div className="h-44 flex items-end gap-1">
+        {Array.from({ length: 30 }).map((_, i) => (
+          <Skeleton key={i} className="flex-1" rounded="rounded-t-[4px]" style={{ height: `${30 + ((i * 37) % 60)}%` }} />
+        ))}
+      </div>
+    </div>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      {Array.from({ length: 2 }).map((_, c) => (
+        <div key={c} className={adminCard}>
+          <Skeleton className="h-5 w-44 mb-5" />
+          <div className="space-y-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-3.5 w-1/3" />
+                <Skeleton className="h-2.5" rounded="rounded-full" style={{ width: `${100 - i * 22}%` }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      {Array.from({ length: 2 }).map((_, c) => (
+        <div key={c} className={adminCard}>
+          <Skeleton className="h-5 w-40 mb-5" />
+          <div className="space-y-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-9" rounded="rounded-lg" style={{ width: `${100 - i * 12}%` }} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+/** Admin → Chyby: karta se seznamem chyb. */
+export const AdminErrorsSkeleton = () => (
+  <div className={adminCard}>
+    <Skeleton className="h-5 w-40 mb-5" />
+    <div className="divide-y divide-gray-100 dark:divide-white/[0.06]">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="py-3.5 space-y-2">
+          <Skeleton className="h-5 w-40" rounded="rounded-full" />
+          <Skeleton className="h-4" style={{ width: `${70 - (i % 3) * 15}%` }} />
+          <Skeleton className="h-3 w-56" />
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+/** Detail v adminu (uživatel / výlet): hlavička, štítky, sekce s řádky. */
+export const AdminDetailSkeleton = () => (
+  <div className="px-5 sm:px-8 py-7 space-y-7">
+    <div className="flex items-center gap-4">
+      <Skeleton className="w-14 h-14 shrink-0" rounded="rounded-full" />
+      <div className="flex-1 space-y-2">
+        <Skeleton className="h-6 w-48" />
+        <Skeleton className="h-3.5 w-40" />
+      </div>
+    </div>
+    <div className="flex gap-2">
+      <Skeleton className="h-6 w-24" rounded="rounded-full" />
+      <Skeleton className="h-6 w-32" rounded="rounded-full" />
+    </div>
+    {Array.from({ length: 2 }).map((_, s) => (
+      <div key={s} className="space-y-3">
+        <Skeleton className="h-5 w-32" />
+        <AdminRowsSkeleton rows={3} avatar={s === 1} />
+      </div>
+    ))}
+  </div>
+);
+
+/** Položky rozbalovacího našeptávače (místa, lidé) — vrací <li>. */
+export const SuggestionSkeletonItems = ({ rows = 3 }) =>
+  Array.from({ length: rows }).map((_, i) => (
+    <li key={i} aria-hidden="true" className="flex items-center gap-3 px-3 py-2.5">
+      <Skeleton className="w-8 h-8 shrink-0" rounded="rounded-lg" />
+      <div className="flex-1 space-y-1.5">
+        <Skeleton className="h-3.5" style={{ width: `${70 - i * 15}%` }} />
+        <Skeleton className="h-3 w-1/3" />
+      </div>
+    </li>
+  ));
+
+/** Celá stránka aplikace, než se načte přihlášení nebo kód routy. */
+export const AppShellSkeleton = () => (
+  <div className="min-h-[100dvh] flex bg-desk">
+    <div className="hidden md:flex flex-col gap-4 w-[264px] shrink-0 border-r border-gray-200/80 dark:border-white/10 bg-page p-5">
+      <Skeleton className="h-7 w-32" />
+      <Skeleton className="h-28 rounded-2xl" />
+      <Skeleton className="h-11 rounded-2xl" />
+      <div className="space-y-3 pt-2">
+        {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-5" style={{ width: `${60 + (i % 3) * 10}%` }} />)}
+      </div>
+    </div>
+    <div className="flex-1 min-w-0 px-4 sm:px-8 pt-[calc(var(--safe-top)+1.5rem)] md:pt-10">
+      <ContentSkeleton />
+    </div>
+  </div>
+);
+
 /** Notification dropdown list skeleton. */
 export const NotificationListSkeleton = () => (
   <div className="p-2 space-y-1">

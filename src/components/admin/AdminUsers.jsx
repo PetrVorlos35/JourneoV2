@@ -2,12 +2,12 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import { ChevronDown, ChevronRight, Heart, Loader2, Shield, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Heart, Shield, Trash2 } from 'lucide-react';
 import api from '../../services/api';
 import UserAvatar from '../ui/UserAvatar';
 import { useDialog } from '../ui/DialogModal';
 import { useAuth } from '../../contexts/AuthContext';
-import { AdminTableSkeleton } from '../ui/Skeletons';
+import { AdminTableSkeleton, AdminRowsSkeleton, AdminDetailSkeleton } from '../ui/Skeletons';
 import { eventLabel, relativeTime } from './analyticsUi';
 import {
   MasterDetail, ListToolbar, ListRow, LoadMore, BackToList, DetailSection, Badge, EmptyDetail,
@@ -39,7 +39,7 @@ const UserActivity = ({ userId, t, locale }) => {
   return (
     <DetailSection title={t('admin.analytics.userActivity')}>
       {!activity ? (
-        <div className="py-4"><Loader2 className="animate-spin text-gray-400" size={18} /></div>
+        <AdminRowsSkeleton rows={5} avatar={false} />
       ) : events.length === 0 ? (
         <p className="py-3 text-[14px] text-muted">{t('admin.analytics.noUserActivity')}</p>
       ) : (
@@ -88,7 +88,7 @@ const UserDossier = ({ userId, onSelectUser, onChanged, onDeleted, onBack }) => 
   }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-[420px]"><Loader2 className="animate-spin text-gray-400" size={22} /></div>;
+    return <AdminDetailSkeleton />;
   }
   if (!user) return <EmptyDetail text={t('admin.users.toast.detailError')} />;
 

@@ -7,7 +7,7 @@ import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { useDialog } from '../ui/DialogModal';
 import UserAvatar from '../ui/UserAvatar';
-import { FriendsSkeleton } from '../ui/Skeletons';
+import { FriendsSkeleton, SuggestionSkeletonItems } from '../ui/Skeletons';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import { formatCurrencyShort } from '../../utils/currency';
 import { countryFlag } from '../../utils/country';
@@ -499,7 +499,7 @@ const Friends = () => {
                   className="absolute left-0 right-0 lg:left-auto lg:w-[26rem] top-full mt-2 z-30 bg-page border border-default rounded-soft shadow-popover overflow-hidden"
                 >
                   {isSearching ? (
-                    <div className="flex items-center justify-center py-6 text-muted"><Spinner /></div>
+                    <ul aria-hidden="true" className="py-1"><SuggestionSkeletonItems rows={3} /></ul>
                   ) : searchResults.length === 0 ? (
                     <p className="px-4 py-4 text-[13px] font-medium text-muted">{t('friends.search.noResults')}</p>
                   ) : (

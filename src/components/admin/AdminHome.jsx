@@ -1,7 +1,7 @@
 import { Suspense, lazy } from 'react';
 import { Routes, Route, NavLink, Navigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { AdminDashboardSkeleton, AdminTableSkeleton } from '../ui/Skeletons';
+import { AdminDashboardSkeleton, AdminTableSkeleton, AdminAnalyticsSkeleton, AdminErrorsSkeleton } from '../ui/Skeletons';
 
 const AdminDashboard = lazy(() => import('./AdminDashboard'));
 const AdminUsers = lazy(() => import('./AdminUsers'));
@@ -53,8 +53,8 @@ const AdminHome = () => {
         <Route index element={<Suspense fallback={<AdminDashboardSkeleton />}><AdminDashboard /></Suspense>} />
         <Route path="users" element={<Suspense fallback={<TableLoading />}><AdminUsers /></Suspense>} />
         <Route path="trips" element={<Suspense fallback={<TableLoading />}><AdminTrips /></Suspense>} />
-        <Route path="analytics" element={<Suspense fallback={<AdminDashboardSkeleton />}><AdminAnalytics /></Suspense>} />
-        <Route path="errors" element={<Suspense fallback={<TableLoading />}><AdminErrors /></Suspense>} />
+        <Route path="analytics" element={<Suspense fallback={<AdminAnalyticsSkeleton />}><AdminAnalytics /></Suspense>} />
+        <Route path="errors" element={<Suspense fallback={<AdminErrorsSkeleton />}><AdminErrors /></Suspense>} />
         <Route path="*" element={<Navigate to="/dashboard/admin" replace />} />
       </Routes>
     </div>

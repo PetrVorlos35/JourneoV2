@@ -15,6 +15,7 @@ import BottomSheet, { SNAP_HEIGHTS } from './BottomSheet';
 import SidePanel from './SidePanel';
 import { getCategory, categoryLabelKey } from './placeConfig';
 import { DRAFT_MARKER_ID } from '../../hooks/useMapWorkspace';
+import Skeleton from '../ui/Skeleton';
 
 const BAR_HEIGHT = SNAP_HEIGHTS.bar();
 // Šířka bočního panelu na desktopu. Odečítá se při centrování křížku i při
@@ -369,9 +370,11 @@ const MapWorkspaceView = ({
       <div className="px-4 pt-1 pb-3 flex items-center gap-3">
         <div className="min-w-0 flex-1">
           <h2 className="text-[16px] font-bold text-primary truncate">{title}</h2>
-          <p className="text-[12px] font-medium text-muted">
-            {loading ? t('map.loading') : t('map.subtitle', { count: places.length })}
-          </p>
+          {loading ? (
+            <div role="status" aria-label={t('map.loading')} className="pt-1.5"><Skeleton className="h-3 w-24" rounded="rounded-full" /></div>
+          ) : (
+            <p className="text-[12px] font-medium text-muted">{t('map.subtitle', { count: places.length })}</p>
+          )}
         </div>
         {canEdit && (
           <button

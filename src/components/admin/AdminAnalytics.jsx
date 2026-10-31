@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
+import { AdminAnalyticsSkeleton, AdminRowsSkeleton } from '../ui/Skeletons';
 import api from '../../services/api';
 import UserAvatar from '../ui/UserAvatar';
 import { avatarUser, displayName } from './adminUi';
@@ -149,13 +150,13 @@ const LiveFeed = ({ t, locale }) => {
           disabled={loading}
           className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-active hover:underline underline-offset-2 disabled:opacity-50 cursor-pointer"
         >
-          <RefreshCw size={13} strokeWidth={2.5} className={loading ? 'animate-spin motion-reduce:animate-none' : ''} aria-hidden="true" />
+          <RefreshCw size={13} strokeWidth={2.5} aria-hidden="true" />
           {t('admin.analytics.refresh')}
         </button>
       }
     >
       {!events ? (
-        <div className="flex justify-center py-8"><Loader2 className="animate-spin text-gray-400" size={20} /></div>
+        <AdminRowsSkeleton rows={8} />
       ) : events.length === 0 ? (
         <p className="py-3 text-[14px] font-medium text-muted">{t('admin.analytics.noEvents')}</p>
       ) : (
@@ -230,7 +231,7 @@ const AdminAnalytics = () => {
       </div>
 
       {loading && !data ? (
-        <div className="flex justify-center py-24"><Loader2 className="animate-spin text-gray-400" size={22} /></div>
+        <AdminAnalyticsSkeleton />
       ) : error || !data ? (
         <p className="py-20 text-center text-muted">{t('admin.dashboard.loadError')}</p>
       ) : (

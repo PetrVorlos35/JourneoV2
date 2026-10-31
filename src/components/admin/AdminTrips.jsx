@@ -2,11 +2,11 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
-import { ChevronRight, Loader2, MapPin, Trash2 } from 'lucide-react';
+import { ChevronRight, MapPin, Trash2 } from 'lucide-react';
 import api from '../../services/api';
 import UserAvatar from '../ui/UserAvatar';
 import { useDialog } from '../ui/DialogModal';
-import { AdminTableSkeleton } from '../ui/Skeletons';
+import { AdminTableSkeleton, AdminDetailSkeleton } from '../ui/Skeletons';
 import {
   MasterDetail, ListToolbar, ListRow, LoadMore, BackToList, DetailSection, Badge, EmptyDetail,
   avatarUser, displayName, formatDate,
@@ -29,7 +29,7 @@ const TripDossier = ({ tripId, onDeleted, onBack }) => {
   }, [tripId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-[420px]"><Loader2 className="animate-spin text-gray-400" size={22} /></div>;
+    return <AdminDetailSkeleton />;
   }
   if (!trip) return <EmptyDetail text={t('admin.trips.toast.detailError')} />;
 

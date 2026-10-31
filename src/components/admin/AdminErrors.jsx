@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Loader2, ChevronDown, Check, RotateCcw } from 'lucide-react';
+import { ChevronDown, Check, RotateCcw } from 'lucide-react';
+import { AdminErrorsSkeleton } from '../ui/Skeletons';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { Badge, displayName } from './adminUi';
@@ -111,13 +112,12 @@ const AdminErrors = () => {
         />
       </div>
 
+      {loading && !data ? <AdminErrorsSkeleton /> : (
       <Card
         title={status === 'open' ? t('admin.errors.openTitle') : t('admin.errors.resolvedTitle')}
         aside={data && status === 'open' ? t('admin.errors.last24h', { count: data.last24h }) : null}
       >
-        {loading && !data ? (
-          <div className="flex justify-center py-12"><Loader2 className="animate-spin text-gray-400" size={20} /></div>
-        ) : !data ? (
+        {!data ? (
           <p className="py-6 text-center text-muted">{t('admin.dashboard.loadError')}</p>
         ) : data.errors.length === 0 ? (
           <p className="py-6 text-[15px] font-medium text-muted">{status === 'open' ? t('admin.errors.emptyOpen') : t('admin.errors.emptyResolved')}</p>
@@ -127,6 +127,7 @@ const AdminErrors = () => {
           </ul>
         )}
       </Card>
+      )}
     </div>
   );
 };

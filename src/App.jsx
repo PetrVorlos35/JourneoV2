@@ -6,6 +6,7 @@ import CookieConsent from './components/CookieConsent';
 import { useAuth } from './contexts/AuthContext';
 import { Analytics } from '@vercel/analytics/react';
 import { trackPageview, optOutThisDevice } from './utils/analytics';
+import { AppShellSkeleton } from './components/ui/Skeletons';
 
 // Lazy load everything except the landing page to speed up initial load
 const AuthFlow = lazy(() => import('./components/auth/AuthFlow'));
@@ -15,11 +16,14 @@ const TermsOfService = lazy(() => import('./components/TermsOfService'));
 const PublicTripView = lazy(() => import('./components/public/PublicTripView'));
 const JoinTripView = lazy(() => import('./components/public/JoinTripView'));
 
-const LoadingFallback = () => (
-  <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center">
-    <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-  </div>
-);
+// Aplikace dostane kostru postranního panelu a obsahu; veřejné stránky
+// (přihlášení, sdílený výlet…) mají vlastní vzhled, tak jen čisté pozadí.
+const LoadingFallback = () => {
+  const { pathname } = useLocation();
+  return pathname.startsWith('/dashboard')
+    ? <AppShellSkeleton />
+    : <div className="min-h-screen bg-gray-50 dark:bg-black" aria-hidden="true" />;
+};
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {

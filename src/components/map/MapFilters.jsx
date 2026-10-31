@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import { PLACE_CATEGORIES, categoryLabelKey } from './placeConfig';
+import { SuggestionSkeletonItems } from '../ui/Skeletons';
 
 const SEARCH_DEBOUNCE_MS = 450;
 const MIN_QUERY_LENGTH = 3;
@@ -103,9 +104,7 @@ const MapFilters = ({
             className="w-full min-h-[44px] pl-11 pr-9 rounded-2xl glass-card border border-default text-base sm:text-[14px] font-medium text-primary placeholder:text-placeholder focus:outline-none focus:border-blue-500 transition-colors"
           />
           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
-            {isSearching ? (
-              <Loader2 size={16} className="text-blue-500 animate-spin" aria-hidden="true" />
-            ) : query ? (
+            {query ? (
               <button
                 type="button"
                 onClick={() => {
@@ -121,7 +120,7 @@ const MapFilters = ({
           </div>
 
           <AnimatePresence>
-            {showResults && results.length > 0 && (
+            {showResults && (results.length > 0 || isSearching) && (
               <motion.ul
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -129,6 +128,7 @@ const MapFilters = ({
                 transition={{ duration: 0.18 }}
                 className="absolute left-0 right-0 top-full mt-2 glass-card rounded-2xl border border-subtle shadow-2xl p-2 max-h-[300px] overflow-y-auto custom-scrollbar"
               >
+                {isSearching && results.length === 0 && <SuggestionSkeletonItems rows={3} />}
                 {results.map((result) => (
                   <li key={`${result.lat},${result.lng}`}>
                     <button

@@ -3,8 +3,7 @@ import { createPortal } from 'react-dom';
 import {
   Plus, Trash2, TrendingUp, TrendingDown, Calendar, Car, Home, Utensils,
   Palmtree, MoreHorizontal, ChevronRight, Wallet, X, Search, Pencil, Check, Target,
-  Scale, ArrowRight, Split, HandCoins, Copy, CheckCircle2, Loader2,
-} from 'lucide-react';
+  Scale, ArrowRight, Split, HandCoins, Copy, CheckCircle2, } from 'lucide-react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { format, differenceInDays, differenceInCalendarDays, isToday, isYesterday, parseISO, startOfDay, subDays } from 'date-fns';
 import { cs } from 'date-fns/locale';
@@ -25,6 +24,7 @@ import { formatCurrency, formatRate, currencySymbol } from '../../utils/currency
 import { CurrencyList, TripCurrencyControl, getRecentCurrencies, rememberCurrency } from './CurrencyPicker';
 import { PlanFirstTripButton } from './EmptyShowcase';
 import { track } from '../../utils/analytics';
+import Skeleton from '../ui/Skeleton';
 
 const CATEGORIES = [
   { id: 'transport',      icon: Car,          colorClass: 'bg-blue-500',    lightBgClass: 'bg-active',     textClass: 'text-accent' },
@@ -1039,8 +1039,8 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency: tripCurrency, tripI
                         </p>
                       )}
                       {rateStatus === 'loading' && !rate ? (
-                        <p className="inline-flex items-center gap-1.5">
-                          <Loader2 size={13} strokeWidth={2.5} className="animate-spin" aria-hidden="true" /> {t('budget.addModal.rateLoading')}
+                        <p role="status" aria-label={t('budget.addModal.rateLoading')} className="flex justify-center">
+                          <Skeleton className="h-4 w-44" rounded="rounded-full" />
                         </p>
                       ) : rateStatus === 'error' && form.rateSource !== 'manual' ? (
                         <p className="text-danger">{t('budget.addModal.rateError')}</p>

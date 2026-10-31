@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { MapPin, Loader2, X } from 'lucide-react';
+import { MapPin, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
+import { SuggestionSkeletonItems } from './Skeletons';
 
 // `onChange` dostává (text, place | null). Druhý argument je vyplněný jen
 // při výběru ze seznamu a nese souřadnice — volající, který je nepotřebuje,
@@ -133,9 +134,7 @@ const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLeng
           className={`${className || ''} !pr-12`}
         />
         <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center">
-          {isLoading ? (
-            <Loader2 size={18} className="text-blue-500 animate-spin" strokeWidth={2.5} />
-          ) : inputValue ? (
+          {inputValue ? (
             <button
               onClick={clearInput}
               aria-label={t('friends.search.clear')}
@@ -148,7 +147,7 @@ const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLeng
       </div>
 
       <AnimatePresence>
-        {showSuggestions && suggestions.length > 0 && (
+        {showSuggestions && (suggestions.length > 0 || isLoading) && (
           <motion.div
             initial={{ opacity: 0, y: 10, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -157,6 +156,7 @@ const LocationAutocomplete = ({ value, onChange, placeholder, className, maxLeng
             className="absolute left-0 right-0 top-full mt-2 z-[200] glass-card shadow-2xl p-2 rounded-2xl border border-subtle"
           >
             <ul className="max-h-[300px] overflow-y-auto custom-scrollbar">
+              {isLoading && suggestions.length === 0 && <SuggestionSkeletonItems rows={3} />}
               {suggestions.map((suggestion) => (
                 <li key={suggestion.id}>
                   <button
