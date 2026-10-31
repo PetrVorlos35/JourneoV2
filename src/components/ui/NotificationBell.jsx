@@ -210,7 +210,7 @@ const NotificationBell = ({ placement = 'right' }) => {
                               }}
                               className={`text-left text-sm leading-tight break-words hover:underline cursor-pointer ${!n.isRead ? 'font-bold text-primary' : 'font-medium text-gray-600 dark:text-gray-400'}`}
                             >
-                              {t('notifications.messages.friendRequest', { name: n.actorName || '?' })}
+                              {t('notifications.messages.friendRequest', { name: n.actorName || t('notifications.deletedUser') })}
                             </button>
                           ) : n.type === 'TRIP_JOINED' && n.referenceId ? (
                             <button
@@ -221,16 +221,16 @@ const NotificationBell = ({ placement = 'right' }) => {
                               }}
                               className={`text-left text-sm leading-tight break-words hover:underline cursor-pointer ${!n.isRead ? 'font-bold text-primary' : 'font-medium text-gray-600 dark:text-gray-400'}`}
                             >
-                              {t('notifications.messages.tripJoined', { name: n.actorName || '?', trip: n.tripTitle || '?' })}
+                              {t('notifications.messages.tripJoined', { name: n.actorName || t('notifications.deletedUser'), trip: n.tripTitle || t('notifications.deletedTrip') })}
                             </button>
                           ) : (
                             <p className={`text-sm leading-tight break-words ${!n.isRead ? 'font-bold text-primary' : 'font-medium text-gray-600 dark:text-gray-400'}`}>
                               {n.type === 'FRIEND_REQUEST'
-                                ? t('notifications.messages.friendRequest', { name: n.actorName || '?' })
+                                ? t('notifications.messages.friendRequest', { name: n.actorName || t('notifications.deletedUser') })
                                 : n.type === 'FRIEND_ACCEPTED'
-                                  ? t('notifications.messages.friendAccepted', { name: n.actorName || '?' })
+                                  ? t('notifications.messages.friendAccepted', { name: n.actorName || t('notifications.deletedUser') })
                                   : n.type === 'TRIP_TRANSFERRED'
-                                    ? t('notifications.messages.tripTransferred', { name: n.actorName || '?', trip: n.tripTitle || '?' })
+                                    ? t('notifications.messages.tripTransferred', { name: n.actorName || t('notifications.deletedUser'), trip: n.tripTitle || t('notifications.deletedTrip') })
                                     : n.actorName || '—'}
                             </p>
                           )}

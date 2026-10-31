@@ -10,6 +10,7 @@ import { currencySymbol } from '../../utils/currency';
 import { useAuth } from '../../contexts/AuthContext';
 import api from '../../services/api';
 import JourneoLogo from '../../assets/Journeo_blacklogo.png';
+import { track } from '../../utils/analytics';
 
 
 const CATEGORY_COLORS = {
@@ -60,7 +61,10 @@ const TripPdfExport = ({ trip, dailyPlans, packingList, documents, sections, onD
     window.addEventListener('afterprint', handleAfterPrint);
     // Give the portal a paint and wait for webfonts so the first page is crisp.
     const timer = setTimeout(() => {
-      (document.fonts?.ready || Promise.resolve()).then(() => window.print());
+      (document.fonts?.ready || Promise.resolve()).then(() => {
+        track('pdf_exported');
+        window.print();
+      });
     }, 50);
     return () => {
       clearTimeout(timer);

@@ -16,7 +16,9 @@ router.get('/', async (req, res) => {
          n.reference_id AS referenceId,
          n.is_read      AS isRead,
          n.created_at   AS createdAt,
-         TRIM(CONCAT(
+         -- Bez jména ukážeme e-mail; NULL = účet už neexistuje (klient
+         -- pak napíše „Smazaný uživatel“ místo otazníku).
+         COALESCE(NULLIF(TRIM(CONCAT(
            COALESCE(CASE WHEN n.type = 'FRIEND_REQUEST'   THEN u_req.first_name
                          WHEN n.type = 'FRIEND_ACCEPTED'  THEN u_addr.first_name
                          WHEN n.type IN ('TRIP_TRANSFERRED', 'TRIP_JOINED') THEN n.message
@@ -25,7 +27,10 @@ router.get('/', async (req, res) => {
            COALESCE(CASE WHEN n.type = 'FRIEND_REQUEST'  THEN u_req.last_name
                          WHEN n.type = 'FRIEND_ACCEPTED' THEN u_addr.last_name
                     END, '')
-         )) AS actorName,
+         )), ''),
+         CASE WHEN n.type = 'FRIEND_REQUEST'  THEN u_req.email
+              WHEN n.type = 'FRIEND_ACCEPTED' THEN u_addr.email
+         END) AS actorName,
          CASE WHEN n.type IN ('TRIP_TRANSFERRED', 'TRIP_JOINED') THEN t.title END AS tripTitle
        FROM notifications n
        LEFT JOIN trips       t      ON t.id = n.reference_id AND n.type IN ('TRIP_TRANSFERRED', 'TRIP_JOINED')

@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { api } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import UserAvatar from '../ui/UserAvatar';
+import { track } from '../../utils/analytics';
 
 const ROLES = ['editor', 'viewer'];
 
@@ -208,6 +209,7 @@ const ShareTripModal = ({ isOpen, onClose, trip, onInvited }) => {
   const handleCopyInvite = async () => {
     if (!inviteUrl || !(await copyText(inviteUrl))) return;
     setInviteCopied(true);
+    track('invite_link_shared', { via: 'copy' });
     onInvited?.();
     toast.success(t('shareModal.linkCopied'));
     setTimeout(() => setInviteCopied(false), 2000);
@@ -221,6 +223,7 @@ const ShareTripModal = ({ isOpen, onClose, trip, onInvited }) => {
         text: t('shareModal.invite.shareText', { trip: trip?.title }),
         url: inviteUrl,
       });
+      track('invite_link_shared', { via: 'native' });
       onInvited?.();
     } catch {
       // Zavřený systémový dialog není chyba.
@@ -262,6 +265,7 @@ const ShareTripModal = ({ isOpen, onClose, trip, onInvited }) => {
 
   const handleCopyPublic = async () => {
     if (!shareUrl || !(await copyText(shareUrl))) return;
+    track('share_link_copied');
     setLinkCopied(true);
     toast.success(t('shareModal.linkCopied'));
     setTimeout(() => setLinkCopied(false), 2000);

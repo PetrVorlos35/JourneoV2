@@ -13,6 +13,7 @@ import VersionBadge from './ui/VersionBadge';
 import useForceLightTheme from '../hooks/useForceLightTheme';
 import { CHANGELOG } from '../config/changelog';
 import { openCookieSettings } from '../utils/consent';
+import { track } from '../utils/analytics';
 
 const EASE = [0.16, 1, 0.3, 1];
 
@@ -43,6 +44,7 @@ const HeroPlanForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const plan = destination.trim().slice(0, 255);
+    track('landing_plan_submitted', { hasDestination: Boolean(plan) });
     const target = plan ? `/dashboard?plan=${encodeURIComponent(plan)}` : '/dashboard';
     if (user) navigate(target);
     else navigate('/auth', { state: { from: target } });

@@ -11,6 +11,7 @@ import { FriendsSkeleton } from '../ui/Skeletons';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import { formatCurrencyShort } from '../../utils/currency';
 import { countryFlag } from '../../utils/country';
+import { track } from '../../utils/analytics';
 
 // Přátelé jako spolucestující: každý přítel je pasová karta toho, co jste
 // spolu procestovali — výlety, země, dny, příští výlet a jak jste na tom
@@ -411,6 +412,7 @@ const Friends = () => {
     if (!inviteUrl) return;
     try {
       await navigator.clipboard.writeText(inviteUrl);
+      track('friend_invite_copied');
       setLinkCopied(true);
       toast.success(t('friends.invite.linkCopied'));
       setTimeout(() => setLinkCopied(false), 2000);

@@ -395,6 +395,12 @@
       "subtitle": "Jediná aplikace, kterou pro své cestování budete kdy potřebovat."
     }
   },
+  "errorBoundary": {
+    "title": "Tohle se nepovedlo",
+    "description": "Něco se pokazilo a stránka se nenačetla. O chybě víme a podíváme se na ni. Zkuste stránku obnovit.",
+    "reload": "Obnovit stránku",
+    "home": "Na přehled"
+  },
   "notFound": {
     "title": "Mimo mapu",
     "description": "Vypadá to, že jste zabloudili. Tato destinace neexistuje nebo byla přesunuta."
@@ -1636,7 +1642,9 @@
       "friendAccepted": "{{name}} přijal/a vaši žádost o přátelství.",
       "tripTransferred": "{{name}} smazal/a svůj účet a výlet „{{trip}}“ teď patří vám.",
       "tripJoined": "{{name}} se připojil/a k výletu „{{trip}}“."
-    }
+    },
+    "deletedUser": "Smazaný uživatel",
+    "deletedTrip": "smazaný výlet"
   },
   "friendProfile": {
     "loading": "Načítám profil...",
@@ -1761,7 +1769,9 @@
     "nav": {
       "overview": "Přehled",
       "users": "Uživatelé",
-      "trips": "Výlety"
+      "trips": "Výlety",
+      "analytics": "Analytika",
+      "errors": "Chyby"
     },
     "logout": "Odhlásit se",
     "backToDashboard": "Zpět do dashboardu",
@@ -1954,6 +1964,130 @@
       "friendCount": "Přátelé",
       "searchTrips": "Hledat výlet…",
       "searchUsers": "Hledat jméno nebo e-mail…"
+    },
+    "analytics": {
+      "intro": "Vlastní měření bez cookies. Návštěvníci se počítají za den, admini a jejich zařízení se nepočítají.",
+      "range": "Období",
+      "days_one": "{{count}} den",
+      "days_few": "{{count}} dny",
+      "days_other": "{{count}} dní",
+      "kpi": {
+        "visitors": "Návštěvníci",
+        "pageviews": "Zobrazení stránek",
+        "activeUsers": "Aktivní uživatelé",
+        "signups": "Registrace",
+        "trips": "Nové výlety"
+      },
+      "kpiNote": "Procenta = srovnání s předchozím stejně dlouhým obdobím. Návštěvníci = součet unikátních návštěvníků po dnech.",
+      "series": {
+        "visitors": "Návštěvníci",
+        "activeUsers": "Přihlášení uživatelé",
+        "pageviews": "Zobrazení",
+        "signups": "Registrace"
+      },
+      "chartTitle": "Návštěvnost po dnech",
+      "day": "Den",
+      "funnel": {
+        "visitorsTitle": "Od návštěvy k registraci",
+        "visitorsHint": "návštěvník za den",
+        "newUsersTitle": "Co udělali noví uživatelé",
+        "newUsersHint": "registrovaní v období",
+        "visitors": {
+          "visited": "Navštívili web",
+          "landing": "Viděli úvodní stránku",
+          "auth": "Otevřeli přihlášení",
+          "signup": "Zaregistrovali se"
+        },
+        "newUsers": {
+          "signedUp": "Registrovaní",
+          "hasTrip": "Mají výlet",
+          "hasContent": "Naplnili výlet (plán, místa, výdaje)",
+          "invited": "Pozvali parťáka",
+          "returned": "Vrátili se jiný den"
+        }
+      },
+      "featuresTitle": "Co lidé dělají",
+      "featuresHint": "akce v období",
+      "action": "Akce",
+      "count": "Počet",
+      "users": "Uživatelé",
+      "pagesTitle": "Nejnavštěvovanější stránky",
+      "byVisitors": "podle návštěvníků",
+      "referrersTitle": "Odkud přišli",
+      "utmTitle": "Kampaně (UTM)",
+      "devicesTitle": "Zařízení",
+      "countriesTitle": "Země",
+      "noReferrers": "Zatím jen přímé návštěvy.",
+      "noData": "Zatím žádná data.",
+      "liveTitle": "Právě teď",
+      "refresh": "Obnovit",
+      "anonymous": "Nepřihlášený návštěvník",
+      "noEvents": "Zatím žádné události. Sběr začne po nasazení.",
+      "userActivity": "Aktivita",
+      "noUserActivity": "Zatím žádná zaznamenaná aktivita.",
+      "lastSeen": "Naposledy {{when}}",
+      "activeDays_one": "aktivní {{count}} den",
+      "activeDays_few": "aktivní {{count}} dny",
+      "activeDays_other": "aktivní {{count}} dní",
+      "showAll": "Zobrazit vše ({{count}})",
+      "events": {
+        "signup": "Registrace",
+        "login": "Přihlášení",
+        "account_deleted": "Smazal účet",
+        "trip_created": "Vytvořil výlet",
+        "trip_joined": "Připojil se k výletu přes pozvánku",
+        "collaborator_added": "Přidal parťáka do výletu",
+        "share_link_created": "Vytvořil veřejný odkaz",
+        "share_link_copied": "Zkopíroval veřejný odkaz",
+        "invite_link_created": "Vytvořil pozvánku do výletu",
+        "invite_link_shared": "Poslal pozvánku do výletu",
+        "place_added": "Přidal místo",
+        "expense_added": "Přidal výdaj",
+        "settlement": "Vyrovnal dluh",
+        "pdf_exported": "Exportoval PDF",
+        "friend_request_sent": "Poslal žádost o přátelství",
+        "friend_accepted": "Přijal přátelství",
+        "friend_invite_copied": "Zkopíroval odkaz pro přátele",
+        "landing_plan_submitted": "Zadal cíl na úvodní stránce"
+      },
+      "device": {
+        "mobile": "Mobil",
+        "tablet": "Tablet",
+        "desktop": "Počítač"
+      }
+    },
+    "errors": {
+      "title": "Chyby",
+      "intro": "Chyby z prohlížečů uživatelů i ze serveru. Stejná chyba je jeden řádek s počtem výskytů. Vyřešená se znovu otevře, když se objeví znovu.",
+      "open": "Otevřené",
+      "resolvedTab": "Vyřešené",
+      "openTitle": "Otevřené chyby",
+      "resolvedTitle": "Vyřešené chyby",
+      "last24h_one": "{{count}} za posledních 24 h",
+      "last24h_few": "{{count}} za posledních 24 h",
+      "last24h_other": "{{count}} za posledních 24 h",
+      "source": {
+        "client": "Prohlížeč",
+        "server": "Server"
+      },
+      "occurrences_one": "{{count}}× výskyt",
+      "occurrences_few": "{{count}}× výskyt",
+      "occurrences_other": "{{count}}× výskyt",
+      "usersAffected_one": "{{count}} uživatel",
+      "usersAffected_few": "{{count}} uživatelé",
+      "usersAffected_other": "{{count}} uživatelů",
+      "lastSeen": "naposledy {{when}}",
+      "firstSeen": "Poprvé",
+      "lastSeenAt": "Naposledy",
+      "lastUser": "Poslední uživatel",
+      "browser": "Prohlížeč",
+      "resolve": "Označit jako vyřešené",
+      "reopen": "Znovu otevřít",
+      "resolved": "Chyba označena jako vyřešená.",
+      "reopened": "Chyba znovu otevřena.",
+      "updateError": "Chybu se nepodařilo upravit.",
+      "emptyOpen": "Žádné otevřené chyby. 🎉",
+      "emptyResolved": "Zatím žádné vyřešené chyby."
     }
   },
   "common": {
@@ -1970,7 +2104,7 @@
   "privacyPolicy": {
     "back": "Zpět na hlavní stránku",
     "title": "Zásady ochrany osobních údajů",
-    "effectiveDate": "Datum účinnosti: 12. října 2026",
+    "effectiveDate": "Datum účinnosti: 31. října 2026",
     "section1": {
       "title": "1. Jaké údaje shromažďujeme",
       "content": "Shromažďujeme údaje, které nám poskytnete při registraci (jméno, e-mail), a údaje o vašich cestách, které do aplikace sami vložíte (lokace, data, výdaje, poznámky, fotografie)."
@@ -1985,7 +2119,7 @@
     },
     "section4": {
       "title": "4. Cookies a partnerské odkazy",
-      "content": "Nezbytné úložiště (localStorage) používáme pro přihlášení, jazyk, motiv a uložení vaší volby cookies; souhlas k němu není potřeba. Návštěvnost měříme přes Vercel Web Analytics, které cookies nepoužívá. Marketingové cookies partnera Travelpayouts se načtou jen s vaším souhlasem. Slouží ke sledování partnerských (affiliate) odkazů na služby jako Booking.com nebo GetYourGuide: když přes ně něco rezervujete, dostane Journeo provizi, cena pro vás zůstává stejná. Souhlas můžete kdykoli odvolat.",
+      "content": "Nezbytné úložiště (localStorage) používáme pro přihlášení, jazyk, motiv a uložení vaší volby cookies; souhlas k němu není potřeba. Návštěvnost a používání aplikace měříme přes Vercel Web Analytics a vlastní měření, obojí bez cookies. Vlastní měření ukládá navštívené stránky aplikace a akce (např. vytvoření výletu nebo přidání výdaje), u přihlášených s vazbou na účet, abychom aplikaci mohli zlepšovat (oprávněný zájem). IP adresu neukládáme; nepřihlášeného návštěvníka rozlišíme jen v rámci jednoho dne. Záznamy mažeme po 13 měsících a po smazání účtu se od něj oddělí. Technické chyby aplikace ukládáme kvůli jejich opravě. Marketingové cookies partnera Travelpayouts se načtou jen s vaším souhlasem. Slouží ke sledování partnerských (affiliate) odkazů na služby jako Booking.com nebo GetYourGuide: když přes ně něco rezervujete, dostane Journeo provizi, cena pro vás zůstává stejná. Souhlas můžete kdykoli odvolat.",
       "cookieSettings": true
     },
     "section5": {
@@ -2071,6 +2205,10 @@
     "necessary": {
       "title": "Nezbytné",
       "desc": "Přihlášení, jazyk, motiv a uložení této volby. Bez nich appka nefunguje."
+    },
+    "measurement": {
+      "title": "Měření používání",
+      "desc": "Bez cookies a bez ukládání IP: které stránky a funkce se používají, abychom věděli, co zlepšit. Nepřihlášené návštěvníky nerozlišujeme déle než den."
     },
     "marketing": {
       "title": "Marketingové",

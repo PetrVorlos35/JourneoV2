@@ -26,7 +26,20 @@ router.get('/purge-trash', async (req, res) => {
       'DELETE FROM geocode_cache WHERE created_at < NOW() - INTERVAL 30 DAY'
     );
 
-    res.json({ purged: result.affectedRows, geocachePurged: geocache.affectedRows });
+    // Analytika se drží 13 měsíců (meziroční srovnání), vyřešené chyby 90 dní.
+    const [events] = await pool.query(
+      'DELETE FROM analytics_events WHERE created_at < NOW() - INTERVAL 13 MONTH LIMIT 50000'
+    );
+    const [errors] = await pool.query(
+      'DELETE FROM app_errors WHERE resolved_at IS NOT NULL AND resolved_at < NOW() - INTERVAL 90 DAY'
+    );
+
+    res.json({
+      purged: result.affectedRows,
+      geocachePurged: geocache.affectedRows,
+      eventsPurged: events.affectedRows,
+      errorsPurged: errors.affectedRows,
+    });
   } catch (err) {
     console.error('Purge trash error:', err);
     res.status(500).json({ error: 'Purge failed' });

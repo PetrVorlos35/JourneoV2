@@ -395,6 +395,12 @@
       "subtitle": "The only app you'll ever need for your travels."
     }
   },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "description": "The page failed to load. We know about it and will look into it. Try reloading the page.",
+    "reload": "Reload page",
+    "home": "Go to overview"
+  },
   "notFound": {
     "title": "Off the map",
     "description": "Looks like you got lost. This destination doesn't exist or has been moved."
@@ -1602,7 +1608,9 @@
       "friendAccepted": "{{name}} accepted your friend request.",
       "tripTransferred": "{{name}} deleted their account — the trip “{{trip}}” is now yours.",
       "tripJoined": "{{name}} joined your trip “{{trip}}”."
-    }
+    },
+    "deletedUser": "Deleted user",
+    "deletedTrip": "a deleted trip"
   },
   "friendProfile": {
     "loading": "Loading profile...",
@@ -1727,7 +1735,9 @@
     "nav": {
       "overview": "Overview",
       "users": "Users",
-      "trips": "Trips"
+      "trips": "Trips",
+      "analytics": "Analytics",
+      "errors": "Errors"
     },
     "logout": "Log out",
     "backToDashboard": "Back to dashboard",
@@ -1920,6 +1930,125 @@
       "friendCount": "Friends",
       "searchTrips": "Search trips…",
       "searchUsers": "Search name or e-mail…"
+    },
+    "analytics": {
+      "intro": "First-party, cookie-free measurement. Visitors are counted per day; admins and their devices are excluded.",
+      "range": "Period",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
+      "kpi": {
+        "visitors": "Visitors",
+        "pageviews": "Page views",
+        "activeUsers": "Active users",
+        "signups": "Sign-ups",
+        "trips": "New trips"
+      },
+      "kpiNote": "Percentages compare with the previous period of the same length. Visitors = sum of daily unique visitors.",
+      "series": {
+        "visitors": "Visitors",
+        "activeUsers": "Signed-in users",
+        "pageviews": "Views",
+        "signups": "Sign-ups"
+      },
+      "chartTitle": "Daily traffic",
+      "day": "Day",
+      "funnel": {
+        "visitorsTitle": "From visit to sign-up",
+        "visitorsHint": "visitor per day",
+        "newUsersTitle": "What new users did",
+        "newUsersHint": "signed up in period",
+        "visitors": {
+          "visited": "Visited the site",
+          "landing": "Saw the landing page",
+          "auth": "Opened sign-in",
+          "signup": "Signed up"
+        },
+        "newUsers": {
+          "signedUp": "Signed up",
+          "hasTrip": "Have a trip",
+          "hasContent": "Filled a trip (plan, places, expenses)",
+          "invited": "Invited a buddy",
+          "returned": "Came back another day"
+        }
+      },
+      "featuresTitle": "What people do",
+      "featuresHint": "actions in period",
+      "action": "Action",
+      "count": "Count",
+      "users": "Users",
+      "pagesTitle": "Top pages",
+      "byVisitors": "by visitors",
+      "referrersTitle": "Where they came from",
+      "utmTitle": "Campaigns (UTM)",
+      "devicesTitle": "Devices",
+      "countriesTitle": "Countries",
+      "noReferrers": "Only direct visits so far.",
+      "noData": "No data yet.",
+      "liveTitle": "Right now",
+      "refresh": "Refresh",
+      "anonymous": "Anonymous visitor",
+      "noEvents": "No events yet. Collection starts after deploy.",
+      "userActivity": "Activity",
+      "noUserActivity": "No recorded activity yet.",
+      "lastSeen": "Last seen {{when}}",
+      "activeDays_one": "active {{count}} day",
+      "activeDays_other": "active {{count}} days",
+      "showAll": "Show all ({{count}})",
+      "events": {
+        "signup": "Signed up",
+        "login": "Signed in",
+        "account_deleted": "Deleted account",
+        "trip_created": "Created a trip",
+        "trip_joined": "Joined a trip via invite",
+        "collaborator_added": "Added a buddy to a trip",
+        "share_link_created": "Created a public link",
+        "share_link_copied": "Copied a public link",
+        "invite_link_created": "Created a trip invite",
+        "invite_link_shared": "Shared a trip invite",
+        "place_added": "Added a place",
+        "expense_added": "Added an expense",
+        "settlement": "Settled a debt",
+        "pdf_exported": "Exported PDF",
+        "friend_request_sent": "Sent a friend request",
+        "friend_accepted": "Accepted a friendship",
+        "friend_invite_copied": "Copied friend link",
+        "landing_plan_submitted": "Entered a destination on landing"
+      },
+      "device": {
+        "mobile": "Mobile",
+        "tablet": "Tablet",
+        "desktop": "Desktop"
+      }
+    },
+    "errors": {
+      "title": "Errors",
+      "intro": "Errors from users' browsers and from the server. The same error is one row with an occurrence count. A resolved error reopens if it happens again.",
+      "open": "Open",
+      "resolvedTab": "Resolved",
+      "openTitle": "Open errors",
+      "resolvedTitle": "Resolved errors",
+      "last24h_one": "{{count}} in the last 24 h",
+      "last24h_other": "{{count}} in the last 24 h",
+      "source": {
+        "client": "Browser",
+        "server": "Server"
+      },
+      "occurrences_one": "{{count}} occurrence",
+      "occurrences_other": "{{count}} occurrences",
+      "usersAffected_one": "{{count}} user",
+      "usersAffected_other": "{{count}} users",
+      "lastSeen": "last {{when}}",
+      "firstSeen": "First seen",
+      "lastSeenAt": "Last seen",
+      "lastUser": "Last user",
+      "browser": "Browser",
+      "resolve": "Mark as resolved",
+      "reopen": "Reopen",
+      "resolved": "Error marked as resolved.",
+      "reopened": "Error reopened.",
+      "updateError": "Couldn't update the error.",
+      "emptyOpen": "No open errors. 🎉",
+      "emptyResolved": "No resolved errors yet."
     }
   },
   "common": {
@@ -1936,7 +2065,7 @@
   "privacyPolicy": {
     "back": "Back to home",
     "title": "Privacy Policy",
-    "effectiveDate": "Effective date: October 12, 2026",
+    "effectiveDate": "Effective date: October 31, 2026",
     "section1": {
       "title": "1. What data we collect",
       "content": "We collect data you provide when registering (name, email), and data about your trips that you enter into the app yourself (locations, dates, expenses, notes, photos)."
@@ -1951,7 +2080,7 @@
     },
     "section4": {
       "title": "4. Cookies and partner links",
-      "content": "We use essential storage (localStorage) for sign-in, language, theme and remembering your cookie choice; it does not require consent. We measure traffic with Vercel Web Analytics, which uses no cookies. Marketing cookies from our partner Travelpayouts are loaded only with your consent. They track partner (affiliate) links to services such as Booking.com or GetYourGuide: when you book through them, Journeo earns a commission and your price stays the same. You can withdraw consent at any time.",
+      "content": "We use essential storage (localStorage) for sign-in, language, theme and remembering your cookie choice; it does not require consent. We measure traffic and app usage with Vercel Web Analytics and our own measurement, both without cookies. Our own measurement records visited app pages and actions (e.g. creating a trip or adding an expense), linked to your account when signed in, so we can improve the app (legitimate interest). We do not store IP addresses; anonymous visitors are only distinguished within a single day. Records are deleted after 13 months and are detached from your account when you delete it. Technical app errors are stored so we can fix them. Marketing cookies from our partner Travelpayouts are loaded only with your consent. They track partner (affiliate) links to services such as Booking.com or GetYourGuide: when you book through them, Journeo earns a commission and your price stays the same. You can withdraw consent at any time.",
       "cookieSettings": true
     },
     "section5": {
@@ -2035,6 +2164,10 @@
     "necessary": {
       "title": "Essential",
       "desc": "Sign-in, language, theme and remembering this choice. The app does not work without them."
+    },
+    "measurement": {
+      "title": "Usage measurement",
+      "desc": "No cookies, no stored IP: which pages and features get used, so we know what to improve. Anonymous visitors are never tracked for longer than a day."
     },
     "marketing": {
       "title": "Marketing",

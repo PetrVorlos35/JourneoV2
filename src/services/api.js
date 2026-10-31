@@ -1,4 +1,4 @@
-const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace(/\/$/, '');
+export const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api').replace(/\/$/, '');
 
 function getToken() {
   return localStorage.getItem('journeo_token');
@@ -385,6 +385,20 @@ export const api = {
 
     deleteTrip: (id) =>
       request(`/admin/trips/${id}`, { method: 'DELETE' }),
+
+    analytics: (days = 30) => request(`/admin/analytics?days=${days}`),
+
+    analyticsLive: () => request('/admin/analytics/live'),
+
+    getUserActivity: (id) => request(`/admin/users/${id}/activity`),
+
+    errors: (status = 'open') => request(`/admin/errors?status=${status}`),
+
+    resolveError: (id, resolved) =>
+      request(`/admin/errors/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ resolved }),
+      }),
   },
 };
 

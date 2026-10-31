@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Cookie } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { isTrackingEnabled, setTrackingEnabled } from '../utils/analytics';
 import {
   getConsent,
   saveConsent,
@@ -36,6 +37,8 @@ const CookieConsent = () => {
   const [open, setOpen] = useState(() => getConsent() === null);
   const [showSettings, setShowSettings] = useState(false);
   const [marketing, setMarketing] = useState(() => getConsent()?.marketing ?? false);
+  // Měření je bez cookies a bez souhlasu (oprávněný zájem), jde ale vypnout.
+  const [measurement, setMeasurement] = useState(isTrackingEnabled);
 
   // Souhlas z minulé návštěvy → načíst skripty hned.
   useEffect(() => {
@@ -46,6 +49,7 @@ const CookieConsent = () => {
   useEffect(() => {
     const handler = () => {
       setMarketing(getConsent()?.marketing ?? false);
+      setMeasurement(isTrackingEnabled());
       setShowSettings(true);
       setOpen(true);
     };
@@ -56,6 +60,7 @@ const CookieConsent = () => {
   const commit = (allowMarketing) => {
     const hadMarketing = getConsent()?.marketing ?? false;
     saveConsent({ marketing: allowMarketing });
+    setTrackingEnabled(measurement);
     setOpen(false);
     setShowSettings(false);
     if (allowMarketing) {
@@ -103,6 +108,15 @@ const CookieConsent = () => {
                     </p>
                   </div>
                   <Toggle checked disabled label={t('cookies.necessary.title')} />
+                </div>
+                <div className="flex items-start justify-between gap-4 rounded-xl bg-gray-50 dark:bg-white/5 p-3">
+                  <div>
+                    <p className="text-sm font-medium">{t('cookies.measurement.title')}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">
+                      {t('cookies.measurement.desc')}
+                    </p>
+                  </div>
+                  <Toggle checked={measurement} onChange={setMeasurement} label={t('cookies.measurement.title')} />
                 </div>
                 <div className="flex items-start justify-between gap-4 rounded-xl bg-gray-50 dark:bg-white/5 p-3">
                   <div>

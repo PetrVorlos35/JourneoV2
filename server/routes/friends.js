@@ -3,6 +3,7 @@ import { randomBytes } from 'crypto';
 import pool from '../config/db.js';
 import { sendFriendRequestEmail } from '../lib/mailer.js';
 import { wantsEmail } from '../lib/emailPrefs.js';
+import { track } from '../lib/analytics.js';
 
 const router = Router();
 
@@ -206,6 +207,7 @@ router.post('/request', async (req, res) => {
       );
     }
 
+    track(req, 'friend_request_sent');
     res.status(201).json({ message: 'Žádost odeslána.', friendshipId });
   } catch (err) {
     console.error('Send friend request error:', err);
@@ -251,6 +253,7 @@ router.put('/:id/accept', async (req, res) => {
       [f.requester_id, friendshipId, `${name} přijal/a vaši žádost o přátelství.`]
     );
 
+    track(req, 'friend_accepted');
     res.json({ message: 'Žádost přijata.' });
   } catch (err) {
     console.error('Accept friend request error:', err);
@@ -528,6 +531,7 @@ router.post('/invite/:token/accept', async (req, res) => {
       );
     }
 
+    track(req, 'friend_request_sent', { props: { via: 'invite_link' } });
     res.status(201).json({ message: 'Žádost odeslána.', friendshipId });
   } catch (err) {
     console.error('Accept invite error:', err);

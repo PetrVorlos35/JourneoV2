@@ -105,12 +105,15 @@ const OverviewTiles = ({ budget, balances, places, tripCounts }) => {
 
   // ── Geography ──
   const geoTile = (() => {
-    if (!places) return { value: '—', sub: t('tripsOverview.tiles.countriesEmpty') };
-    const countries = [...new Set(places.map((p) => p.countryCode).filter(Boolean))];
+    if (!places?.length) return { value: '—', sub: t('tripsOverview.tiles.countriesEmpty') };
+    // Jen navštívené země — stejně jako pas v profilu a Statistiky; vysněná
+    // místa se počítají jen do „X z Y míst“.
+    const visitedPlaces = places.filter((p) => p.status === 'visited');
+    const visited = visitedPlaces.length;
+    const countries = [...new Set(visitedPlaces.map((p) => p.countryCode).filter(Boolean))];
     if (countries.length === 0) {
-      return { value: '—', sub: t('tripsOverview.tiles.countriesEmpty') };
+      return { value: '—', sub: t('tripsOverview.tiles.placesVisited', { visited, total: places.length }) };
     }
-    const visited = places.filter((p) => p.status === 'visited').length;
     return {
       value: countries.length,
       sub: t('tripsOverview.tiles.placesVisited', { visited, total: places.length }),

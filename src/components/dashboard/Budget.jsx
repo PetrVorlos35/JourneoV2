@@ -24,6 +24,7 @@ import UserAvatar from '../ui/UserAvatar';
 import { formatCurrency, formatRate, currencySymbol } from '../../utils/currency';
 import { CurrencyList, TripCurrencyControl, getRecentCurrencies, rememberCurrency } from './CurrencyPicker';
 import { PlanFirstTripButton } from './EmptyShowcase';
+import { track } from '../../utils/analytics';
 
 const CATEGORIES = [
   { id: 'transport',      icon: Car,          colorClass: 'bg-blue-500',    lightBgClass: 'bg-active',     textClass: 'text-accent' },
@@ -888,6 +889,7 @@ const AddExpenseModal = ({ isOpen, onClose, onAdd, currency: tripCurrency, tripI
       } : {}),
     });
     rememberExpenseCurrency(tripId, form.currency, isForeign);
+    if (!isEditing) track('expense_added', { category: form.category, foreign: isForeign, split: splits.length > 0 });
     toast.success(isEditing ? t('budget.addModal.editSuccess') : t('budget.addModal.success'));
 
     if (addAnother) {

@@ -27,6 +27,11 @@ import adminRoutes from './routes/admin.js';
 import adminAuth from './middleware/adminAuth.js';
 import publicRoutes from './routes/public.js';
 import cronRoutes from './routes/cron.js';
+import collectRoutes from './routes/collect.js';
+import { requestContext } from './lib/requestContext.js';
+import { installServerErrorTracking } from './lib/errorTracking.js';
+
+installServerErrorTracking();
 import { globalLimiter, authLimiter, geoLimiter } from './middleware/rateLimit.js';
 
 const app = express();
@@ -71,10 +76,12 @@ app.use(express.json({ limit: '10mb' }));
 
 // Globální rate limit na všechny API cally.
 app.use('/api', globalLimiter);
+app.use(requestContext);
 
 app.use('/api/public', publicRoutes);
 // Vercel Cron jobs (secured by CRON_SECRET, not user JWTs).
 app.use('/api/cron', cronRoutes);
+app.use('/api/collect', collectRoutes);
 // Přísnější limit na citlivé auth endpointy (login, register, reset…).
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/trips', auth, tripRoutes);

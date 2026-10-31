@@ -8,6 +8,7 @@ import UserAvatar from '../ui/UserAvatar';
 import { useDialog } from '../ui/DialogModal';
 import { useAuth } from '../../contexts/AuthContext';
 import { AdminTableSkeleton } from '../ui/Skeletons';
+import { eventLabel, relativeTime } from './analyticsUi';
 import {
   MasterDetail, ListToolbar, ListRow, LoadMore, BackToList, DetailSection, Badge, EmptyDetail,
   avatarUser, displayName, formatDate,
@@ -17,6 +18,55 @@ const SORTS = {
   newest: { sort: 'created_at', order: 'desc' },
   name: { sort: 'first_name', order: 'asc' },
   email: { sort: 'email', order: 'asc' },
+};
+
+// Co uživatel v aplikaci dělal (analytics_events), nejnovější nahoře.
+const UserActivity = ({ userId, t, locale }) => {
+  const [activity, setActivity] = useState(null);
+  const [showAll, setShowAll] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    setActivity(null);
+    setShowAll(false);
+    api.admin.getUserActivity(userId)
+      .then((r) => { if (alive) setActivity(r.activity); })
+      .catch(() => { if (alive) setActivity({ events: [], failed: true }); });
+    return () => { alive = false; };
+  }, [userId]);
+
+  const events = activity?.events || [];
+  const visible = showAll ? events : events.slice(0, 8);
+  return (
+    <DetailSection title={t('admin.analytics.userActivity')}>
+      {!activity ? (
+        <div className="py-4"><Loader2 className="animate-spin text-gray-400" size={18} /></div>
+      ) : events.length === 0 ? (
+        <p className="py-3 text-[14px] text-muted">{t('admin.analytics.noUserActivity')}</p>
+      ) : (
+        <>
+          <p className="text-[13px] font-medium text-secondary">
+            {t('admin.analytics.lastSeen', { when: relativeTime(activity.lastSeen, locale) })}
+            {' · '}{t('admin.analytics.activeDays', { count: activity.activeDays })}
+          </p>
+          <ul className="mt-2">
+            {visible.map((e) => (
+              <li key={e.id} className="flex items-center justify-between gap-3 py-2 border-b border-gray-100 dark:border-white/[0.06]">
+                <span className={`min-w-0 truncate text-[14px] ${e.name === 'pageview' ? 'font-medium text-secondary' : 'font-semibold text-primary'}`}>
+                  {eventLabel(t, e)}
+                </span>
+                <span className="shrink-0 text-[12px] font-medium tabular-nums text-muted">{relativeTime(e.createdAt, locale)}</span>
+              </li>
+            ))}
+          </ul>
+          {events.length > 8 && !showAll && (
+            <button type="button" onClick={() => setShowAll(true)} className="mt-2 text-[13px] font-semibold text-active hover:underline underline-offset-2 cursor-pointer">
+              {t('admin.analytics.showAll', { count: events.length })}
+            </button>
+          )}
+        </>
+      )}
+    </DetailSection>
+  );
 };
 
 const UserDossier = ({ userId, onSelectUser, onChanged, onDeleted, onBack }) => {
@@ -153,6 +203,8 @@ const UserDossier = ({ userId, onSelectUser, onChanged, onDeleted, onBack }) => 
           </ul>
         )}
       </DetailSection>
+
+      <UserActivity userId={user.id} t={t} locale={i18n.language} />
 
       <DetailSection title={t('admin.v2.friendCount')} count={user.friends.length}>
         {user.friends.length === 0 ? (

@@ -1,10 +1,11 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
 import NotFound from './components/NotFound';
 import CookieConsent from './components/CookieConsent';
 import { useAuth } from './contexts/AuthContext';
 import { Analytics } from '@vercel/analytics/react';
+import { trackPageview, optOutThisDevice } from './utils/analytics';
 
 // Lazy load everything except the landing page to speed up initial load
 const AuthFlow = lazy(() => import('./components/auth/AuthFlow'));
@@ -61,7 +62,16 @@ const AdminRedirect = () => {
   return <Navigate to={`/dashboard${location.pathname}${location.search}`} replace />;
 };
 
+// Zobrazení stránky při každé změně cesty; zařízení admina se nepočítá.
+const usePageviews = () => {
+  const { pathname } = useLocation();
+  const { isAdmin } = useAuth();
+  useEffect(() => { if (isAdmin) optOutThisDevice(); }, [isAdmin]);
+  useEffect(() => { trackPageview(pathname); }, [pathname]);
+};
+
 function App() {
+  usePageviews();
   return (
     <div className="bg-gray-50 dark:bg-black min-h-screen text-primary transition-colors duration-500">
       <Suspense fallback={<LoadingFallback />}>

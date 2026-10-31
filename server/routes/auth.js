@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
 import auth from '../middleware/auth.js';
 import { sendVerificationCode, sendTripTransferredEmail } from '../lib/mailer.js';
+import { track } from '../lib/analytics.js';
 import { getCodeCooldownRemaining } from '../lib/otpThrottle.js';
 import { waitUntil } from '@vercel/functions';
 
@@ -153,6 +154,7 @@ router.post('/verify', async (req, res) => {
     const { token_version, ...user } = users[0];
     const token = jwt.sign({ userId: user.id, tv: token_version }, process.env.JWT_SECRET, { expiresIn: '30d' });
 
+    track(req, 'signup', { userId: user.id, props: { method: 'email' } });
     res.json({
       message: 'E-mail byl úspěšně ověřen.',
       token,
@@ -248,6 +250,7 @@ router.post('/login', async (req, res) => {
 
     // Generate JWT. `tv` (token version) umožňuje revokaci — viz middleware/auth.js.
     const token = jwt.sign({ userId: user.id, tv: user.token_version }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    track(req, 'login', { userId: user.id, props: { method: 'password' } });
 
     res.json({
       token,
@@ -383,6 +386,7 @@ router.post('/google', async (req, res) => {
 
     // Generate JWT. `tv` (token version) umožňuje revokaci — viz middleware/auth.js.
     const token = jwt.sign({ userId, tv: tokenVersion }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    track(req, isNew ? 'signup' : 'login', { userId, props: { method: 'google' } });
 
     res.json({
       token,
@@ -663,6 +667,7 @@ router.delete('/account', auth, async (req, res) => {
       );
     }
 
+    track(req, 'account_deleted', { userId: null });
     res.json({ message: 'Účet byl smazán.', transferredTrips: heirs.length });
   } catch (err) {
     await connection.rollback();

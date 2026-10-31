@@ -1,7 +1,10 @@
 import { Router } from 'express';
 import pool from '../config/db.js';
+import analyticsRoutes from './adminAnalytics.js';
+import { makeConverter } from '../lib/rates.js';
 
 const router = Router();
+router.use(analyticsRoutes);
 
 // ── GET /api/admin/dashboard ────────────────────────────────
 // Platform-wide statistics for admin dashboard
@@ -81,8 +84,13 @@ router.get('/dashboard', async (req, res) => {
         ORDER BY trip_count DESC
         LIMIT 5
       `),
-      // Total expense amount
-      pool.query('SELECT COALESCE(SUM(amount), 0) AS total FROM trip_expenses'),
+      // Součet výdajů po měnách výletů — sčítat CZK s EUR by nedávalo smysl,
+      // převádí se níž na CZK posledním kurzem ECB.
+      pool.query(`
+        SELECT t.currency, COALESCE(SUM(e.amount), 0) AS total
+        FROM trip_expenses e JOIN trips t ON t.id = e.trip_id
+        GROUP BY t.currency
+      `),
       // Trips created per month (last 6 months)
       pool.query(`
         SELECT 
@@ -112,6 +120,12 @@ router.get('/dashboard', async (req, res) => {
       `),
     ]);
 
+    const toCzk = await makeConverter('CZK', totalExpenseAmountRows.map((r) => r.currency));
+    const totalExpenseAmount = totalExpenseAmountRows.reduce(
+      (sum, r) => sum + (toCzk(parseFloat(r.total), r.currency) ?? 0),
+      0
+    );
+
     res.json({
       dashboard: {
         totalUsers: parseInt(totalUsersRows[0].count),
@@ -120,7 +134,8 @@ router.get('/dashboard', async (req, res) => {
         totalFriendships: parseInt(totalFriendshipsRows[0].count),
         newUsersWeek: parseInt(newUsersWeekRows[0].count),
         newUsersMonth: parseInt(newUsersMonthRows[0].count),
-        totalExpenseAmount: parseFloat(totalExpenseAmountRows[0].total),
+        totalExpenseAmount: Math.round(totalExpenseAmount * 100) / 100,
+        totalExpenseCurrency: 'CZK',
         newTripsWeek: parseInt(newTripsWeekRows[0].count),
         activeUsers30: parseInt(activeUsersRows[0].count),
         unverifiedUsers: parseInt(unverifiedRows[0].count),
@@ -245,6 +260,7 @@ router.get('/users/:id', async (req, res) => {
       `SELECT t.id, t.title, DATE_FORMAT(t.start_date, '%Y-%m-%d') AS startDate, 
         DATE_FORMAT(t.end_date, '%Y-%m-%d') AS endDate, t.created_at, t.deleted_at,
         COALESCE((SELECT SUM(e.amount) FROM trip_expenses e WHERE e.trip_id = t.id), 0) AS totalExpenses,
+        t.currency AS currency,
         (SELECT COUNT(*) FROM votes v WHERE v.trip_id = t.id AND v.value = 1) AS likes
       FROM trips t WHERE t.user_id = ? ORDER BY t.created_at DESC`,
       [userId]
@@ -277,6 +293,7 @@ router.get('/users/:id', async (req, res) => {
           endDate: t.endDate,
           createdAt: t.created_at,
           totalExpenses: parseFloat(t.totalExpenses),
+          currency: t.currency,
           likes: parseInt(t.likes),
           inTrash: !!t.deleted_at,
         })),
@@ -393,7 +410,7 @@ router.get('/trips', async (req, res) => {
       `SELECT t.id, t.title, 
         DATE_FORMAT(t.start_date, '%Y-%m-%d') AS startDate,
         DATE_FORMAT(t.end_date, '%Y-%m-%d') AS endDate,
-        t.created_at, t.deleted_at,
+        t.created_at, t.deleted_at, t.currency,
         u.id AS userId, u.email AS userEmail, u.first_name AS userFirstName, u.last_name AS userLastName, u.avatar_url AS userAvatar,
         (SELECT COUNT(*) FROM trip_activities a WHERE a.trip_id = t.id) AS activityCount,
         COALESCE((SELECT SUM(e.amount) FROM trip_expenses e WHERE e.trip_id = t.id), 0) AS totalExpenses,
@@ -423,6 +440,7 @@ router.get('/trips', async (req, res) => {
         },
         activityCount: parseInt(t.activityCount),
         totalExpenses: parseFloat(t.totalExpenses),
+        currency: t.currency,
         likes: parseInt(t.likes),
         durationDays: parseInt(t.durationDays),
         inTrash: !!t.deleted_at,
@@ -472,7 +490,7 @@ router.get('/trips/:id', async (req, res) => {
       `SELECT t.id, t.title, 
         DATE_FORMAT(t.start_date, '%Y-%m-%d') AS startDate,
         DATE_FORMAT(t.end_date, '%Y-%m-%d') AS endDate,
-        t.created_at, t.deleted_at,
+        t.created_at, t.deleted_at, t.currency,
         u.id AS userId, u.email AS userEmail, u.first_name AS userFirstName, 
         u.last_name AS userLastName, u.avatar_url AS userAvatar,
         DATEDIFF(t.end_date, t.start_date) AS durationDays
@@ -531,6 +549,7 @@ router.get('/trips/:id', async (req, res) => {
         durationDays: parseInt(trip.durationDays),
         likes: parseInt(voteScore[0].likes),
         inTrash: !!trip.deleted_at,
+        currency: trip.currency,
         user: {
           id: trip.userId,
           email: trip.userEmail,

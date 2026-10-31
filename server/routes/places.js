@@ -2,6 +2,7 @@ import { Router } from 'express';
 import pool from '../config/db.js';
 import { getTripRole } from '../lib/tripAccess.js';
 import { geocodeOne } from '../lib/geocode.js';
+import { track } from '../lib/analytics.js';
 
 const router = Router();
 
@@ -262,6 +263,7 @@ router.post('/', async (req, res) => {
       [result.insertId]
     );
 
+    track(req, 'place_added', { props: { source: data.source ?? 'manual', trip: Boolean(row?.trip_id) } });
     res.status(201).json({ place: shapePlace(row) });
   } catch (err) {
     console.error('Create place error:', err);

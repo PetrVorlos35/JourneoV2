@@ -7,6 +7,7 @@ import { calculateBalances } from '../lib/balances.js';
 import { sendSettlementEmail } from '../lib/mailer.js';
 import { wantsEmail } from '../lib/emailPrefs.js';
 import { getRate, getUserCurrency, isSupportedCurrency, makeConverter } from '../lib/rates.js';
+import { track } from '../lib/analytics.js';
 
 const router = Router();
 
@@ -271,6 +272,7 @@ router.post('/', async (req, res) => {
     );
 
     const tripId = result.insertId;
+    track(req, 'trip_created', { props: { source: 'new' } });
 
     res.status(201).json({
       trip: {
@@ -906,6 +908,7 @@ router.post('/:id/settle', async (req, res) => {
       );
     }
 
+    track(req, 'settlement');
     res.json({
       success: true,
       receiverBankAccount: receiver?.bankAccount || null,
@@ -954,6 +957,7 @@ router.post('/:id/share', async (req, res) => {
       [tripId, targetUserId, role]
     );
 
+    track(req, 'collaborator_added', { props: { role } });
     res.status(201).json({ message: 'Výlet byl sdílen.' });
   } catch (err) {
     console.error('Share trip error:', err);
@@ -1034,6 +1038,7 @@ router.post('/:id/share-link', async (req, res) => {
 
     const token = randomBytes(32).toString('hex');
     await pool.query('UPDATE trips SET share_token = ? WHERE id = ?', [token, tripId]);
+    track(req, 'share_link_created');
     res.json({ token });
   } catch (err) {
     console.error('Generate share link error:', err);
@@ -1075,6 +1080,7 @@ router.post('/:id/invite-link', async (req, res) => {
 
     const token = randomBytes(32).toString('hex');
     await pool.query('UPDATE trips SET invite_token = ? WHERE id = ?', [token, tripId]);
+    track(req, 'invite_link_created');
     res.json({ token });
   } catch (err) {
     console.error('Generate invite link error:', err);
@@ -1132,6 +1138,7 @@ router.post('/join/:token', async (req, res) => {
       [trip.ownerId, trip.id, name]
     );
 
+    track(req, 'trip_joined');
     res.status(201).json({ tripId: trip.id.toString(), status: 'joined' });
   } catch (err) {
     console.error('Join trip error:', err);
@@ -1221,6 +1228,7 @@ router.post('/copy/:shareToken', async (req, res) => {
     }
 
     await connection.commit();
+    track(req, 'trip_created', { props: { source: 'copy' } });
 
     res.status(201).json({ trip: await fetchFullTrip(tripId, userId, 'owner') });
   } catch (err) {

@@ -32,6 +32,14 @@ const transporter = nodemailer.createTransport({
  * @param {string} code - The 6-digit verification code
  * @param {'REGISTER' | 'RESET'} type - The type of verification
  */
+// Patička volitelných upozornění: odkaz, kde si je uživatel vypne.
+// Ověřovací kódy ji nemají — chodí vždycky.
+const settingsFooter = (appUrl, isCs = true) => `
+          <div style="margin-top:8px;font-size:13px;">
+            ${isCs ? 'Tato upozornění si můžete vypnout v' : 'You can turn these emails off in'}
+            <a href="${appUrl}/dashboard/settings" style="color:#71717a;text-decoration:underline;">${isCs ? 'Nastavení' : 'Settings'}</a>.
+          </div>`;
+
 export const sendVerificationCode = async (email, code, type) => {
   const isRegister = type === 'REGISTER';
   
@@ -252,6 +260,7 @@ export const sendFriendRequestEmail = async (email, requesterName, friendshipId)
         </div>
         <div class="footer">
           &copy; ${new Date().getFullYear()} Journeo. Všechna práva vyhrazena.
+          ${settingsFooter(appUrl)}
         </div>
       </div>
     </body>
@@ -385,6 +394,7 @@ export const sendSettlementEmail = async (email, { payerName, amountLabel, tripN
         </div>
         <div class="footer">
           &copy; ${new Date().getFullYear()} Journeo. ${isCs ? 'Všechna práva vyhrazena.' : 'All rights reserved.'}
+          ${settingsFooter(appUrl, isCs)}
         </div>
       </div>
     </body>
@@ -497,6 +507,7 @@ export const sendTripTransferredEmail = async (email, { previousOwnerName, tripN
         </div>
         <div class="footer">
           &copy; ${new Date().getFullYear()} Journeo. ${isCs ? 'Všechna práva vyhrazena.' : 'All rights reserved.'}
+          ${settingsFooter(appUrl, isCs)}
         </div>
       </div>
     </body>
