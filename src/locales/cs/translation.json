@@ -566,7 +566,8 @@
       "daysToGo_few": "dny do odjezdu",
       "daysToGo_many": "dne do odjezdu",
       "daysToGo_other": "dní do odjezdu"
-    }
+    },
+    "logoHome": "Journeo – úvodní stránka"
   },
   "spotlight": {
     "title": "Rychlé hledání",

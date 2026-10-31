@@ -380,8 +380,16 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
       <div className={`hidden md:flex z-20 shrink-0 w-[264px] ${isMapRoute ? 'absolute inset-y-0 left-0' : ''}`}>
         <aside className="w-full h-full flex flex-col bg-white dark:bg-[#111113] border-r border-gray-200/80 dark:border-white/10">
           <div className="flex items-center gap-2.5 pl-5 pr-3 pt-5 pb-4">
-            <img src={isDark ? JourneoLogo : JourneoLogoDark} alt="Journeo Logo" className="h-7 w-auto object-contain" />
-            <span className="font-bold text-lg tracking-tight">Journeo</span>
+            {/* Logo vede na úvodní stránku; zpátky se jde přes „Přehled“ v její liště. */}
+            <Link
+              to="/"
+              onClick={(e) => handleNavigation('/', e)}
+              aria-label={t('dashboardLayout.logoHome')}
+              className="flex items-center gap-2.5 -ml-1 px-1 rounded-lg hover:opacity-80 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+            >
+              <img src={isDark ? JourneoLogo : JourneoLogoDark} alt="" className="h-7 w-auto object-contain" />
+              <span className="font-bold text-lg tracking-tight">Journeo</span>
+            </Link>
             <VersionBadge className="text-[11px] font-semibold px-1.5 py-0.5 rounded-md bg-subtle text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/20 hover:text-gray-900 dark:hover:text-gray-200 transition-colors" />
             <div className="ml-auto"><NotificationBell placement="sidebar" /></div>
           </div>
@@ -589,14 +597,19 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
       <main className={`flex-1 min-w-0 ${isTripDetail ? 'pb-[env(safe-area-inset-bottom)]' : 'pb-[calc(max(1.25rem,env(safe-area-inset-bottom))+5.75rem)]'} md:pb-0 h-full flex flex-col relative z-10`}>
         {/* Mobile top bar */}
         <div className="md:hidden flex items-center justify-between px-4 pb-3 pt-[max(0.75rem,var(--safe-top))] glass sticky top-0 z-30 shrink-0">
-          <div className="flex items-center gap-2">
+          <Link
+            to="/"
+            onClick={(e) => handleNavigation('/', e)}
+            aria-label={t('dashboardLayout.logoHome')}
+            className="flex items-center gap-2 rounded-lg active:opacity-70 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+          >
             <img
               src={isDark ? JourneoLogo : JourneoLogoDark}
-              alt="Journeo Logo"
+              alt=""
               className="h-7 w-auto object-contain"
             />
             <span className="font-bold text-lg tracking-tight mt-0.5">Journeo</span>
-          </div>
+          </Link>
           <div className="flex items-center gap-1">
             <button
               onClick={openSpotlight}

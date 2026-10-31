@@ -564,7 +564,8 @@
       "dayOf": "day of {{total}}",
       "daysToGo_one": "day to go",
       "daysToGo_other": "days to go"
-    }
+    },
+    "logoHome": "Journeo – home page"
   },
   "spotlight": {
     "title": "Quick search",
