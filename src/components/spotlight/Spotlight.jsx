@@ -324,7 +324,7 @@ const Spotlight = ({ isOpen, onClose, trips = [], onCreateTrip, onLogout }) => {
             className="relative w-full sm:max-w-2xl h-[100dvh] sm:h-auto sm:max-h-[68vh] flex flex-col overflow-hidden bg-page sm:rounded-[1.75rem] border-0 sm:border border-black/5 dark:border-white/10 shadow-2xl"
           >
             {/* Vyhledávací pole */}
-            <div className="flex items-center gap-3 px-4 sm:px-5 pb-3 pt-[max(0.875rem,env(safe-area-inset-top))] sm:pt-4 border-b border-gray-100 dark:border-white/[0.07] shrink-0">
+            <div className="flex items-center gap-3 px-4 sm:px-5 pb-3 pt-[max(0.875rem,var(--safe-top))] sm:pt-4 border-b border-gray-100 dark:border-white/[0.07] shrink-0">
               <Search size={18} strokeWidth={2.25} className="shrink-0 text-gray-400 dark:text-gray-500" aria-hidden="true" />
               <input
                 ref={inputRef}

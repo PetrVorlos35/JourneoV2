@@ -13,7 +13,7 @@ const Navbar = ({ variant = 'dark' }) => {
 
   return (
     <nav
-      className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-3xl rounded-full backdrop-blur-[40px] saturate-[1.8] border px-2 py-2 ${
+      className={`fixed top-[max(1.5rem,calc(var(--safe-top)+0.5rem))] left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-3xl rounded-full backdrop-blur-[40px] saturate-[1.8] border px-2 py-2 ${
         isLight
           ? 'bg-white/70 border-gray-200/70 shadow-[0_8px_32px_rgba(0,0,0,0.06)]'
           : 'bg-[#1d1d1f]/70 border-white/10 shadow-sm'

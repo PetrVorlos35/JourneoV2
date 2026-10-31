@@ -339,7 +339,7 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
       )}
       <Toaster
         position="top-right"
-        containerStyle={{ zIndex: 99999, top: 'max(1rem, calc(env(safe-area-inset-top) + 0.5rem))' }}
+        containerStyle={{ zIndex: 99999, top: 'max(1rem, calc(var(--safe-top) + 0.5rem))' }}
         toastOptions={{
           style: {
             background: isDark ? '#1C1C1E' : '#fff',
@@ -588,7 +588,7 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
       {/* ── Main content ── */}
       <main className={`flex-1 min-w-0 ${isTripDetail ? 'pb-[env(safe-area-inset-bottom)]' : 'pb-[calc(max(1.25rem,env(safe-area-inset-bottom))+5.75rem)]'} md:pb-0 h-full flex flex-col relative z-10`}>
         {/* Mobile top bar */}
-        <div className="md:hidden flex items-center justify-between px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] glass sticky top-0 z-30 shrink-0">
+        <div className="md:hidden flex items-center justify-between px-4 pb-3 pt-[max(0.75rem,var(--safe-top))] glass sticky top-0 z-30 shrink-0">
           <div className="flex items-center gap-2">
             <img
               src={isDark ? JourneoLogo : JourneoLogoDark}

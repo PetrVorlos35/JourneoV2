@@ -154,7 +154,7 @@ const NotificationBell = ({ placement = 'right' }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className={`fixed md:absolute left-0 right-0 ${placement === 'sidebar' ? 'md:left-0 md:right-auto md:top-12' : 'md:left-auto md:top-14'} top-[max(4.25rem,calc(env(safe-area-inset-top)+3.75rem))] w-full md:w-96 max-h-[calc(100dvh-max(4.25rem,calc(env(safe-area-inset-top)+3.75rem))-1rem)] md:max-h-[420px] bg-page shadow-2xl rounded-b-[2rem] md:rounded-2xl border-b md:border border-black/5 dark:border-white/10 overflow-hidden z-[100] flex flex-col`}
+            className={`fixed md:absolute left-0 right-0 ${placement === 'sidebar' ? 'md:left-0 md:right-auto md:top-12' : 'md:left-auto md:top-14'} top-[max(4.25rem,calc(var(--safe-top)+3.75rem))] w-full md:w-96 max-h-[calc(100dvh-max(4.25rem,calc(var(--safe-top)+3.75rem))-1rem)] md:max-h-[420px] bg-page shadow-2xl rounded-b-[2rem] md:rounded-2xl border-b md:border border-black/5 dark:border-white/10 overflow-hidden z-[100] flex flex-col`}
           >
             <div className="px-5 py-4 border-b border-subtle flex items-center justify-between">
               <h3 className="font-bold text-[15px] text-primary tracking-tight">{t('notifications.title')}</h3>

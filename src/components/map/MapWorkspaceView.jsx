@@ -464,7 +464,7 @@ const MapWorkspaceView = ({
     // pointer-events-none na obalu a auto jen na vlastních prvcích, ať se
     // klik na tlačítko sbalení panelu pod ní neztratí.
     <div
-      className="pointer-events-none absolute inset-x-0 top-0 z-[30] flex items-start gap-2 p-3 pt-[max(0.75rem,env(safe-area-inset-top))]"
+      className="pointer-events-none absolute inset-x-0 top-0 z-[30] flex items-start gap-2 p-3 pt-[max(0.75rem,var(--safe-top))]"
       style={isDesktop ? { paddingLeft: controlsLeftPad } : undefined}
     >
       {showBack && (

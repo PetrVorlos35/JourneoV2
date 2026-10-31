@@ -835,7 +835,7 @@ const AuthFlow = () => {
       <div className="absolute inset-0 hidden lg:block bg-gradient-to-r from-black/40 via-transparent to-black/10" />
 
       {/* Back home */}
-      <div className="absolute top-5 left-5 sm:top-6 sm:left-8 z-20">
+      <div className="absolute top-[max(1.25rem,calc(var(--safe-top)+0.5rem))] left-5 sm:top-[max(1.5rem,calc(var(--safe-top)+0.5rem))] sm:left-8 z-20">
         <button
           onClick={() => navigate('/')}
           className="flex items-center gap-2 rounded-full bg-black/25 backdrop-blur-md border border-white/20 px-4 py-2 text-[13px] font-semibold text-white/90 hover:bg-black/40 hover:text-white transition-colors duration-300 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
@@ -850,7 +850,7 @@ const AuthFlow = () => {
           sky, fog, foliage — sits behind it. */}
       <Link
         to="/"
-        className="absolute top-5 right-5 sm:top-6 sm:right-8 z-20 flex items-center gap-2 rounded-full bg-black/25 backdrop-blur-md border border-white/20 pl-3 pr-4 py-2 hover:bg-black/40 transition-colors duration-300 group focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+        className="absolute top-[max(1.25rem,calc(var(--safe-top)+0.5rem))] right-5 sm:top-[max(1.5rem,calc(var(--safe-top)+0.5rem))] sm:right-8 z-20 flex items-center gap-2 rounded-full bg-black/25 backdrop-blur-md border border-white/20 pl-3 pr-4 py-2 hover:bg-black/40 transition-colors duration-300 group focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
       >
         <img
           src={JourneoWhiteLogo}

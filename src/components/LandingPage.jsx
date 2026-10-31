@@ -51,23 +51,33 @@ const HeroPlanForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full max-w-md flex flex-col sm:flex-row items-stretch gap-2 sm:gap-0 sm:p-1.5 sm:bg-white sm:border sm:border-gray-200 sm:rounded-full sm:shadow-lg sm:shadow-blue-600/10 focus-within:sm:border-blue-300 transition-colors"
+      className="w-full max-w-md flex flex-col sm:flex-row items-stretch gap-1.5 sm:gap-0 p-1.5 bg-white border border-gray-200 rounded-[1.75rem] sm:rounded-full shadow-lg shadow-blue-600/10 focus-within:border-blue-300 focus-within:ring-4 focus-within:ring-blue-500/10 transition-[border-color,box-shadow] duration-300"
     >
       <label htmlFor="hero-destination" className="sr-only">{t('landing.hero.planLabel')}</label>
-      <input
-        id="hero-destination"
-        type="text"
-        value={destination}
-        onChange={(e) => setDestination(e.target.value)}
-        placeholder={t('landing.hero.planPlaceholder')}
-        maxLength={255}
-        autoComplete="off"
-        enterKeyHint="go"
-        className="flex-1 min-w-0 h-14 sm:h-auto px-6 sm:px-5 rounded-full sm:rounded-none bg-white sm:bg-transparent border border-gray-200 sm:border-0 text-[16px] font-medium text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-blue-300"
-      />
+      {/* Pozor: flex-1 jen od sm — ve sloupcovém flexu by flex-basis 0
+          srazil výšku inputu na pár pixelů. */}
+      <div className="relative shrink-0 sm:flex-1 min-w-0 flex items-center">
+        <MapPin
+          size={19}
+          strokeWidth={2.25}
+          className="absolute left-4 text-accent pointer-events-none"
+          aria-hidden="true"
+        />
+        <input
+          id="hero-destination"
+          type="text"
+          value={destination}
+          onChange={(e) => setDestination(e.target.value)}
+          placeholder={t('landing.hero.planPlaceholder')}
+          maxLength={255}
+          autoComplete="off"
+          enterKeyHint="go"
+          className="w-full h-14 sm:h-12 pl-11 pr-4 bg-transparent text-[17px] sm:text-[16px] font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none"
+        />
+      </div>
       <button
         type="submit"
-        className="group inline-flex items-center justify-center gap-2 bg-accent text-white font-semibold rounded-full px-7 py-4 sm:py-3.5 shadow-lg shadow-blue-600/25 sm:shadow-none hover:bg-accent-hover active:scale-[0.98] transition-all duration-300 cursor-pointer"
+        className="group shrink-0 inline-flex items-center justify-center gap-2 h-14 sm:h-12 bg-accent text-white font-semibold rounded-[1.375rem] sm:rounded-full px-7 shadow-md shadow-blue-600/25 sm:shadow-none hover:bg-accent-hover active:scale-[0.98] transition-all duration-300 cursor-pointer"
       >
         {t('landing.hero.planCta')}
         <ArrowRight
@@ -1006,7 +1016,7 @@ const LandingPage = () => {
 
       <main className="relative z-10">
         {/* ── Hero ── */}
-        <section className="relative px-6 pt-36 sm:pt-44 pb-14 sm:pb-16 text-center">
+        <section className="relative px-6 pt-[calc(9rem+var(--safe-top))] sm:pt-[calc(11rem+var(--safe-top))] pb-14 sm:pb-16 text-center">
           <Doodle name="plane" className="left-[8%] top-32 w-[120px] rotate-[-3deg]" delay={1.2} />
           <FloatIn className="left-[3%] top-64" delay={0.9} rotate={-5}>
             <PackingCard />

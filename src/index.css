@@ -21,6 +21,18 @@
     text-size-adjust: 100%;
   }
 
+  /* Horní okraj pro lišty. Na plochu uložená PWA na iOS (black-translucent)
+     kreslí obsah pod status bar a systém ho tam rozmazává o kus níž, než sahá
+     samotný safe-area inset — proto v standalone přidáváme rezervu navíc. */
+  :root {
+    --safe-top: env(safe-area-inset-top, 0px);
+  }
+  @media (display-mode: standalone) {
+    :root {
+      --safe-top: calc(env(safe-area-inset-top, 0px) + 0.75rem);
+    }
+  }
+
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
