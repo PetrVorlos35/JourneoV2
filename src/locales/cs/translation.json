@@ -11,6 +11,22 @@
     "current": "Aktuální verze",
     "empty": "Zatím tu nejsou žádné novinky.",
     "releases": {
+      "v1_8": {
+        "title": "Journeo na ploše",
+        "summary": "Journeo si teď přidáte na plochu telefonu a otevřete jedním klepnutím, celé přes obrazovku jako aplikaci. K tomu vyladěná aplikace na iPhonu, volitelné e-maily a plynulejší načítání.",
+        "highlights": [
+          "Přidejte si Journeo na plochu: na Androidu jedním klepnutím, na iPhonu s krátkým návodem krok za krokem",
+          "Když odkaz otevřete v Instagramu nebo Facebooku, poradíme, jak Journeo otevřít v Safari nebo Chrome",
+          "Aplikace spuštěná z plochy iPhonu už nemá horní lištu schovanou pod hodinami",
+          "V Nastavení si vypnete e-maily, které nechcete: žádosti o přátelství, vyrovnané dluhy a předané výlety. Kódy pro přihlášení chodí vždy",
+          "Sdílený výlet se otevírá ve světlém režimu, tmavý si návštěvník zapne sám",
+          "Místo točících se koleček uvidíte obrys obsahu, který se právě načítá",
+          "Pole „Kam jedeš?“ na úvodní stránce je na telefonu zase pořádně velké",
+          "Dlaždice Země na přehledu počítá jen navštívené země, stejně jako profil",
+          "Upozornění od smazaných účtů ukazují „Smazaný uživatel“ místo otazníku",
+          "Logo vlevo nahoře vede na úvodní stránku"
+        ]
+      },
       "v1_7": {
         "title": "Výdaje v cizí měně",
         "summary": "Každý výlet má teď vlastní měnu a výdaj zadáte v té, ve které jste platili. Journeo ho převede kurzem ECB ke dni výdaje a původní částku si pamatuje. K tomu změna termínu výletu, úprava odkazů a rychlejší, svižnější rozpočet.",
@@ -2049,7 +2065,12 @@
         "friend_request_sent": "Poslal žádost o přátelství",
         "friend_accepted": "Přijal přátelství",
         "friend_invite_copied": "Zkopíroval odkaz pro přátele",
-        "landing_plan_submitted": "Zadal cíl na úvodní stránce"
+        "landing_plan_submitted": "Zadal cíl na úvodní stránce",
+        "pwa_prompt_shown": "Viděl nabídku „Přidat na plochu“",
+        "pwa_install_opened": "Otevřel instalaci aplikace",
+        "pwa_installed": "Nainstaloval aplikaci na plochu",
+        "pwa_prompt_declined": "Odmítl instalaci",
+        "pwa_card_dismissed": "Zavřel nabídku instalace"
       },
       "device": {
         "mobile": "Mobil",
@@ -2387,5 +2408,56 @@
     "noResults": "Žádná měna neodpovídá.",
     "change": "Měna výdaje: {{currency}}, změnit",
     "tripCurrency": "Měna výletu · {{currency}}"
+  },
+  "pwa": {
+    "menu": "Přidat na plochu",
+    "card": {
+      "title": "Měj Journeo po ruce",
+      "text": "Přidej si ho na plochu. Otevře se jako aplikace, bez adresního řádku, jedním klepnutím.",
+      "cta": "Přidat na plochu",
+      "ctaInApp": "Jak na to",
+      "dismiss": "Teď ne"
+    },
+    "settings": {
+      "group": "Aplikace",
+      "title": "Journeo na ploše",
+      "hint": "Otevírej Journeo jako aplikaci, jedním klepnutím z plochy.",
+      "installedHint": "Journeo máš na ploše, otevírá se jako aplikace.",
+      "installed": "Nainstalováno"
+    },
+    "sheet": {
+      "title": "Přidej si Journeo na plochu",
+      "subtitle": "Pak ho otevřeš jedním klepnutím, celé přes obrazovku jako aplikaci.",
+      "ios": {
+        "step1": "Klepni na Sdílet",
+        "step1Hint": "Ikona čtverečku se šipkou. V Safari dole, případně schovaná pod ⋯.",
+        "step2": "Vyber „Přidat na plochu“",
+        "step2Hint": "Když ji nevidíš, sjeď v nabídce níž.",
+        "step3": "Potvrď „Přidat“",
+        "step3Hint": "Journeo se objeví mezi aplikacemi."
+      },
+      "android": {
+        "step1": "Otevři menu prohlížeče",
+        "step1Hint": "Tři tečky ⋮ vpravo nahoře.",
+        "step2": "Zvol „Přidat na plochu“",
+        "step2Hint": "Někde se to jmenuje „Instalovat aplikaci“.",
+        "step3": "Potvrď",
+        "step3Hint": "Journeo se objeví mezi aplikacemi."
+      },
+      "inapp": {
+        "title": "{{app}} aplikace instalovat neumí",
+        "thisApp": "Tenhle prohlížeč",
+        "subtitle": "Otevři Journeo v prohlížeči {{browser}} a tam si ho přidej na plochu.",
+        "step1": "Klepni na ⋯ nebo ⋮ vpravo nahoře",
+        "step1Hint": "V menu aplikace, ve které se ti odkaz otevřel.",
+        "step2": "Zvol „Otevřít v prohlížeči“ ({{browser}})",
+        "step2Hint": "Nebo zkopíruj odkaz níž a vlož ho do prohlížeče.",
+        "step3": "Tam zvol „Přidat na plochu“",
+        "step3Hint": "Přes Sdílet (iPhone) nebo menu ⋮ (Android).",
+        "copy": "Zkopírovat odkaz",
+        "copied": "Odkaz zkopírován, vlož ho do {{browser}}.",
+        "copyError": "Odkaz se nepodařilo zkopírovat."
+      }
+    }
   }
 }

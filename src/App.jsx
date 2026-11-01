@@ -6,6 +6,7 @@ import CookieConsent from './components/CookieConsent';
 import { useAuth } from './contexts/AuthContext';
 import { Analytics } from '@vercel/analytics/react';
 import { trackPageview, optOutThisDevice } from './utils/analytics';
+import './utils/pwaInstall';
 import { AppShellSkeleton } from './components/ui/Skeletons';
 
 // Lazy load everything except the landing page to speed up initial load

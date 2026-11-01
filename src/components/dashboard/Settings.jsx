@@ -12,6 +12,8 @@ import UserAvatar from '../ui/UserAvatar';
 import { Group, Row } from '../ui/GroupedList';
 import { avatarPresets } from '../ui/avatarPresets';
 import api from '../../services/api';
+import usePwaInstall from '../../hooks/usePwaInstall';
+import { startInstall } from '../../utils/pwaInstall';
 
 // Nastavení = pas (kdo jsem) + tiché skupiny řádků (vyrovnání, předvolby,
 // účet). Profil se ukládá sám, stejně jako plán v zápisníku.
@@ -271,6 +273,9 @@ const Settings = () => {
       // Language is already changed locally; DB sync is best-effort
     }
   };
+
+  // Na počítači bez instalace (Safari, Firefox) se řádek „Aplikace“ neukazuje.
+  const installMode = usePwaInstall();
 
   // ── E-mailová upozornění ─────────────────────────────────────
   // Přepínač se uloží hned (optimisticky); při chybě se vrátí zpět.
@@ -536,6 +541,22 @@ const Settings = () => {
             <Segmented labelledBy={ids.language} value={language} options={languageOptions} onChange={handleLanguageChange} />
           </Row>
         </Group>
+
+        {installMode !== 'unsupported' && (
+          <Group title={t('pwa.settings.group')}>
+            <Row title={t('pwa.settings.title')} hint={installMode === 'installed' ? t('pwa.settings.installedHint') : t('pwa.settings.hint')}>
+              {installMode === 'installed' ? (
+                <p className="inline-flex items-center gap-1.5 text-[14px] font-semibold text-success">
+                  <Check size={15} strokeWidth={2.5} aria-hidden="true" /> {t('pwa.settings.installed')}
+                </p>
+              ) : (
+                <button type="button" onClick={() => startInstall('settings')} className={secondaryButtonClass}>
+                  {t('pwa.menu')}
+                </button>
+              )}
+            </Row>
+          </Group>
+        )}
 
         <div>
           <Group title={t('settings.emails.title')}>

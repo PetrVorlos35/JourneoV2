@@ -11,6 +11,22 @@
     "current": "Current version",
     "empty": "There are no release notes yet.",
     "releases": {
+      "v1_8": {
+        "title": "Journeo on your home screen",
+        "summary": "You can now add Journeo to your phone's home screen and open it in one tap, full screen like an app. Plus a polished iPhone app, optional emails and smoother loading.",
+        "highlights": [
+          "Add Journeo to your home screen: one tap on Android, a short step-by-step guide on iPhone",
+          "Opened the link in Instagram or Facebook? We show how to open Journeo in Safari or Chrome",
+          "The app launched from the iPhone home screen no longer hides its top bar under the clock",
+          "Turn off the emails you don't want in Settings: friend requests, settled debts and handed-over trips. Sign-in codes are always sent",
+          "Shared trips open in light mode; visitors can switch to dark themselves",
+          "Instead of spinners you see the outline of the content that's loading",
+          "The “Where to?” field on the landing page is properly sized on phones again",
+          "The Countries tile on the overview counts visited countries only, like your profile",
+          "Notifications from deleted accounts say “Deleted user” instead of a question mark",
+          "The logo in the top left takes you to the home page"
+        ]
+      },
       "v1_7": {
         "title": "Expenses in any currency",
         "summary": "Every trip now has its own currency, and you enter each expense in the currency you paid in. Journeo converts it at the ECB rate for that day and keeps the original amount. Plus editable trip dates, editable links and a snappier budget.",
@@ -2013,7 +2029,12 @@
         "friend_request_sent": "Sent a friend request",
         "friend_accepted": "Accepted a friendship",
         "friend_invite_copied": "Copied friend link",
-        "landing_plan_submitted": "Entered a destination on landing"
+        "landing_plan_submitted": "Entered a destination on landing",
+        "pwa_prompt_shown": "Saw “Add to Home Screen” offer",
+        "pwa_install_opened": "Opened app install",
+        "pwa_installed": "Installed the app",
+        "pwa_prompt_declined": "Declined install",
+        "pwa_card_dismissed": "Dismissed install offer"
       },
       "device": {
         "mobile": "Mobile",
@@ -2336,5 +2357,56 @@
     "noResults": "No matching currency.",
     "change": "Expense currency: {{currency}}, change",
     "tripCurrency": "Trip currency · {{currency}}"
+  },
+  "pwa": {
+    "menu": "Add to Home Screen",
+    "card": {
+      "title": "Keep Journeo at hand",
+      "text": "Add it to your home screen. It opens like an app, no address bar, in one tap.",
+      "cta": "Add to Home Screen",
+      "ctaInApp": "How to",
+      "dismiss": "Not now"
+    },
+    "settings": {
+      "group": "App",
+      "title": "Journeo on your home screen",
+      "hint": "Open Journeo like an app, in one tap from your home screen.",
+      "installedHint": "Journeo is on your home screen and opens as an app.",
+      "installed": "Installed"
+    },
+    "sheet": {
+      "title": "Add Journeo to your home screen",
+      "subtitle": "Then open it in one tap, full screen like an app.",
+      "ios": {
+        "step1": "Tap Share",
+        "step1Hint": "The square with an arrow. At the bottom in Safari, or tucked under ⋯.",
+        "step2": "Choose “Add to Home Screen”",
+        "step2Hint": "Scroll down the menu if you don't see it.",
+        "step3": "Confirm “Add”",
+        "step3Hint": "Journeo appears among your apps."
+      },
+      "android": {
+        "step1": "Open the browser menu",
+        "step1Hint": "Three dots ⋮ in the top right.",
+        "step2": "Choose “Add to Home screen”",
+        "step2Hint": "Sometimes called “Install app”.",
+        "step3": "Confirm",
+        "step3Hint": "Journeo appears among your apps."
+      },
+      "inapp": {
+        "title": "{{app}} can't install apps",
+        "thisApp": "This browser",
+        "subtitle": "Open Journeo in {{browser}} and add it to your home screen there.",
+        "step1": "Tap ⋯ or ⋮ in the top right",
+        "step1Hint": "In the menu of the app the link opened in.",
+        "step2": "Choose “Open in browser” ({{browser}})",
+        "step2Hint": "Or copy the link below and paste it into your browser.",
+        "step3": "Then choose “Add to Home Screen”",
+        "step3Hint": "Via Share (iPhone) or the ⋮ menu (Android).",
+        "copy": "Copy link",
+        "copied": "Link copied, paste it into {{browser}}.",
+        "copyError": "Couldn't copy the link."
+      }
+    }
   }
 }

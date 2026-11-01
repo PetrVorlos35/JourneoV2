@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo, lazy, Suspense } from 'react';
 import { createPortal } from 'react-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Plus, Settings, LogOut, X, Sun, Moon, Monitor, Shield, Search, ChevronsUpDown } from 'lucide-react';
+import { Plus, Settings, LogOut, X, Sun, Moon, Monitor, Shield, Search, ChevronsUpDown, SquarePlus } from 'lucide-react';
 import { Toaster } from 'react-hot-toast';
 // eslint-disable-next-line no-unused-vars
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
@@ -22,6 +22,9 @@ import { MobileMenuContext } from '../../contexts/MobileMenuContext';
 import api from '../../services/api';
 import { categorizeTrip, tripDayCount, currentTripDay, daysUntilStart } from '../../utils/trip';
 import { countryFlag } from '../../utils/country';
+import InstallAppSheet from '../pwa/InstallAppSheet';
+import usePwaInstall from '../../hooks/usePwaInstall';
+import { isMobileDevice, startInstall } from '../../utils/pwaInstall';
 
 // Paleta se stahuje až při prvním ⌘K — do prvního vykreslení dashboardu
 // nepatří nic, co uživatel možná nikdy neotevře.
@@ -130,6 +133,10 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user, isAdmin } = useAuth();
+  // „Přidat na plochu“ v menu: na telefonu vždy (dokud není nainstalováno),
+  // na počítači jen když prohlížeč umí instalaci sám.
+  const installMode = usePwaInstall();
+  const canOfferInstall = installMode === 'prompt' || (isMobileDevice() && ['ios', 'android', 'inapp'].includes(installMode));
   const { theme } = useTheme();
   const { t } = useTranslation();
   const { confirmDialog, ModalPortal } = useDialog();
@@ -337,6 +344,7 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
           />
         </Suspense>
       )}
+      <InstallAppSheet />
       <Toaster
         position="top-right"
         containerStyle={{ zIndex: 99999, top: 'max(1rem, calc(var(--safe-top) + 0.5rem))' }}
@@ -430,6 +438,15 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
                   >
                     <Settings size={18} strokeWidth={2} /> {t('dashboardLayout.nav.settings')}
                   </Link>
+                  {canOfferInstall && (
+                    <button
+                      type="button"
+                      onClick={() => { setProfileOpen(false); startInstall('profile_menu'); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-colors cursor-pointer"
+                    >
+                      <SquarePlus size={18} strokeWidth={2} /> {t('pwa.menu')}
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => { setProfileOpen(false); handleLogout(); }}
@@ -568,6 +585,9 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
                   <SidebarItem icon={Settings} label={t('dashboardLayout.nav.settings')} path="/dashboard/settings" active={location.pathname === '/dashboard/settings'} onClick={(path, e) => handleNavigation(path, e, closeMobile)} layoutId="mobile-sidebar-active-pill" className="cursor-pointer" />
                   {isAdmin && (
                     <SidebarItem icon={Shield} label={t('dashboardLayout.nav.admin')} path="/dashboard/admin" active={location.pathname.startsWith('/dashboard/admin')} onClick={(path, e) => handleNavigation(path, e, closeMobile)} layoutId="mobile-sidebar-active-pill" className="cursor-pointer" />
+                  )}
+                  {canOfferInstall && (
+                    <SidebarItem icon={SquarePlus} label={t('pwa.menu')} path="#install" active={false} onClick={(path, e) => { e?.preventDefault(); closeMobile(); startInstall('mobile_menu'); }} layoutId="mobile-sidebar-active-pill" className="cursor-pointer" />
                   )}
                 </div>
 

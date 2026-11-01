@@ -3,6 +3,49 @@
 All notable changes to Journeo are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [1.8.0] – 2026-11-01
+
+### Added — Journeo on your home screen
+
+- **Installable PWA** — `public/manifest.json` now has icons (192, 512,
+  maskable 512 in `public/icons/`), `start_url: /dashboard`, light
+  `#fbfbfd` colors and a Czech name/description; `index.html` links an
+  `apple-touch-icon`. Chrome now offers installation.
+- **Install flow** — `utils/pwaInstall.js` captures `beforeinstallprompt` and
+  picks a mode (`prompt`, `ios`, `android`, `inapp`, `installed`).
+  `pwa/InstallAppSheet` shows iPhone (Share → Add to Home Screen), Android
+  (⋮ menu) and in-app browser (open in Safari/Chrome + copy link) guides;
+  `pwa/InstallAppCard` on the overview (phones only, after a first trip or a
+  second visit, dismissible for 14 days); "Přidat na plochu" in the account
+  menu, mobile menu and Settings → Aplikace.
+- **Email preferences** — Settings → E-mailová upozornění with switches for
+  friend requests, settled debts and handed-over trips (`user_settings.email_*`,
+  migration `011_email_prefs.sql`, `lib/emailPrefs.js`). Verification codes are
+  always sent; optional emails link to Settings in the footer.
+- **Own analytics and error tracking (admin)** — cookie-less
+  `analytics_events` and grouped `app_errors` (migration
+  `012_analytics_errors.sql`), `POST /api/collect/events|error`, server
+  `track()` for key actions, wrapped `console.error` with request context,
+  client `ErrorBoundary` (reloads once on a stale chunk). Admin tabs Analytika
+  and Chyby, user activity timeline. "Měření používání" toggle in cookie
+  settings; privacy policy section 4 updated.
+
+### Changed
+
+- iOS home-screen app: top bars use `--safe-top` (safe-area inset plus a
+  margin in standalone mode) so they clear the status bar.
+- Skeleton loaders replace content spinners everywhere (app shell, admin,
+  share modal, friends search, place suggestions, ECB rate).
+- Shared trip (`/share`) defaults to light mode.
+- Dashboard logo links to the landing page.
+
+### Fixed
+
+- Landing "Kam jedeš?" input collapsed on phones (`flex-1` in a column).
+- Overview Countries tile counted wishlist places.
+- Notifications showed "?" for deleted or nameless users.
+- Admin totals summed different currencies; now converted to CZK.
+
 ## [1.7.0] – 2026-10-30
 
 ### Added — Expenses in any currency

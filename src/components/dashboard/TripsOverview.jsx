@@ -13,6 +13,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { sumInMain, useMainCurrency } from '../../contexts/CurrencyContext';
 import useOverviewData from './overview/useOverviewData';
 import { categorizeTrip, tripSpend } from '../../utils/trip';
+import InstallAppCard from '../pwa/InstallAppCard';
 
 // How many trips the overview shows before handing off to /all-trips. The
 // overview answers "what's next", not "show me everything" — search, filters
@@ -148,6 +149,8 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal, onCreateStarter
           </div>
         )}
       </div>
+
+      <InstallAppCard hasTrips={trips.length > 0} />
 
       <OverviewTiles
         budget={budget}
