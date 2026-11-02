@@ -67,9 +67,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Zkušební režim bez registrace: dočasný účet na 3 dny s ukázkovým výletem.
-  const startGuest = async () => {
+  // { sample: false } — host přichází s vlastním výletem (kopie ze sdílení).
+  const startGuest = async ({ sample = true } = {}) => {
     const language = (localStorage.getItem('journeo_lang') || navigator.language || 'cs').slice(0, 2);
-    const data = await api.auth.startGuest(language === 'en' ? 'en' : 'cs');
+    const data = await api.auth.startGuest(language === 'en' ? 'en' : 'cs', sample);
     localStorage.setItem('journeo_token', data.token);
     localStorage.setItem(GUEST_TOKEN_KEY, data.token);
     setUser(withGuestClock(data.user));

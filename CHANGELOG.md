@@ -44,6 +44,23 @@ changes how new visitors get in.
   `guest_upsell_shown`, `guest_upgrade_clicked`.
 - Privacy policy section 1 mentions the trial (effective 2 November 2026).
 
+### Added — Trip reminder
+
+- **Reminder 3 days before a trip** — daily cron `/api/cron/trip-reminders`
+  (07:00 UTC, `CRON_SECRET`) emails the owner and collaborators what's left:
+  unpacked items, days without a plan, missing documents (`lib/tripReminders.js`,
+  `sendTripReminderEmail`, CS/EN). `trip_reminders` dedupes per trip, person and
+  kind; a failed send is retried on the next run. Guests, unverified accounts,
+  sample and trashed trips are skipped. Link carries UTM `email / reminder`.
+- **Setting** "Připomínka před cestou" (`user_settings.email_trip_reminders`,
+  migration `014_trip_reminders.sql`, run before deploy).
+
+### Changed
+
+- Shared trip "Zkopírovat si výlet" without an account starts a trial (no
+  sample trip, `POST /auth/guest { sample: false }`) and copies right away
+  instead of sending people to sign-up.
+
 ## [1.8.0] – 2026-11-01
 
 ### Added — Journeo on your home screen

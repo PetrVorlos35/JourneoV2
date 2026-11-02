@@ -137,7 +137,7 @@ const Switch = ({ checked, onChange, labelledBy, describedBy, disabled }) => (
   </button>
 );
 
-const EMAIL_KINDS = ['friendRequests', 'settlements', 'tripTransfers'];
+const EMAIL_KINDS = ['tripReminders', 'friendRequests', 'settlements', 'tripTransfers'];
 
 const fieldClass =
   'w-full rounded-control bg-page border border-default px-3.5 text-primary placeholder:text-placeholder transition-[background-color,border-color,box-shadow] duration-200 hover:border-strong focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/25';
@@ -186,7 +186,7 @@ const Settings = () => {
   const { promptDialog, confirmDialog, ModalPortal } = useDialog();
   const { t, i18n } = useTranslation();
   const reduceMotion = useReducedMotion();
-  const ids = { first: useId(), last: useId(), bio: useId(), bank: useId(), bankHint: useId(), avatar: useId(), currency: useId(), theme: useId(), language: useId(), pwdError: useId(), pwdReqs: useId(), friendRequests: useId(), settlements: useId(), tripTransfers: useId(), friendRequestsHint: useId(), settlementsHint: useId(), tripTransfersHint: useId() };
+  const ids = { first: useId(), last: useId(), bio: useId(), bank: useId(), bankHint: useId(), avatar: useId(), currency: useId(), theme: useId(), language: useId(), pwdError: useId(), pwdReqs: useId(), tripReminders: useId(), tripRemindersHint: useId(), friendRequests: useId(), settlements: useId(), tripTransfers: useId(), friendRequestsHint: useId(), settlementsHint: useId(), tripTransfersHint: useId() };
 
   // ── Profil s automatickým ukládáním ──────────────────────────
   const [profileForm, setProfileForm] = useState(() => profileFromUser(user));

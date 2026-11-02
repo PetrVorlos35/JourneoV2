@@ -65,7 +65,8 @@ router.post('/guest', guestLimiter, async (req, res) => {
       [userId, 'light', language === 'en' ? 'EUR' : 'CZK', language]
     );
     try {
-      await createSampleTrip(connection, userId);
+      // Kdo přišel přes „Zkopírovat si výlet“, ukázku nepotřebuje.
+      if (req.body?.sample !== false) await createSampleTrip(connection, userId);
     } catch (err) {
       // Bez ukázky to pořád funguje — host si udělá vlastní výlet.
       console.error('Sample trip error:', err);

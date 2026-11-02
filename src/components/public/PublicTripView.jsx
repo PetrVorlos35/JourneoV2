@@ -18,6 +18,7 @@ import LandingLanguageSwitcher from '../LandingLanguageSwitcher';
 import UserAvatar from '../ui/UserAvatar';
 import Skeleton from '../ui/Skeleton';
 import useForceLightTheme from '../../hooks/useForceLightTheme';
+import { track } from '../../utils/analytics';
 
 const PublicTripView = () => {
   const { token } = useParams();
@@ -37,18 +38,27 @@ const PublicTripView = () => {
   const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, startGuest } = useAuth();
   const [copying, setCopying] = useState(false);
   const autoCopyRef = useRef(false);
 
-  // „Zkopírovat si výlet“: bez účtu přes registraci a zpět s ?copy=1, které
-  // kopii dokončí samo. Hotová kopie se pamatuje v sessionStorage, aby obnovení
+  // „Zkopírovat si výlet“: bez účtu přes zkušební režim, v nouzi přes
+  // registraci a zpět s ?copy=1, které kopii dokončí samo. Hotová kopie se pamatuje v sessionStorage, aby obnovení
   // stránky s ?copy=1 nezaložilo druhou.
   const copyKey = `journeo_copied_${token}`;
   const copyTrip = async () => {
     if (!user) {
-      navigate('/auth', { state: { from: `/share/${token}?copy=1` } });
-      return;
+      // Bez účtu: zkušební režim (bez ukázky, výlet má) a hned kopie.
+      // Když se host nezaloží (limit, výpadek), jde se přes registraci.
+      setCopying(true);
+      track('guest_trial_clicked', { placement: 'share_copy' });
+      try {
+        await startGuest({ sample: false });
+      } catch (err) {
+        setCopying(false);
+        navigate('/auth', { state: { from: `/share/${token}?copy=1`, trialError: err.message } });
+        return;
+      }
     }
     let existing = null;
     try { existing = sessionStorage.getItem(copyKey); } catch { /* bez úložiště */ }

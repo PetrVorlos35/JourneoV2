@@ -127,10 +127,10 @@ export const api = {
 
     me: () => request('/auth/me'),
 
-    startGuest: (language) =>
+    startGuest: (language, sample = true) =>
       request('/auth/guest', {
         method: 'POST',
-        body: JSON.stringify({ language }),
+        body: JSON.stringify({ language, sample }),
       }),
 
     claimGuest: (guestToken) =>

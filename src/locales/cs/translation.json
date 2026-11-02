@@ -807,7 +807,7 @@
     "copy": {
       "cta": "Zkopírovat si výlet",
       "busy": "Kopíruju…",
-      "hint": "Program, balení a místa se ti zkopírují do vlastního účtu.",
+      "hint": "Program, balení a místa se ti zkopírují. Bez registrace, vyzkoušíš to hned.",
       "done": "Výlet je zkopírovaný. Uprav si ho podle sebe.",
       "error": "Zkopírovat výlet se nepovedlo."
     }
@@ -1461,6 +1461,8 @@
     "emails": {
       "title": "E-mailová upozornění",
       "note": "Kódy pro přihlášení a obnovení hesla chodí vždy.",
+      "tripReminders": "Připomínka před cestou",
+      "tripRemindersHint": "3 dny před odjezdem: co zbývá sbalit, naplánovat a mít po ruce.",
       "friendRequests": "Žádosti o přátelství",
       "friendRequestsHint": "Když vás někdo přidá do přátel.",
       "settlements": "Vyrovnané dluhy",

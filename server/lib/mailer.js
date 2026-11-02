@@ -528,3 +528,103 @@ export const sendTripTransferredEmail = async (email, { previousOwnerName, tripN
     throw error;
   }
 };
+
+// Česká množná čísla: 1 věc, 2–4 věci, 5+ věcí.
+const czPlural = (n, one, few, many) => (n === 1 ? one : n >= 2 && n <= 4 ? few : many);
+
+/**
+ * Připomínka 3 dny před odjezdem: co ještě zbývá připravit.
+ * readiness = { daysTotal, daysPlanned, packingTotal, packingLeft, documents }
+ */
+export const sendTripReminderEmail = async (email, { firstName, tripName, tripId, daysLeft = 3, readiness, locale = 'cs' }) => {
+  const isCs = !String(locale).startsWith('en');
+  const appUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const tripUrl = `${appUrl}/dashboard/trip/${tripId}?utm_source=email&utm_medium=reminder&utm_campaign=trip_${daysLeft}d`;
+  const safeTrip = escapeHtml(tripName);
+  const { daysTotal, daysPlanned, packingTotal, packingLeft, documents } = readiness;
+  const unplanned = Math.max(0, daysTotal - daysPlanned);
+
+  // Každý řádek: hotovo (✓), nebo co zbývá (•).
+  const items = isCs
+    ? [
+        packingTotal === 0
+          ? [false, 'Ještě nemáš seznam na balení']
+          : packingLeft > 0
+            ? [false, `Zbývá sbalit ${packingLeft} ${czPlural(packingLeft, 'věc', 'věci', 'věcí')}`]
+            : [true, 'Máš sbaleno'],
+        unplanned > 0
+          ? [false, `${unplanned} z ${daysTotal} ${czPlural(daysTotal, 'dne', 'dnů', 'dnů')} ještě nemáš naplánovaných`]
+          : [true, 'Program máš na všechny dny'],
+        documents === 0
+          ? [false, 'Nemáš uložené letenky, ubytování ani odkazy']
+          : [true, `${documents} ${czPlural(documents, 'dokument', 'dokumenty', 'dokumentů')} a odkazů máš po ruce`],
+      ]
+    : [
+        packingTotal === 0
+          ? [false, 'No packing list yet']
+          : packingLeft > 0
+            ? [false, `${packingLeft} ${packingLeft === 1 ? 'item' : 'items'} left to pack`]
+            : [true, 'All packed'],
+        unplanned > 0
+          ? [false, `${unplanned} of ${daysTotal} days have no plan yet`]
+          : [true, 'Every day has a plan'],
+        documents === 0
+          ? [false, 'No tickets, bookings or links saved']
+          : [true, `${documents} ${documents === 1 ? 'document' : 'documents and links'} at hand`],
+      ];
+  const allDone = items.every(([done]) => done);
+
+  const subject = isCs ? `Za ${daysLeft} dny: ${tripName} – Journeo` : `${daysLeft} days to go: ${tripName} – Journeo`;
+  const greeting = firstName ? (isCs ? `Ahoj ${escapeHtml(firstName)},` : `Hi ${escapeHtml(firstName)},`) : (isCs ? 'Ahoj,' : 'Hi,');
+  const intro = isCs
+    ? `za ${daysLeft} dny vyrážíš na <strong>${safeTrip}</strong>. ${allDone ? 'Všechno máš připravené, užij si to!' : 'Tohle ještě zbývá:'}`
+    : `<strong>${safeTrip}</strong> starts in ${daysLeft} days. ${allDone ? 'You\'re all set, enjoy it!' : 'Here\'s what\'s left:'}`;
+  const rows = items
+    .map(([done, text]) => `
+      <tr>
+        <td style="width:28px;padding:6px 0;vertical-align:top;font-size:16px;color:${done ? '#16a34a' : '#155dfc'};">${done ? '✓' : '•'}</td>
+        <td style="padding:6px 0;font-size:15px;line-height:1.45;color:${done ? '#71717a' : '#18181b'};">${escapeHtml(text)}</td>
+      </tr>`)
+    .join('');
+  const buttonText = isCs ? 'Otevřít výlet' : 'Open trip';
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="${isCs ? 'cs' : 'en'}">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${escapeHtml(subject)}</title>
+    </head>
+    <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background-color:#f4f4f5;margin:0;padding:0;color:#18181b;">
+      <div style="max-width:500px;margin:40px auto;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
+        <div style="background-color:#09090b;padding:24px;text-align:center;">
+          <h1 style="color:#ffffff;margin:0;font-size:24px;font-weight:600;letter-spacing:-0.025em;">Journeo</h1>
+        </div>
+        <div style="padding:32px 24px;">
+          <p style="font-size:16px;line-height:1.5;margin:0 0 8px;color:#52525b;">${greeting}</p>
+          <p style="font-size:16px;line-height:1.5;margin:0 0 16px;color:#52525b;">${intro}</p>
+          <table role="presentation" style="border-collapse:collapse;margin:0 0 24px;">${rows}</table>
+          <div style="text-align:center;">
+            <a href="${tripUrl}" style="display:inline-block;background-color:#155dfc;color:#ffffff !important;text-decoration:none;padding:14px 28px;border-radius:8px;font-size:16px;font-weight:600;">
+              <span style="color:#ffffff;">${buttonText}</span>
+            </a>
+          </div>
+        </div>
+        <div style="text-align:center;padding:24px;font-size:14px;color:#a1a1aa;background-color:#fafafa;border-top:1px solid #f4f4f5;">
+          &copy; ${new Date().getFullYear()} Journeo. ${isCs ? 'Všechna práva vyhrazena.' : 'All rights reserved.'}
+          ${settingsFooter(appUrl, isCs)}
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const info = await transporter.sendMail({
+    from: '"Journeo" <petr@vorlos.eu>',
+    to: email,
+    subject,
+    html,
+  });
+  return info;
+};

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import pool from '../config/db.js';
 import { GUEST_GRACE_DAYS } from '../lib/guest.js';
+import { sendDueReminders } from '../lib/tripReminders.js';
 
 const router = Router();
 
@@ -51,6 +52,22 @@ router.get('/purge-trash', async (req, res) => {
   } catch (err) {
     console.error('Purge trash error:', err);
     res.status(500).json({ error: 'Purge failed' });
+  }
+});
+
+// ── GET /api/cron/trip-reminders ────────────────────────────
+// Denně ráno: připomínka 3 dny před odjezdem (lib/tripReminders.js).
+// Stejné zabezpečení jako purge-trash (CRON_SECRET, fail closed).
+router.get('/trip-reminders', async (req, res) => {
+  const secret = process.env.CRON_SECRET;
+  if (!secret || req.headers.authorization !== `Bearer ${secret}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  try {
+    res.json(await sendDueReminders());
+  } catch (err) {
+    console.error('Trip reminders error:', err);
+    res.status(500).json({ error: 'Reminders failed' });
   }
 });
 

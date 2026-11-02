@@ -6,6 +6,7 @@ export const EMAIL_PREFS = {
   friendRequests: 'email_friend_requests',
   settlements: 'email_settlements',
   tripTransfers: 'email_trip_transfers',
+  tripReminders: 'email_trip_reminders',
 };
 
 // Bez řádku v user_settings = výchozí stav, tedy zapnuto. Chyba dotazu
