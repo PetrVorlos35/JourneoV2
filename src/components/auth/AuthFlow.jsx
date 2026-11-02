@@ -14,6 +14,7 @@ import { avatarPresets } from '../ui/avatarPresets';
 import HeroTravel from '../../assets/hero_travel.webp';
 import JourneoWhiteLogo from '../../assets/Journeo_whitelogo.png';
 import GoogleIcon from '../../assets/google.png';
+import { useStartTrial } from '../guest/guestUi';
 
 const EASE = [0.16, 1, 0.3, 1];
 
@@ -98,7 +99,8 @@ const AuthFlow = () => {
     avatar: '',
   });
   const [otpCode, setOtpCode] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+  // Když se nepovedlo spustit zkušební režim, přijde sem důvod z landingu.
+  const [errorMsg, setErrorMsg] = useState(() => location.state?.trialError || '');
   const [isLoading, setIsLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -107,6 +109,13 @@ const AuthFlow = () => {
   const shouldReduceMotion = useReducedMotion();
 
   const goToApp = () => navigate(location.state?.from || '/dashboard');
+  // Host ze zkušebního režimu si ukládá účet: jiný nadpis, žádné „vyzkoušet“.
+  const isGuestUpgrade = Boolean(user?.is_guest);
+  const { start: startTrial, busy: trialBusy } = useStartTrial();
+  // Výlety ze zkoušky převádí AuthContext; tady jen oznámení.
+  const announceClaim = (data) => {
+    if (data?.claimedTrips > 0) toast.success(t('guest.claimed', { count: data.claimedTrips }));
+  };
 
   // Odpočet cooldownu pro opětovné odeslání ověřovacího kódu.
   useEffect(() => {
@@ -147,6 +156,7 @@ const AuthFlow = () => {
       try {
         const data = await loginWithGoogle(tokenResponse.access_token);
         rememberEmail(data.user?.email);
+        announceClaim(data);
         if (data.isNew) {
           startProfileStep(data.user);
         } else {
@@ -181,7 +191,7 @@ const AuthFlow = () => {
       if (exists && autofilledPassword) {
         // Správce hesel vyplnil celý účet — přihlas rovnou, bez kroku s heslem.
         try {
-          await login(email, autofilledPassword);
+          announceClaim(await login(email, autofilledPassword));
           rememberEmail(email);
           toast.success(t('auth.toasts.loginSuccess'));
           goToApp();
@@ -208,7 +218,7 @@ const AuthFlow = () => {
     setErrorMsg('');
     setIsLoading(true);
     try {
-      await login(formData.email, formData.password);
+      announceClaim(await login(formData.email, formData.password));
       rememberEmail(formData.email);
       toast.success(t('auth.toasts.loginSuccess'));
       goToApp();
@@ -263,6 +273,7 @@ const AuthFlow = () => {
     try {
       const data = await verify(formData.email, otpCode);
       rememberEmail(formData.email);
+      announceClaim(data);
       setOtpCode('');
       toast.success(t('auth.toasts.verifySuccess'));
       startProfileStep(data.user);
@@ -422,7 +433,9 @@ const AuthFlow = () => {
       case 'email':
         return (
           <div>
-            {stepHeader(t('auth.title.email'), t('auth.subtitle.email'))}
+            {isGuestUpgrade
+              ? stepHeader(t('guest.auth.title'), t('guest.auth.subtitle'))
+              : stepHeader(t('auth.title.email'), t('auth.subtitle.email'))}
             <ErrorBanner message={errorMsg} reduceMotion={shouldReduceMotion} />
 
             <form onSubmit={handleEmailSubmit} className="relative space-y-3">
@@ -484,6 +497,17 @@ const AuthFlow = () => {
                 </>
               )}
             </button>
+
+            {!user && (
+              <button
+                type="button"
+                onClick={() => startTrial('auth')}
+                disabled={trialBusy || isLoading || isGoogleLoading}
+                className="mt-4 w-full text-center text-[13px] font-semibold text-gray-600 hover:text-gray-900 underline-offset-4 hover:underline disabled:opacity-50 cursor-pointer"
+              >
+                {t('guest.tryAuth')}
+              </button>
+            )}
           </div>
         );
 

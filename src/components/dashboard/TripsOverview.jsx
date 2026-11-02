@@ -107,7 +107,10 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal, onCreateStarter
 
   // První spuštění: místo prázdného přehledu s pomlčkami jedna otázka,
   // ze které je za pár vteřin hotový výlet.
-  if (trips.length === 0) {
+  // Ukázkový výlet (zkušební režim) se nepočítá: dokud nemá vlastní výlet,
+  // vidí host stejnou otázku jako nový uživatel, s odkazem na ukázku.
+  const sampleTrip = trips.find((trip) => trip.isSample);
+  if (!trips.some((trip) => !trip.isSample)) {
     return (
       <div className="w-full space-y-6">
         <FriendRequestsRow count={friendRequests} />
@@ -117,6 +120,18 @@ const TripsOverview = ({ trips, onDeleteTrip, onOpenCreateModal, onCreateStarter
           initialDestination={(searchParams.get('plan') || '').slice(0, 255)}
           onCreate={onCreateStarterTrip}
         />
+        {sampleTrip && (
+          <Link
+            to={`/dashboard/trip/${sampleTrip.id}?from=dashboard`}
+            className="group flex items-center justify-between gap-4 max-w-xl mx-auto lg:mx-0 px-5 py-4 rounded-[1.25rem] bg-page border border-gray-200/80 dark:border-white/10 hover:border-blue-300 dark:hover:border-blue-500/40 transition-colors"
+          >
+            <span className="min-w-0">
+              <span className="block text-[13px] font-semibold text-muted">{t('guest.sample.eyebrow')}</span>
+              <span className="block text-[15px] font-bold text-primary truncate">{t('guest.sample.cta', { title: sampleTrip.title })}</span>
+            </span>
+            <ArrowRight size={18} strokeWidth={2.5} className="shrink-0 text-accent transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+          </Link>
+        )}
       </div>
     );
   }

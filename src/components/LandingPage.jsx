@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   ArrowRight, Home, Map, BarChart2, Users, Wallet, Plane, Plus, Mail,
@@ -14,6 +14,7 @@ import useForceLightTheme from '../hooks/useForceLightTheme';
 import { CHANGELOG } from '../config/changelog';
 import { openCookieSettings } from '../utils/consent';
 import { track } from '../utils/analytics';
+import { useStartTrial } from './guest/guestUi';
 
 const EASE = [0.16, 1, 0.3, 1];
 
@@ -33,21 +34,37 @@ const Reveal = ({ children, delay = 0, className = '' }) => {
   );
 };
 
-// Hero začíná otázkou místo tlačítka: napsaná destinace projde registrací
-// (/dashboard?plan=…) a onboarding z ní rovnou založí výlet.
+// Hero začíná otázkou místo tlačítka: napsaná destinace vede rovnou do
+// aplikace — nepřihlášený dostane zkušební režim (bez registrace) a
+// onboarding z destinace hned založí výlet (/dashboard?plan=…).
+// Odkaz „Vyzkoušet bez registrace“ — zkušební režim bez cíle (výlet si
+// host zadá v aplikaci, nebo si prohlédne ukázku).
+const TryWithoutSignup = ({ placement, className = '' }) => {
+  const { t } = useTranslation();
+  const { start, busy } = useStartTrial();
+  return (
+    <button
+      type="button"
+      onClick={() => start(placement)}
+      disabled={busy}
+      className={`inline-flex items-center gap-1.5 text-[13px] font-semibold underline-offset-4 hover:underline disabled:opacity-60 cursor-pointer ${className}`}
+    >
+      {t('guest.try')} <ArrowRight size={14} strokeWidth={2.5} aria-hidden="true" />
+    </button>
+  );
+};
+
 const HeroPlanForm = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const { user } = useAuth();
   const [destination, setDestination] = useState('');
+  const { start, busy } = useStartTrial();
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (busy) return;
     const plan = destination.trim().slice(0, 255);
     track('landing_plan_submitted', { hasDestination: Boolean(plan) });
-    const target = plan ? `/dashboard?plan=${encodeURIComponent(plan)}` : '/dashboard';
-    if (user) navigate(target);
-    else navigate('/auth', { state: { from: target } });
+    start('landing_plan', plan);
   };
 
   return (
@@ -79,7 +96,9 @@ const HeroPlanForm = () => {
       </div>
       <button
         type="submit"
-        className="group shrink-0 inline-flex items-center justify-center gap-2 h-14 sm:h-12 bg-accent text-white font-semibold rounded-[1.375rem] sm:rounded-full px-7 shadow-md shadow-blue-600/25 sm:shadow-none hover:bg-accent-hover active:scale-[0.98] transition-all duration-300 cursor-pointer"
+        disabled={busy}
+        aria-busy={busy}
+        className="group shrink-0 disabled:opacity-70 inline-flex items-center justify-center gap-2 h-14 sm:h-12 bg-accent text-white font-semibold rounded-[1.375rem] sm:rounded-full px-7 shadow-md shadow-blue-600/25 sm:shadow-none hover:bg-accent-hover active:scale-[0.98] transition-all duration-300 cursor-pointer"
       >
         {t('landing.hero.planCta')}
         <ArrowRight
@@ -974,6 +993,10 @@ const LandingPage = () => {
   useForceLightTheme();
   const { t } = useTranslation();
   const reduce = useReducedMotion();
+  const { user } = useAuth();
+  // Sem vede konec zkušebního režimu (api.js po smazání hosta).
+  const [searchParams] = useSearchParams();
+  const trialEnded = searchParams.get('trial') === 'ended';
 
   const heroEntrance = (delay) =>
     reduce
@@ -1029,6 +1052,11 @@ const LandingPage = () => {
           <FloatIn className="right-[6%] top-[24rem]" delay={1.2} rotate={-2} drift={6}>
             <SharedChip />
           </FloatIn>
+          {trialEnded && (
+            <p role="status" className="mx-auto mb-6 max-w-md px-4 py-3 rounded-2xl bg-amber-50 border border-amber-200 text-[14px] font-medium text-amber-900">
+              {t('guest.endedNotice')}
+            </p>
+          )}
           <motion.div {...heroEntrance(0)} className="mb-6 sm:mb-7">
             <a
               href="#changelog"
@@ -1068,6 +1096,7 @@ const LandingPage = () => {
                 {t('landing.hero.secondary')}
               </a>
             </p>
+            {!user && <TryWithoutSignup placement="landing_hero" className="text-gray-700 hover:text-gray-900" />}
           </motion.div>
         </section>
 
@@ -1244,6 +1273,7 @@ const LandingPage = () => {
                   <ArrowRight size={17} strokeWidth={2.5} />
                 </Link>
                 <p className="mt-5 text-[13px] font-medium text-blue-100">{t('landing.hero.microcopy')}</p>
+                {!user && <TryWithoutSignup placement="landing_cta" className="mt-2 text-white/90 hover:text-white" />}
               </div>
             </div>
           </Reveal>

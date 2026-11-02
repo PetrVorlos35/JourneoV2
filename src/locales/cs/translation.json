@@ -1980,7 +1980,9 @@
       "tripCount": "Výlety",
       "friendCount": "Přátelé",
       "searchTrips": "Hledat výlet…",
-      "searchUsers": "Hledat jméno nebo e-mail…"
+      "searchUsers": "Hledat jméno nebo e-mail…",
+      "guestsActive": "Zkoušejí bez registrace",
+      "guestsConverted": "Ze zkoušky registrace · 30 d"
     },
     "analytics": {
       "intro": "Vlastní měření bez cookies. Návštěvníci se počítají za den, admini a jejich zařízení se nepočítají.",
@@ -2070,7 +2072,12 @@
         "pwa_install_opened": "Otevřel instalaci aplikace",
         "pwa_installed": "Nainstaloval aplikaci na plochu",
         "pwa_prompt_declined": "Odmítl instalaci",
-        "pwa_card_dismissed": "Zavřel nabídku instalace"
+        "pwa_card_dismissed": "Zavřel nabídku instalace",
+        "guest_started": "Spustil zkušební režim",
+        "guest_converted": "Zaregistroval se ze zkušebního režimu",
+        "guest_trial_clicked": "Klikl na „Vyzkoušet bez registrace“",
+        "guest_upsell_shown": "Viděl nabídku registrace (host)",
+        "guest_upgrade_clicked": "Klikl na uložení účtu (host)"
       },
       "device": {
         "mobile": "Mobil",
@@ -2126,10 +2133,10 @@
   "privacyPolicy": {
     "back": "Zpět na hlavní stránku",
     "title": "Zásady ochrany osobních údajů",
-    "effectiveDate": "Datum účinnosti: 31. října 2026",
+    "effectiveDate": "Datum účinnosti: 2. listopadu 2026",
     "section1": {
       "title": "1. Jaké údaje shromažďujeme",
-      "content": "Shromažďujeme údaje, které nám poskytnete při registraci (jméno, e-mail), a údaje o vašich cestách, které do aplikace sami vložíte (lokace, data, výdaje, poznámky, fotografie)."
+      "content": "Shromažďujeme údaje, které nám poskytnete při registraci (jméno, e-mail), a údaje o vašich cestách, které do aplikace sami vložíte (lokace, data, výdaje, poznámky, fotografie). Ve zkušebním režimu bez registrace nepotřebujeme žádné osobní údaje: výlety jsou vázané jen na tento prohlížeč, po 3 dnech zkoušky a dalším dni na prohlížení je smažeme, pokud se nezaregistrujete."
     },
     "section2": {
       "title": "2. Jak údaje využíváme",
@@ -2458,6 +2465,93 @@
         "copied": "Odkaz zkopírován, vlož ho do {{browser}}.",
         "copyError": "Odkaz se nepodařilo zkopírovat."
       }
+    }
+  },
+  "guest": {
+    "name": "Host",
+    "subtitle": "Zkušební režim",
+    "try": "Vyzkoušet bez registrace",
+    "tryAuth": "Nebo si to nejdřív vyzkoušej bez registrace →",
+    "endedNotice": "Zkušební režim skončil a výlety z něj jsme smazali. Zaregistruj se a začni znovu, je to zdarma.",
+    "claimed_one": "Účet je uložený i s {{count}} výletem ze zkoušky.",
+    "claimed_few": "Účet je uložený i se {{count}} výlety ze zkoušky.",
+    "claimed_other": "Účet je uložený i s {{count}} výlety ze zkoušky.",
+    "logoutWarning": "Jsi ve zkušebním režimu bez účtu. Po odhlášení se k výletům už nedostaneš. Chceš si je radši uložit registrací?",
+    "time": {
+      "days_one": "{{count}} den",
+      "days_few": "{{count}} dny",
+      "days_other": "{{count}} dní",
+      "hours_one": "{{count}} hodina",
+      "hours_few": "{{count}} hodiny",
+      "hours_other": "{{count}} hodin",
+      "minutes_one": "{{count}} minuta",
+      "minutes_few": "{{count}} minuty",
+      "minutes_other": "{{count}} minut"
+    },
+    "banner": {
+      "title": "Zkušební režim · zbývá {{time}}",
+      "local": "Uloženo jen v tomto prohlížeči",
+      "save": "Uložit si účet",
+      "expiredTitle": "Zkušební režim skončil",
+      "expiredText": "Výlety si můžeš prohlížet a stáhnout v PDF ještě {{time}}, pak je smažeme. Registrací si je necháš.",
+      "keep": "Zaregistrovat se a ponechat výlety",
+      "pdf": "Stáhnout PDF"
+    },
+    "upsell": {
+      "limit": {
+        "title": "Další výlet po registraci",
+        "text": "Ve zkušebním režimu máš jeden vlastní výlet a ukázku. Zaregistruj se a plánuj, kolik chceš."
+      },
+      "expired": {
+        "title": "Zkušební režim skončil",
+        "text": "Výlety si ještě chvíli prohlédneš. Upravovat je můžeš po registraci, všechno ti zůstane."
+      },
+      "friends": {
+        "title": "Přátelé po registraci",
+        "text": "Přidávat přátele a vidět jejich výlety jde jen s účtem."
+      },
+      "share": {
+        "title": "Sdílení po registraci",
+        "text": "Pozvat parťáky do výletu nebo ho sdílet odkazem jde jen s účtem."
+      },
+      "locked": {
+        "title": "Tohle odemkneš registrací",
+        "text": "Ve zkušebním režimu je tahle funkce zamčená."
+      },
+      "benefits": {
+        "keep": "Všechno, co sis vyzkoušel, ti zůstane",
+        "trips": "Neomezeně výletů na všech zařízeních",
+        "friends": "Pozvi parťáky a plánujte spolu"
+      },
+      "cta": "Zaregistrovat se zdarma",
+      "later": "Teď ne"
+    },
+    "locked": {
+      "friends": {
+        "title": "Přátelé po registraci",
+        "text": "S účtem si přidáš přátele, uvidíš jejich výlety a pozveš je do svých. Výlety ze zkoušky ti zůstanou."
+      }
+    },
+    "settings": {
+      "group": "Zkušební účet",
+      "title": "Ulož si účet",
+      "hint": "Zbývá {{time}}. Výlety jsou zatím uložené jen v tomto prohlížeči.",
+      "expiredHint": "Zkouška skončila. Výlety smažeme za {{time}}, pokud se nezaregistruješ.",
+      "deleteTitle": "Smazat zkušební data",
+      "deleteHint": "Smaže výlety ze zkoušky hned, nečeká se na konec.",
+      "deleteButton": "Smazat data",
+      "deleteConfirmTitle": "Smazat zkušební data?",
+      "deleteConfirmMessage": "Výlety ze zkušebního režimu se nevratně smažou."
+    },
+    "auth": {
+      "title": "Ulož si svůj výlet",
+      "subtitle": "Zadej e-mail. Všechno ze zkoušky ti zůstane."
+    },
+    "sample": {
+      "badge": "Ukázkový výlet · klidně ho upravuj",
+      "short": "Ukázka",
+      "eyebrow": "Nejdřív se jen rozhlédnout?",
+      "cta": "Prohlédnout si ukázku: {{title}}"
     }
   }
 }

@@ -3,6 +3,47 @@
 All notable changes to Journeo are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [1.8.1] – 2026-11-02
+
+Not announced in the app (no release notes, `APP_VERSION` stays 1.8) — it only
+changes how new visitors get in.
+
+### Added — Try without signing up (guest trial)
+
+- **Guest accounts** — `users.is_guest`, `users.guest_expires_at`,
+  `trips.is_sample` (migration `013_guest_accounts.sql`, run before deploy).
+  A guest is a real account with an undeliverable `@guest.journeo.invalid`
+  address (blocked in every auth email endpoint), no password login.
+- **Trial lifecycle** — 3-day trial, then 1 day read-only (`auth` middleware
+  answers writes with 403 `GUEST_EXPIRED`, account deletion still allowed),
+  then 401 `GUEST_ENDED` and the nightly cron deletes the account (trips and
+  places cascade, analytics is detached).
+- **`POST /api/auth/guest`** — starts a trial; `guestLimiter` (5/hour/IP, DB
+  store), `GUEST_HOURLY_CAP` env (default 200), bots rejected. Copies the
+  sample trip from `SAMPLE_TRIP_ID` env (activities, packing, places, personal
+  expenses, documents), shifted to start in 21 days.
+- **`POST /api/auth/guest/claim`** — after register / login / Google the client
+  sends the guest token and its trips, places, expenses, votes and analytics
+  move to the real account; the sample is dropped if the account already had
+  trips. Guest tokens can only be claimed once and never for a real account.
+- **Limits** — guest: 1 own trip + the sample (create, copy and restore check
+  it, 403 `GUEST_TRIP_LIMIT`); friends, sharing, share/invite links, joining
+  and password change return 403 `GUEST_LOCKED`. Guests are hidden from friend
+  search and requests; sample trips are hidden on friend profiles.
+- **Entry points** — landing "Kam jedeš?" starts the trial directly (lazy
+  registration); "Vyzkoušet bez registrace" on the landing hero, bottom CTA and
+  the `/auth` email step.
+- **UI** — `guest/guestUi`: `GuestBanner` (time left, save account, expired
+  state with PDF via `?export=pdf`), `GuestUpsellSheet` (opened by `api.js` on
+  any 403 `GUEST_*`), `GuestLockedPanel` (Friends, friend invite), Settings
+  "Zkušební účet" group, "Ukázka" badge, upgrade heading on `/auth`, logout
+  warning for guests. PWA install offer hidden for guests.
+- **Admin & analytics** — guests and sample trips excluded from user/trip
+  stats and lists; dashboard shows active guests and 30-day conversions.
+  Events `guest_started`, `guest_converted`, `guest_trial_clicked`,
+  `guest_upsell_shown`, `guest_upgrade_clicked`.
+- Privacy policy section 1 mentions the trial (effective 2 November 2026).
+
 ## [1.8.0] – 2026-11-01
 
 ### Added — Journeo on your home screen

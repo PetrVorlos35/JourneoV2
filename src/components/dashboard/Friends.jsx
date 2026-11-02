@@ -12,6 +12,8 @@ import { useCurrency } from '../../contexts/CurrencyContext';
 import { formatCurrencyShort } from '../../utils/currency';
 import { countryFlag } from '../../utils/country';
 import { track } from '../../utils/analytics';
+import { GuestLockedPanel } from '../guest/guestUi';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Přátelé jako spolucestující: každý přítel je pasová karta toho, co jste
 // spolu procestovali — výlety, země, dny, příští výlet a jak jste na tom
@@ -216,7 +218,14 @@ const InviteCard = ({ inviteUrl, onCopy, copied, onRegenerate, regenerating, emp
   </section>
 );
 
+// Host (zkušební režim) přátele nemá — místo stránky nabídka registrace.
 const Friends = () => {
+  const { isGuest } = useAuth();
+  if (isGuest) return <GuestLockedPanel feature="friends" />;
+  return <FriendsPage />;
+};
+
+const FriendsPage = () => {
   const { t, i18n } = useTranslation();
   const { currency } = useCurrency();
   const reduceMotion = useReducedMotion();

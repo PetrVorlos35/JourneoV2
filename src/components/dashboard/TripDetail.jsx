@@ -21,6 +21,8 @@ import TripDatesEditor from './trip/TripDatesEditor';
 import { getWelcome, updateWelcome } from '../../utils/onboarding';
 import { useCurrency } from '../../contexts/CurrencyContext';
 import { formatCurrency } from '../../utils/currency';
+import { useAuth } from '../../contexts/AuthContext';
+import { openGuestUpsell } from '../guest/guestUi';
 
 // Mapa se stahuje až při otevření záložky — Leaflet a jeho CSS tak
 // nezatěžují detail výletu, který se otevírá mnohem častěji.
@@ -77,6 +79,9 @@ const TripDetail = ({ trips, onUpdateTrip, onChangeCurrency }) => {
   const { t, i18n } = useTranslation();
   const reduceMotion = useReducedMotion();
   const trip = trips.find(tr => tr.id === id);
+  const { isGuest } = useAuth();
+  // Sdílení a pozvánky potřebují účet — host dostane nabídku registrace.
+  const openShare = () => (isGuest ? openGuestUpsell('GUEST_LOCKED', 'share') : setShowShareModal(true));
 
   const dateLocale = i18n.language?.startsWith('en') ? enUS : cs;
   const backHref = fromParam === 'all' ? '/dashboard/all-trips' : '/dashboard';
@@ -111,6 +116,11 @@ const TripDetail = ({ trips, onUpdateTrip, onChangeCurrency }) => {
   // Uvítací checklist u výletu založeného v onboardingu nebo zkopírovaného.
   const [welcome, setWelcome] = useState(() => getWelcome(id));
   const [showPdfOptions, setShowPdfOptions] = useState(false);
+  // ?export=pdf přichází z lišty po konci zkušebního režimu (Stáhnout PDF).
+  useEffect(() => {
+    if (searchParams.get('export') === 'pdf') setShowPdfOptions(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const [pdfSections, setPdfSections] = useState(null);
   const [addExpenseRequest, setAddExpenseRequest] = useState(0);
   const { currency: mainCurrency } = useCurrency();
@@ -477,7 +487,7 @@ const TripDetail = ({ trips, onUpdateTrip, onChangeCurrency }) => {
       ? { id: 'packing', label: t('onboarding.checklist.packingOwn'), done: packingList.length > 0, onClick: () => openView('packing') }
       : { id: 'packing', label: t('onboarding.checklist.packing'), done: packingList.some(i => i.checked), onClick: () => openView('packing') },
     { id: 'plan', label: t('onboarding.checklist.plan'), done: dailyPlans.some(d => d.plan?.trim()), onClick: () => goToDay(0) },
-    ...(isOwner ? [{ id: 'invite', label: t('onboarding.checklist.invite'), done: !!welcome.invited, onClick: () => setShowShareModal(true) }] : []),
+    ...(isOwner && !isGuest ? [{ id: 'invite', label: t('onboarding.checklist.invite'), done: !!welcome.invited, onClick: () => setShowShareModal(true) }] : []),
   ] : null;
 
   const headerActions = (
@@ -511,7 +521,7 @@ const TripDetail = ({ trips, onUpdateTrip, onChangeCurrency }) => {
             </button>
             {isOwner && (
               <button
-                onClick={() => setShowShareModal(true)}
+                onClick={openShare}
                 aria-label={t('shareModal.shareButton')}
                 className="h-11 w-11 sm:w-auto sm:px-5 flex items-center justify-center gap-2 rounded-2xl bg-ink text-white dark:text-gray-900 text-[14px] font-semibold hover:bg-gray-800 dark:hover:bg-gray-100 active:scale-95 transition-all cursor-pointer shrink-0"
               >
@@ -585,6 +595,11 @@ const TripDetail = ({ trips, onUpdateTrip, onChangeCurrency }) => {
               </h1>
             )}
 
+            {trip?.isSample && (
+              <p className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-active text-[12px] font-semibold text-active">
+                {t('guest.sample.badge')}
+              </p>
+            )}
             <div className="mt-2.5 sm:mt-3 overflow-hidden">
             <p className="meta-dots -ml-5 flex flex-wrap items-center gap-y-1 text-[14px] font-medium text-muted">
               {isViewer ? (

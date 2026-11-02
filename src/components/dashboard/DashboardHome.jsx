@@ -1,6 +1,7 @@
 import React, { Suspense, lazy, useState, useEffect, useCallback, useRef } from 'react';
 import { Routes, Route, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { openGuestUpsell } from '../guest/guestUi';
 import { useTranslation } from 'react-i18next';
 import DashboardLayout from './DashboardLayout';
 import DashboardNotFound from './DashboardNotFound';
@@ -65,7 +66,7 @@ const keepExpenseIds = (serverExpenses = [], localExpenses = []) => {
 };
 
 const DashboardHome = () => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, isGuest } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [trips, setTrips] = useState([]);
@@ -76,6 +77,11 @@ const DashboardHome = () => {
   // Zakládání výletu je vlastní stránka (/dashboard/new), takže funguje
   // šipka zpět i odkaz a sidebar zůstává na místě.
   const openNewTrip = (destination = '') => {
+    // Host má jeden vlastní výlet (ukázka se nepočítá); další po registraci.
+    if (isGuest && trips.some((tr) => !tr.isSample && tr.role === 'owner')) {
+      openGuestUpsell('GUEST_TRIP_LIMIT');
+      return;
+    }
     navigate(destination ? `/dashboard/new?plan=${encodeURIComponent(destination)}` : '/dashboard/new');
   };
 
@@ -121,7 +127,7 @@ const DashboardHome = () => {
   // i když server odpoví hned. Uvítací checklist dostane jen první výlet.
   const handleCreateStarterTrip = async ({ title, startDate, endDate, place, type }, onStep) => {
     const beat = () => new Promise(resolve => setTimeout(resolve, 350));
-    const isFirstTrip = trips.length === 0;
+    const isFirstTrip = !trips.some((tr) => !tr.isSample);
     let created = null;
     const finish = (trip) => {
       setTrips(prev => (prev.some(tr => tr.id === trip.id) ? prev : [...prev, trip]));
@@ -331,7 +337,8 @@ const DashboardHome = () => {
   // s předvyplněnou destinací (bez výletů to řeší onboarding na přehledu).
   const planParam = searchParams.get('plan');
   useEffect(() => {
-    if (loading || !planParam || trips.length === 0) return;
+    // Ukázkový výlet hosta se nepočítá — první vlastní výlet řeší onboarding.
+    if (loading || !planParam || !trips.some((tr) => !tr.isSample)) return;
     navigate(`/dashboard/new?plan=${encodeURIComponent(planParam.slice(0, 255))}`, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, planParam]);

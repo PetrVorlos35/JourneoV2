@@ -1946,7 +1946,9 @@
       "tripCount": "Trips",
       "friendCount": "Friends",
       "searchTrips": "Search trips…",
-      "searchUsers": "Search name or e-mail…"
+      "searchUsers": "Search name or e-mail…",
+      "guestsActive": "Trying without account",
+      "guestsConverted": "Trial → sign-up · 30 d"
     },
     "analytics": {
       "intro": "First-party, cookie-free measurement. Visitors are counted per day; admins and their devices are excluded.",
@@ -2034,7 +2036,12 @@
         "pwa_install_opened": "Opened app install",
         "pwa_installed": "Installed the app",
         "pwa_prompt_declined": "Declined install",
-        "pwa_card_dismissed": "Dismissed install offer"
+        "pwa_card_dismissed": "Dismissed install offer",
+        "guest_started": "Started trial mode",
+        "guest_converted": "Signed up from trial mode",
+        "guest_trial_clicked": "Clicked “Try without signing up”",
+        "guest_upsell_shown": "Saw sign-up offer (guest)",
+        "guest_upgrade_clicked": "Clicked save account (guest)"
       },
       "device": {
         "mobile": "Mobile",
@@ -2087,10 +2094,10 @@
   "privacyPolicy": {
     "back": "Back to home",
     "title": "Privacy Policy",
-    "effectiveDate": "Effective date: October 31, 2026",
+    "effectiveDate": "Effective date: November 2, 2026",
     "section1": {
       "title": "1. What data we collect",
-      "content": "We collect data you provide when registering (name, email), and data about your trips that you enter into the app yourself (locations, dates, expenses, notes, photos)."
+      "content": "We collect data you provide when registering (name, email), and data about your trips that you enter into the app yourself (locations, dates, expenses, notes, photos). Trial mode without signing up needs no personal data: trips are tied to your browser only and are deleted after the 3-day trial plus one more day for viewing, unless you sign up."
     },
     "section2": {
       "title": "2. How we use your data",
@@ -2407,6 +2414,89 @@
         "copied": "Link copied, paste it into {{browser}}.",
         "copyError": "Couldn't copy the link."
       }
+    }
+  },
+  "guest": {
+    "name": "Guest",
+    "subtitle": "Trial mode",
+    "try": "Try it without signing up",
+    "tryAuth": "Or try it first without signing up →",
+    "endedNotice": "Your trial has ended and its trips were deleted. Sign up and start again, it's free.",
+    "claimed_one": "Your account is saved with {{count}} trip from the trial.",
+    "claimed_other": "Your account is saved with {{count}} trips from the trial.",
+    "logoutWarning": "You're in trial mode without an account. After signing out you won't get back to your trips. Save them by signing up instead?",
+    "time": {
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
+      "hours_one": "{{count}} hour",
+      "hours_other": "{{count}} hours",
+      "minutes_one": "{{count}} minute",
+      "minutes_other": "{{count}} minutes"
+    },
+    "banner": {
+      "title": "Trial mode · {{time}} left",
+      "local": "Saved in this browser only",
+      "save": "Save your account",
+      "expiredTitle": "Your trial has ended",
+      "expiredText": "You can still view your trips and download them as PDF for {{time}}, then they're deleted. Sign up to keep them.",
+      "keep": "Sign up and keep my trips",
+      "pdf": "Download PDF"
+    },
+    "upsell": {
+      "limit": {
+        "title": "More trips after signing up",
+        "text": "In trial mode you get one trip of your own plus a sample. Sign up and plan as many as you like."
+      },
+      "expired": {
+        "title": "Your trial has ended",
+        "text": "You can still look around for a while. Sign up to keep editing, everything stays."
+      },
+      "friends": {
+        "title": "Friends after signing up",
+        "text": "Adding friends and seeing their trips needs an account."
+      },
+      "share": {
+        "title": "Sharing after signing up",
+        "text": "Inviting buddies or sharing a trip by link needs an account."
+      },
+      "locked": {
+        "title": "Unlock this by signing up",
+        "text": "This feature is locked in trial mode."
+      },
+      "benefits": {
+        "keep": "Everything you tried stays",
+        "trips": "Unlimited trips on all your devices",
+        "friends": "Invite buddies and plan together"
+      },
+      "cta": "Sign up for free",
+      "later": "Not now"
+    },
+    "locked": {
+      "friends": {
+        "title": "Friends after signing up",
+        "text": "With an account you can add friends, see their trips and invite them to yours. Your trial trips stay."
+      }
+    },
+    "settings": {
+      "group": "Trial account",
+      "title": "Save your account",
+      "hint": "{{time}} left. Your trips are saved in this browser only for now.",
+      "expiredHint": "Your trial has ended. Trips are deleted in {{time}} unless you sign up.",
+      "deleteTitle": "Delete trial data",
+      "deleteHint": "Deletes your trial trips right away instead of waiting.",
+      "deleteButton": "Delete data",
+      "deleteConfirmTitle": "Delete trial data?",
+      "deleteConfirmMessage": "Trips from trial mode will be permanently deleted."
+    },
+    "auth": {
+      "title": "Save your trip",
+      "subtitle": "Enter your email. Everything from the trial stays."
+    },
+    "sample": {
+      "badge": "Sample trip · feel free to edit it",
+      "short": "Sample",
+      "eyebrow": "Just want to look around first?",
+      "cta": "See the sample: {{title}}"
     }
   }
 }

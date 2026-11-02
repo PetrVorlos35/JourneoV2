@@ -7,8 +7,17 @@ import api from '../../services/api';
 import toast from 'react-hot-toast';
 import UserAvatar from '../ui/UserAvatar';
 import Skeleton from '../ui/Skeleton';
+import { GuestLockedPanel } from '../guest/guestUi';
+import { useAuth } from '../../contexts/AuthContext';
 
+// Pozvánku do přátel host přijmout nemůže — nejdřív registrace.
 const AddFriendInvite = () => {
+  const { isGuest } = useAuth();
+  if (isGuest) return <GuestLockedPanel feature="friends" />;
+  return <AddFriendInvitePage />;
+};
+
+const AddFriendInvitePage = () => {
   const { token } = useParams();
   const { t } = useTranslation();
   const shouldReduceMotion = useReducedMotion();

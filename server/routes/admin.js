@@ -6,6 +6,11 @@ import { makeConverter } from '../lib/rates.js';
 const router = Router();
 router.use(analyticsRoutes);
 
+// Zkušební účty (hosté) a jejich ukázkové výlety se do statistik
+// skutečných uživatelů nepočítají; hosté mají vlastní čísla.
+const REAL_USER = 'is_guest = 0';
+const REAL_TRIP = 'is_sample = 0 AND user_id IN (SELECT id FROM users WHERE is_guest = 0)';
+
 // ── GET /api/admin/dashboard ────────────────────────────────
 // Platform-wide statistics for admin dashboard
 // Souvislá řada posledních 12 ISO týdnů (i prázdné týdny = 0), aby graf
@@ -53,24 +58,26 @@ router.get('/dashboard', async (req, res) => {
       [unverifiedRows],
       [signupsWeeklyRows],
       [tripsWeeklyRows],
+      [[guestRow]],
     ] = await Promise.all([
       // Total users
-      pool.query('SELECT COUNT(*) AS count FROM users'),
+      pool.query(`SELECT COUNT(*) AS count FROM users WHERE ${REAL_USER}`),
       // Total trips
-      pool.query('SELECT COUNT(*) AS count FROM trips'),
+      pool.query(`SELECT COUNT(*) AS count FROM trips WHERE ${REAL_TRIP}`),
       // Total expenses
       pool.query('SELECT COUNT(*) AS count FROM trip_expenses'),
       // Total friendships (accepted)
       pool.query("SELECT COUNT(*) AS count FROM friendships WHERE status = 'ACCEPTED'"),
       // New users last 7 days
-      pool.query('SELECT COUNT(*) AS count FROM users WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)'),
+      pool.query(`SELECT COUNT(*) AS count FROM users WHERE ${REAL_USER} AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)`),
       // New users last 30 days
-      pool.query('SELECT COUNT(*) AS count FROM users WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)'),
+      pool.query(`SELECT COUNT(*) AS count FROM users WHERE ${REAL_USER} AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)`),
       // 10 most recent users
       pool.query(`
         SELECT u.id, u.email, u.first_name, u.last_name, u.avatar_url, u.role, u.created_at,
-          (SELECT COUNT(*) FROM trips t WHERE t.user_id = u.id) AS trip_count
+          (SELECT COUNT(*) FROM trips t WHERE t.user_id = u.id AND t.is_sample = 0) AS trip_count
         FROM users u
+        WHERE u.is_guest = 0
         ORDER BY u.created_at DESC
         LIMIT 10
       `),
@@ -79,7 +86,8 @@ router.get('/dashboard', async (req, res) => {
         SELECT u.id, u.email, u.first_name, u.last_name, u.avatar_url,
           COUNT(t.id) AS trip_count
         FROM users u
-        LEFT JOIN trips t ON t.user_id = u.id
+        LEFT JOIN trips t ON t.user_id = u.id AND t.is_sample = 0
+        WHERE u.is_guest = 0
         GROUP BY u.id
         ORDER BY trip_count DESC
         LIMIT 5
@@ -97,26 +105,36 @@ router.get('/dashboard', async (req, res) => {
           DATE_FORMAT(created_at, '%Y-%m') AS month,
           COUNT(*) AS count
         FROM trips
-        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+        WHERE ${REAL_TRIP} AND created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
         GROUP BY DATE_FORMAT(created_at, '%Y-%m')
         ORDER BY month ASC
       `),
       // New trips last 7 days
-      pool.query('SELECT COUNT(*) AS count FROM trips WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)'),
+      pool.query(`SELECT COUNT(*) AS count FROM trips WHERE ${REAL_TRIP} AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)`),
       // Users who edited a trip in the last 30 days (proxy for activity)
-      pool.query('SELECT COUNT(DISTINCT user_id) AS count FROM trips WHERE updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)'),
+      pool.query(`SELECT COUNT(DISTINCT user_id) AS count FROM trips WHERE ${REAL_TRIP} AND updated_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)`),
       // Accounts that never verified their e-mail
-      pool.query('SELECT COUNT(*) AS count FROM users WHERE is_verified = 0'),
+      pool.query(`SELECT COUNT(*) AS count FROM users WHERE is_verified = 0 AND ${REAL_USER}`),
       // Weekly series for the growth chart (last 12 ISO weeks)
       pool.query(`
         SELECT YEARWEEK(created_at, 3) AS yw, COUNT(*) AS count
-        FROM users WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 12 WEEK)
+        FROM users WHERE ${REAL_USER} AND created_at >= DATE_SUB(CURDATE(), INTERVAL 12 WEEK)
         GROUP BY yw
       `),
       pool.query(`
         SELECT YEARWEEK(created_at, 3) AS yw, COUNT(*) AS count
-        FROM trips WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 12 WEEK)
+        FROM trips WHERE ${REAL_TRIP} AND created_at >= DATE_SUB(CURDATE(), INTERVAL 12 WEEK)
         GROUP BY yw
+      `),
+      // Zkušební režim: kolik hostů právě zkouší a kolik se za 30 dní
+      // zaregistrovalo (z analytiky, hosté po převodu v users nezůstávají).
+      pool.query(`
+        SELECT
+          (SELECT COUNT(*) FROM users WHERE is_guest = 1 AND guest_expires_at > NOW()) AS active,
+          (SELECT COUNT(*) FROM analytics_events WHERE env = 'production' AND name = 'guest_started'
+             AND created_at >= NOW() - INTERVAL 30 DAY) AS started30,
+          (SELECT COUNT(*) FROM analytics_events WHERE env = 'production' AND name = 'guest_converted'
+             AND created_at >= NOW() - INTERVAL 30 DAY) AS converted30
       `),
     ]);
 
@@ -139,6 +157,11 @@ router.get('/dashboard', async (req, res) => {
         newTripsWeek: parseInt(newTripsWeekRows[0].count),
         activeUsers30: parseInt(activeUsersRows[0].count),
         unverifiedUsers: parseInt(unverifiedRows[0].count),
+        guests: {
+          active: Number(guestRow?.active) || 0,
+          started30: Number(guestRow?.started30) || 0,
+          converted30: Number(guestRow?.converted30) || 0,
+        },
         weekly: buildWeeklySeries(signupsWeeklyRows, tripsWeeklyRows),
         recentUsers: recentUsersRows.map(u => ({
           id: u.id,
@@ -182,11 +205,11 @@ router.get('/users', async (req, res) => {
     const sort = ['created_at', 'email', 'first_name'].includes(req.query.sort) ? req.query.sort : 'created_at';
     const order = req.query.order === 'asc' ? 'ASC' : 'DESC';
 
-    let whereClause = '';
+    let whereClause = 'WHERE u.is_guest = 0';
     const params = [];
 
     if (search) {
-      whereClause = 'WHERE u.email LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ?';
+      whereClause += ' AND (u.email LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ?)';
       const searchParam = `%${search}%`;
       params.push(searchParam, searchParam, searchParam);
     }
@@ -383,7 +406,8 @@ router.get('/trips', async (req, res) => {
     const sort = ['created_at', 'title', 'start_date'].includes(req.query.sort) ? req.query.sort : 'created_at';
     const order = req.query.order === 'asc' ? 'ASC' : 'DESC';
 
-    let whereConditions = [];
+    // Výlety hostů (i ukázky) do přehledu výletů nepatří.
+    let whereConditions = ['t.is_sample = 0', 't.user_id IN (SELECT id FROM users WHERE is_guest = 0)'];
     const params = [];
 
     if (search) {

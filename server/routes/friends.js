@@ -135,7 +135,8 @@ router.post('/request', async (req, res) => {
     }
 
     // Check if the addressee exists
-    const [userExists] = await pool.query('SELECT id FROM users WHERE id = ?', [addresseeId]);
+    // Zkušební účty (hosté) do přátel přidat nejde.
+    const [userExists] = await pool.query('SELECT id FROM users WHERE id = ? AND is_guest = 0', [addresseeId]);
     if (userExists.length === 0) {
       return res.status(404).json({ error: 'Uživatel nenalezen.' });
     }
@@ -337,7 +338,7 @@ router.get('/search', async (req, res) => {
               f.status AS raw_status, f.requester_id
        FROM users u
        LEFT JOIN friendships f ON (f.requester_id = ? AND f.addressee_id = u.id) OR (f.requester_id = u.id AND f.addressee_id = ?)
-       WHERE u.id != ?
+       WHERE u.id != ? AND u.is_guest = 0
          AND (u.email LIKE ? OR u.first_name LIKE ? OR u.last_name LIKE ? OR CONCAT(u.first_name, ' ', u.last_name) LIKE ?)
        LIMIT 20`,
       [userId, userId, userId, searchTerm, searchTerm, searchTerm, searchTerm]

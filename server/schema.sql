@@ -15,12 +15,15 @@ CREATE TABLE IF NOT EXISTS users (
     bank_account VARCHAR(64) DEFAULT NULL COMMENT 'Číslo účtu / IBAN pro vyrovnání dluhů',
     invite_token VARCHAR(64) UNIQUE NULL DEFAULT NULL,
     role ENUM('user', 'admin') DEFAULT 'user',
+    is_guest TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Zkušební účet bez registrace',
+    guest_expires_at DATETIME NULL COMMENT 'Konec zkoušky; den poté se účet smaže',
     is_verified TINYINT(1) DEFAULT 0,
     token_version INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Bump zneplatní všechny dříve vydané JWT',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-    INDEX idx_users_email (email)
+    INDEX idx_users_email (email),
+    INDEX idx_users_guest (is_guest, guest_expires_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -51,6 +54,7 @@ CREATE TABLE IF NOT EXISTS trips (
     invite_token CHAR(64) UNIQUE NULL DEFAULT NULL COMMENT 'Zvací odkaz /join/:token, kdo ho přijme, je editor',
     budget_target DECIMAL(12,2) NULL DEFAULT NULL,
     currency CHAR(3) NOT NULL DEFAULT 'CZK' COMMENT 'Měna výletu, v ní jsou všechny částky výletu',
+    is_sample TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Ukázkový výlet ze zkušebního režimu',
     version INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Zvyšuje se při každém PUT /api/trips/:id (ochrana proti přepsání)',
     deleted_at DATETIME NULL DEFAULT NULL COMMENT 'Non-NULL = výlet je v koši; po 30 dnech se maže natvrdo',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

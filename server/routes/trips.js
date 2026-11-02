@@ -8,6 +8,7 @@ import { sendSettlementEmail } from '../lib/mailer.js';
 import { wantsEmail } from '../lib/emailPrefs.js';
 import { getRate, getUserCurrency, isSupportedCurrency, makeConverter } from '../lib/rates.js';
 import { track } from '../lib/analytics.js';
+import { blockGuests, guestTripLimitReached, guestTripLimitResponse } from '../lib/guest.js';
 
 const router = Router();
 
@@ -121,7 +122,8 @@ router.get('/', async (req, res) => {
          t.share_token AS shareToken,
          t.budget_target AS budgetTarget,
          t.currency,
-         t.version
+         t.version,
+         t.is_sample AS isSample
        FROM trips t
        WHERE t.user_id = ? AND t.deleted_at IS NULL
        UNION
@@ -134,7 +136,8 @@ router.get('/', async (req, res) => {
          NULL AS shareToken,
          t.budget_target AS budgetTarget,
          t.currency,
-         t.version
+         t.version,
+         t.is_sample AS isSample
        FROM trips t
        JOIN trip_collaborators tc ON tc.trip_id = t.id AND tc.user_id = ?
        WHERE t.user_id != ? AND t.deleted_at IS NULL
@@ -226,6 +229,7 @@ router.get('/', async (req, res) => {
       ...trip,
       id: trip.id.toString(),
       budgetTarget: trip.budgetTarget != null ? parseFloat(trip.budgetTarget) : null,
+      isSample: !!trip.isSample,
       activities: (activitiesByTrip.get(trip.id) || []).map((a) => ({
         id: a.id.toString(),
         dayIndex: a.dayIndex,
@@ -262,6 +266,8 @@ router.post('/', async (req, res) => {
     if (dateValidationError) {
       return res.status(dateValidationError.status).json({ error: dateValidationError.error });
     }
+
+    if (await guestTripLimitReached(req)) return guestTripLimitResponse(res);
 
     // Nový výlet je v hlavní měně uživatele, pokud klient neřekne jinak.
     const currency = isSupportedCurrency(requestedCurrency) ? requestedCurrency : await getUserCurrency(pool, userId);
@@ -315,7 +321,7 @@ const foreignExpenseFields = (e) => {
 // Celý výlet ve tvaru, jaký vrací GET /api/trips (pro odpověď PUT i 409).
 const fetchFullTrip = async (tripId, userId, role) => {
   const [updatedTrips] = await pool.query(
-    "SELECT id, title, DATE_FORMAT(start_date, '%Y-%m-%d') AS startDate, DATE_FORMAT(end_date, '%Y-%m-%d') AS endDate, budget_target AS budgetTarget, currency, version FROM trips WHERE id = ?",
+    "SELECT id, title, DATE_FORMAT(start_date, '%Y-%m-%d') AS startDate, DATE_FORMAT(end_date, '%Y-%m-%d') AS endDate, budget_target AS budgetTarget, currency, version, is_sample AS isSample FROM trips WHERE id = ?",
     [tripId]
   );
   const [updatedActivities] = await pool.query(
@@ -344,6 +350,7 @@ const fetchFullTrip = async (tripId, userId, role) => {
     ...updatedTrips[0],
     id: updatedTrips[0].id.toString(),
     budgetTarget: updatedTrips[0].budgetTarget != null ? parseFloat(updatedTrips[0].budgetTarget) : null,
+    isSample: !!updatedTrips[0].isSample,
     role,
     activities: updatedActivities.map(a => ({ ...a, id: a.id.toString() })),
     expenses: updatedExpenses,
@@ -740,6 +747,11 @@ router.post('/:id/restore', async (req, res) => {
     const userId = req.userId;
     const tripId = parseInt(req.params.id);
 
+    if (await guestTripLimitReached(req)) {
+      const [[trip]] = await pool.query('SELECT is_sample FROM trips WHERE id = ? AND user_id = ?', [tripId, userId]);
+      if (!trip?.is_sample) return guestTripLimitResponse(res);
+    }
+
     const [result] = await pool.query(
       'UPDATE trips SET deleted_at = NULL WHERE id = ? AND user_id = ? AND deleted_at IS NOT NULL',
       [tripId, userId]
@@ -921,7 +933,7 @@ router.post('/:id/settle', async (req, res) => {
 
 // ── POST /api/trips/:id/share ───────────────────────────────
 // Owner adds a friend as editor or viewer
-router.post('/:id/share', async (req, res) => {
+router.post('/:id/share', blockGuests, async (req, res) => {
   try {
     const userId = req.userId;
     const tripId = parseInt(req.params.id);
@@ -967,7 +979,7 @@ router.post('/:id/share', async (req, res) => {
 
 // ── PUT /api/trips/:id/share/:targetUserId ──────────────────
 // Owner updates a collaborator's role
-router.put('/:id/share/:targetUserId', async (req, res) => {
+router.put('/:id/share/:targetUserId', blockGuests, async (req, res) => {
   try {
     const userId = req.userId;
     const tripId = parseInt(req.params.id);
@@ -1000,7 +1012,7 @@ router.put('/:id/share/:targetUserId', async (req, res) => {
 
 // ── DELETE /api/trips/:id/share/:targetUserId ───────────────
 // Owner removes a collaborator's access
-router.delete('/:id/share/:targetUserId', async (req, res) => {
+router.delete('/:id/share/:targetUserId', blockGuests, async (req, res) => {
   try {
     const userId = req.userId;
     const tripId = parseInt(req.params.id);
@@ -1028,7 +1040,7 @@ router.delete('/:id/share/:targetUserId', async (req, res) => {
 
 // ── POST /api/trips/:id/share-link ─────────────────────────
 // Owner generates a public share token
-router.post('/:id/share-link', async (req, res) => {
+router.post('/:id/share-link', blockGuests, async (req, res) => {
   try {
     const userId = req.userId;
     const tripId = parseInt(req.params.id);
@@ -1067,7 +1079,7 @@ router.delete('/:id/share-link', async (req, res) => {
 // ── POST /api/trips/:id/invite-link ────────────────────────
 // Owner gets the trip's invite link (/join/:token), creating it on first use.
 // Whoever accepts it joins as an editor — unlike the read-only share link.
-router.post('/:id/invite-link', async (req, res) => {
+router.post('/:id/invite-link', blockGuests, async (req, res) => {
   try {
     const userId = req.userId;
     const tripId = parseInt(req.params.id);
@@ -1110,7 +1122,7 @@ router.delete('/:id/invite-link', async (req, res) => {
 // Accept an invite link: the caller becomes an editor of the trip. Someone
 // who's already in keeps their role (the owner may have set them to viewer
 // on purpose), so accepting twice is harmless.
-router.post('/join/:token', async (req, res) => {
+router.post('/join/:token', blockGuests, async (req, res) => {
   try {
     const userId = req.userId;
     const { token } = req.params;
@@ -1166,6 +1178,8 @@ const COPY_LEAD_DAYS = 30;
 router.post('/copy/:shareToken', async (req, res) => {
   const { shareToken } = req.params;
   if (!shareToken || shareToken.length !== 64) return res.status(404).json({ error: 'Odkaz není platný.' });
+
+  if (await guestTripLimitReached(req)) return guestTripLimitResponse(res);
 
   const connection = await pool.getConnection();
   try {

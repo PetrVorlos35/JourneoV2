@@ -14,6 +14,7 @@ import { avatarPresets } from '../ui/avatarPresets';
 import api from '../../services/api';
 import usePwaInstall from '../../hooks/usePwaInstall';
 import { startInstall } from '../../utils/pwaInstall';
+import { useGuestClock, useStartUpgrade, formatRemaining } from '../guest/guestUi';
 
 // Nastavení = pas (kdo jsem) + tiché skupiny řádků (vyrovnání, předvolby,
 // účet). Profil se ukládá sám, stejně jako plán v zápisníku.
@@ -178,7 +179,9 @@ const PasswordField = ({ id, label, value, onChange, autoComplete, autoFocus, in
 const Settings = () => {
   const { currency, setCurrency } = useCurrency();
   const { theme, setTheme } = useTheme();
-  const { user, updateProfile, changePassword, deleteAccount, logout } = useAuth();
+  const { user, updateProfile, changePassword, deleteAccount, logout, isGuest } = useAuth();
+  const guestClock = useGuestClock();
+  const startUpgrade = useStartUpgrade();
   const navigate = useNavigate();
   const { promptDialog, confirmDialog, ModalPortal } = useDialog();
   const { t, i18n } = useTranslation();
@@ -373,6 +376,23 @@ const Settings = () => {
     navigate('/');
   };
 
+  // Host: zkušební data smaže bez opisování e-mailu (žádný nemá).
+  const handleDeleteGuest = async () => {
+    const ok = await confirmDialog({
+      title: t('guest.settings.deleteConfirmTitle'),
+      message: t('guest.settings.deleteConfirmMessage'),
+      variant: 'danger',
+      confirmLabel: t('guest.settings.deleteButton'),
+    });
+    if (!ok) return;
+    try {
+      await deleteAccount(user.email);
+      navigate('/', { replace: true });
+    } catch (err) {
+      toast.error(err.message || t('settings.delete.error'));
+    }
+  };
+
   const handleDeleteAccount = async () => {
     const value = await promptDialog({
       title: t('settings.delete.confirmTitle'),
@@ -506,6 +526,35 @@ const Settings = () => {
         </div>
 
         <div className="space-y-10 lg:pt-20">
+        {isGuest && (
+          <Group title={t('guest.settings.group')}>
+            <Row
+              title={t('guest.settings.title')}
+              hint={guestClock?.expired
+                ? t('guest.settings.expiredHint', { time: formatRemaining(t, guestClock.graceMsLeft) })
+                : t('guest.settings.hint', { time: formatRemaining(t, guestClock?.msLeft || 0) })}
+            >
+              <button
+                type="button"
+                onClick={() => startUpgrade('settings')}
+                className="inline-flex items-center justify-center w-full sm:w-auto h-11 sm:h-10 px-4 rounded-soft bg-accent hover:bg-accent-hover text-white text-[14px] font-semibold transition-colors cursor-pointer"
+              >
+                {t('guest.banner.save')}
+              </button>
+            </Row>
+            <Row title={t('guest.settings.deleteTitle')} hint={t('guest.settings.deleteHint')}>
+              <button
+                type="button"
+                onClick={handleDeleteGuest}
+                className="inline-flex items-center justify-center w-full sm:w-auto h-11 sm:h-10 px-4 rounded-soft border border-danger text-danger hover:bg-danger hover:text-on-accent text-[14px] font-semibold whitespace-nowrap transition-colors cursor-pointer"
+              >
+                {t('guest.settings.deleteButton')}
+              </button>
+            </Row>
+          </Group>
+        )}
+
+        {!isGuest && (
         <Group title={t('settings.settle.title')}>
           <Row
             title={t('settings.settle.bankAccount')}
@@ -529,6 +578,7 @@ const Settings = () => {
             />
           </Row>
         </Group>
+        )}
 
         <Group title={t('settings.preferences.title')}>
           <Row title={t('settings.currency.title')} titleId={ids.currency} hint={t('settings.currency.subtitle')}>
@@ -542,7 +592,7 @@ const Settings = () => {
           </Row>
         </Group>
 
-        {installMode !== 'unsupported' && (
+        {!isGuest && installMode !== 'unsupported' && (
           <Group title={t('pwa.settings.group')}>
             <Row title={t('pwa.settings.title')} hint={installMode === 'installed' ? t('pwa.settings.installedHint') : t('pwa.settings.hint')}>
               {installMode === 'installed' ? (
@@ -558,6 +608,7 @@ const Settings = () => {
           </Group>
         )}
 
+        {!isGuest && (
         <div>
           <Group title={t('settings.emails.title')}>
             {EMAIL_KINDS.map((kind) => (
@@ -580,7 +631,9 @@ const Settings = () => {
           </Group>
           <p className="mt-2 px-1 text-[12px] font-medium text-muted">{t('settings.emails.note')}</p>
         </div>
+        )}
 
+        {!isGuest && (
         <Group title={t('settings.account.title')}>
           <Row title={t('settings.account.email')} hint={t('settings.account.emailHint')}>
             <p className="text-[15px] font-medium text-primary break-all sm:text-right">{user?.email}</p>
@@ -693,6 +746,7 @@ const Settings = () => {
             </button>
           </Row>
         </Group>
+        )}
         </div>
       </div>
     </div>

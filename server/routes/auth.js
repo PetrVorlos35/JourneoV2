@@ -1,14 +1,137 @@
 import { Router } from 'express';
+import crypto from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
 import auth from '../middleware/auth.js';
 import { sendVerificationCode, sendTripTransferredEmail } from '../lib/mailer.js';
-import { track } from '../lib/analytics.js';
+import { track, isBot } from '../lib/analytics.js';
+import { guestLimiter } from '../middleware/rateLimit.js';
+import {
+  GUEST_COLUMNS, GUEST_GRACE_DAYS, GUEST_TRIAL_DAYS, blockGuests, claimGuest, createSampleTrip,
+  guestEmail, guestFields, guestState, isGuestEmail,
+} from '../lib/guest.js';
 import { getCodeCooldownRemaining } from '../lib/otpThrottle.js';
 import { waitUntil } from '@vercel/functions';
 
 const router = Router();
+
+// Nedoručitelné adresy hostů (…@guest.journeo.invalid) nikdy nevstupují
+// do přihlášení, registrace ani resetu hesla — na zkušební účet se jde
+// jen jeho tokenem.
+router.use((req, res, next) => {
+  if (isGuestEmail(req.body?.email)) {
+    return res.status(400).json({ error: 'Neplatný e-mail.' });
+  }
+  next();
+});
+
+// ── POST /api/auth/guest ────────────────────────────────────
+// Spustí zkušební režim: dočasný účet na 3 dny s ukázkovým výletem.
+// Bez e-mailu a hesla, přihlášení drží jen token v tomto prohlížeči.
+const GUEST_HOURLY_CAP = parseInt(process.env.GUEST_HOURLY_CAP, 10) || 200;
+
+router.post('/guest', guestLimiter, async (req, res) => {
+  if (isBot(req.headers['user-agent'])) {
+    return res.status(403).json({ error: 'Zkušební režim není dostupný.' });
+  }
+  const language = req.body?.language === 'en' ? 'en' : 'cs';
+
+  const connection = await pool.getConnection();
+  try {
+    // Pojistka proti zahlcení napříč IP adresami: nad strop už jen registrace.
+    const [[{ recent }]] = await connection.query(
+      'SELECT COUNT(*) AS recent FROM users WHERE is_guest = 1 AND created_at >= NOW() - INTERVAL 1 HOUR'
+    );
+    if (Number(recent) >= GUEST_HOURLY_CAP) {
+      return res.status(503).json({
+        error: 'Zkušební režim je teď vytížený. Zaregistruj se, je to zdarma a zabere minutu.',
+        code: 'GUEST_UNAVAILABLE',
+      });
+    }
+
+    // Náhodné heslo jen kvůli NOT NULL — host se heslem nikdy nepřihlašuje.
+    const passwordHash = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10);
+
+    await connection.beginTransaction();
+    const [result] = await connection.query(
+      `INSERT INTO users (email, password_hash, is_verified, is_guest, guest_expires_at)
+       VALUES (?, ?, 0, 1, NOW() + INTERVAL ? DAY)`,
+      [guestEmail(), passwordHash, GUEST_TRIAL_DAYS]
+    );
+    const userId = result.insertId;
+    await connection.query(
+      'INSERT INTO user_settings (user_id, theme, currency, language) VALUES (?, ?, ?, ?)',
+      [userId, 'light', language === 'en' ? 'EUR' : 'CZK', language]
+    );
+    try {
+      await createSampleTrip(connection, userId);
+    } catch (err) {
+      // Bez ukázky to pořád funguje — host si udělá vlastní výlet.
+      console.error('Sample trip error:', err);
+    }
+    await connection.commit();
+
+    const [[user]] = await connection.query(
+      `SELECT id, email, first_name, last_name, avatar_url, bio, bank_account, role, created_at, ${GUEST_COLUMNS}
+       FROM users WHERE id = ?`,
+      [userId]
+    );
+    const token = jwt.sign({ userId, tv: 0 }, process.env.JWT_SECRET, {
+      expiresIn: `${GUEST_TRIAL_DAYS + GUEST_GRACE_DAYS}d`,
+    });
+    track(req, 'guest_started', { userId });
+
+    const { is_guest: _g, guest_seconds_left: _s, ...publicUser } = user;
+    res.status(201).json({ token, user: { ...publicUser, ...guestFields(user) } });
+  } catch (err) {
+    await connection.rollback().catch(() => {});
+    console.error('Start guest error:', err);
+    res.status(500).json({ error: 'Zkušební režim se nepodařilo spustit.' });
+  } finally {
+    connection.release();
+  }
+});
+
+// ── POST /api/auth/guest/claim  { guestToken } ──────────────
+// Po registraci nebo přihlášení převede výlety ze zkoušky na skutečný účet
+// (volá se s tokenem nového účtu). Token hosta zná jen prohlížeč, ve kterém
+// zkouška běžela, takže cizí výlety si takhle nikdo nepřivlastní.
+router.post('/guest/claim', auth, async (req, res) => {
+  if (req.isGuest) return res.status(400).json({ error: 'Nejdřív se zaregistruj nebo přihlas.' });
+
+  let guestId;
+  try {
+    guestId = jwt.verify(String(req.body?.guestToken || ''), process.env.JWT_SECRET).userId;
+  } catch {
+    return res.status(404).json({ error: 'Zkušební účet nenalezen.' });
+  }
+  if (!guestId || guestId === req.userId) return res.status(404).json({ error: 'Zkušební účet nenalezen.' });
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [[guest]] = await connection.query(
+      `SELECT id, ${GUEST_COLUMNS} FROM users WHERE id = ? AND is_guest = 1 FOR UPDATE`,
+      [guestId]
+    );
+    const state = guestState(guest);
+    if (!state || state.ended) {
+      await connection.rollback();
+      return res.status(404).json({ error: 'Zkušební účet už neexistuje.' });
+    }
+    const movedTrips = await claimGuest(connection, guestId, req.userId);
+    await connection.commit();
+    track(req, 'guest_converted', { props: { trips: movedTrips, readOnly: state.readOnly } });
+    res.json({ movedTrips });
+  } catch (err) {
+    await connection.rollback().catch(() => {});
+    console.error('Claim guest error:', err);
+    res.status(500).json({ error: 'Výlety ze zkoušky se nepodařilo převést.' });
+  } finally {
+    connection.release();
+  }
+});
 
 // ── POST /api/auth/check-email ──────────────────────────────
 // První krok sjednoceného přihlášení/registrace: podle e-mailu se frontend
@@ -403,14 +526,16 @@ router.post('/google', async (req, res) => {
 router.get('/me', auth, async (req, res) => {
   try {
     const [users] = await pool.query(
-      'SELECT id, email, first_name, last_name, avatar_url, bio, bank_account, role, created_at FROM users WHERE id = ?',
+      `SELECT id, email, first_name, last_name, avatar_url, bio, bank_account, role, created_at, ${GUEST_COLUMNS}
+       FROM users WHERE id = ?`,
       [req.userId]
     );
     if (users.length === 0) {
       return res.status(404).json({ error: 'Uživatel nenalezen.' });
     }
 
-    res.json({ user: users[0] });
+    const { is_guest: _g, guest_seconds_left: _s, ...user } = users[0];
+    res.json({ user: { ...user, ...guestFields(users[0]) } });
   } catch (err) {
     console.error('Me error:', err);
     res.status(500).json({ error: 'Chyba serveru.' });
@@ -535,7 +660,7 @@ router.post('/reset-password', async (req, res) => {
 });
 
 // ── POST /api/auth/change-password ──────────────────────────
-router.post('/change-password', auth, async (req, res) => {
+router.post('/change-password', auth, blockGuests, async (req, res) => {
   try {
     const { old_password, new_password } = req.body;
 

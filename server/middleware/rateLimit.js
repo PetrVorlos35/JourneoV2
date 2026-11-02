@@ -61,3 +61,18 @@ export const authLimiter = rateLimit({
   // používání nenarazí na strop.
   skip: (req) => req.method === 'GET',
 });
+
+// ── Zakládání zkušebních účtů (hosté) ───────────────────────
+// Host vzniká bez e-mailu, takže jediná brzda proti skriptu, který by
+// zakládal tisíce účtů, je strop na IP (přes DB, platí napříč instancemi).
+// Celkový hodinový strop hlídá přímo routa (GUEST_HOURLY_CAP).
+export const guestLimiter = rateLimit({
+  ...common,
+  windowMs: 60 * 60 * 1000, // 1 hodina
+  max: 5, // max 5 zkušebních účtů / hodinu / IP
+  store: new DbRateStore('guest'),
+  message: {
+    error: 'Zkušební režim jsi teď spustil už několikrát. Zaregistruj se, je to zdarma.',
+    code: 'GUEST_RATE_LIMIT',
+  },
+});

@@ -4,6 +4,12 @@ function getToken() {
   return localStorage.getItem('journeo_token');
 }
 
+// Zkušební režim: token hosta si držíme zvlášť, aby po registraci nebo
+// přihlášení šly jeho výlety převést na skutečný účet (POST /auth/guest/claim).
+export const GUEST_TOKEN_KEY = 'journeo_guest_token';
+export const GUEST_UPSELL_EVENT = 'journeo:guest-upsell';
+const GUEST_CODES = new Set(['GUEST_LOCKED', 'GUEST_TRIP_LIMIT', 'GUEST_EXPIRED']);
+
 async function request(endpoint, options = {}) {
   const token = getToken();
 
@@ -20,12 +26,25 @@ async function request(endpoint, options = {}) {
 
   // If 401 and not on auth endpoint, token is invalid – logout
   if (response.status === 401 && !endpoint.startsWith('/auth')) {
+    const wasGuest = token && token === localStorage.getItem(GUEST_TOKEN_KEY);
     localStorage.removeItem('journeo_token');
-    window.location.href = '/auth';
+    if (wasGuest) {
+      // Zkouška i den na prohlížení skončily a účet je pryč.
+      localStorage.removeItem(GUEST_TOKEN_KEY);
+      window.location.href = '/?trial=ended';
+    } else {
+      window.location.href = '/auth';
+    }
     throw new Error('Session expired');
   }
 
   const data = await response.json();
+
+  // Host narazil na zamčenou funkci, limit výletů nebo konec zkoušky —
+  // nabídku registrace ukáže GuestUpsellSheet, ať to řeší jedno místo.
+  if (response.status === 403 && GUEST_CODES.has(data.code)) {
+    window.dispatchEvent(new CustomEvent(GUEST_UPSELL_EVENT, { detail: { reason: data.code } }));
+  }
 
   if (!response.ok) {
     const error = new Error(data.error || 'Něco se pokazilo.');
@@ -107,6 +126,18 @@ export const api = {
       }),
 
     me: () => request('/auth/me'),
+
+    startGuest: (language) =>
+      request('/auth/guest', {
+        method: 'POST',
+        body: JSON.stringify({ language }),
+      }),
+
+    claimGuest: (guestToken) =>
+      request('/auth/guest/claim', {
+        method: 'POST',
+        body: JSON.stringify({ guestToken }),
+      }),
     updateProfile: (profileData) =>
       request('/auth/profile', {
         method: 'PUT',

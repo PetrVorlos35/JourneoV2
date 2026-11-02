@@ -126,12 +126,20 @@ const AdminDashboard = () => {
     { label: t('admin.v2.totalTrips'), value: n(data.totalTrips), note: `+${n(data.newTripsWeek)} · 7 d` },
     { label: t('admin.v2.friendships'), value: n(data.totalFriendships) },
     { label: t('admin.v2.unverified'), value: n(data.unverifiedUsers) },
+    ...(data.guests ? [
+      { label: t('admin.v2.guestsActive'), value: n(data.guests.active) },
+      {
+        label: t('admin.v2.guestsConverted'),
+        value: n(data.guests.converted30),
+        note: data.guests.started30 ? `${Math.round((data.guests.converted30 / data.guests.started30) * 100)} %` : null,
+      },
+    ] : []),
   ];
 
   return (
     <div className="space-y-5">
       <section className={pageCard}>
-        <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-5">
+        <dl className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-x-6 gap-y-5">
           {facts.map((f) => (
             <div key={f.label} className="min-w-0 flex flex-col">
               <dt className="order-last mt-1 text-[13px] font-medium text-secondary">{f.label}</dt>

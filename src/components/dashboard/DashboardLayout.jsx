@@ -23,6 +23,7 @@ import api from '../../services/api';
 import { categorizeTrip, tripDayCount, currentTripDay, daysUntilStart } from '../../utils/trip';
 import { countryFlag } from '../../utils/country';
 import InstallAppSheet from '../pwa/InstallAppSheet';
+import { GuestBanner } from '../guest/guestUi';
 import usePwaInstall from '../../hooks/usePwaInstall';
 import { isMobileDevice, startInstall } from '../../utils/pwaInstall';
 
@@ -116,27 +117,34 @@ const PassportStats = ({ stats, flags = [], t }) => (
   </>
 );
 
-const PassportIdentity = ({ user, t, trailing }) => (
-  <div className="flex items-center gap-3">
-    <UserAvatar user={user} size="md" />
-    <div className="min-w-0 flex-1">
-      <p className="text-[14px] font-bold truncate text-primary">
-        {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : user?.email}
-      </p>
-      <p className="text-[12px] font-medium truncate text-muted">{user?.bio || t('dashboardLayout.traveler')}</p>
+// Host nemá e-mail (jen technickou adresu) — ukaž „Host“ a „Zkušební režim“.
+const PassportIdentity = ({ user, t, trailing }) => {
+  const guestName = user?.is_guest && !user?.first_name ? t('guest.name') : null;
+  return (
+    <div className="flex items-center gap-3">
+      <UserAvatar user={guestName ? { ...user, first_name: guestName, email: '' } : user} size="md" />
+      <div className="min-w-0 flex-1">
+        <p className="text-[14px] font-bold truncate text-primary">
+          {user?.first_name ? `${user.first_name} ${user.last_name || ''}` : guestName || user?.email}
+        </p>
+        <p className="text-[12px] font-medium truncate text-muted">
+          {user?.is_guest ? t('guest.subtitle') : user?.bio || t('dashboardLayout.traveler')}
+        </p>
+      </div>
+      {trailing}
     </div>
-    {trailing}
-  </div>
-);
+  );
+};
 
 const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout, user, isAdmin } = useAuth();
+  const { logout, user, isAdmin, isGuest } = useAuth();
   // „Přidat na plochu“ v menu: na telefonu vždy (dokud není nainstalováno),
   // na počítači jen když prohlížeč umí instalaci sám.
   const installMode = usePwaInstall();
-  const canOfferInstall = installMode === 'prompt' || (isMobileDevice() && ['ios', 'android', 'inapp'].includes(installMode));
+  // Host až po registraci — aplikace na ploše s dočasným účtem by po 3 dnech zmizela.
+  const canOfferInstall = !isGuest && (installMode === 'prompt' || (isMobileDevice() && ['ios', 'android', 'inapp'].includes(installMode)));
   const { theme } = useTheme();
   const { t } = useTranslation();
   const { confirmDialog, ModalPortal } = useDialog();
@@ -185,9 +193,10 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
 
   const passportStats = useMemo(() => ({
     countries: countryCodes ? countryCodes.length : null,
-    trips: trips.length,
+    // Ukázkový výlet ze zkušebního režimu do pasu nepatří.
+    trips: trips.filter((tr) => !tr.isSample).length,
     // Stejný součet jako „Dní na cestách“ ve Statistikách (všechny výlety).
-    days: trips.reduce((sum, tr) => sum + tripDayCount(tr), 0),
+    days: trips.filter((tr) => !tr.isSample).reduce((sum, tr) => sum + tripDayCount(tr), 0),
   }), [trips, countryCodes]);
 
   // Probíhající výlet má přednost, jinak nejbližší chystaný.
@@ -251,7 +260,8 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
 
     const ok = await confirmDialog({
       title: t('dashboardLayout.dialogs.logout.title'),
-      message: t('dashboardLayout.dialogs.logout.message'),
+      // Host odhlášením přijde o zkušební výlety (token je jen v tomto prohlížeči).
+      message: isGuest ? t('guest.logoutWarning') : t('dashboardLayout.dialogs.logout.message'),
       variant: 'danger',
       confirmLabel: t('dashboardLayout.dialogs.logout.confirm')
     });
@@ -657,6 +667,7 @@ const DashboardLayout = ({ children, onOpenCreateModal, trips = [] }) => {
           }
         >
           <MobileMenuContext.Provider value={() => setMobileOpen(true)}>
+            {!isMapRoute && <GuestBanner trips={trips} />}
             {children}
           </MobileMenuContext.Provider>
         </div>

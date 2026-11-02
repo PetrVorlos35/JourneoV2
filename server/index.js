@@ -13,6 +13,7 @@ console.log('Port:', process.env.PORT || 3001);
 
 import { testConnection } from './config/db.js';
 import auth from './middleware/auth.js';
+import { blockGuests } from './lib/guest.js';
 import authRoutes from './routes/auth.js';
 import tripRoutes from './routes/trips.js';
 import placeRoutes from './routes/places.js';
@@ -90,7 +91,8 @@ app.use('/api/places', auth, placeRoutes);
 // vlastní limiter navázaný na uživatele — auth musí běžet před ním.
 app.use('/api/geo', auth, geoLimiter, geoRoutes);
 app.use('/api/settings', auth, settingsRoutes);
-app.use('/api/friends', auth, friendRoutes);
+// Přátelé potřebují identitu — host je odemkne registrací.
+app.use('/api/friends', auth, blockGuests, friendRoutes);
 app.use('/api/profile', auth, profileRoutes);
 app.use('/api/votes', auth, voteRoutes);
 app.use('/api/notifications', auth, notificationRoutes);

@@ -56,7 +56,7 @@ router.get('/:userId', async (req, res) => {
               COALESCE(SUM(CASE WHEN v.value = 1 THEN 1 ELSE 0 END), 0) AS likes
        FROM trips t
        LEFT JOIN votes v ON v.trip_id = t.id
-       WHERE t.user_id = ? AND t.deleted_at IS NULL
+       WHERE t.user_id = ? AND t.deleted_at IS NULL AND t.is_sample = 0
        GROUP BY t.id
        ORDER BY t.start_date DESC`,
       [targetUserId]

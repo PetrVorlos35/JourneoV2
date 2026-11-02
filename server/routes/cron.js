@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import pool from '../config/db.js';
+import { GUEST_GRACE_DAYS } from '../lib/guest.js';
 
 const router = Router();
 
@@ -26,6 +27,12 @@ router.get('/purge-trash', async (req, res) => {
       'DELETE FROM geocode_cache WHERE created_at < NOW() - INTERVAL 30 DAY'
     );
 
+    // Zkušební účty (hosté): 3 dny zkouška + 1 den jen pro čtení, pak pryč.
+    // Výlety, místa a nastavení padnou kaskádou, analytika se jen odpojí.
+    const [guests] = await pool.query(
+      `DELETE FROM users WHERE is_guest = 1 AND guest_expires_at < NOW() - INTERVAL ${GUEST_GRACE_DAYS} DAY LIMIT 1000`
+    );
+
     // Analytika se drží 13 měsíců (meziroční srovnání), vyřešené chyby 90 dní.
     const [events] = await pool.query(
       'DELETE FROM analytics_events WHERE created_at < NOW() - INTERVAL 13 MONTH LIMIT 50000'
@@ -39,6 +46,7 @@ router.get('/purge-trash', async (req, res) => {
       geocachePurged: geocache.affectedRows,
       eventsPurged: events.affectedRows,
       errorsPurged: errors.affectedRows,
+      guestsPurged: guests.affectedRows,
     });
   } catch (err) {
     console.error('Purge trash error:', err);

@@ -49,6 +49,9 @@ const TripCard = ({ trip, onDeleteTrip }) => {
         <span className="flex-1 min-w-0">
           <span className="flex items-center gap-1.5 min-w-0">
             <span className="text-[15px] font-bold text-primary tracking-tight truncate">{trip.title}</span>
+            {trip.isSample && (
+              <span className="shrink-0 px-1.5 py-0.5 rounded-md bg-active text-[11px] font-semibold text-active">{t('guest.sample.short')}</span>
+            )}
             {(trip.role === 'editor' || trip.role === 'viewer') && (
               <Users size={14} strokeWidth={2} className="shrink-0 text-gray-400 dark:text-white/40" aria-label={t('tripCard.sharedTrip')} />
             )}
@@ -99,6 +102,9 @@ const TripCard = ({ trip, onDeleteTrip }) => {
 
       <h3 className="text-2xl font-bold mb-2 text-primary tracking-tight truncate min-w-0">
         {trip.title}
+        {trip.isSample && (
+          <span className="ml-2 align-middle px-2 py-0.5 rounded-md bg-active text-[12px] font-semibold text-active">{t('guest.sample.short')}</span>
+        )}
       </h3>
 
       <div className="flex items-center text-[13px] font-bold text-gray-500 gap-2 mb-6">

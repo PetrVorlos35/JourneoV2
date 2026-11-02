@@ -4,15 +4,18 @@ import { X, ArrowRight } from 'lucide-react';
 import usePwaInstall from '../../hooks/usePwaInstall';
 import { dismissCard, isCardDismissed, isMobileDevice, startInstall, visitCount } from '../../utils/pwaInstall';
 import { track } from '../../utils/analytics';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Nabídka „Přidej si Journeo na plochu“ na přehledu. Jen na telefonu, až když
 // má člověk výlet nebo se vrací (ne hned po příchodu), a po zavření 14 dní ne.
 const InstallAppCard = ({ hasTrips }) => {
   const { t } = useTranslation();
   const mode = usePwaInstall();
+  const { isGuest } = useAuth();
   const shownRef = useRef(false);
 
   const visible =
+    !isGuest &&
     isMobileDevice() &&
     ['prompt', 'ios', 'android', 'inapp'].includes(mode) &&
     !isCardDismissed() &&

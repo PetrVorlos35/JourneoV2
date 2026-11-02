@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import LandingPage from './components/LandingPage';
 import NotFound from './components/NotFound';
 import CookieConsent from './components/CookieConsent';
+import { GuestUpsellSheet } from './components/guest/guestUi';
 import { useAuth } from './contexts/AuthContext';
 import { Analytics } from '@vercel/analytics/react';
 import { trackPageview, optOutThisDevice } from './utils/analytics';
@@ -108,6 +109,7 @@ function App() {
       </Suspense>
       <Analytics />
       <CookieConsent />
+      <GuestUpsellSheet />
     </div>
   );
 }
