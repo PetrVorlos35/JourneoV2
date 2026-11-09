@@ -1724,7 +1724,11 @@
     "noLocation": "No location",
     "dayPlan": "Day plan",
     "noDayNotes": "No notes for this day.",
-    "loadError": "Failed to load trip."
+    "loadError": "Failed to load trip.",
+    "restricted": {
+      "title": "Only trip members can see the details",
+      "text": "{{name}} hasn't shared this trip with you, so you only see its name and dates. You'll see the plan, packing list and documents once they add you to the trip."
+    }
   },
   "likeButton": {
     "error": "Error processing like.",

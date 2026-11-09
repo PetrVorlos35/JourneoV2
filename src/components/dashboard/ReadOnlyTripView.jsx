@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, MapPin, Calendar, PackageOpen, Link as LinkIcon, ExternalLink, Image as ImageIcon, Layout, Briefcase, Info } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, PackageOpen, Link as LinkIcon, ExternalLink, Image as ImageIcon, Layout, Briefcase, Info, Lock } from 'lucide-react';
 import { format, eachDayOfInterval } from 'date-fns';
 import { cs } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
@@ -76,6 +76,8 @@ const ReadOnlyTripView = () => {
     }
   })();
 
+  // Nesdílený výlet přítele: server pošle jen název a termín.
+  const restricted = Boolean(trip.restricted);
   const packingList = trip.packingList || [];
   const documents = trip.documents || [];
 
@@ -86,6 +88,7 @@ const ReadOnlyTripView = () => {
   return (
     <div className="w-full h-full flex flex-col min-h-0 pb-10">
       {/* Mobile bottom nav */}
+      {!restricted && (
       <div className="md:hidden fixed bottom-[max(1.5rem,env(safe-area-inset-bottom))] left-6 right-6 z-50 flex justify-center pointer-events-none">
         <div className="glass-panel w-full max-w-sm rounded-[2rem] flex justify-around items-center px-2 py-3 pointer-events-auto border border-default shadow-2xl">
           <button
@@ -111,6 +114,7 @@ const ReadOnlyTripView = () => {
           </button>
         </div>
       </div>
+      )}
 
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 md:mb-12">
@@ -152,6 +156,17 @@ const ReadOnlyTripView = () => {
         </div>
       </div>
 
+      {restricted ? (
+        <div className="glass-card p-8 sm:p-12 flex flex-col items-center text-center max-w-xl mx-auto w-full">
+          <div className="w-12 h-12 bg-active text-accent rounded-2xl flex items-center justify-center mb-5">
+            <Lock size={22} strokeWidth={2.5} aria-hidden="true" />
+          </div>
+          <h2 className="font-bold text-xl text-primary tracking-tight mb-2">{t('readOnlyTrip.restricted.title')}</h2>
+          <p className="text-[14px] text-muted font-medium leading-relaxed">
+            {t('readOnlyTrip.restricted.text', { name: ownerName })}
+          </p>
+        </div>
+      ) : (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1 min-h-0">
 
         {/* Desktop Sidebar */}
@@ -429,6 +444,7 @@ const ReadOnlyTripView = () => {
 
         </div>
       </div>
+      )}
     </div>
   );
 };

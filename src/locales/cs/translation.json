@@ -1758,7 +1758,11 @@
     "noLocation": "Bez lokace",
     "dayPlan": "Plán na den",
     "noDayNotes": "Žádné poznámky pro tento den.",
-    "loadError": "Nepodařilo se načíst výlet."
+    "loadError": "Nepodařilo se načíst výlet.",
+    "restricted": {
+      "title": "Detail vidí jen spolucestující",
+      "text": "{{name}} tento výlet s tebou nesdílí, takže vidíš jen název a termín. Program, balení a dokumenty uvidíš, až tě do výletu přidá."
+    }
   },
   "likeButton": {
     "error": "Chyba při zpracování lajku.",

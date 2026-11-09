@@ -22,6 +22,19 @@ async function assertFriendship(currentUserId, targetUserId) {
   }
 }
 
+// Helper: výlety daného vlastníka, které jsou se mnou sdílené (jsem
+// spolupracovník). Přítel u ostatních vidí jen název a termín.
+async function sharedTripIds(currentUserId, targetUserId) {
+  if (currentUserId === targetUserId) return null; // null = vidím všechno
+  const [rows] = await pool.query(
+    `SELECT tc.trip_id AS tripId FROM trip_collaborators tc
+     JOIN trips t ON t.id = tc.trip_id
+     WHERE tc.user_id = ? AND t.user_id = ?`,
+    [currentUserId, targetUserId]
+  );
+  return new Set(rows.map(r => r.tripId));
+}
+
 // Helper: formátování data pro MariaDB
 const formatDateForDb = (date) => {
   if (!date) return null;
@@ -67,6 +80,8 @@ router.get('/:userId', async (req, res) => {
     let tripsWithMeta = [];
     if (trips.length > 0) {
       const tripIds = trips.map(t => t.id);
+      const shared = await sharedTripIds(currentUserId, targetUserId);
+      const canSee = (tripId) => !shared || shared.has(tripId);
 
       const [[activities], [userVotes]] = await Promise.all([
         pool.query(
@@ -96,7 +111,8 @@ router.get('/:userId', async (req, res) => {
           likes: parseInt(trip.likes),
           isLiked: likedTripIds.has(trip.id),
           activityCount: tripActivities.length,
-          locations: tripActivities.filter(a => a.location).map(a => a.location),
+          // Kam se jede, je obsah výletu — jen pro ty, s kým je sdílený.
+          locations: canSee(trip.id) ? tripActivities.filter(a => a.location).map(a => a.location) : [],
         };
       });
     }
@@ -136,23 +152,32 @@ router.get('/:userId/trip/:tripId', async (req, res) => {
 
     const trip = trips[0];
 
-    // Sub-data jsou na sobě nezávislá — jeden Promise.all místo sedmi
+    const [[voteScore], [userVote], [owner]] = await Promise.all([
+      pool.query('SELECT COUNT(*) AS likes FROM votes WHERE trip_id = ? AND value = 1', [tripId]),
+      pool.query('SELECT value FROM votes WHERE user_id = ? AND trip_id = ?', [currentUserId, tripId]),
+      pool.query('SELECT id, first_name, last_name, avatar_url FROM users WHERE id = ?', [targetUserId]),
+    ]);
+    const meta = {
+      owner: owner[0],
+      likes: parseInt(voteScore[0].likes),
+      isLiked: userVote.length > 0 && userVote[0].value === 1,
+    };
+
+    // Přítel, se kterým výlet není sdílený, vidí jen název a termín.
+    const shared = await sharedTripIds(currentUserId, targetUserId);
+    if (shared && !shared.has(trip.id)) {
+      return res.json({
+        trip: { ...trip, id: trip.id.toString(), restricted: true },
+        ...meta,
+      });
+    }
+
+    // Sub-data jsou na sobě nezávislá — jeden Promise.all místo
     // sekvenčních dotazů (roundtrip do DB je tu dražší než dotaz sám).
-    const [
-      [activities],
-      [expenses],
-      [packingItems],
-      [documents],
-      [voteScore],
-      [userVote],
-      [owner],
-    ] = await Promise.all([
+    // Výdaje se sem neposílají: náhled je nezobrazuje a jsou soukromé.
+    const [[activities], [packingItems], [documents]] = await Promise.all([
       pool.query(
         'SELECT id, day_index AS dayIndex, date, title, plan, location FROM trip_activities WHERE trip_id = ? ORDER BY day_index ASC',
-        [tripId]
-      ),
-      pool.query(
-        'SELECT id, description, amount, category, date FROM trip_expenses WHERE trip_id = ? ORDER BY created_at DESC',
         [tripId]
       ),
       pool.query(
@@ -163,18 +188,6 @@ router.get('/:userId/trip/:tripId', async (req, res) => {
         'SELECT id, title, content FROM trip_documents WHERE trip_id = ? ORDER BY created_at ASC',
         [tripId]
       ),
-      pool.query(
-        'SELECT COUNT(*) AS likes FROM votes WHERE trip_id = ? AND value = 1',
-        [tripId]
-      ),
-      pool.query(
-        'SELECT value FROM votes WHERE user_id = ? AND trip_id = ?',
-        [currentUserId, tripId]
-      ),
-      pool.query(
-        'SELECT id, first_name, last_name, avatar_url FROM users WHERE id = ?',
-        [targetUserId]
-      ),
     ]);
 
     res.json({
@@ -182,13 +195,10 @@ router.get('/:userId/trip/:tripId', async (req, res) => {
         ...trip,
         id: trip.id.toString(),
         activities: activities.map(a => ({ ...a, id: a.id.toString() })),
-        expenses: expenses.map(e => ({ ...e, id: e.id.toString(), amount: parseFloat(e.amount) })),
         packingList: packingItems.map(p => ({ id: p.id.toString(), text: p.text, checked: !!p.checked })),
         documents: documents.map(d => ({ id: d.id.toString(), title: d.title, content: d.content })),
       },
-      owner: owner[0],
-      likes: parseInt(voteScore[0].likes),
-      isLiked: userVote.length > 0 && userVote[0].value === 1,
+      ...meta,
     });
   } catch (err) {
     if (err.status === 403) {

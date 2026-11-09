@@ -1,5 +1,6 @@
 import rateLimit from 'express-rate-limit';
 import DbRateStore from '../lib/dbRateStore.js';
+import pool from '../config/db.js';
 
 // ============================================================
 // Rate limiting
@@ -75,4 +76,46 @@ export const guestLimiter = rateLimit({
     error: 'Zkušební režim jsi teď spustil už několikrát. Zaregistruj se, je to zdarma.',
     code: 'GUEST_RATE_LIMIT',
   },
+});
+
+// ── Pokusy o OTP kód (ověření e-mailu, reset hesla) ─────────
+// Kód má 6 číslic, takže limit na IP nestačí — útočník s víc IP by ho
+// mohl uhádnout. Počítáme proto špatné pokusy na e-mail a typ kódu
+// (přes DB, napříč instancemi). Po vyčerpání se kód zneplatní a je
+// potřeba si nechat poslat nový.
+export const OTP_MAX_ATTEMPTS = 5;
+
+const otpEmail = (req) => String(req.body?.email || '').trim().toLowerCase();
+
+export const otpAttemptLimiter = (type) => rateLimit({
+  ...common,
+  windowMs: 15 * 60 * 1000, // stejně dlouho jako platnost kódu
+  max: OTP_MAX_ATTEMPTS,
+  store: new DbRateStore(`otp-${type}`),
+  keyGenerator: otpEmail,
+  // Úspěšné ověření se nepočítá, jen špatné kódy.
+  skipSuccessfulRequests: true,
+  handler: async (req, res, next, options) => {
+    try {
+      await pool.query('DELETE FROM verification_tokens WHERE email = ? AND type = ?', [otpEmail(req), type]);
+    } catch (err) {
+      console.error('OTP invalidate failed:', err.message);
+    }
+    res.status(options.statusCode).json({
+      error: 'Příliš mnoho špatných pokusů. Kód jsme zneplatnili, za 15 minut si nech poslat nový.',
+      code: 'OTP_LOCKED',
+    });
+  },
+});
+
+// ── Zjišťování, jestli e-mail má účet ───────────────────────
+// /auth/check-email řídí přihlašovací flow (heslo vs. registrace), takže
+// ze své podstaty prozrazuje existenci účtu. Běžný člověk ho zavolá
+// párkrát; přísný strop na IP brání hromadnému procházení e-mailů.
+export const checkEmailLimiter = rateLimit({
+  ...common,
+  windowMs: 60 * 60 * 1000, // 1 hodina
+  max: 15, // max 15 dotazů / hodinu / IP
+  store: new DbRateStore('check-email'),
+  message: { error: 'Příliš mnoho pokusů. Zkuste to prosím později.' },
 });

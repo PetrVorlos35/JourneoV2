@@ -6,7 +6,7 @@ import pool from '../config/db.js';
 import auth from '../middleware/auth.js';
 import { sendVerificationCode, sendTripTransferredEmail } from '../lib/mailer.js';
 import { track, isBot } from '../lib/analytics.js';
-import { guestLimiter } from '../middleware/rateLimit.js';
+import { guestLimiter, otpAttemptLimiter, checkEmailLimiter } from '../middleware/rateLimit.js';
 import {
   GUEST_COLUMNS, GUEST_GRACE_DAYS, GUEST_TRIAL_DAYS, blockGuests, claimGuest, createSampleTrip,
   guestEmail, guestFields, guestState, isGuestEmail,
@@ -15,6 +15,9 @@ import { getCodeCooldownRemaining } from '../lib/otpThrottle.js';
 import { waitUntil } from '@vercel/functions';
 
 const router = Router();
+
+// 6místný ověřovací kód z kryptograficky bezpečného generátoru.
+const generateOtpCode = () => crypto.randomInt(100000, 1000000).toString();
 
 // Nedoručitelné adresy hostů (…@guest.journeo.invalid) nikdy nevstupují
 // do přihlášení, registrace ani resetu hesla — na zkušební účet se jde
@@ -138,9 +141,9 @@ router.post('/guest/claim', auth, async (req, res) => {
 // První krok sjednoceného přihlášení/registrace: podle e-mailu se frontend
 // rozhodne, jestli ukáže pole pro heslo (existující účet), nebo formulář
 // pro vytvoření účtu. Neověřený účet bereme jako nový — registraci lze
-// dokončit znovu (viz /register). Login existenci e-mailu prozrazoval
-// i dřív, a celé /api/auth hlídá authLimiter.
-router.post('/check-email', async (req, res) => {
+// dokončit znovu (viz /register). Existenci účtu tím ze své podstaty
+// prozrazuje, proto má vlastní přísný limit (checkEmailLimiter).
+router.post('/check-email', checkEmailLimiter, async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: 'E-mail je povinný.' });
@@ -215,7 +218,7 @@ router.post('/register', async (req, res) => {
     }
 
     // Generate OTP
-    const code = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
+    const code = generateOtpCode(); // 6-digit code
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
 
     // Save token
@@ -240,7 +243,7 @@ router.post('/register', async (req, res) => {
 });
 
 // ── POST /api/auth/verify ───────────────────────────────────
-router.post('/verify', async (req, res) => {
+router.post('/verify', otpAttemptLimiter('REGISTER'), async (req, res) => {
   try {
     const { email, code } = req.body;
 
@@ -298,11 +301,10 @@ router.post('/resend-otp', async (req, res) => {
 
     // Check if user exists and is not verified
     const [users] = await pool.query('SELECT is_verified FROM users WHERE email = ?', [email]);
-    if (users.length === 0) {
-      return res.status(404).json({ error: 'Uživatel nenalezen.' });
-    }
-    if (users[0].is_verified) {
-      return res.status(400).json({ error: 'Tento účet je již ověřen.' });
+    // Neexistující i už ověřený účet dostane stejnou odpověď jako úspěch,
+    // ať tenhle endpoint neprozrazuje, které e-maily mají účet.
+    if (users.length === 0 || users[0].is_verified) {
+      return res.json({ message: 'Nový kód byl odeslán na váš e-mail.' });
     }
 
     // Cooldown – kód lze poslat nejvýš jednou za 30 vteřin
@@ -319,7 +321,7 @@ router.post('/resend-otp', async (req, res) => {
     await pool.query('DELETE FROM verification_tokens WHERE email = ? AND type = "REGISTER"', [email]);
 
     // Generate new OTP
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = generateOtpCode();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
     // Save token
@@ -357,7 +359,7 @@ router.post('/login', async (req, res) => {
       [email]
     );
     if (users.length === 0) {
-      return res.status(401).json({ error: 'Tento e-mail není v databázi, musíte se zaregistrovat.' });
+      return res.status(401).json({ error: 'Špatné heslo nebo e-mail.' });
     }
 
     const user = users[0];
@@ -481,7 +483,7 @@ router.post('/google', async (req, res) => {
       // User doesn't exist, create account
       // We still need a password hash field due to schema, we'll generate a random string as password hash 
       // since they will login with Google.
-      const randomPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10);
+      const randomPassword = crypto.randomBytes(32).toString('hex');
       const salt = await bcrypt.genSalt(10);
       const passwordHash = await bcrypt.hash(randomPassword, salt);
 
@@ -594,7 +596,7 @@ router.post('/forgot-password', async (req, res) => {
     // Invalidate old RESET tokens
     await pool.query('DELETE FROM verification_tokens WHERE email = ? AND type = "RESET"', [email]);
 
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const code = generateOtpCode();
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
 
     await pool.query(
@@ -617,7 +619,7 @@ router.post('/forgot-password', async (req, res) => {
 });
 
 // ── POST /api/auth/reset-password ───────────────────────────
-router.post('/reset-password', async (req, res) => {
+router.post('/reset-password', otpAttemptLimiter('RESET'), async (req, res) => {
   try {
     const { email, code, new_password } = req.body;
 
