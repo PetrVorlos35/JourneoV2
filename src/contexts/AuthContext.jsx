@@ -105,6 +105,10 @@ export const AuthProvider = ({ children }) => {
     return await api.auth.forgotPassword(email);
   };
 
+  const verifyResetCode = async (email, code) => {
+    return await api.auth.verifyResetCode(email, code);
+  };
+
   const resetPassword = async (email, code, newPassword) => {
     return await api.auth.resetPassword(email, code, newPassword);
   };
@@ -150,7 +154,7 @@ export const AuthProvider = ({ children }) => {
   const isGuest = Boolean(user?.is_guest);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, checkEmail, verify, resendOtp, forgotPassword, resetPassword, changePassword, loginWithGoogle, logout, deleteAccount, updateProfile, isAdmin, isGuest, startGuest }}>
+    <AuthContext.Provider value={{ user, loading, login, register, checkEmail, verify, resendOtp, forgotPassword, verifyResetCode, resetPassword, changePassword, loginWithGoogle, logout, deleteAccount, updateProfile, isAdmin, isGuest, startGuest }}>
       {children}
     </AuthContext.Provider>
   );

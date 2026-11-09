@@ -429,7 +429,8 @@
       "create": "Create your account",
       "profile": "What should we call you?",
       "forgot": "Forgot password",
-      "reset": "New password"
+      "reset": "New password",
+      "resetCode": "Verify the code"
     },
     "subtitle": {
       "email": "Sign in or create an account. All it takes is your email.",
@@ -437,7 +438,7 @@
       "create": "You don't have an account yet. Set a password for",
       "profile": "Fellow travelers will see you under this name.",
       "forgot": "Enter your email to reset your password.",
-      "reset": "Enter the code from your email and set a new password."
+      "reset": "Choose a new password."
     },
     "otp": {
       "checkEmail": "Check your email",
@@ -463,7 +464,9 @@
       "confirmPasswordPlaceholder": "Confirm new password",
       "submit": "Save new password",
       "submitting": "Saving...",
-      "backToLogin": "Back to login"
+      "backToLogin": "Back to login",
+      "verify": "Verify code",
+      "verifying": "Verifying..."
     },
     "fields": {
       "firstName": "First name",

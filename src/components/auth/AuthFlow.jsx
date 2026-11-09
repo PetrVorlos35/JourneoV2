@@ -88,7 +88,7 @@ const AuthFlow = () => {
   const location = useLocation();
   const { t } = useTranslation();
   // Kroky: email → password (existující účet) | create → otp → profile.
-  // Z password se dá odbočit na forgot → reset.
+  // Z password se dá odbočit na forgot → resetCode (ověření kódu) → resetPassword.
   const [step, setStep] = useState('email');
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -105,7 +105,7 @@ const AuthFlow = () => {
   const [resendCooldown, setResendCooldown] = useState(0);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const navigate = useNavigate();
-  const { user, checkEmail, login, register, loginWithGoogle, verify, resendOtp, forgotPassword, resetPassword, updateProfile } = useAuth();
+  const { user, checkEmail, login, register, loginWithGoogle, verify, resendOtp, forgotPassword, verifyResetCode, resetPassword, updateProfile } = useAuth();
   const shouldReduceMotion = useReducedMotion();
 
   const goToApp = () => navigate(location.state?.from || '/dashboard');
@@ -336,8 +336,45 @@ const AuthFlow = () => {
       const res = await forgotPassword(formData.email);
       toast.success(res.message || t('auth.toasts.resetSuccess'));
       setFormData((prev) => ({ ...prev, password: '' }));
-      goTo('reset');
+      setOtpCode('');
+      setResendCooldown(30);
+      goTo('resetCode');
     } catch (err) {
+      setErrorMsg(err.message || t('auth.errors.forgotError'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Kód se ověří zvlášť, nové heslo jde zadat až po správném kódu.
+  const handleVerifyResetCode = async (e) => {
+    e.preventDefault();
+    setErrorMsg('');
+    if (otpCode.length !== 6) {
+      setErrorMsg(t('auth.otp.codeMustBe6'));
+      return;
+    }
+    setIsLoading(true);
+    try {
+      await verifyResetCode(formData.email, otpCode);
+      goTo('resetPassword');
+    } catch (err) {
+      setErrorMsg(err.message || t('auth.errors.resetError'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendResetCode = async () => {
+    if (resendCooldown > 0) return;
+    setIsLoading(true);
+    setErrorMsg('');
+    try {
+      await forgotPassword(formData.email);
+      toast.success(t('auth.toasts.resendSuccess'));
+      setResendCooldown(30);
+    } catch (err) {
+      if (err.status === 429) setResendCooldown(err.retryAfter || 30);
       setErrorMsg(err.message || t('auth.errors.forgotError'));
     } finally {
       setIsLoading(false);
@@ -347,10 +384,6 @@ const AuthFlow = () => {
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setErrorMsg('');
-    if (otpCode.length !== 6) {
-      setErrorMsg(t('auth.otp.codeMustBe6'));
-      return;
-    }
     if (getPasswordStrength(formData.password) < 3) {
       setErrorMsg(t('auth.errors.weak'));
       return;
@@ -775,7 +808,56 @@ const AuthFlow = () => {
           </div>
         );
 
-      case 'reset':
+      case 'resetCode':
+        return (
+          <div>
+            {stepHeader(
+              t('auth.title.resetCode'),
+              <p className="text-sm text-gray-600">
+                {t('auth.otp.description')}{' '}
+                <span className="font-semibold text-gray-900 break-all">{formData.email}</span>
+              </p>
+            )}
+            <ErrorBanner message={errorMsg} reduceMotion={shouldReduceMotion} />
+
+            <form onSubmit={handleVerifyResetCode} className="space-y-5">
+              <OtpInput
+                value={otpCode}
+                autoFocus
+                disabled={isLoading}
+                onChange={(val) => {
+                  setOtpCode(val);
+                  if (errorMsg) setErrorMsg('');
+                }}
+              />
+              <button type="submit" disabled={isLoading || otpCode.length !== 6} className={primaryBtnClass}>
+                {isLoading ? t('auth.reset.verifying') : t('auth.reset.verify')}
+              </button>
+            </form>
+
+            <div className="mt-6 flex flex-col items-center gap-3">
+              <button
+                type="button"
+                onClick={handleResendResetCode}
+                disabled={isLoading || resendCooldown > 0}
+                className="text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+              >
+                {resendCooldown > 0
+                  ? t('auth.otp.resendWait', { seconds: resendCooldown })
+                  : t('auth.otp.resend')}
+              </button>
+              <button
+                type="button"
+                onClick={() => { goTo('password'); setOtpCode(''); }}
+                className={textLinkClass}
+              >
+                {t('auth.reset.backToLogin')}
+              </button>
+            </div>
+          </div>
+        );
+
+      case 'resetPassword':
         return (
           <div>
             {stepHeader(t('auth.title.reset'), t('auth.subtitle.reset'))}
@@ -784,19 +866,6 @@ const AuthFlow = () => {
             <form onSubmit={handleResetPassword} className="relative space-y-4">
               {hiddenUsernameField}
               <div>
-                <label htmlFor="reset-otp" className={`${labelClass} text-center`}>{t('auth.reset.codeLabel')}</label>
-                <OtpInput
-                  value={otpCode}
-                  autoFocus
-                  disabled={isLoading}
-                  onChange={(val) => {
-                    setOtpCode(val);
-                    if (errorMsg) setErrorMsg('');
-                  }}
-                />
-              </div>
-
-              <div>
                 <label htmlFor="reset-password" className={labelClass}>{t('auth.reset.newPasswordLabel')}</label>
                 <div className="relative">
                   <input
@@ -804,6 +873,7 @@ const AuthFlow = () => {
                     id="reset-password"
                     name="password"
                     required
+                    autoFocus
                     value={formData.password}
                     onChange={handleInputChange}
                     placeholder="••••••••"
@@ -817,7 +887,7 @@ const AuthFlow = () => {
 
               <button
                 type="submit"
-                disabled={isLoading || otpCode.length !== 6 || !formData.password}
+                disabled={isLoading || !formData.password}
                 className={`${primaryBtnClass} mt-1`}
               >
                 {isLoading ? t('auth.reset.submitting') : t('auth.reset.submit')}

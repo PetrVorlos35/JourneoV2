@@ -618,6 +618,37 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
+// Kód pro obnovu hesla: platný a nevypršelý, jinak text chyby pro uživatele.
+const findResetToken = async (email, code) => {
+  const [tokens] = await pool.query(
+    'SELECT id, expires_at FROM verification_tokens WHERE email = ? AND token = ? AND type = "RESET" ORDER BY created_at DESC LIMIT 1',
+    [email, code]
+  );
+  if (tokens.length === 0) return { error: 'Neplatný nebo nesprávný kód.' };
+  if (new Date(tokens[0].expires_at) < new Date()) {
+    return { error: 'Platnost kódu vypršela. Žádejte o obnovu znovu.' };
+  }
+  return { tokenRecord: tokens[0] };
+};
+
+// ── POST /api/auth/verify-reset-code ────────────────────────
+// Jen ověří kód (nespotřebuje ho), aby šlo nové heslo zadávat až po správném
+// kódu. Sdílí limiter s /reset-password, takže pokusy se sčítají.
+router.post('/verify-reset-code', otpAttemptLimiter('RESET'), async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) {
+      return res.status(400).json({ error: 'E-mail a kód jsou povinné.' });
+    }
+    const { error } = await findResetToken(email, code);
+    if (error) return res.status(400).json({ error });
+    res.json({ valid: true });
+  } catch (err) {
+    console.error('Verify reset code error:', err);
+    res.status(500).json({ error: 'Chyba serveru při ověřování kódu.' });
+  }
+});
+
 // ── POST /api/auth/reset-password ───────────────────────────
 router.post('/reset-password', otpAttemptLimiter('RESET'), async (req, res) => {
   try {
@@ -631,19 +662,8 @@ router.post('/reset-password', otpAttemptLimiter('RESET'), async (req, res) => {
       return res.status(400).json({ error: 'Heslo nesplňuje bezpečnostní požadavky.' });
     }
 
-    const [tokens] = await pool.query(
-      'SELECT id, expires_at FROM verification_tokens WHERE email = ? AND token = ? AND type = "RESET" ORDER BY created_at DESC LIMIT 1',
-      [email, code]
-    );
-
-    if (tokens.length === 0) {
-      return res.status(400).json({ error: 'Neplatný nebo nesprávný kód.' });
-    }
-
-    const tokenRecord = tokens[0];
-    if (new Date(tokenRecord.expires_at) < new Date()) {
-      return res.status(400).json({ error: 'Platnost kódu vypršela. Žádejte o obnovu znovu.' });
-    }
+    const { tokenRecord, error } = await findResetToken(email, code);
+    if (error) return res.status(400).json({ error });
 
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(new_password, salt);

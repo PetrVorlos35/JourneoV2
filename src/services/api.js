@@ -95,6 +95,12 @@ export const api = {
         body: JSON.stringify({ email }),
       }),
 
+    verifyResetCode: (email, code) =>
+      request('/auth/verify-reset-code', {
+        method: 'POST',
+        body: JSON.stringify({ email, code }),
+      }),
+
     resetPassword: (email, code, newPassword) =>
       request('/auth/reset-password', {
         method: 'POST',
